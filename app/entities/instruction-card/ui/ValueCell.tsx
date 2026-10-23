@@ -14,7 +14,7 @@ import { InstructionAddress } from './InstructionAddress';
 export function ValueCell({ value }: { value: FieldValue }) {
     return (
         <BaseTable.Cell className={cn('text-right', CELL_CLASS[value.kind])}>
-            <Value value={value} />
+            <FieldValueView value={value} />
         </BaseTable.Cell>
     );
 }
@@ -30,7 +30,7 @@ const CELL_CLASS: Record<FieldValue['kind'], string | undefined> = {
     timestamp: 'font-mono',
 };
 
-function Value({ value }: { value: FieldValue }): React.ReactElement {
+export function FieldValueView({ value }: { value: FieldValue }): React.ReactElement {
     switch (value.kind) {
         case 'address':
             return <InstructionAddress address={value.address} />;

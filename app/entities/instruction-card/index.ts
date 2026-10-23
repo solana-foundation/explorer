@@ -23,6 +23,7 @@ export { InstructionSurfaceProvider, useInstructionSurface } from './model/surfa
 export type { InstructionShellProps, InstructionSurface } from './model/surface';
 export { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from './ui/DecodedInstructionCard';
 export { InstructionAddress } from './ui/InstructionAddress';
+export { FieldValueView } from './ui/ValueCell';
 export { InstructionCardView } from './ui/InstructionCardView';
 export { InstructionFields } from './ui/InstructionFields';
 export { NameOnlyDetailsCard } from './ui/NameOnlyDetailsCard';

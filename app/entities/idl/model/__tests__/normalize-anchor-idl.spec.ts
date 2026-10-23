@@ -58,7 +58,6 @@ describe('normalizeAnchorIdl', () => {
             expect(root?.program.instructions).toHaveLength(accountCompression.instructions.length);
             expect(root?.program.accounts).toHaveLength(accountCompression.accounts.length);
 
-            // Codama has no constants concept, so they ride along under `legacyConstants` for the display path.
             expect(root?.legacyConstants).toHaveLength(accountCompression.constants.length);
             expect(root?.legacyConstants?.[15].name).toBe('NOOP_PUBKEY');
         });
