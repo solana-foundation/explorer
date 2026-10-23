@@ -92,6 +92,14 @@ function tokenStandardToString(standard: TokenStandard): string {
     }
 }
 
+// prettier-ignore
+const DELEGATE_AND_REVOKE_ACCOUNTS = ['delegateRecord', 'delegate', 'metadata', 'masterEdition', 'tokenRecord', 'mint', 'token', 'authority', 'payer', '', '', '', '', 'authorizationRules'];
+
+// prettier-ignore
+const PRINT_V1_ACCOUNTS = ['editionMetadata', 'edition', 'editionMint', 'editionTokenAccountOwner', 'editionTokenAccount', 'editionMintAuthority', 'editionTokenRecord', 'masterEdition', 'editionMarkerPda', 'payer', 'masterTokenAccountOwner', 'masterTokenAccount', 'masterMetadata', 'updateAuthority', '', '', '', ''];
+
+const PRINT_V2_ACCOUNTS = [...PRINT_V1_ACCOUNTS, 'holderDelegateRecord', 'delegate'];
+
 const INSTRUCTIONS: Record<number, Entry> = {
     11: {
         // prettier-ignore
@@ -268,26 +276,26 @@ const INSTRUCTIONS: Record<number, Entry> = {
     },
     44: {
         sub: {
-            0: { accounts: [], name: 'delegateCollectionV1' },
-            1: { accounts: [], name: 'delegateSaleV1' },
-            2: { accounts: [], name: 'delegateTransferV1' },
-            3: { accounts: [], name: 'delegateDataV1' },
-            4: { accounts: [], name: 'delegateUtilityV1' },
-            5: { accounts: [], name: 'delegateStakingV1' },
-            6: { accounts: [], name: 'delegateStandardV1' },
-            7: { accounts: [], name: 'delegateLockedTransferV1' },
+            0: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateCollectionV1' },
+            1: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateSaleV1' },
+            2: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateTransferV1' },
+            3: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateDataV1' },
+            4: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateUtilityV1' },
+            5: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateStakingV1' },
+            6: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateStandardV1' },
+            7: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'delegateLockedTransferV1' },
         },
     },
     45: {
         sub: {
-            0: { accounts: [], name: 'revokeCollectionV1' },
-            1: { accounts: [], name: 'revokeSaleV1' },
-            2: { accounts: [], name: 'revokeTransferV1' },
-            3: { accounts: [], name: 'revokeDataV1' },
-            4: { accounts: [], name: 'revokeUtilityV1' },
-            5: { accounts: [], name: 'revokeStakingV1' },
-            6: { accounts: [], name: 'revokeStandardV1' },
-            7: { accounts: [], name: 'revokeLockedTransferV1' },
+            0: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeCollectionV1' },
+            1: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeSaleV1' },
+            2: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeTransferV1' },
+            3: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeDataV1' },
+            4: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeUtilityV1' },
+            5: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeStakingV1' },
+            6: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeStandardV1' },
+            7: { accounts: DELEGATE_AND_REVOKE_ACCOUNTS, name: 'revokeLockedTransferV1' },
         },
     },
     46: {
@@ -321,8 +329,8 @@ const INSTRUCTIONS: Record<number, Entry> = {
     },
     55: {
         sub: {
-            0: { accounts: [], name: 'printV1' },
-            1: { accounts: [], name: 'printV2' },
+            0: { accounts: PRINT_V1_ACCOUNTS, name: 'printV1' },
+            1: { accounts: PRINT_V2_ACCOUNTS, name: 'printV2' },
         },
     },
     7: {

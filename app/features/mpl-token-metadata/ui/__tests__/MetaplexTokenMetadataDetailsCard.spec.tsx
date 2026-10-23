@@ -26,7 +26,7 @@ vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 const dispatcher = createInstructionParserDispatcher([metaplexTokenMetadataInstructionParser]);
 const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 const PROGRAM_ROW: CardRow = ['Program', PROGRAM_ID.toBase58()];
-const KEYS = [1, 2, 3, 4, 5].map(n => gen.publicKey(n));
+const KEYS = Array.from({ length: 20 }, (_, n) => gen.publicKey(n + 1));
 
 const createMetadataV3 = getCreateMetadataAccountV3InstructionDataSerializer();
 const updateMetadataV2 = getUpdateMetadataAccountV2InstructionDataSerializer();
@@ -146,12 +146,56 @@ describe('MetaplexTokenMetadataDetailsCard', () => {
     it.each([
         { data: [44, 1], title: 'Token Metadata Program: Delegate Sale' },
         { data: [45, 7], title: 'Token Metadata Program: Revoke Locked Transfer' },
-        { data: [55, 1], title: 'Token Metadata Program: Print V2' },
-        { data: [0xff], title: 'Token Metadata Program: Unknown Instruction' },
-    ])('should open $title in the raw view', async ({ data, title }) => {
-        renderTxCard(card(data, KEYS.slice(0, 2)));
+    ])('should name the accounts of $title', async ({ data, title }) => {
+        renderTxCard(card(data, KEYS.slice(0, 14)));
 
-        expect(await screen.findByText(title)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(readCardRows()).toEqual([
+                PROGRAM_ROW,
+                ['Delegate Record', KEYS[0].toBase58()],
+                ['Delegate', KEYS[1].toBase58()],
+                ['Metadata', KEYS[2].toBase58()],
+                ['Master Edition', KEYS[3].toBase58()],
+                ['Token Record', KEYS[4].toBase58()],
+                ['Mint', KEYS[5].toBase58()],
+                ['Token', KEYS[6].toBase58()],
+                ['Authority', KEYS[7].toBase58()],
+                ['Payer', KEYS[8].toBase58()],
+                ['Authorization Rules', KEYS[13].toBase58()],
+            ]);
+        });
+        expect(screen.getByText(title)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Raw' })).toBeEnabled();
+    });
+
+    it.each([
+        { data: [55, 0], extraRows: [], keys: 18, title: 'Token Metadata Program: Print V1' },
+        {
+            data: [55, 1],
+            extraRows: [
+                ['Holder Delegate Record', KEYS[18].toBase58()],
+                ['Delegate', KEYS[19].toBase58()],
+            ],
+            keys: 20,
+            title: 'Token Metadata Program: Print V2',
+        },
+    ])('should name the accounts of $title', async ({ data, extraRows, keys, title }) => {
+        renderTxCard(card(data, KEYS.slice(0, keys)));
+
+        await waitFor(() => {
+            expect(readCardRows()).toEqual([
+                PROGRAM_ROW,
+                ...PRINT_LABELS.map((label, position) => [label, KEYS[position].toBase58()]),
+                ...extraRows,
+            ]);
+        });
+        expect(screen.getByText(title)).toBeInTheDocument();
+    });
+
+    it('should open an unknown instruction in the raw view', async () => {
+        renderTxCard(card([0xff], KEYS.slice(0, 2)));
+
+        expect(await screen.findByText('Token Metadata Program: Unknown Instruction')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Raw' })).toBeDisabled();
         expect(screen.getByText('Account #2')).toBeInTheDocument();
     });
@@ -165,6 +209,23 @@ describe('MetaplexTokenMetadataDetailsCard', () => {
         expect(screen.getAllByText('Program')).toHaveLength(1);
     });
 });
+
+const PRINT_LABELS = [
+    'Edition Metadata',
+    'Edition',
+    'Edition Mint',
+    'Edition Token Account Owner',
+    'Edition Token Account',
+    'Edition Mint Authority',
+    'Edition Token Record',
+    'Master Edition',
+    'Edition Marker',
+    'Payer',
+    'Master Token Account Owner',
+    'Master Token Account',
+    'Master Metadata',
+    'Update Authority',
+];
 
 function card(data: Uint8Array | number[], keys: PublicKey[]) {
     const raw = new TransactionInstruction({

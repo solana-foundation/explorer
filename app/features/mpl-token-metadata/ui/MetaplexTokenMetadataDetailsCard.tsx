@@ -80,24 +80,15 @@ export function MetaplexTokenMetadataDetailsCard({
     }
 
     const { info, type } = ix.parsed as MetaplexTokenMetadataParsed;
-    const title = `${TITLE_PREFIX}: ${IX_TITLES[type]}`;
-    const fields = instructionFields(type, info);
-
-    if (!fields) {
-        return <InstructionCardView node={node} title={title} defaultRaw />;
-    }
 
     return (
-        <InstructionCardView node={node} title={title}>
-            <InstructionFields programId={node.programId} fields={fields} />
+        <InstructionCardView node={node} title={`${TITLE_PREFIX}: ${IX_TITLES[type]}`}>
+            <InstructionFields programId={node.programId} fields={instructionFields(type, info)} />
         </InstructionCardView>
     );
 }
 
-function instructionFields(
-    type: MetaplexInstructionType,
-    info: Record<string, unknown>,
-): InstructionFieldList | undefined {
+function instructionFields(type: MetaplexInstructionType, info: Record<string, unknown>): InstructionFieldList {
     switch (type) {
         case 'createMetadataAccountV3':
             return [
@@ -278,8 +269,54 @@ function instructionFields(
                 account('Owner', info.owner),
                 account('Token Account', info.tokenAccount),
             ];
-        default:
-            return undefined;
+        case 'delegateCollectionV1':
+        case 'delegateDataV1':
+        case 'delegateLockedTransferV1':
+        case 'delegateSaleV1':
+        case 'delegateStakingV1':
+        case 'delegateStandardV1':
+        case 'delegateTransferV1':
+        case 'delegateUtilityV1':
+        case 'revokeCollectionV1':
+        case 'revokeDataV1':
+        case 'revokeLockedTransferV1':
+        case 'revokeSaleV1':
+        case 'revokeStakingV1':
+        case 'revokeStandardV1':
+        case 'revokeTransferV1':
+        case 'revokeUtilityV1':
+            return [
+                account('Delegate Record', info.delegateRecord),
+                account('Delegate', info.delegate),
+                account('Metadata', info.metadata),
+                account('Master Edition', info.masterEdition),
+                account('Token Record', info.tokenRecord),
+                account('Mint', info.mint),
+                account('Token', info.token),
+                account('Authority', info.authority),
+                account('Payer', info.payer),
+                account('Authorization Rules', info.authorizationRules),
+            ];
+        case 'printV1':
+        case 'printV2':
+            return [
+                account('Edition Metadata', info.editionMetadata),
+                account('Edition', info.edition),
+                account('Edition Mint', info.editionMint),
+                account('Edition Token Account Owner', info.editionTokenAccountOwner),
+                account('Edition Token Account', info.editionTokenAccount),
+                account('Edition Mint Authority', info.editionMintAuthority),
+                account('Edition Token Record', info.editionTokenRecord),
+                account('Master Edition', info.masterEdition),
+                account('Edition Marker', info.editionMarkerPda),
+                account('Payer', info.payer),
+                account('Master Token Account Owner', info.masterTokenAccountOwner),
+                account('Master Token Account', info.masterTokenAccount),
+                account('Master Metadata', info.masterMetadata),
+                account('Update Authority', info.updateAuthority),
+                account('Holder Delegate Record', info.holderDelegateRecord),
+                account('Delegate', info.delegate),
+            ];
     }
 }
 
