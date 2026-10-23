@@ -1,26 +1,17 @@
+import type { IdlConst } from '@coral-xyz/anchor/dist/cjs/idl';
 import { convertToCodama } from '@explorer/idl-decode/anchor';
 import type { RootNode } from 'codama';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { type SupportedIdl } from '../lib/types';
+import { type CodamaIdl, type SupportedIdl } from '../lib/types';
 import { getIdlSpecType } from './idl-spec';
 
-/**
- * Normalizes a resolved IDL to a shape the app's decode/display/interactive paths understand.
- *
- * Modern Anchor (`metadata.spec`) and Codama (`standard: 'codama'`) IDLs pass through untouched.
- * A legacy pre-0.30 Anchor IDL is converted to a Codama `RootNode` via `@explorer/idl-decode`'s
- * patched `nodes-from-anchor`, so legacy programs flow through the same Codama paths as PMP IDLs
- * instead of the retired in-house Anchor up-converter.
- *
- * `programAddress` backfills the Codama program id for legacy IDLs that carry no `metadata.address`
- * (the viewed program is the source of truth). Returns `undefined` only when conversion fails.
- */
 export function normalizeAnchorIdl(idl: unknown, programAddress?: string): SupportedIdl | undefined {
     if (!idl) return undefined;
     if (getIdlSpecType(idl) !== 'legacy') return idl as SupportedIdl;
 
+    const legacyConstants = (idl as { constants?: IdlConst[] }).constants;
     const withAddress =
         programAddress && !(idl as { metadata?: { address?: string } }).metadata?.address
             ? { ...(idl as object), metadata: { ...(idl as { metadata?: object }).metadata, address: programAddress } }
@@ -35,8 +26,8 @@ export function normalizeAnchorIdl(idl: unknown, programAddress?: string): Suppo
     // idl-decode and the app pin slightly different `codama` node types (version-template + display-node
     // branding); the runtime root node is identical, so cross the type boundary once here.
     const root = converted as unknown as RootNode;
-    if (programAddress && !root.program.publicKey) {
-        return { ...root, program: { ...root.program, publicKey: programAddress } };
-    }
-    return root;
+    const program =
+        programAddress && !root.program.publicKey ? { ...root.program, publicKey: programAddress } : root.program;
+    const normalized: CodamaIdl = { ...root, program };
+    return legacyConstants?.length ? { ...normalized, legacyConstants } : normalized;
 }

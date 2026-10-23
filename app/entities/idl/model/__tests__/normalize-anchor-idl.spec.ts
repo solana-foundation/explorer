@@ -1,9 +1,11 @@
 import type { RootNode } from 'codama';
 import { describe, expect, it } from 'vitest';
 
+import type { CodamaIdl } from '../../lib/types';
 import anchor029Devi from '../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchor030Devi from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchorLegacy094ShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
+import accountCompression from '../../mocks/anchor/anchor-legacy-account_compression-compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq.json';
 import reference029 from '../../mocks/anchor/reference-0.29.json';
 import { getIdlSpecType } from '../idl-spec';
 import { normalizeAnchorIdl } from '../normalize-anchor-idl';
@@ -47,6 +49,23 @@ describe('normalizeAnchorIdl', () => {
 
             expect(getIdlSpecType(root)).toBe('codama');
             expect(root?.program.publicKey).toBe(PROGRAM_ADDRESS);
+        });
+
+        it('should convert account_compression (13 ix, 9 accounts) and preserve its 16 constants Codama drops', () => {
+            const root = normalizeAnchorIdl(accountCompression, PROGRAM_ADDRESS) as CodamaIdl | undefined;
+
+            expect(getIdlSpecType(root)).toBe('codama');
+            expect(root?.program.instructions).toHaveLength(accountCompression.instructions.length);
+            expect(root?.program.accounts).toHaveLength(accountCompression.accounts.length);
+
+            // Codama has no constants concept, so they ride along under `legacyConstants` for the display path.
+            expect(root?.legacyConstants).toHaveLength(accountCompression.constants.length);
+            expect(root?.legacyConstants?.[15].name).toBe('NOOP_PUBKEY');
+        });
+
+        it('should omit legacyConstants when the legacy IDL defines none', () => {
+            const root = normalizeAnchorIdl(anchorLegacy094ShankWave, PROGRAM_ADDRESS) as CodamaIdl | undefined;
+            expect(root?.legacyConstants).toBeUndefined();
         });
 
         it('should return undefined when conversion fails', () => {
