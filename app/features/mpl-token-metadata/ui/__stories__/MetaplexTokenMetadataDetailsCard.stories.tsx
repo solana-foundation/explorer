@@ -16,6 +16,8 @@ import {
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
 import { metaplexTokenMetadataInstructionParser } from '../../lib/metaplex-token-metadata-client';
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
 
@@ -37,7 +39,9 @@ function makeIx(
         keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
         programId: PROGRAM_ID,
     });
-    return { ix: dispatcher.fromTransactionInstruction(raw) as DispatchResult, raw };
+    const ix = dispatcher.fromTransactionInstruction(raw);
+    invariant(ix, 'the token metadata program is registered');
+    return { ix, raw };
 }
 
 const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
