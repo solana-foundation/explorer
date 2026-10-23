@@ -12,13 +12,13 @@ catalogs:
     oxfmt: ^0.56.0
     oxlint: ^1.71.0
   storybook:
-    '@storybook/addon-a11y': 10.6.2
-    '@storybook/addon-docs': 10.6.2
-    '@storybook/addon-vitest': 10.6.2
-    '@storybook/nextjs-vite': 10.6.2
-    '@storybook/react': 10.6.2
-    eslint-plugin-storybook: 10.6.2
-    storybook: 10.6.2
+    '@storybook/addon-a11y': 10.6.3
+    '@storybook/addon-docs': 10.6.3
+    '@storybook/addon-vitest': 10.6.3
+    '@storybook/nextjs-vite': 10.6.3
+    '@storybook/react': 10.6.3
+    eslint-plugin-storybook: 10.6.3
+    storybook: 10.6.3
   tooling:
     '@eslint/js': 9.39.4
     eslint: 9.39.4
