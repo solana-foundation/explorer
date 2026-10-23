@@ -1,6 +1,7 @@
 'use client';
 
 import { shouldUseDirectRpc } from '@entities/cluster/@x/idl';
+import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { type Cluster } from '@/app/utils/cluster';
@@ -8,6 +9,7 @@ import { type Cluster } from '@/app/utils/cluster';
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
 import { type ProgramIdlPair } from '../api/types';
+import { normalizeAnchorIdl } from './normalize-anchor-idl';
 
 export type ProgramIdls = ProgramIdlPair & { isLoading: boolean };
 
@@ -53,21 +55,25 @@ export function useProgramIdls(
         { errorRetryCount: 3, suspense },
     );
 
-    if (isCustom) {
-        return {
-            anchorIdl: customIdls?.anchorIdl,
-            anchorIdlAddress: customIdls?.anchorIdlAddress,
-            isLoading: customLoading,
-            programMetadataIdl: customIdls?.programMetadataIdl,
-            programMetadataIdlAddress: customIdls?.programMetadataIdlAddress,
-        };
-    }
+    const resolved = isCustom ? customIdls : serverIdls;
+
+    // Normalize both IDL slots once: legacy pre-0.30 Anchor IDLs — whether read from the Anchor PDA or
+    // published through the Program Metadata Program — become Codama root nodes so they flow through the
+    // same Codama display/decode/interactive paths. Modern Anchor and Codama IDLs pass through unchanged.
+    const anchorIdl = useMemo(
+        () => normalizeAnchorIdl(resolved?.anchorIdl, programId),
+        [resolved?.anchorIdl, programId],
+    );
+    const programMetadataIdl = useMemo(
+        () => normalizeAnchorIdl(resolved?.programMetadataIdl, programId),
+        [resolved?.programMetadataIdl, programId],
+    );
 
     return {
-        anchorIdl: serverIdls?.anchorIdl,
-        anchorIdlAddress: serverIdls?.anchorIdlAddress,
-        isLoading: serverLoading,
-        programMetadataIdl: serverIdls?.programMetadataIdl,
-        programMetadataIdlAddress: serverIdls?.programMetadataIdlAddress,
+        anchorIdl,
+        anchorIdlAddress: resolved?.anchorIdlAddress,
+        isLoading: isCustom ? customLoading : serverLoading,
+        programMetadataIdl,
+        programMetadataIdlAddress: resolved?.programMetadataIdlAddress,
     };
 }

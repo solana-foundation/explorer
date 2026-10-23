@@ -18,8 +18,7 @@ type Story = StoryObj<typeof meta>;
 
 const PROGRAM_ID = PublicKey.default.toBase58();
 
-// Minimal Anchor 0.30 IDL with `metadata.spec` so the formatter routes via the 0.30 path
-// (the legacy fallback in convert-legacy-idl chokes on 0.30-shaped accounts/events).
+// Minimal Anchor 0.30 IDL with `metadata.spec` so the renderer routes it through the Anchor card.
 const anchorIdl: AnchorIdl = {
     accounts: [{ discriminator: [216, 146, 107, 94, 104, 75, 182, 177], name: 'State' }],
     address: PROGRAM_ID,

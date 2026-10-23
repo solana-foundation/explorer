@@ -164,6 +164,9 @@ importers:
       '@explorer/entity-inspector':
         specifier: workspace:*
         version: link:packages/entity-inspector
+      '@explorer/idl-decode':
+        specifier: workspace:*
+        version: link:packages/idl-decode
       '@explorer/parsers':
         specifier: workspace:*
         version: link:packages/parsers

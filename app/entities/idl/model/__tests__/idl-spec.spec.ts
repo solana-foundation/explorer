@@ -1,9 +1,6 @@
-import { getIdlSpecType } from '../converters/convert-legacy-idl';
+import { getIdlSpecType } from '../idl-spec';
 
-/**
- * Spec test for the improved implementation for the Explorer
- */
-describe('[idl] convert-legacy-idl', () => {
+describe('[idl] idl-spec', () => {
     describe('getIdlSpecType', async () => {
         describe('codama', () => {
             it('should return "codama" when idl.standard is "codama"', () => {

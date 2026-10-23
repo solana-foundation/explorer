@@ -16,6 +16,7 @@ export type { InstructionField, InstructionFieldList } from './model/fields';
 export { remainingAccountLabel } from './model/accounts';
 export { parseCodamaArgs } from './model/args';
 export type { InstructionArg } from './model/args';
+export { ArgRows } from './ui/ArgRows';
 export { toInstructionNode } from './model/node';
 export type { InstructionNode } from './model/node';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';

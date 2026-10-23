@@ -59,6 +59,7 @@
         "@explorer/decoder-token-swap": "workspace:*",
         "@explorer/decoder-wormhole": "workspace:*",
         "@explorer/entity-inspector": "workspace:*",
+        "@explorer/idl-decode": "workspace:*",
         "@explorer/parsers": "workspace:*",
         "@explorer/utils": "workspace:*",
         "@fast-csv/format": "5.0.5",

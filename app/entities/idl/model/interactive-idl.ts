@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import type { RootNode } from 'codama';
 
 import { type SupportedIdl } from '../lib/types';
-import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
+import { getIdlSpecType as getSerdeIdlSpecType } from './idl-spec';
 import { getIdlVersion, MODERN_ANCHOR_IDL_WILDCARD } from './idl-version';
 
 /**

@@ -238,7 +238,9 @@ function ProgramLogRow({
                 });
             }
 
-            if (txInstruction) {
+            // Anchor instruction-name decoding needs a built Anchor Program; legacy IDLs resolve as
+            // Codama root nodes (no Program), so they fall through to the default instruction label.
+            if (txInstruction && anchorProgram) {
                 const decodedName = getAnchorNameForInstruction(txInstruction, anchorProgram);
                 if (decodedName) {
                     instructionName = camelToTitleCase(decodedName);

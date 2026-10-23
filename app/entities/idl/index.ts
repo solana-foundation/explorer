@@ -22,11 +22,11 @@ export { useProgramIdlNames } from './model/use-program-idl-names';
 export type { InstructionNameResolver, ProgramIdlNames } from './model/use-program-idl-names';
 export { buildProgramName } from './model/instruction-name-table';
 
-export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
+export { getIdlSpecType as getDisplayIdlSpecType } from './model/idl-spec';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
 export { useFormatAnchorIdl } from './model/anchor/use-format-anchor-idl';
 export { useAnchorProgram } from './model/anchor/use-anchor-program';
 export { getProvider } from './model/anchor/anchor-provider';
 export { useProgramIdls, type ProgramIdls } from './model/use-program-idls';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
-export { getIdlSpecType } from './model/converters/convert-legacy-idl';
+export { getIdlSpecType, type IdlSpec } from './model/idl-spec';

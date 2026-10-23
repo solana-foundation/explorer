@@ -8,7 +8,10 @@ const useAnchorProgram = vi.fn();
 const useProgramMetadataIdl = vi.fn();
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'mainnet-beta', url: 'http://localhost' }) }));
-vi.mock('@entities/idl', () => ({ useAnchorProgram: (...a: unknown[]) => useAnchorProgram(...a) }));
+vi.mock('@entities/idl', () => ({
+    getIdlSpecType: (idl: any) => (idl?.standard === 'codama' ? 'codama' : (idl?.metadata?.spec ?? 'legacy')),
+    useAnchorProgram: (...a: unknown[]) => useAnchorProgram(...a),
+}));
 vi.mock('@/app/entities/program-metadata', () => ({
     useProgramMetadataIdl: (...a: unknown[]) => useProgramMetadataIdl(...a),
 }));
@@ -40,6 +43,14 @@ describe('AccountDataTab', () => {
         useProgramMetadataIdl.mockReturnValue({ programMetadataIdl: { accounts: [] } });
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
+    });
+
+    it('should show the Anchor Data tab when a Codama PMP IDL declares account types', () => {
+        useProgramMetadataIdl.mockReturnValue({
+            programMetadataIdl: { program: { accounts: [{ name: 'state' }] }, standard: 'codama' },
+        });
+        renderTab();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
     });
 
     it('should hide the tab when there is no Anchor program and no PMP IDL', () => {

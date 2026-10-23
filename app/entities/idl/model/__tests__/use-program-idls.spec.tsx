@@ -42,7 +42,10 @@ describe('useProgramIdls', () => {
         it('should map the /api/idl-latest payload into the IDL slots', async () => {
             mocks.fetch.mockResolvedValue({
                 json: async () => ({
-                    idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp_idl' } },
+                    idls: {
+                        anchor: { metadata: { spec: '0.1.0' }, name: 'anchor_idl' },
+                        programMetadata: { metadata: { spec: '0.1.0' }, name: 'pmp_idl' },
+                    },
                 }),
                 ok: true,
             });
@@ -52,8 +55,11 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'anchor_idl' }));
-            expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' });
+            // Modern Anchor IDLs (`metadata.spec`) pass through `normalizeAnchorIdl` untouched.
+            await waitForHook(() =>
+                expect(result.current.anchorIdl).toEqual({ metadata: { spec: '0.1.0' }, name: 'anchor_idl' }),
+            );
+            expect(result.current.programMetadataIdl).toEqual({ metadata: { spec: '0.1.0' }, name: 'pmp_idl' });
 
             const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
             expect(requestedUrl).toContain('/api/idl-latest');
@@ -77,16 +83,18 @@ describe('useProgramIdls', () => {
     describe('custom / local clusters (client-side @solana/idl resolver)', () => {
         it('should resolve IDLs client-side against the user RPC and never call the server route', async () => {
             mocks.resolveProgramIdlsClient.mockResolvedValue({
-                anchorIdl: { name: 'custom_anchor_idl' },
-                programMetadataIdl: { name: 'custom_pmp_idl' },
+                anchorIdl: { metadata: { spec: '0.1.0' }, name: 'custom_anchor_idl' },
+                programMetadataIdl: { metadata: { spec: '0.1.0' }, name: 'custom_pmp_idl' },
             });
 
             const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
-            expect(result.current.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
+            await waitForHook(() =>
+                expect(result.current.anchorIdl).toEqual({ metadata: { spec: '0.1.0' }, name: 'custom_anchor_idl' }),
+            );
+            expect(result.current.programMetadataIdl).toEqual({ metadata: { spec: '0.1.0' }, name: 'custom_pmp_idl' });
             // The resolver runs against the user-supplied RPC URL (so localhost works end-to-end).
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
@@ -114,7 +122,7 @@ describe('useProgramIdls', () => {
     describe('known cluster pointed at a local validator', () => {
         it('should resolve client-side against localhost for MainnetBeta + http://localhost:8899', async () => {
             mocks.resolveProgramIdlsClient.mockResolvedValue({
-                anchorIdl: { name: 'local_anchor_idl' },
+                anchorIdl: { metadata: { spec: '0.1.0' }, name: 'local_anchor_idl' },
                 programMetadataIdl: undefined,
             });
 
@@ -123,7 +131,9 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
+            await waitForHook(() =>
+                expect(result.current.anchorIdl).toEqual({ metadata: { spec: '0.1.0' }, name: 'local_anchor_idl' }),
+            );
             // Resolved against the user's local RPC URL (the correct network)...
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),

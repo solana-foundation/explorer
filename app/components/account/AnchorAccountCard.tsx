@@ -1,11 +1,12 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { useAnchorProgram } from '@entities/idl';
+import { getIdlSpecType, useAnchorProgram } from '@entities/idl';
 import { useProgramMetadataIdl } from '@entities/program-metadata';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
+import type { RootNode } from 'codama';
 import React, { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
@@ -13,15 +14,26 @@ import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
+import { CodamaAccountCard } from './CodamaAccountCard';
+
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
     const { url, cluster } = useCluster();
-    const { program: anchorProgram } = useAnchorProgram(account.owner.toString(), url, cluster);
+    const { program: anchorProgram, idl: resolvedIdl } = useAnchorProgram(account.owner.toString(), url, cluster);
     const { programMetadataIdl } = useProgramMetadataIdl(account.owner.toString(), url, cluster);
     const rawData = account.data.raw;
 
-    // Prefer the legacy Anchor IDL; fall back to an Anchor-format IDL published via the Program
-    // Metadata Program so PMP-only programs (no on-chain Anchor IDL account) decode account data too.
+    // A Codama IDL — from the Anchor PDA slot (incl. a converted legacy IDL) or published via PMP —
+    // decodes through the Codama pipeline. Prefer the program's own IDL over the PMP one.
+    const codamaIdl: RootNode | undefined =
+        resolvedIdl && getIdlSpecType(resolvedIdl) === 'codama'
+            ? (resolvedIdl as RootNode)
+            : programMetadataIdl && getIdlSpecType(programMetadataIdl) === 'codama'
+              ? (programMetadataIdl as RootNode)
+              : undefined;
+
+    // Anchor decode path: prefer the on-chain Anchor IDL, falling back to an Anchor-format PMP IDL so
+    // PMP-only programs (no on-chain Anchor IDL account) decode account data too.
     const idl: Idl | undefined = useMemo(() => {
         if (anchorProgram?.idl) return anchorProgram.idl;
         const pmp = programMetadataIdl as Idl | undefined;
@@ -63,6 +75,11 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     }, [idl, rawData]);
 
     if (lamports === undefined) return null;
+    // Codama IDLs (incl. legacy Anchor IDLs converted by `normalizeAnchorIdl`) decode through the
+    // Codama pipeline, not an Anchor Program.
+    if (codamaIdl) {
+        return <CodamaAccountCard account={account} idl={codamaIdl} />;
+    }
     if (!idl) return <ErrorCard text="No Anchor IDL found" />;
     if (!decodedAccountData || !accountDef) {
         return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
