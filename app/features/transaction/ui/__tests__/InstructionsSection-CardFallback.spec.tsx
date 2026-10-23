@@ -188,6 +188,13 @@ describe('Transaction page InstructionsSection with a Token Metadata instruction
         expect(await screen.findByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
         expect(screen.getAllByText('Program')).toHaveLength(1);
     });
+
+    test('should render the inner instructions of a Token Metadata card', async () => {
+        renderSection([SIGN_METADATA_IX], [UNKNOWN_SAS_IX]);
+
+        expect(await screen.findByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
+        expect(screen.getByText('#1.1')).toBeInTheDocument();
+    });
 });
 
 function instruction(programId: PublicKey, data: number[]): PartiallyDecodedInstruction {
