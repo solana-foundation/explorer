@@ -12,13 +12,13 @@ catalogs:
     oxfmt: ^0.56.0
     oxlint: ^1.71.0
   storybook:
-    '@storybook/addon-a11y': 10.5.7
-    '@storybook/addon-docs': 10.5.7
-    '@storybook/addon-vitest': 10.5.7
-    '@storybook/nextjs-vite': 10.5.7
-    '@storybook/react': 10.5.7
-    eslint-plugin-storybook: 10.5.7
-    storybook: 10.5.7
+    '@storybook/addon-a11y': 10.6.3
+    '@storybook/addon-docs': 10.6.3
+    '@storybook/addon-vitest': 10.6.3
+    '@storybook/nextjs-vite': 10.6.3
+    '@storybook/react': 10.6.3
+    eslint-plugin-storybook: 10.6.3
+    storybook: 10.6.3
   tooling:
     '@eslint/js': 9.39.4
     eslint: 9.39.4
@@ -35,11 +35,6 @@ catalogs:
 ignoreScripts: true
 
 minimumReleaseAge: 20160
-
-minimumReleaseAgeExclude:
-  # 2.1.0 (2026-10-05) is the first release of the package that replaces sas-lib.
-  # Clears the quarantine window on 2026-10-19; remove then.
-  - '@solana/attestation'
 
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
