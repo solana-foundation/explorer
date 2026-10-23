@@ -30,7 +30,7 @@ export type InstructionSurface = {
     result: SignatureResult;
     /**
      * The key is required, because a missing signature throws no error. The
-     * frame then fetches no raw transaction.
+     * frame then fetches no raw transaction, and a card shows no program events.
      */
     signature: TransactionSignature | undefined;
 };

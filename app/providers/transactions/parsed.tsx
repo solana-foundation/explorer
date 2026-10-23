@@ -80,7 +80,9 @@ export function useFetchTransactionDetails() {
     );
 }
 
-export function useTransactionDetails(signature: TransactionSignature): Cache.CacheEntry<Details> | undefined {
+export function useTransactionDetails(
+    signature: TransactionSignature | undefined,
+): Cache.CacheEntry<Details> | undefined {
     const context = React.useContext(StateContext);
 
     if (!context) {

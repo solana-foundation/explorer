@@ -114,7 +114,7 @@ A card SHALL receive the instruction it renders as one `InstructionNode`, not as
 
 `InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
 
-`InstructionNode.programId` SHALL carry the program id separately from `ix`, and is the only node field a card reads — it has to, because `InstructionFields` takes `programId` as a prop. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
+`InstructionNode.programId` SHALL carry the program id separately from `ix`. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
 
 Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs *inside* the card and exist only on the tx page, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail.
 
@@ -141,7 +141,7 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 - **WHEN** a card needs the instruction's raw bytes or its RPC-parsed payload
 - **THEN** it MUST NOT read them from `node.ix` — the frame obtains them from the node instead
 - **AND** the values the card renders MUST come only from its decoded `info`
-- **AND** the only node field the card may read MUST be `node.programId`
+- **AND** the card MUST read only `node.programId` from the node, plus `node.index` and `node.childIndex` when the card reads program events
 
 ### Requirement: Whole-program migration
 

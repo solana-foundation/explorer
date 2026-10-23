@@ -1,6 +1,5 @@
 import { Idl, Instruction } from '@coral-xyz/anchor';
 import { IdlInstruction } from '@coral-xyz/anchor/dist/cjs/idl';
-import { ProgramField } from '@entities/instruction-card';
 import { ExpandToggleCell } from '@shared/ui/expandable-row';
 import { TransactionInstruction } from '@solana/web3.js';
 import { FlattenedIdlAccount, mapIxArgsToRows } from '@utils/anchor';
@@ -16,14 +15,12 @@ import { type AnchorRow, buildAnchorRows, visibleAnchorRows } from '../lib/build
 export function AnchorInstructionBody({
     ix,
     idl,
-    programName,
     ixAccounts,
     decodedIxData,
     ixDef,
 }: {
     ix: TransactionInstruction;
     idl: Idl;
-    programName: string;
     ixAccounts: FlattenedIdlAccount[] | undefined;
     decodedIxData: Instruction | undefined;
     ixDef: IdlInstruction | undefined;
@@ -59,7 +56,6 @@ export function AnchorInstructionBody({
 
     return (
         <>
-            <ProgramField programId={ix.programId} name={programName} colSpan={2} />
             <BaseTable.SectionRow>
                 <BaseTable.Cell>Account Name</BaseTable.Cell>
                 <BaseTable.Cell className="text-right" colSpan={2}>

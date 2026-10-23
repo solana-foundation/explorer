@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
+import { toInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -57,11 +58,9 @@ const updateRewardInfosIx = buildInstruction(UPDATE_REWARD_INFOS_DISCRIMINATOR, 
 export const UpdateRewardInfos: Story = {
     args: {
         decoded: decodeAnchorInstruction(anchorProgram, updateRewardInfosIx),
-        index: 0,
         ix: updateRewardInfosIx,
+        node: toInstructionNode({ index: 0, ix: updateRewardInfosIx }),
         program: anchorProgram,
-        result: { err: null },
-        signature: '',
     },
 };
 
@@ -70,10 +69,8 @@ const failedToDecodeIx = buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0
 export const FailedToDecode: Story = {
     args: {
         decoded: decodeAnchorInstruction(anchorProgram, failedToDecodeIx),
-        index: 1,
         ix: failedToDecodeIx,
+        node: toInstructionNode({ index: 1, ix: failedToDecodeIx }),
         program: anchorProgram,
-        result: { err: null },
-        signature: '',
     },
 };

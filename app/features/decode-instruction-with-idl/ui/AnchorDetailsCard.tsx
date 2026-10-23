@@ -1,7 +1,6 @@
 import { Idl, Program } from '@coral-xyz/anchor';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-
-import { InstructionCard } from '@/app/components/instruction/InstructionCard';
+import { InstructionCardView, type InstructionNode, ProgramField } from '@entities/instruction-card';
+import { TransactionInstruction } from '@solana/web3.js';
 
 import { type AnchorInstructionDecoded } from '../lib/decode-anchor-instruction';
 import { useAnchorEvents } from '../model/use-anchor-events';
@@ -9,56 +8,40 @@ import { AnchorInstructionBody } from './AnchorInstructionBody';
 import { ProgramEventsCard } from './ProgramEventsCard';
 
 export function AnchorDetailsCard({
+    node,
     ix,
-    index,
-    result,
-    signature,
-    innerCards,
-    childIndex,
     program,
     decoded,
 }: {
+    node: InstructionNode;
     ix: TransactionInstruction;
-    index: number;
-    result: SignatureResult;
-    signature: string;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
     program: Program<Idl>;
     decoded: AnchorInstructionDecoded;
 }) {
-    const entries = useAnchorEvents({ childIndex, index, signature }, program);
-    const eventCards =
+    const entries = useAnchorEvents(node, program);
+    const events =
         entries.length > 0
             ? [
                   <ProgramEventsCard
                       key="events"
                       entries={entries}
                       program={program}
-                      instructionIndex={index}
-                      childIndex={childIndex}
+                      instructionIndex={node.index}
+                      childIndex={node.childIndex}
                   />,
               ]
             : undefined;
 
     return (
-        <InstructionCard
-            title={decoded.cardTitle}
-            ix={ix}
-            index={index}
-            result={result}
-            innerCards={innerCards}
-            childIndex={childIndex}
-            eventCards={eventCards}
-        >
+        <InstructionCardView node={node} title={decoded.cardTitle} events={events}>
+            <ProgramField programId={node.programId} name={decoded.programName} colSpan={2} />
             <AnchorInstructionBody
                 ix={ix}
                 idl={program.idl}
-                programName={decoded.programName}
                 ixAccounts={decoded.ixAccounts}
                 decodedIxData={decoded.decodedIxData}
                 ixDef={decoded.ixDef}
             />
-        </InstructionCard>
+        </InstructionCardView>
     );
 }

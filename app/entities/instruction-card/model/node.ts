@@ -1,12 +1,8 @@
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 export type InstructionNode = {
-    /**
-     * The one fact about the instruction a card may read. Named separately from
-     * `ix` so that reshaping `ix` (below) touches no card: a card needs the
-     * program id to hand to `InstructionFields`, and nothing else.
-     */
     programId: PublicKey;
+    /** The frame reads `ix`. A card must not read `ix`, so a change to the shape of `ix` touches no card. */
     ix: ParsedInstruction | TransactionInstruction;
     index: number;
     childIndex?: number;

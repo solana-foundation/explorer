@@ -1,14 +1,13 @@
 import { Idl, Program } from '@coral-xyz/anchor';
+import { type InstructionNode, useInstructionSurface } from '@entities/instruction-card';
 import { extractEventsFromLogs } from '@entities/program-logs';
 import { useTransactionDetails } from '@providers/transactions';
 import { useMemo } from 'react';
 
 import { decodeProgramEvents, type EventEntry } from '../lib/decode-program-events';
 
-export function useAnchorEvents(
-    { childIndex, index, signature }: { childIndex?: number; index: number; signature: string },
-    program: Program<Idl>,
-): EventEntry[] {
+export function useAnchorEvents(node: InstructionNode, program: Program<Idl>): EventEntry[] {
+    const { signature } = useInstructionSurface();
     const details = useTransactionDetails(signature);
     return useMemo(() => {
         const transactionWithMeta = details?.data?.transactionWithMeta;
@@ -21,7 +20,12 @@ export function useAnchorEvents(
             i.programId.toBase58(),
         );
 
-        const payloads = extractEventsFromLogs({ childIndex, index, instructionProgramIds, logs: logMessages });
+        const payloads = extractEventsFromLogs({
+            childIndex: node.childIndex,
+            index: node.index,
+            instructionProgramIds,
+            logs: logMessages,
+        });
         return decodeProgramEvents(payloads, program);
-    }, [details, childIndex, index, program]);
+    }, [details, node.childIndex, node.index, program]);
 }
