@@ -1,4 +1,3 @@
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import {
     InstructionSurfaceProvider,
@@ -370,8 +369,6 @@ function InspectorInstructionCard({
                         ix={parsedIx}
                         raw={ix}
                         index={index}
-                        result={INSPECTOR_RESULT}
-                        InstructionCardComponent={BaseInstructionCard}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />
@@ -482,8 +479,6 @@ function InspectorInstructionCard({
                         ix={parsedIx}
                         raw={ix}
                         index={index}
-                        result={INSPECTOR_RESULT}
-                        InstructionCardComponent={BaseInstructionCard}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />

@@ -1,13 +1,19 @@
-import { Address } from '@components/common/Address';
-import { InstructionCard } from '@components/instruction/InstructionCard';
+import {
+    address,
+    InstructionCardView,
+    type InstructionField,
+    type InstructionFieldList,
+    InstructionFields,
+    text,
+    toInstructionNode,
+} from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
-
-import { BaseTable } from '@/app/shared/ui/Table';
+import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 
 import type { MetaplexTokenMetadataParsed } from '../lib/metaplex-token-metadata-client';
 import type { MetaplexInstructionType } from '../lib/metaplex-token-metadata-parser';
+
+const TITLE_PREFIX = 'Token Metadata Program';
 
 const IX_TITLES: Record<MetaplexInstructionType, string> = {
     burnEditionNft: 'Burn Edition NFT',
@@ -52,343 +58,248 @@ const IX_TITLES: Record<MetaplexInstructionType, string> = {
     verifySizedCollectionItem: 'Verify Sized Collection Item',
 };
 
-function AccountRow({ label, pubkey }: { label: string; pubkey: unknown }) {
-    if (!(pubkey instanceof PublicKey)) return null;
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">
-                <Address pubkey={pubkey} alignRight link />
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
-function DataRow({ label, value }: { label: string; value: unknown }) {
-    if (value === null || value === undefined) return null;
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">{String(value)}</BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
-function RoyaltyRow({ basisPoints }: { basisPoints: unknown }) {
-    if (typeof basisPoints !== 'number') return null;
-    const pct = basisPoints / 100;
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>Royalty</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
-function GenericAccountRows({ ix }: { ix: TransactionInstruction }) {
-    return (
-        <>
-            {ix.keys.map((key, i) => (
-                <BaseTable.Row key={i}>
-                    <BaseTable.Cell>Account #{i + 1}</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={key.pubkey} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            ))}
-        </>
-    );
-}
-
-function renderContent(
-    type: MetaplexInstructionType,
-    info: Record<string, unknown>,
-    ix: TransactionInstruction,
-): React.ReactNode {
-    switch (type) {
-        case 'createMetadataAccountV3':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Mint Authority" pubkey={info.mintAuthority} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <DataRow label="Name" value={info.name} />
-                    <DataRow label="Symbol" value={info.symbol} />
-                    <DataRow label="URI" value={info.uri} />
-                    <RoyaltyRow basisPoints={info.sellerFeeBasisPoints} />
-                    <DataRow label="Mutable" value={info.isMutable} />
-                </>
-            );
-        case 'createV1':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEdition} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <DataRow label="Name" value={info.name} />
-                    <DataRow label="Symbol" value={info.symbol} />
-                    <DataRow label="URI" value={info.uri} />
-                    <DataRow label="Token Standard" value={info.tokenStandard} />
-                    <RoyaltyRow basisPoints={info.sellerFeeBasisPoints} />
-                    <DataRow label="Mutable" value={info.isMutable} />
-                </>
-            );
-        case 'updateMetadataAccountV2':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <AccountRow label="New Update Authority" pubkey={info.newUpdateAuthority} />
-                    <DataRow label="Name" value={info.name} />
-                    <DataRow label="Symbol" value={info.symbol} />
-                    <DataRow label="URI" value={info.uri} />
-                    <DataRow label="Primary Sale Happened" value={info.primarySaleHappened} />
-                    <DataRow label="Mutable" value={info.isMutable} />
-                </>
-            );
-        case 'createMasterEditionV3':
-            return (
-                <>
-                    <AccountRow label="Edition" pubkey={info.edition} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <AccountRow label="Mint Authority" pubkey={info.mintAuthority} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <DataRow label="Max Supply" value={info.maxSupply ?? 'Unlimited'} />
-                </>
-            );
-        case 'mintNewEditionFromMasterEditionViaToken':
-            return (
-                <>
-                    <AccountRow label="New Edition" pubkey={info.newEdition} />
-                    <AccountRow label="New Mint" pubkey={info.newMint} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEdition} />
-                    <AccountRow label="New Mint Authority" pubkey={info.newMintAuthority} />
-                    <AccountRow label="New Update Authority" pubkey={info.newUpdateAuthority} />
-                    <AccountRow label="Original Metadata" pubkey={info.originalMetadata} />
-                    <AccountRow label="Token Account Owner" pubkey={info.tokenAccountOwner} />
-                    <DataRow label="Edition Number" value={info.edition} />
-                </>
-            );
-        case 'burnV1':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Token" pubkey={info.token} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEdition} />
-                </>
-            );
-        case 'burnNft':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Owner" pubkey={info.owner} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Token Account" pubkey={info.tokenAccount} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEditionAccount} />
-                    <AccountRow label="Collection Metadata" pubkey={info.collectionMetadata} />
-                </>
-            );
-        case 'burnEditionNft':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Owner" pubkey={info.owner} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Print Edition" pubkey={info.printEdition} />
-                    <AccountRow label="Master Edition Mint" pubkey={info.masterEditionMint} />
-                    <AccountRow label="Master Token Account" pubkey={info.masterTokenAccount} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEdition} />
-                    <AccountRow label="Edition Marker" pubkey={info.editionMarker} />
-                </>
-            );
-        case 'transferV1':
-            return (
-                <>
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Source Token" pubkey={info.sourceToken} />
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Destination Token" pubkey={info.destinationToken} />
-                    <AccountRow label="Destination Owner" pubkey={info.destinationOwner} />
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Source Owner" pubkey={info.sourceOwner} />
-                </>
-            );
-        case 'mintV1':
-            return (
-                <>
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Token" pubkey={info.token} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEdition} />
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Token Owner" pubkey={info.tokenOwner} />
-                </>
-            );
-        case 'updateV1':
-            return (
-                <>
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Master Edition" pubkey={info.masterEdition} />
-                </>
-            );
-        case 'lockV1':
-        case 'unlockV1':
-            return (
-                <>
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Token" pubkey={info.token} />
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Token Owner" pubkey={info.tokenOwner} />
-                </>
-            );
-        case 'useV1':
-            return (
-                <>
-                    <AccountRow label="Authority" pubkey={info.authority} />
-                    <AccountRow label="Mint" pubkey={info.mint} />
-                    <AccountRow label="Token" pubkey={info.token} />
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                </>
-            );
-        case 'signMetadata':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Creator" pubkey={info.creator} />
-                </>
-            );
-        case 'verifyCollection':
-        case 'setAndVerifyCollection':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <AccountRow label="Collection Authority" pubkey={info.collectionAuthority} />
-                    <AccountRow label="Collection" pubkey={info.collection} />
-                    <AccountRow label="Collection Master Edition" pubkey={info.collectionMasterEditionAccount} />
-                </>
-            );
-        case 'unverifyCollection':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <AccountRow label="Collection Authority" pubkey={info.collectionAuthority} />
-                    <AccountRow label="Collection Mint" pubkey={info.collectionMint} />
-                    <AccountRow label="Collection Metadata" pubkey={info.collectionMetadata} />
-                    <AccountRow label="Collection Master Edition" pubkey={info.collectionMasterEditionAccount} />
-                </>
-            );
-        case 'verifySizedCollectionItem':
-        case 'setAndVerifySizedCollectionItem':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <AccountRow label="Collection Authority" pubkey={info.collectionAuthority} />
-                    <AccountRow label="Collection" pubkey={info.collection} />
-                    <AccountRow label="Collection Master Edition" pubkey={info.collectionMasterEditionAccount} />
-                    <AccountRow label="Collection Mint" pubkey={info.collectionMint} />
-                </>
-            );
-        case 'unverifySizedCollectionItem':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Payer" pubkey={info.payer} />
-                    <AccountRow label="Update Authority" pubkey={info.updateAuthority} />
-                    <AccountRow label="Collection Authority" pubkey={info.collectionAuthority} />
-                    <AccountRow label="Collection Mint" pubkey={info.collectionMint} />
-                    <AccountRow label="Collection Master Edition" pubkey={info.collectionMasterEditionAccount} />
-                    <AccountRow label="Collection Metadata" pubkey={info.collectionMetadata} />
-                </>
-            );
-        case 'updatePrimarySaleHappenedViaToken':
-            return (
-                <>
-                    <AccountRow label="Metadata" pubkey={info.metadata} />
-                    <AccountRow label="Owner" pubkey={info.owner} />
-                    <AccountRow label="Token Account" pubkey={info.tokenAccount} />
-                </>
-            );
-        default: {
-            const entries = Object.entries(info);
-            return entries.length > 0 ? (
-                <>
-                    {entries.map(([key, value]) =>
-                        value instanceof PublicKey ? (
-                            <AccountRow key={key} label={key} pubkey={value} />
-                        ) : (
-                            <DataRow key={key} label={key} value={value} />
-                        ),
-                    )}
-                </>
-            ) : (
-                <GenericAccountRows ix={ix} />
-            );
-        }
-    }
-}
-
-export function MetaplexTokenMetadataDetailsCard({
-    childIndex,
-    index,
-    innerCards,
-    ix,
-    raw,
-    result,
-    InstructionCardComponent = InstructionCard,
-}: {
-    childIndex?: number;
-    index: number;
-    innerCards?: JSX.Element[];
+type MetaplexTokenMetadataDetailsCardProps = {
     ix: DispatchResult;
     raw: TransactionInstruction;
-    result: SignatureResult;
-    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
-}) {
+    index: number;
+    innerCards?: JSX.Element[];
+    childIndex?: number;
+};
+
+export function MetaplexTokenMetadataDetailsCard({
+    ix,
+    raw,
+    index,
+    innerCards,
+    childIndex,
+}: MetaplexTokenMetadataDetailsCardProps) {
+    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
+
     if ('unknown' in ix) {
-        return (
-            <InstructionCardComponent
-                ix={raw}
-                index={index}
-                result={result}
-                title="Token Metadata Program: Unknown Instruction"
-                innerCards={innerCards}
-                childIndex={childIndex}
-                defaultRaw
-            />
-        );
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
     }
 
-    const { type, info } = ix.parsed as MetaplexTokenMetadataParsed;
-    const title = `Token Metadata Program: ${IX_TITLES[type] ?? type}`;
+    const { info, type } = ix.parsed as MetaplexTokenMetadataParsed;
+    const title = `${TITLE_PREFIX}: ${IX_TITLES[type]}`;
+    const fields = instructionFields(type, info);
+
+    if (!fields) {
+        return <InstructionCardView node={node} title={title} defaultRaw />;
+    }
 
     return (
-        <InstructionCardComponent
-            ix={raw}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            {renderContent(type, info, raw)}
-        </InstructionCardComponent>
+        <InstructionCardView node={node} title={title}>
+            <InstructionFields programId={node.programId} fields={fields} />
+        </InstructionCardView>
     );
+}
+
+function instructionFields(
+    type: MetaplexInstructionType,
+    info: Record<string, unknown>,
+): InstructionFieldList | undefined {
+    switch (type) {
+        case 'createMetadataAccountV3':
+            return [
+                account('Metadata', info.metadata),
+                account('Mint', info.mint),
+                account('Mint Authority', info.mintAuthority),
+                account('Payer', info.payer),
+                account('Update Authority', info.updateAuthority),
+                data('Name', info.name),
+                data('Symbol', info.symbol),
+                data('URI', info.uri),
+                royalty(info.sellerFeeBasisPoints),
+                data('Mutable', info.isMutable),
+            ];
+        case 'createV1':
+            return [
+                account('Metadata', info.metadata),
+                account('Master Edition', info.masterEdition),
+                account('Mint', info.mint),
+                account('Authority', info.authority),
+                account('Payer', info.payer),
+                account('Update Authority', info.updateAuthority),
+                data('Name', info.name),
+                data('Symbol', info.symbol),
+                data('URI', info.uri),
+                data('Token Standard', info.tokenStandard),
+                royalty(info.sellerFeeBasisPoints),
+                data('Mutable', info.isMutable),
+            ];
+        case 'updateMetadataAccountV2':
+            return [
+                account('Metadata', info.metadata),
+                account('Update Authority', info.updateAuthority),
+                account('New Update Authority', info.newUpdateAuthority),
+                data('Name', info.name),
+                data('Symbol', info.symbol),
+                data('URI', info.uri),
+                data('Primary Sale Happened', info.primarySaleHappened),
+                data('Mutable', info.isMutable),
+            ];
+        case 'createMasterEditionV3':
+            return [
+                account('Edition', info.edition),
+                account('Mint', info.mint),
+                account('Update Authority', info.updateAuthority),
+                account('Mint Authority', info.mintAuthority),
+                account('Payer', info.payer),
+                account('Metadata', info.metadata),
+                data('Max Supply', info.maxSupply ?? 'Unlimited'),
+            ];
+        case 'mintNewEditionFromMasterEditionViaToken':
+            return [
+                account('New Edition', info.newEdition),
+                account('New Mint', info.newMint),
+                account('Master Edition', info.masterEdition),
+                account('New Mint Authority', info.newMintAuthority),
+                account('New Update Authority', info.newUpdateAuthority),
+                account('Original Metadata', info.originalMetadata),
+                account('Token Account Owner', info.tokenAccountOwner),
+                data('Edition Number', info.edition),
+            ];
+        case 'burnV1':
+            return [
+                account('Metadata', info.metadata),
+                account('Authority', info.authority),
+                account('Mint', info.mint),
+                account('Token', info.token),
+                account('Master Edition', info.masterEdition),
+            ];
+        case 'burnNft':
+            return [
+                account('Metadata', info.metadata),
+                account('Owner', info.owner),
+                account('Mint', info.mint),
+                account('Token Account', info.tokenAccount),
+                account('Master Edition', info.masterEditionAccount),
+                account('Collection Metadata', info.collectionMetadata),
+            ];
+        case 'burnEditionNft':
+            return [
+                account('Metadata', info.metadata),
+                account('Owner', info.owner),
+                account('Mint', info.mint),
+                account('Print Edition', info.printEdition),
+                account('Master Edition Mint', info.masterEditionMint),
+                account('Master Token Account', info.masterTokenAccount),
+                account('Master Edition', info.masterEdition),
+                account('Edition Marker', info.editionMarker),
+            ];
+        case 'transferV1':
+            return [
+                account('Mint', info.mint),
+                account('Source Token', info.sourceToken),
+                account('Authority', info.authority),
+                account('Destination Token', info.destinationToken),
+                account('Destination Owner', info.destinationOwner),
+                account('Metadata', info.metadata),
+                account('Source Owner', info.sourceOwner),
+            ];
+        case 'mintV1':
+            return [
+                account('Mint', info.mint),
+                account('Metadata', info.metadata),
+                account('Token', info.token),
+                account('Master Edition', info.masterEdition),
+                account('Authority', info.authority),
+                account('Payer', info.payer),
+                account('Token Owner', info.tokenOwner),
+            ];
+        case 'updateV1':
+            return [
+                account('Authority', info.authority),
+                account('Metadata', info.metadata),
+                account('Mint', info.mint),
+                account('Master Edition', info.masterEdition),
+            ];
+        case 'lockV1':
+        case 'unlockV1':
+            return [
+                account('Authority', info.authority),
+                account('Mint', info.mint),
+                account('Token', info.token),
+                account('Metadata', info.metadata),
+                account('Token Owner', info.tokenOwner),
+            ];
+        case 'useV1':
+            return [
+                account('Authority', info.authority),
+                account('Mint', info.mint),
+                account('Token', info.token),
+                account('Metadata', info.metadata),
+            ];
+        case 'signMetadata':
+            return [account('Metadata', info.metadata), account('Creator', info.creator)];
+        case 'verifyCollection':
+        case 'setAndVerifyCollection':
+            return [
+                account('Metadata', info.metadata),
+                account('Payer', info.payer),
+                account('Update Authority', info.updateAuthority),
+                account('Collection Authority', info.collectionAuthority),
+                account('Collection', info.collection),
+                account('Collection Master Edition', info.collectionMasterEditionAccount),
+            ];
+        case 'unverifyCollection':
+            return [
+                account('Metadata', info.metadata),
+                account('Update Authority', info.updateAuthority),
+                account('Collection Authority', info.collectionAuthority),
+                account('Collection Mint', info.collectionMint),
+                account('Collection Metadata', info.collectionMetadata),
+                account('Collection Master Edition', info.collectionMasterEditionAccount),
+            ];
+        case 'verifySizedCollectionItem':
+        case 'setAndVerifySizedCollectionItem':
+            return [
+                account('Metadata', info.metadata),
+                account('Payer', info.payer),
+                account('Update Authority', info.updateAuthority),
+                account('Collection Authority', info.collectionAuthority),
+                account('Collection', info.collection),
+                account('Collection Master Edition', info.collectionMasterEditionAccount),
+                account('Collection Mint', info.collectionMint),
+            ];
+        case 'unverifySizedCollectionItem':
+            return [
+                account('Metadata', info.metadata),
+                account('Payer', info.payer),
+                account('Update Authority', info.updateAuthority),
+                account('Collection Authority', info.collectionAuthority),
+                account('Collection Mint', info.collectionMint),
+                account('Collection Master Edition', info.collectionMasterEditionAccount),
+                account('Collection Metadata', info.collectionMetadata),
+            ];
+        case 'updatePrimarySaleHappenedViaToken':
+            return [
+                account('Metadata', info.metadata),
+                account('Owner', info.owner),
+                account('Token Account', info.tokenAccount),
+            ];
+        default:
+            return undefined;
+    }
+}
+
+function account(label: string, value: unknown): InstructionField | undefined {
+    return value instanceof PublicKey ? address(label, value) : undefined;
+}
+
+function data(label: string, value: unknown): InstructionField | undefined {
+    switch (typeof value) {
+        case 'boolean':
+        case 'number':
+        case 'string':
+            return text(label, String(value));
+        default:
+            return undefined;
+    }
+}
+
+function royalty(basisPoints: unknown): InstructionField | undefined {
+    if (typeof basisPoints !== 'number') return undefined;
+    const pct = basisPoints / 100;
+    return text('Royalty', pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`);
 }

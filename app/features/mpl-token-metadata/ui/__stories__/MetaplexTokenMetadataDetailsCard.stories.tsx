@@ -78,7 +78,6 @@ export const CreateMetadataAccountV3: Story = {
             ),
             [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -111,7 +110,6 @@ export const UpdateMetadataAccountV2: Story = {
             ),
             [KEY_A, KEY_B],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -131,7 +129,6 @@ export const CreateMasterEditionV3: Story = {
             ),
             [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -145,7 +142,6 @@ export const SignMetadata: Story = {
         index: 3,
         // discriminator byte 7 = signMetadata
         ...makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -157,22 +153,9 @@ export const UnknownInstruction: Story = {
     args: {
         index: 4,
         ...makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Unknown Instruction')).toBeInTheDocument();
-    },
-};
-
-export const FailedTransaction: Story = {
-    args: {
-        index: 5,
-        ...makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
-        result: { err: 'InstructionError' },
-    },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
     },
 };
