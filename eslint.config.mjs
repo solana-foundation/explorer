@@ -892,7 +892,6 @@ export default tseslint.config(
             'app/features/idl/ui/IdlSection.tsx',
             'app/features/metadata/mocks.ts',
             'app/features/metadata/model/useOffChainMetadata.ts',
-            'app/features/mpl-token-metadata/ui/MetaplexTokenMetadataDetailsCard.tsx',
             'app/features/nicknames/lib/nicknames.ts',
             'app/features/nicknames/model/use-nickname.ts',
             'app/features/receipt/__e2e__/receipt.e2e.ts',

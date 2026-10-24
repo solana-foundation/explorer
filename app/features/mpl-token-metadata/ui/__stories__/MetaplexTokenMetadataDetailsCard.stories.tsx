@@ -1,3 +1,4 @@
+import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
     getCreateMetadataAccountV3InstructionDataSerializer,
@@ -15,6 +16,9 @@ import {
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
+import { metaplexTokenMetadataInstructionParser } from '../../lib/metaplex-token-metadata-client';
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
 
 const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
@@ -24,12 +28,20 @@ const KEY_C = new PublicKey(new Uint8Array(32).fill(3));
 const KEY_D = new PublicKey(new Uint8Array(32).fill(4));
 const KEY_E = PublicKey.default;
 
-function makeIx(data: Uint8Array | Buffer, keys: PublicKey[] = []): TransactionInstruction {
-    return new TransactionInstruction({
+const dispatcher = createInstructionParserDispatcher([metaplexTokenMetadataInstructionParser]);
+
+function makeIx(
+    data: Uint8Array | Buffer,
+    keys: PublicKey[] = [],
+): { ix: DispatchResult; raw: TransactionInstruction } {
+    const raw = new TransactionInstruction({
         data: Buffer.from(data),
         keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
         programId: PROGRAM_ID,
     });
+    const ix = dispatcher.fromTransactionInstruction(raw);
+    invariant(ix, 'the token metadata program is registered');
+    return { ix, raw };
 }
 
 const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
@@ -52,7 +64,7 @@ type Story = StoryObj<typeof meta>;
 export const CreateMetadataAccountV3: Story = {
     args: {
         index: 0,
-        ix: makeIx(
+        ...makeIx(
             Buffer.from(
                 createMetadataV3Serializer.serialize({
                     collectionDetails: none(),
@@ -70,7 +82,6 @@ export const CreateMetadataAccountV3: Story = {
             ),
             [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -84,7 +95,7 @@ export const CreateMetadataAccountV3: Story = {
 export const UpdateMetadataAccountV2: Story = {
     args: {
         index: 1,
-        ix: makeIx(
+        ...makeIx(
             Buffer.from(
                 updateMetadataV2Serializer.serialize({
                     data: some({
@@ -103,7 +114,6 @@ export const UpdateMetadataAccountV2: Story = {
             ),
             [KEY_A, KEY_B],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -115,7 +125,7 @@ export const UpdateMetadataAccountV2: Story = {
 export const CreateMasterEditionV3: Story = {
     args: {
         index: 2,
-        ix: makeIx(
+        ...makeIx(
             Buffer.from(
                 createMasterEditionV3Serializer.serialize({
                     maxSupply: some(100n),
@@ -123,7 +133,6 @@ export const CreateMasterEditionV3: Story = {
             ),
             [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -136,8 +145,7 @@ export const SignMetadata: Story = {
     args: {
         index: 3,
         // discriminator byte 7 = signMetadata
-        ix: makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
-        result: { err: null },
+        ...makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -148,23 +156,10 @@ export const SignMetadata: Story = {
 export const UnknownInstruction: Story = {
     args: {
         index: 4,
-        ix: makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
-        result: { err: null },
+        ...makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Unknown Instruction')).toBeInTheDocument();
-    },
-};
-
-export const FailedTransaction: Story = {
-    args: {
-        index: 5,
-        ix: makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
-        result: { err: 'InstructionError' },
-    },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
     },
 };

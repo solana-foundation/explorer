@@ -155,11 +155,28 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
         // info may be populated from keys or empty — either is acceptable
     });
 
-    test('should return type only for delegate/revoke instructions that have no decoding', () => {
-        const result = assertParsed(parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([44, 0]))));
-        expect(result.type).toBe('delegateCollectionV1');
-        expect(result.info).toEqual({});
-    });
+    test.each([44, 45].flatMap(discriminator => Array.from({ length: 8 }, (_, sub) => [discriminator, sub])))(
+        'should name the accounts of [%i, %i] and skip the program accounts',
+        (discriminator, sub) => {
+            const keys = Array.from({ length: 14 }, (_, n) => new PublicKey(new Uint8Array(32).fill(n + 1)));
+            const result = assertParsed(
+                parseMetaplexTokenMetadataInstruction(makeIx(new Uint8Array([discriminator, sub]), keys)),
+            );
+            expect(Object.keys(result.info)).toEqual([
+                'delegateRecord',
+                'delegate',
+                'metadata',
+                'masterEdition',
+                'tokenRecord',
+                'mint',
+                'token',
+                'authority',
+                'payer',
+                'authorizationRules',
+            ]);
+            expect(result.info.authorizationRules).toEqual(keys[13]);
+        },
+    );
 
     describe('createMetadataAccountV3', () => {
         function buildData(name: string, symbol: string, uri: string, basisPoints: number, isMutable: boolean) {
