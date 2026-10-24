@@ -11,7 +11,6 @@ export interface BaseStarRatingProps {
 const STARS = [1, 2, 3, 4, 5];
 
 export function BaseStarRating({ onChange, value = 0 }: BaseStarRatingProps) {
-    // Two feedback forms can be mounted at once, and radios with the same name form one group.
     const name = useId();
 
     return (
@@ -25,6 +24,9 @@ export function BaseStarRating({ onChange, value = 0 }: BaseStarRatingProps) {
                         className="peer sr-only"
                         name={name}
                         onChange={() => onChange?.(star)}
+                        onClick={() => {
+                            if (value === star) onChange?.(0);
+                        }}
                         type="radio"
                         value={star}
                     />

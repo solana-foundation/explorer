@@ -1,23 +1,20 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-import { isFeedbackEnabled, isFeedbackWidgetEnabled } from '../env';
+import { isFeedbackWidgetEnabled } from '../env';
+import { openFeedbackPopup } from '../model/feedback';
 
-export interface FeedbackTriggerProps {
+export interface FeedbackTriggerProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
     children: ReactNode;
-    className?: string;
 }
 
-/** Opens the feedback form from inline content, such as a footer link. */
-export function FeedbackTrigger({ children, className }: FeedbackTriggerProps) {
-    if (!isFeedbackWidgetEnabled() || !isFeedbackEnabled()) return undefined;
+export function FeedbackTrigger({ children, ...props }: FeedbackTriggerProps) {
+    if (!isFeedbackWidgetEnabled()) return undefined;
 
-    return <FeedbackTriggerButton className={className}>{children}</FeedbackTriggerButton>;
+    return (
+        <button {...props} onClick={event => openFeedbackPopup(event.currentTarget)} type="button">
+            {children}
+        </button>
+    );
 }
-
-// A static import bundles the feedback form and `sendFeedback` even when the flag is off.
-const FeedbackTriggerButton = dynamic(() => import('./FeedbackTriggerButton').then(m => m.FeedbackTriggerButton), {
-    ssr: false,
-});
