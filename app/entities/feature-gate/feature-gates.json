@@ -2132,7 +2132,7 @@
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
     "devnet_activation_epoch": 1128,
     "key": "iBRLjhJnkmDZgNoZRDMW11d8ZV7HvsL3vAyRjZB5npW",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1052,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
@@ -2310,7 +2310,7 @@
     "description": "This proposal changes the core consensus protocol from the current one, based on Proof-of-History and TowerBFT, to Alpenglow, specifically the Votor parts of Alpenglow. Compared to the old protocol, Alpenglow offers higher resilience and better performance.",
     "devnet_activation_epoch": 1167,
     "key": "A1pengvuM6JEcyNuTnMqepBKhwHE3N6PmUrdATGawhJS",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1064,
     "min_agave_versions": [
       "v4.3.0"
     ],
