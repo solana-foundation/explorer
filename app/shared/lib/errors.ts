@@ -10,10 +10,6 @@ export function matchAbortError(error: unknown): error is Error {
     return Boolean(error instanceof Error && error.name === 'AbortError');
 }
 
-export function isQuotaExceededError(error: unknown): boolean {
-    return error instanceof DOMException && error.name === 'QuotaExceededError';
-}
-
 // Transient connection-level fetch failures, matched by structured `code` (stable; messages vary by undici/locale).
 // A name that stops resolving (`ENOTFOUND`) and a TLS handshake a client will not complete (`EPROTO`) are
 // left out: both need someone to act, so they belong with the failures that get reported.
