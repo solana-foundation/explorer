@@ -6,7 +6,6 @@ export type IdlSelection = 'custom' | 'onChain';
 
 declare const parsed: unique symbol;
 
-/** An IDL that the decoder can load for `programAddress`. */
 export type CustomIdl = TaggedIdl & { readonly programAddress: Address; readonly [parsed]: true };
 
 export type CustomIdlOrigin = { kind: 'file'; fileName: string } | { kind: 'pasted' };

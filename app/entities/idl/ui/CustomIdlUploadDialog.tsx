@@ -28,7 +28,6 @@ export function CustomIdlUploadDialog({
     const [isSaving, setIsSaving] = useState(false);
 
     return (
-        // Closing unmounts the form, so an error from a running save would not show.
         <Dialog
             open={open}
             onOpenChange={next => {
@@ -69,7 +68,6 @@ export function CustomIdlUploadDialog({
     );
 }
 
-// On phones the box keeps a side gutter and round corners, where the shared dialog box goes edge to edge.
 const CONTENT_CLASSES = cn(
     '!w-[calc(100%-2rem)] !max-w-md !gap-3 !rounded-lg !border-outer-space-800 !bg-outer-space-900 !p-5 !pt-6',
     'max-h-[calc(100dvh-2rem)] overflow-y-auto',

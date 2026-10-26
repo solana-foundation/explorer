@@ -11,7 +11,6 @@ export type CustomIdlStorage = {
     put(entry: StoredEntry): Promise<StorageWriteResult>;
     remove(programAddress: string): Promise<StorageWriteResult>;
     subscribe(onChange: () => void): () => void;
-    /** Writes the value that `change` returns for the stored value, or nothing for `undefined`. */
     update(programAddress: string, change: (value: unknown) => string | undefined): Promise<StorageWriteResult>;
 };
 
@@ -20,15 +19,12 @@ const DATABASE_VERSION = 1;
 const STORE_NAME = 'records';
 
 export function createIndexedDbCustomIdlStorage(): CustomIdlStorage {
-    // A channel does not receive its own messages, so `subscribe` does not call back for a write from this tab.
     let channel: BroadcastChannel | undefined;
     const getChannel = (): BroadcastChannel | undefined => {
         if (channel || typeof BroadcastChannel === 'undefined') return channel;
         try {
             channel = new BroadcastChannel(DATABASE_NAME);
-        } catch {
-            // Without a channel, other tabs read a change only when they load the store again.
-        }
+        } catch {}
         return channel;
     };
 
@@ -41,9 +37,7 @@ export function createIndexedDbCustomIdlStorage(): CustomIdlStorage {
     function notifyOtherTabs() {
         try {
             getChannel()?.postMessage(undefined);
-        } catch {
-            // The write is already stored, so a failed notification must not fail the write.
-        }
+        } catch {}
     }
 
     return {
@@ -114,7 +108,6 @@ function isQuotaExceededError(error: unknown): boolean {
     return error instanceof DOMException && error.name === 'QuotaExceededError';
 }
 
-// Callers close each connection after one operation, so an idle tab never blocks a version upgrade in another tab.
 function openDatabase(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
@@ -131,7 +124,6 @@ function requestResult<T>(request: IDBRequest<T>): Promise<T> {
     });
 }
 
-// A full quota can abort the commit after every request succeeds, so a write waits for the commit.
 function transactionCompletion(transaction: IDBTransaction): Promise<void> {
     return new Promise((resolve, reject) => {
         transaction.oncomplete = () => resolve();

@@ -18,7 +18,6 @@ export type CustomIdlParseError =
 
 export type CustomIdlParseResult = { ok: true; customIdl: CustomIdl } | { ok: false; error: CustomIdlParseError };
 
-/** Without a program address, the IDL must declare one. */
 export async function parseCustomIdl(json: unknown, programAddress: string | undefined): Promise<CustomIdlParseResult> {
     const shape = matchIdlShape(json);
     if (!shape) return { error: { kind: 'not-an-idl' }, ok: false };
@@ -81,7 +80,6 @@ const LegacyAnchorIdl = type({
     version: string(),
 });
 
-// The decoder reads `kind` and the display reads `standard`, so a root with one marker must not pass as an Anchor IDL.
 const CodamaMarker = union([type({ kind: literal('rootNode') }), type({ standard: literal('codama') })]);
 
 type IdlShape = { tagged: TaggedIdl; declared: IdlDeclaredAddress };

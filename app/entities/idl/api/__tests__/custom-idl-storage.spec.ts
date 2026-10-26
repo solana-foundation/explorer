@@ -266,7 +266,6 @@ function openThrows(errorName: string) {
     });
 }
 
-// The browser aborts the commit itself, so the error is on the transaction, not on the request.
 function abortCommitWith(errorName: string) {
     const put = IDBObjectStore.prototype.put;
     vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (

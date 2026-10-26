@@ -203,7 +203,6 @@ describe('parseCustomIdl', () => {
     });
 });
 
-// The Anchor Program rejects the undefined `Missing` type, and the Codama conversion accepts it.
 function codamaOnlyLegacyIdl(metadata?: { address: string }) {
     return {
         instructions: [

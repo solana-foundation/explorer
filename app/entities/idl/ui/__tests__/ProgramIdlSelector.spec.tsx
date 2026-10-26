@@ -84,7 +84,6 @@ describe('ProgramIdlSelector', () => {
         expect(JSON.parse(String(await storedValue())).selected).toBe('onChain');
     });
 
-    // The store reads the storage once after a selection change, so the read means the change has ended.
     it('should not write the selection again when the user picks the stored one', async () => {
         await storeCustomIdl();
         renderSelector();
@@ -115,7 +114,6 @@ describe('ProgramIdlSelector', () => {
         await userEvent.click(screen.getByRole('menuitemradio', { name: 'Custom Pasted JSON' }));
         storeFirstPick();
 
-        // Each change reads the storage once, when the store reloads.
         await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
         expect(JSON.parse(String(await storedValue())).selected).toBe('custom');
         expect(await screen.findByRole('button', { name: 'IDL: Custom' })).toBeInTheDocument();
@@ -209,7 +207,6 @@ async function storedValue(): Promise<unknown> {
     return read.ok ? read.entries.find(entry => entry.programAddress === PROGRAM_ADDRESS)?.value : undefined;
 }
 
-// The selector renders nothing while the store loads, so an empty render proves nothing before the store is ready.
 async function storeIsReady(store: ReturnType<typeof createStore>) {
     await waitFor(() => expect(store.get(customIdlStoreAtom)).toMatchObject({ status: 'ready' }));
     await act(async () => undefined);

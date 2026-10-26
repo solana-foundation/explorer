@@ -36,7 +36,6 @@ const IDL_BY_PROGRAM: Record<string, unknown> = {
 
 const SwrWrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
 
-// A fresh Jotai store per render, so one test's custom IDLs never reach the next.
 function wrapper({ children }: { children: ReactNode }) {
     return (
         <JotaiProvider>
@@ -130,7 +129,6 @@ describe('useProgramIdlNames', () => {
     });
 
     // Compute Budget reaches this hook on nearly every transaction, so its exclusion is load-bearing.
-    // The store read delays the fetch past the first render, so each test waits for a name before it checks the fetch.
     it('should exclude builtin programs and not fetch them', async () => {
         const { result } = render([SYSTEM, COMPUTE_BUDGET, VOTING]);
 

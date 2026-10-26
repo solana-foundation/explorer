@@ -11,7 +11,6 @@ import { type CustomIdlUploadError, uploadCustomIdlAtom } from '../model/custom-
 import { type CustomIdlOrigin } from '../model/custom-idl/types';
 import { CUSTOM_IDL_SAVE_FAILED_MESSAGE, CUSTOM_IDL_STORAGE_UNAVAILABLE_MESSAGE } from './custom-idl-messages';
 
-// The form renders no buttons, so a caller can place the submit button outside it through the `form` attribute.
 export function CustomIdlForm({
     id,
     programAddress,
@@ -136,7 +135,6 @@ export function CustomIdlForm({
     );
 }
 
-// Covers the nearest positioned ancestor, so the host decides what the hint frames.
 function DropHint() {
     return (
         <div
@@ -180,7 +178,6 @@ function ChooseFileButton({ onClick }: { onClick: () => void }) {
         >
             <span className="text-xs">
                 <span className="text-white">Choose a file</span>
-                {/* Phones and touch screens cannot drag a file. */}
                 <span className="max-md:hidden [@media(pointer:coarse)]:hidden"> or drag it anywhere</span>
             </span>
         </button>
@@ -189,17 +186,13 @@ function ChooseFileButton({ onClick }: { onClick: () => void }) {
 
 const FILE_BOX = 'min-h-14 rounded border';
 
-/**
- * Sends a file dropped anywhere in the window to `onFile`, and returns whether a file is dragged over the window.
- * A drop outside a small target would make the browser open the file in place of the page.
- */
+// A file dropped outside a drop target replaces the page, so the hook handles a drop anywhere in the window.
 function useWindowFileDrop(onFile: (file: File | undefined) => void): boolean {
     const [isDragging, setIsDragging] = useState(false);
     const onFileRef = useRef(onFile);
     onFileRef.current = onFile;
 
     useEffect(() => {
-        // Every element that a drag crosses fires dragenter and dragleave, so a count of zero means the drag left.
         let depth = 0;
         const carriesFiles = (event: DragEvent) => Boolean(event.dataTransfer?.types.includes('Files'));
         const onDragEnter = (event: DragEvent) => {
@@ -214,7 +207,6 @@ function useWindowFileDrop(onFile: (file: File | undefined) => void): boolean {
         };
         const onDragOver = (event: DragEvent) => {
             if (!carriesFiles(event)) return;
-            // Without preventDefault, the browser refuses the drop and opens the file on release.
             event.preventDefault();
             if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
         };

@@ -28,12 +28,11 @@ export function BaseFormattedIdl({
 
     if (!tabs || activeTabIndex === null || !idl) return null;
 
-    // The IDL can change while this view is mounted, and the new IDL can lack or disable the tab at this index.
-    // A search also disables a tab with no match, and that tab stays active while the user searches.
+    // The active tab must stay active while a search disables it.
     const storedTab = tabs[activeTabIndex];
     const isStale = !storedTab || (storedTab.disabled && !searchStr?.trim());
     const activeIndex = isStale ? tabs.findIndex(tab => !tab.disabled) : activeTabIndex;
-    // Store the fallback during render, so a later search does not restore the stale tab.
+    // The view must store the fallback during render to keep it active when a search starts.
     if (activeIndex !== activeTabIndex) setActiveTabIndex(activeIndex);
     const activeTab = tabs[activeIndex];
 

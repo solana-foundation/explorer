@@ -14,7 +14,7 @@ import { type CustomIdlRecord } from './custom-idl/types';
 import { getOnChainIdls, getSelectedIdls, type OnChainIdl, type SourcedIdl } from './sourced-idl';
 
 export type ProgramIdls = {
-    /** `undefined` while the store loads, and while the on-chain IDLs load unless the custom IDL is selected. */
+    /** `undefined` while the store or the selected IDLs load. */
     idls: readonly SourcedIdl[] | undefined;
     /** `undefined` while the on-chain IDLs load. */
     onChainIdls: readonly OnChainIdl[] | undefined;
