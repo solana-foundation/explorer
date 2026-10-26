@@ -162,6 +162,18 @@ describe('useProgramIdlNames', () => {
             expect(mocks.fetch.mock.calls.flat().join(' ')).not.toContain(DEVI);
         });
 
+        it('should name a builtin program from its selected custom IDL without a fetch', async () => {
+            await storeCustomIdl(COMPUTE_BUDGET, { ...anchorModernIdl, address: COMPUTE_BUDGET }, 'custom');
+
+            const { result } = render([COMPUTE_BUDGET, VOTING]);
+
+            await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+            expect(result.current.get(COMPUTE_BUDGET)?.resolveInstructionName?.(CREATE_AMM_CONFIG)).toBe(
+                'Create Amm Config',
+            );
+            expect(mocks.fetch.mock.calls.flat().join(' ')).not.toContain(COMPUTE_BUDGET);
+        });
+
         it('should name a program from its on-chain IDLs when On-chain is selected', async () => {
             await storeCustomIdl(VOTING, { ...anchorModernIdl, address: VOTING }, 'onChain');
 

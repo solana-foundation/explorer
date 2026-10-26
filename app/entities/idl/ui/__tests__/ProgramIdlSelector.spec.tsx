@@ -53,6 +53,16 @@ describe('ProgramIdlSelector', () => {
         expect(await screen.findByRole('button', { name: 'IDL: PMP' })).toBeInTheDocument();
     });
 
+    it('should show None and disable the on-chain selection when the program has no on-chain IDL', async () => {
+        await storeCustomIdl('onChain');
+        mocks.fetch.mockResolvedValue({ json: async () => ({ idls: {} }), ok: true });
+        renderSelector();
+
+        await userEvent.click(await screen.findByRole('button', { name: 'IDL: None' }));
+
+        expect(screen.getByRole('menuitemradio', { name: 'On-chain' })).toHaveAttribute('aria-disabled', 'true');
+    });
+
     it('should list the custom IDL and the on-chain IDL that the program decodes with', async () => {
         await storeCustomIdl();
         renderSelector();

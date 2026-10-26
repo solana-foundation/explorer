@@ -180,6 +180,7 @@ describe('createIndexedDbCustomIdlStorage', () => {
         it.each([
             ['a put', (otherTab: CustomIdlStorage) => otherTab.put({ programAddress: PROGRAM_ADDRESS, value: '{}' })],
             ['a remove', (otherTab: CustomIdlStorage) => otherTab.remove(PROGRAM_ADDRESS)],
+            ['an update', (otherTab: CustomIdlStorage) => otherTab.update(PROGRAM_ADDRESS, () => '{}')],
         ])('should call back for %s in another tab', async (_, change) => {
             const onChange = subscribe(storage);
 

@@ -126,6 +126,7 @@ describe('useProgramIdls', () => {
             });
 
             await waitForHook(() => expect(mocks.resolveProgramIdlsClient).toHaveBeenCalled());
+            await waitForHook(() => expect(result.current.stored.status).toBe('ready'));
             expect(result.current.idls).toBeUndefined();
         });
 
@@ -179,6 +180,7 @@ describe('useProgramIdls', () => {
             );
 
             await waitForHook(() => expect(mocks.fetch).toHaveBeenCalled());
+            await waitForHook(() => expect(result.current.stored.status).toBe('ready'));
             expect(result.current.idls).toBeUndefined();
         });
     });

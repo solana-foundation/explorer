@@ -216,17 +216,20 @@ describe('custom IDL store', () => {
             const store = await mountedStore();
             await store.set(uploadCustomIdlAtom, upload(IDL_TEXT));
             const otherTabIdl = { ...anchorModernIdl, metadata: { ...anchorModernIdl.metadata, name: 'other_tab' } };
-            const list = customIdlStorage.list.bind(customIdlStorage);
-            vi.spyOn(customIdlStorage, 'list').mockImplementationOnce(async () => {
-                const read = await list();
-                await otherTab.put({
-                    programAddress: PROGRAM_ADDRESS,
-                    value: JSON.stringify({ ...STORED, idl: otherTabIdl }),
-                });
-                return read;
-            });
+            const update = customIdlStorage.update.bind(customIdlStorage);
+            let otherTabWrite: Promise<unknown> | undefined;
+            vi.spyOn(customIdlStorage, 'update').mockImplementationOnce((programAddress, change) =>
+                update(programAddress, value => {
+                    otherTabWrite = otherTab.put({
+                        programAddress: PROGRAM_ADDRESS,
+                        value: JSON.stringify({ ...STORED, idl: otherTabIdl }),
+                    });
+                    return change(value);
+                }),
+            );
 
             await store.set(setIdlSelectionAtom, { programAddress: PROGRAM_ADDRESS, selected: 'onChain' });
+            await otherTabWrite;
 
             expect(JSON.parse(String(await storedValue(PROGRAM_ADDRESS))).idl).toEqual(otherTabIdl);
         });
@@ -338,6 +341,37 @@ describe('custom IDL store', () => {
             expect(vi.mocked(trackEvent).mock.calls).toEqual([
                 ['cidl_selected', { program_id: PROGRAM_ADDRESS, selection: 'onChain' }],
             ]);
+        });
+
+        it('should not track a pick of the stored selection', async () => {
+            await putValue(PROGRAM_ADDRESS, JSON.stringify(STORED));
+            const store = await mountedStore();
+
+            await store.set(setIdlSelectionAtom, { programAddress: PROGRAM_ADDRESS, selected: 'custom' });
+
+            expect(trackEvent).not.toHaveBeenCalled();
+        });
+
+        it('should not track a selection change that the browser refuses to commit', async () => {
+            const store = await mountedStore();
+            vi.spyOn(customIdlStorage, 'update').mockImplementation(async (_, change) => {
+                change(JSON.stringify(STORED));
+                return { ok: false, reason: 'unavailable' };
+            });
+
+            await store.set(setIdlSelectionAtom, { programAddress: PROGRAM_ADDRESS, selected: 'onChain' });
+
+            expect(trackEvent).not.toHaveBeenCalled();
+        });
+
+        it('should not track a removal that the browser refuses', async () => {
+            await putValue(PROGRAM_ADDRESS, JSON.stringify(STORED));
+            const store = await mountedStore();
+            vi.spyOn(customIdlStorage, 'remove').mockResolvedValue({ ok: false, reason: 'unavailable' });
+
+            await store.set(removeCustomIdlAtom, PROGRAM_ADDRESS);
+
+            expect(trackEvent).not.toHaveBeenCalled();
         });
 
         it('should track the removal of a custom IDL', async () => {
