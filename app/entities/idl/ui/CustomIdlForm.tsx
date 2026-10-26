@@ -8,7 +8,7 @@ import { type ReactNode, useId, useRef, useState } from 'react';
 
 import { type CustomIdlUploadError, uploadCustomIdlAtom } from '../model/custom-idl/custom-idl-store';
 import { type CustomIdlOrigin } from '../model/custom-idl/types';
-import { CUSTOM_IDL_STORAGE_UNAVAILABLE_MESSAGE } from './custom-idl-messages';
+import { CUSTOM_IDL_SAVE_FAILED_MESSAGE, CUSTOM_IDL_STORAGE_UNAVAILABLE_MESSAGE } from './custom-idl-messages';
 
 // The form renders no buttons, so a caller can place the submit button outside it through the `form` attribute.
 export function CustomIdlForm({
@@ -17,6 +17,7 @@ export function CustomIdlForm({
     initialText = '',
     initialOrigin = { kind: 'pasted' },
     onSaved,
+    onSavingChange,
     children,
 }: {
     id: string;
@@ -24,6 +25,7 @@ export function CustomIdlForm({
     initialText?: string;
     initialOrigin?: CustomIdlOrigin;
     onSaved: (programAddress: string) => void;
+    onSavingChange?: (isSaving: boolean) => void;
     children?: ReactNode;
 }) {
     const uploadCustomIdl = useSetAtom(uploadCustomIdlAtom);
@@ -54,9 +56,12 @@ export function CustomIdlForm({
     const submit = async () => {
         if (isSaving) return;
         setIsSaving(true);
-        const result = await uploadCustomIdl({ origin, programAddress, text });
+        onSavingChange?.(true);
+        const result = await uploadCustomIdl({ origin, programAddress, text }).catch(() => undefined);
         setIsSaving(false);
-        if (result.ok) onSaved(result.programAddress);
+        onSavingChange?.(false);
+        if (!result) setError(CUSTOM_IDL_SAVE_FAILED_MESSAGE);
+        else if (result.ok) onSaved(result.programAddress);
         else setError(describeUploadError(result.error));
     };
 
