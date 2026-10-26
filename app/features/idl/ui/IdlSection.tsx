@@ -51,7 +51,6 @@ export function IdlSection({
         return toBase64(fromUtf8(JSON.stringify(idl, null, 2)));
     }, [idl]);
     const castawayUrl = useMemo(() => {
-        // The SDK generator fetches the IDL by its on-chain source, so a custom IDL has no source to pass.
         if (source === 'custom') return undefined;
         const params = new URLSearchParams({ idlSource: source, network, program: programId });
         return `https://www.castaway.lol/?${params.toString()}`;

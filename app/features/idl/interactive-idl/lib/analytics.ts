@@ -52,7 +52,7 @@ export function createIdlAnalytics(standard: IdlStandard, source: IdlSource): Id
     const idlType = IDL_TYPE_LABELS[standard];
     const track = (action: IidlAction, params: EventParams) =>
         trackEvent(eventName(idlType, action), { ...params, idl_source: source });
-    // A custom IDL never leaves the browser, so its events carry no text from the IDL.
+    // A custom IDL stays in the browser, so `fromIdl` must wrap each param that holds text from the IDL.
     const fromIdl = (params: EventParams): EventParams => (source === 'custom' ? {} : params);
     return {
         trackIdlViewed(programId) {

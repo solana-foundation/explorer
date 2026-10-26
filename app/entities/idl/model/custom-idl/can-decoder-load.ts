@@ -10,7 +10,6 @@ import { buildProgramIdlNames } from '../instruction-name-table';
 export function canDecoderLoad(tagged: TaggedIdl, programAddress: string): boolean {
     if (!canBuildNames(tagged.idl)) return false;
     if (tagged.standard === 'Codama') return hasNoValidationErrors(tagged.idl);
-    // The instruction decoder converts an Anchor IDL to Codama when the Anchor Program rejects it.
     return canBuildAnchorProgram(tagged.idl, programAddress) || canConvertToCodama(tagged.idl, programAddress);
 }
 
@@ -31,7 +30,6 @@ function hasNoValidationErrors(root: CodamaIdl): boolean {
     }
 }
 
-// The Program constructor sends no request, so the provider URL is never used.
 const UNUSED_RPC_URL = 'http://localhost:8899';
 
 function canBuildAnchorProgram(idl: AnchorIdl, programAddress: string): boolean {

@@ -11,7 +11,6 @@ import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/to
 import { mockSolanaRpc } from './app/__tests__/mock-rpc';
 
 // jsdom storage outlives a test and storage-backed state reads it on first use; node-environment specs have none.
-// jsdom has no IndexedDB, so every test gets an empty in-memory one.
 beforeEach(() => {
     globalThis.localStorage?.clear();
     globalThis.sessionStorage?.clear();

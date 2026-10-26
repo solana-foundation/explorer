@@ -31,7 +31,6 @@ export function ProgramHeader({
     const { idls } = useProgramIdls(address, url, cluster);
     // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
     const idlProgramName = idls && buildProgramName(idls.map(({ idl }) => idl));
-    // A custom IDL comes from this browser, not from the program authority, so its name is not self-reported.
     const isCustomIdl = idls?.at(0)?.source === 'custom';
     const onChainIdlName = isCustomIdl ? undefined : idlProgramName;
     const customIdlName = isCustomIdl ? idlProgramName : undefined;

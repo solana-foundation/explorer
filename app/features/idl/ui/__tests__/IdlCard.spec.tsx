@@ -34,7 +34,6 @@ vi.hoisted(() => vi.stubEnv('NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED', 'true'));
 vi.mock('../../interactive-idl/ui/InteractWithIdl', async () => {
     const { useState } = await import('react');
     return {
-        // The real view keeps its expanded sections in state and adds each expanded instruction to them.
         InteractWithIdl: ({
             data,
             onSectionsExpanded,

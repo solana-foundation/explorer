@@ -28,7 +28,6 @@ const PROGRAM_ID = '11111111111111111111111111111111';
 
 const SwrWrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
 
-// A fresh Jotai store per render, so one test's custom IDLs never reach the next.
 function wrapper({ children }: { children: ReactNode }) {
     return (
         <JotaiProvider>

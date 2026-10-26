@@ -33,7 +33,6 @@ export function BaseIdlSourceSelect({
     onRemove,
 }: {
     selected: IdlSelection;
-    // The source of the first on-chain IDL, or `undefined` when no on-chain IDL has loaded.
     onChainSource: IdlVariant | undefined;
     isOnChainLoading?: boolean;
     customIdlName: string;

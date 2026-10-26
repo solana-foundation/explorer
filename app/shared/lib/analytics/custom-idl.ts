@@ -29,7 +29,7 @@ type UploadFailureReason =
     | 'quota-exceeded'
     | 'unavailable';
 
-// A custom IDL never leaves the browser, so these events carry no text from the IDL other than its program address.
+// A custom IDL stays in the browser. These events must carry no text from the IDL except its program address.
 export const customIdlAnalytics = {
     trackAdded(programId: string, standard: Standard, origin: Origin): void {
         trackEvent(CustomIdlEvent.Added, { origin, program_id: programId, standard: standard.toLowerCase() });

@@ -20,9 +20,8 @@ export type { InstructionNameResolver, ProgramIdlNames };
 /**
  * Per-program names built from each program's IDL: a display name plus an instruction-name resolver
  * (matched by discriminator, no Borsh decode). One SWR entry covers the whole set so the caller can
- * resolve names without any per-row data hooks — the list/line components stay pure. Names follow each
- * program's selected IDLs, so a program with a selected custom IDL is named without a fetch, on every
- * cluster. Otherwise builtins and custom/localhost clusters resolve to nothing.
+ * resolve names without any per-row data hooks — the list/line components stay pure. Builtins and
+ * custom/localhost clusters resolve to nothing unless the program has a selected custom IDL.
  *
  * The last source `transaction-data` tries and the only one that fetches, so an empty map means "no
  * IDL", never "nothing is named yet".
@@ -80,7 +79,6 @@ export function useProgramIdlNames(programIds: string[], cluster: Cluster, url: 
         for (const id of uniqueIds) {
             const onChain = onChainById.get(id);
             const idls = getSelectedIdls(onChain ? getOnChainIdls(onChain) : [], records.get(id));
-            // Earlier IDLs take precedence; a later one only names what the earlier ones can't.
             const names = buildProgramIdlNames(idls.map(({ idl }) => idl));
             if (names) resolvers.set(id, names);
         }

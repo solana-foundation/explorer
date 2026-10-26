@@ -18,7 +18,6 @@ export type CustomIdlStore =
 const storeStateAtom = atom<CustomIdlStore>({ status: 'loading' });
 const loadGenerationAtom = atom(0);
 
-/** Writing the atom reloads the store from the storage. */
 export const customIdlStoreAtom = atom(
     get => get(storeStateAtom),
     (get, set) => reload(get, set),
@@ -71,7 +70,6 @@ type SelectionChange = { programAddress: string; selected: IdlSelection };
 
 const selectionChangesAtom = atom<Promise<unknown>>(Promise.resolve());
 
-// Changes run one after another, so each one reads the selection that the change before it stored.
 export const setIdlSelectionAtom = atom(undefined, (get, set, change: SelectionChange): Promise<StorageWriteResult> => {
     const result = get(selectionChangesAtom).then(() => changeSelection(get, set, change));
     set(
@@ -81,7 +79,6 @@ export const setIdlSelectionAtom = atom(undefined, (get, set, change: SelectionC
     return result;
 });
 
-// The selection change reads and writes the stored record in one transaction to keep an IDL that another tab saved.
 async function changeSelection(
     get: Getter,
     set: Setter,
@@ -116,7 +113,6 @@ async function reload(get: Getter, set: Setter): Promise<void> {
         });
         return { status: 'failed' };
     });
-    // A later reload read the storage later, so an earlier reload must not overwrite its result.
     if (get(loadGenerationAtom) === generation) set(storeStateAtom, store);
 }
 
