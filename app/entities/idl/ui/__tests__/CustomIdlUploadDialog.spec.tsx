@@ -214,6 +214,18 @@ describe('CustomIdlUploadDialog', () => {
         await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
         expect(recordOf(store)?.origin).toEqual({ fileName: 'amm_v3.json', kind: 'file' });
     });
+
+    it('should store the text of a picked file as pasted once the user edits it', async () => {
+        const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
+        const file = Object.assign(new File([IDL_TEXT], 'amm_v3.json'), { text: async () => IDL_TEXT });
+        fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), { target: { files: [file] } });
+        await waitFor(() => expect(screen.getByLabelText('Or paste the IDL JSON')).toHaveValue(IDL_TEXT));
+
+        submitPasted(JSON.stringify({ ...anchorModernIdl, docs: ['edited'] }));
+
+        await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+        expect(recordOf(store)?.origin).toEqual({ kind: 'pasted' });
+    });
 });
 
 function renderDialog(programAddress: string) {

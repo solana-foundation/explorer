@@ -371,6 +371,23 @@ describe('IdlCard', () => {
         expect(screen.getByRole('button', { name: /MCP & API/i })).toBeInTheDocument();
     });
 
+    test('should offer to add a custom IDL in the empty upload state', async () => {
+        mockProgramIdls({});
+
+        renderCard();
+
+        expect(await screen.findByRole('button', { name: 'Add custom IDL' })).toBeInTheDocument();
+    });
+
+    test('should keep the selector in the empty upload state after the user picks the on-chain IDL', async () => {
+        mockProgramIdls({ customIdlRecord: customIdlRecord('onChain') });
+
+        renderCard();
+
+        expect(await screen.findByText(/doesn't have an IDL yet/)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'IDL: None' })).toBeInTheDocument();
+    });
+
     test('should link to the idl.solana.com history view for the program', async () => {
         mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
 

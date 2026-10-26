@@ -33,6 +33,7 @@ describe('useIdlInstructionDecode', () => {
         safeDecodeInstructionWithIdl.mockReset();
         useProgramIdls.mockClear();
         idlState.idls = [];
+        idlState.onChainIdls = [];
     });
 
     it('should decode with the PMP IDL over the IDL from the Anchor IDL account', () => {
@@ -53,6 +54,17 @@ describe('useIdlInstructionDecode', () => {
 
         expect(safeDecodeInstructionWithIdl).toHaveBeenCalledWith(raw, anchorIdl, 'http://localhost');
         expect(result.current).toEqual({ kind: 'anchor' });
+    });
+
+    it('should decode with the selected custom IDL over the PMP IDL', () => {
+        const customIdl = { kind: 'custom' } as unknown as AnchorIdl;
+        idlState.idls = [{ idl: customIdl, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' }];
+        idlState.onChainIdls = [PMP];
+        safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'anchor' });
+
+        renderHook(() => useIdlInstructionDecode({ programId, raw }));
+
+        expect(safeDecodeInstructionWithIdl).toHaveBeenCalledWith(raw, customIdl, 'http://localhost');
     });
 
     it('should read the IDLs of the instruction program', () => {
