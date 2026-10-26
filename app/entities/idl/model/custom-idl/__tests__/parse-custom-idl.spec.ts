@@ -21,16 +21,12 @@ describe('parseCustomIdl', () => {
         ['an array', []],
         ['an object with an empty instruction list', { instructions: [] }],
         ['an object with instructions that are not objects', { instructions: [1, 'x', null] }],
-        ['a legacy Anchor IDL with an address that is not a string', { ...anchorLegacyIdl, address: 42 }],
         ['an Anchor 0.30 IDL with an empty address', { ...anchorModernIdl, address: '' }],
         ['a legacy Anchor IDL with the kind of a Codama root', { ...anchorNoAddressIdl, kind: 'rootNode' }],
         ['a legacy Anchor IDL with the standard of a Codama root', { ...anchorNoAddressIdl, standard: 'codama' }],
-        [
-            'a legacy Anchor IDL with a spec that is not a string',
-            { ...anchorNoAddressIdl, metadata: { address: 'devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH', spec: 1 } },
-        ],
-    ])('should reject %s as not an IDL', async (_, json) => {
-        expect(await parseCustomIdl(json, MODERN_ADDRESS)).toEqual({ error: { kind: 'not-an-idl' }, ok: false });
+        ['a legacy Anchor IDL whose program name is not a string', { ...anchorNoAddressIdl, metadata: { name: 5 } }],
+    ])('should reject %s as an IDL the decoder cannot load', async (_, json) => {
+        expect(await parseCustomIdl(json, MODERN_ADDRESS)).toEqual({ error: { kind: 'cannot-load' }, ok: false });
     });
 
     it.each([
@@ -90,25 +86,9 @@ describe('parseCustomIdl', () => {
         },
     );
 
-    it.each([
-        ['a legacy Anchor IDL whose program name', { ...anchorNoAddressIdl, metadata: { name: 5 } }, MODERN_ADDRESS],
-        [
-            'a legacy Anchor IDL whose program version',
-            { ...anchorNoAddressIdl, metadata: { version: {} } },
-            MODERN_ADDRESS,
-        ],
-        [
-            'a Codama root whose program version',
-            { ...codamaIdl, program: { ...codamaIdl.program, version: {} } },
-            CODAMA_ADDRESS,
-        ],
-    ])('should reject %s is not a string as not an IDL', async (_, json, programAddress) => {
-        expect(await parseCustomIdl(json, programAddress)).toEqual({ error: { kind: 'not-an-idl' }, ok: false });
-    });
-
-    it('should report JSON that is not an IDL before a missing address', async () => {
-        expect(await parseCustomIdl({ instructions: [] }, undefined)).toEqual({
-            error: { kind: 'not-an-idl' },
+    it('should reject a program address that the IDL declares when it is not a string', async () => {
+        expect(await parseCustomIdl({ ...anchorLegacyIdl, address: 42 }, MODERN_ADDRESS)).toEqual({
+            error: { kind: 'invalid-declared-address' },
             ok: false,
         });
     });

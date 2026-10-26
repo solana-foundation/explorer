@@ -49,7 +49,7 @@ export function getAnchorIdlsWithAccounts(idls: readonly SourcedIdl[]): AnchorId
     return getAnchorIdls(idls).filter(idl => (idl.accounts?.length ?? 0) > 0);
 }
 
-function tagIdl(idl: SupportedIdl): TaggedIdl {
+export function tagIdl(idl: SupportedIdl): TaggedIdl {
     return isCodamaIdl(idl) ? { idl, standard: 'Codama' } : { idl, standard: 'Anchor' };
 }
 
