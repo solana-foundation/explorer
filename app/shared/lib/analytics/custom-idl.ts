@@ -19,7 +19,6 @@ type Origin = 'file' | 'pasted';
 
 type UploadFailureReason =
     | 'not-json'
-    | 'not-an-idl'
     | 'missing-address'
     | 'invalid-address'
     | 'invalid-declared-address'

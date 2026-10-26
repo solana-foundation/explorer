@@ -195,8 +195,6 @@ function describeUploadError(error: CustomIdlUploadError): string {
             return 'The program address that this IDL declares is not a valid Solana address.';
         case 'not-json':
             return 'This text is not valid JSON.';
-        case 'not-an-idl':
-            return 'This JSON is not an Anchor or Codama IDL.';
         case 'missing-address':
             return 'This IDL does not declare its program. Enter the program address.';
         case 'program-mismatch':

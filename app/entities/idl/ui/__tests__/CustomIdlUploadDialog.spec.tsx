@@ -20,7 +20,7 @@ describe('CustomIdlUploadDialog', () => {
 
     it.each([
         ['text that is not JSON', '{not json', 'This text is not valid JSON.'],
-        ['JSON that is not an IDL', '{"instructions":[]}', 'This JSON is not an Anchor or Codama IDL.'],
+        ['JSON that is not an IDL', '{"instructions":[]}', 'The Explorer cannot decode instructions with this IDL.'],
         [
             'an IDL the decoder cannot load',
             JSON.stringify({

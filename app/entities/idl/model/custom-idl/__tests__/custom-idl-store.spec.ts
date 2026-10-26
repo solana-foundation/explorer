@@ -126,7 +126,7 @@ describe('custom IDL store', () => {
 
         it.each([
             ['text that is not JSON', upload('{not json'), { kind: 'not-json' }],
-            ['JSON that is not an IDL', upload('{"instructions":[]}'), { kind: 'not-an-idl' }],
+            ['JSON that is not an IDL', upload('{"instructions":[]}'), { kind: 'cannot-load' }],
             [
                 'a program address that is not base58',
                 { ...upload(IDL_TEXT), programAddress: 'not-an-address' },
@@ -314,7 +314,7 @@ describe('custom IDL store', () => {
 
         it.each([
             ['text that is not JSON', '{not json', 'not-json'],
-            ['JSON that is not an IDL', '{"instructions":[]}', 'not-an-idl'],
+            ['JSON that is not an IDL', '{"instructions":[]}', 'cannot-load'],
         ])('should track a failed upload of %s with its reason only', async (_, text, reason) => {
             const store = await mountedStore();
 
