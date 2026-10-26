@@ -21,6 +21,11 @@ vi.mock('@entities/idl', async () => {
         getIdlDeclaredAddress: (
             await vi.importActual<typeof import('@entities/idl/lib/utils')>('@entities/idl/lib/utils')
         ).getIdlDeclaredAddress,
+        isIdlProgramIdMismatch: (
+            await vi.importActual<typeof import('@entities/idl/model/interactive-idl')>(
+                '@entities/idl/model/interactive-idl',
+            )
+        ).isIdlProgramIdMismatch,
     };
 });
 vi.mock('@coral-xyz/anchor', () => ({
