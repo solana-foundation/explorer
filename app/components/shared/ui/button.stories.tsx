@@ -47,6 +47,7 @@ const dashkitVariantOptions = [
     'outline-primary',
     'outline-danger',
     'outline-warning',
+    'amber',
 ] as const satisfies readonly ButtonVariant[];
 
 const dashkitSizeOptions = ['default', 'sm', 'lg'] as const satisfies readonly ButtonSize[];
