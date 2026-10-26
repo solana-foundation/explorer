@@ -8,7 +8,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@components/shared/ui/dropdown-menu';
-import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'react-feather';
 
 import { type IdlSelection } from '../model/custom-idl/types';
@@ -46,9 +45,9 @@ export function BaseIdlSourceSelect({
             <DropdownMenuTrigger asChild>
                 <Button
                     ui="dashkit"
-                    variant="white"
+                    variant={selected === 'custom' ? 'amber' : 'white'}
                     size="sm"
-                    className={triggerVariants({ isCustom: selected === 'custom' })}
+                    className="whitespace-nowrap"
                 >
                     IDL: {source ? IDL_SOURCE_LABELS[source] : isOnChainLoading ? 'On-chain' : 'None'}
                     <ChevronDown className="ml-1.5" size={13} />
@@ -82,12 +81,3 @@ export function BaseIdlSourceSelect({
         </DropdownMenu>
     );
 }
-
-const triggerVariants = cva('whitespace-nowrap', {
-    variants: {
-        isCustom: {
-            false: '',
-            true: '!border-amber-400 !bg-amber-400/10 !text-amber-300',
-        },
-    },
-});
