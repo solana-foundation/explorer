@@ -243,7 +243,132 @@ describe('CustomIdlUploadDialog', () => {
         await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
         expect(recordOf(store)?.origin).toEqual({ kind: 'pasted' });
     });
+
+    it('should open the file picker from the drop area', async () => {
+        const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => undefined);
+        renderDialog(PROGRAM_ADDRESS);
+
+        await userEvent.click(screen.getByRole('button', { name: 'Choose a file or drag it anywhere' }));
+
+        expect(click.mock.contexts).toEqual([screen.getByLabelText('Anchor or Codama IDL file')]);
+    });
+
+    it('should show the name of a picked file in place of the drop area', async () => {
+        renderDialog(PROGRAM_ADDRESS);
+
+        fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), {
+            target: { files: [readableFile('amm_v3.json')] },
+        });
+
+        expect(await screen.findByText('amm_v3.json')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Choose a file or drag it anywhere' })).not.toBeInTheDocument();
+    });
+
+    it('should clear the IDL text and show the drop area again when the file is removed', async () => {
+        const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
+        fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), {
+            target: { files: [readableFile('amm_v3.json')] },
+        });
+        await screen.findByText('amm_v3.json');
+
+        await userEvent.click(screen.getByRole('button', { name: 'Remove file' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+        expect(screen.getByLabelText('Or paste the IDL JSON')).toHaveValue('');
+        expect(screen.getByRole('button', { name: 'Choose a file or drag it anywhere' })).toBeInTheDocument();
+        expect(recordOf(store)).toBeUndefined();
+        expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('should keep the form empty when a dropped file is read after the file is removed', async () => {
+        renderDialog(PROGRAM_ADDRESS);
+        fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), {
+            target: { files: [readableFile('amm_v3.json')] },
+        });
+        await screen.findByText('amm_v3.json');
+        let finishRead: (text: string) => void = () => undefined;
+        const late = Object.assign(new File(['{}'], 'late.json'), {
+            text: () => new Promise<string>(resolve => (finishRead = resolve)),
+        });
+
+        fireEvent.drop(window, { dataTransfer: fileTransfer(late) });
+        await userEvent.click(screen.getByRole('button', { name: 'Remove file' }));
+        await act(async () => finishRead(IDL_TEXT));
+
+        expect(screen.getByLabelText('Or paste the IDL JSON')).toHaveValue('');
+        expect(screen.queryByText('late.json')).not.toBeInTheDocument();
+    });
+
+    it('should store a file dropped anywhere in the window under its file name', async () => {
+        const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
+
+        const dropped = fireEvent.drop(window, { dataTransfer: fileTransfer(readableFile('dropped.json')) });
+        expect(await screen.findByText('dropped.json')).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+        expect(dropped).toBe(false);
+        await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+        expect(recordOf(store)?.origin).toEqual({ fileName: 'dropped.json', kind: 'file' });
+    });
+
+    it('should show the drop hint until a file drag leaves the window', () => {
+        renderDialog(PROGRAM_ADDRESS);
+        const transfer = fileTransfer(readableFile('amm_v3.json'));
+
+        act(() => void fireEvent.dragEnter(window, { dataTransfer: transfer }));
+        act(() => void fireEvent.dragEnter(window, { dataTransfer: transfer }));
+        act(() => void fireEvent.dragLeave(window, { dataTransfer: transfer }));
+        expect(screen.getByText('Drop the IDL file')).toBeInTheDocument();
+
+        act(() => void fireEvent.dragLeave(window, { dataTransfer: transfer }));
+        expect(screen.queryByText('Drop the IDL file')).not.toBeInTheDocument();
+    });
+
+    it('should prevent the browser default for a file drag but not for a text drag', () => {
+        renderDialog(PROGRAM_ADDRESS);
+        const textTransfer = { files: [], types: ['text/plain'] };
+
+        expect(fireEvent.dragOver(window, { dataTransfer: fileTransfer(readableFile('amm_v3.json')) })).toBe(false);
+        expect(fireEvent.dragOver(window, { dataTransfer: textTransfer })).toBe(true);
+        act(() => void fireEvent.dragEnter(window, { dataTransfer: textTransfer }));
+        expect(fireEvent.drop(window, { dataTransfer: textTransfer })).toBe(true);
+        expect(screen.queryByText('Drop the IDL file')).not.toBeInTheDocument();
+    });
+
+    it('should not prevent the browser default for a file drag after the dialog closes', () => {
+        const { rerender } = render(
+            <JotaiProvider store={createStore()}>
+                <CustomIdlUploadDialog
+                    programAddress={PROGRAM_ADDRESS}
+                    isReplacing={false}
+                    open
+                    onOpenChange={vi.fn()}
+                />
+            </JotaiProvider>,
+        );
+
+        rerender(
+            <JotaiProvider store={createStore()}>
+                <CustomIdlUploadDialog
+                    programAddress={PROGRAM_ADDRESS}
+                    isReplacing={false}
+                    open={false}
+                    onOpenChange={vi.fn()}
+                />
+            </JotaiProvider>,
+        );
+
+        expect(fireEvent.dragOver(window, { dataTransfer: fileTransfer(readableFile('amm_v3.json')) })).toBe(true);
+    });
 });
+
+function readableFile(name: string) {
+    return Object.assign(new File([IDL_TEXT], name), { text: async () => IDL_TEXT });
+}
+
+function fileTransfer(file: File) {
+    return { files: [file], types: ['Files'] };
+}
 
 function renderDialog(programAddress: string) {
     const store = createStore();
