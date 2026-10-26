@@ -57,7 +57,7 @@ export function CustomIdlForm({
         const result = await uploadCustomIdl({ origin, programAddress, text });
         setIsSaving(false);
         if (result.ok) onSaved(result.programAddress);
-        else setError(describeUploadError(result.error, programAddress));
+        else setError(describeUploadError(result.error));
     };
 
     return (
@@ -104,12 +104,12 @@ export function CustomIdlForm({
     );
 }
 
-function describeUploadError(error: CustomIdlUploadError, programAddress: string | undefined): string {
+function describeUploadError(error: CustomIdlUploadError): string {
     switch (error.kind) {
         case 'invalid-address':
-            return programAddress === undefined
-                ? 'The program address that this IDL declares is not a valid Solana address.'
-                : 'The program address is not a valid Solana address.';
+            return 'The program address is not a valid Solana address.';
+        case 'invalid-declared-address':
+            return 'The program address that this IDL declares is not a valid Solana address.';
         case 'not-json':
             return 'This text is not valid JSON.';
         case 'not-an-idl':

@@ -22,6 +22,7 @@ type UploadFailureReason =
     | 'not-an-idl'
     | 'missing-address'
     | 'invalid-address'
+    | 'invalid-declared-address'
     | 'program-mismatch'
     | 'cannot-load'
     | 'check-failed'

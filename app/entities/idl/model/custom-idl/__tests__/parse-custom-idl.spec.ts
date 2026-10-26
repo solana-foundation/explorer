@@ -70,12 +70,25 @@ describe('parseCustomIdl', () => {
         });
     });
 
-    it.each([
-        ['the caller passes', anchorNoAddressIdl, 'not-an-address'],
-        ['the IDL declares', { ...anchorModernIdl, address: 'not-an-address' }, undefined],
-    ])('should reject a program address that %s when it is not base58', async (_, json, programAddress) => {
-        expect(await parseCustomIdl(json, programAddress)).toEqual({ error: { kind: 'invalid-address' }, ok: false });
+    it('should reject a program address that the caller passes when it is not base58', async () => {
+        expect(await parseCustomIdl(anchorNoAddressIdl, 'not-an-address')).toEqual({
+            error: { kind: 'invalid-address' },
+            ok: false,
+        });
     });
+
+    it.each([
+        ['passes none', undefined],
+        ['passes a valid address', MODERN_ADDRESS],
+    ])(
+        'should reject a program address that the IDL declares when it is not base58 and the caller %s',
+        async (_, programAddress) => {
+            expect(await parseCustomIdl({ ...anchorModernIdl, address: 'not-an-address' }, programAddress)).toEqual({
+                error: { kind: 'invalid-declared-address' },
+                ok: false,
+            });
+        },
+    );
 
     it.each([
         ['a legacy Anchor IDL whose program name', { ...anchorNoAddressIdl, metadata: { name: 5 } }, MODERN_ADDRESS],

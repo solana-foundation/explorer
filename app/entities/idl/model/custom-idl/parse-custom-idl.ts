@@ -11,6 +11,7 @@ export type CustomIdlParseError =
     | { kind: 'not-an-idl' }
     | { kind: 'missing-address' }
     | { kind: 'invalid-address' }
+    | { kind: 'invalid-declared-address' }
     | { kind: 'program-mismatch'; declaredAddress: string; programAddress: string }
     | { kind: 'cannot-load' }
     | { kind: 'check-failed' };
@@ -23,7 +24,7 @@ export async function parseCustomIdl(json: unknown, programAddress: string | und
     if (!shape) return { error: { kind: 'not-an-idl' }, ok: false };
 
     const { tagged, declared } = shape;
-    if (declared.kind === 'malformed') return { error: { kind: 'invalid-address' }, ok: false };
+    if (declared.kind === 'malformed') return { error: { kind: 'invalid-declared-address' }, ok: false };
     const declaredAddress = declared.kind === 'address' ? declared.address : undefined;
     const target = programAddress ?? declaredAddress;
     if (target === undefined) return { error: { kind: 'missing-address' }, ok: false };

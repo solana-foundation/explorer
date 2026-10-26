@@ -47,6 +47,16 @@ describe('CustomIdlUploadDialog', () => {
         );
     });
 
+    it('should name the address that the IDL declares when that address is not base58', async () => {
+        renderDialog(PROGRAM_ADDRESS);
+
+        submitPasted(JSON.stringify({ ...anchorModernIdl, address: 'not-an-address' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'The program address that this IDL declares is not a valid Solana address.',
+        );
+    });
+
     it.each([
         ['quota-exceeded', 'This IDL does not fit in the browser storage.'],
         ['unavailable', 'This browser blocks storage for the Explorer'],
