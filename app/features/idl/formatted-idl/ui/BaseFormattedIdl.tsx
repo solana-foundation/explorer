@@ -33,6 +33,8 @@ export function BaseFormattedIdl({
     const storedTab = tabs[activeTabIndex];
     const isStale = !storedTab || (storedTab.disabled && !searchStr?.trim());
     const activeIndex = isStale ? tabs.findIndex(tab => !tab.disabled) : activeTabIndex;
+    // Store the fallback during render, so a later search does not restore the stale tab.
+    if (activeIndex !== activeTabIndex) setActiveTabIndex(activeIndex);
     const activeTab = tabs[activeIndex];
 
     return (

@@ -598,6 +598,37 @@ describe('IdlCard', () => {
         expect(screen.getByRole('tab', { name: /^Instructions/ })).toHaveAttribute('aria-selected', 'true');
     });
 
+    test('should keep the first tab when the user searches after leaving a tab that the on-chain IDL lacks', async () => {
+        const customIdl = { ...anchorModernIdl, address: programId } as Idl;
+        const onChainIdl = { ...customIdl, events: [] };
+        const card = () => (
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>
+        );
+        mockProgramIdls({ anchorIdl: onChainIdl, customIdlRecord: customIdlRecord('custom', customIdl) });
+        const { rerender } = render(card());
+        fireEvent.click(await screen.findByRole('tab', { name: /^Events/ }));
+        mockProgramIdls({ anchorIdl: onChainIdl, customIdlRecord: customIdlRecord('onChain', customIdl) });
+        rerender(card());
+        expect(await screen.findByRole('button', { name: 'IDL: Anchor' })).toBeInTheDocument();
+
+        fireEvent.change(screen.getByPlaceholderText('Search...'), { target: { value: 'swap' } });
+
+        expect(screen.getByRole('tab', { name: /^Instructions/ })).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('should keep the open tab while a search matches nothing on it', async () => {
+        mockProgramIdls({ anchorIdl: { ...anchorModernIdl, address: programId } as Idl });
+        renderCard();
+        fireEvent.click(await screen.findByRole('tab', { name: /^Events/ }));
+
+        fireEvent.change(screen.getByPlaceholderText('Search...'), { target: { value: 'TickArrayBitmapExtension' } });
+
+        expect(screen.getByRole('tab', { name: /^Events/ })).toBeDisabled();
+        expect(screen.getByRole('tab', { name: /^Events/ })).toHaveAttribute('aria-selected', 'true');
+    });
+
     test('should render a custom Codama IDL after the on-chain Codama IDL failed to render', async () => {
         const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
         const onChainIdl = createMockProgramMetadataIdl() as CodamaIdl;
