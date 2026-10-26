@@ -116,10 +116,10 @@ code here at all.
 
 Two things are held back from it. The built-in sources below are one. The other is `NON_ANCHOR_PROGRAMS`
 (`entities/idl/api/config.ts`), which `useProgramIdlNames` and its server-side counterpart
-`resolveProgramIdlNames` both filter out of the fetch entirely: those programs never reach the IDL source
-whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
+`resolveProgramIdlNames` both filter out of the fetch entirely, whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
 programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins with no built-in source at all (Vote, Config, Address Lookup Table,
 Ed25519, Secp256k1, the BPF loaders), which stay unnamed by design rather than by omission.
+A selected custom IDL needs no fetch, so `useProgramIdlNames` names a program from it on every cluster, a `NON_ANCHOR_PROGRAMS` builtin included.
 
 The built-in sources are a short list of exceptions, kept for three reasons.
 
@@ -154,7 +154,7 @@ extension groups are unverified against the RPC.
 **3. Cluster coverage.** A PMP IDL is an on-chain account, so it exists per cluster. As of 2026-08-19 the
 Compute Budget IDL account is present on mainnet and devnet, **absent on testnet**, and unreachable on
 custom/localhost —
-`useProgramIdlNames` returns an empty map there, having no client-side fallback (unlike `useProgramIdls`).
+`useProgramIdlNames` fetches no on-chain IDL there, having no client-side fallback (unlike `useProgramIdls`).
 A discriminator lookup works on every cluster.
 
 ### Not reasons
