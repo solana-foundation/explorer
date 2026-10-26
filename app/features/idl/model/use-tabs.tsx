@@ -132,7 +132,10 @@ export function useTabs(
                     isProgramIdMismatch ? (
                         <BaseWarningCard message="IDL program address does not match the current program" />
                     ) : (
+                        // The view keeps its expanded sections, so a new source needs a new view
+                        // to keep the names from a custom IDL out of analytics.
                         <InteractWithIdl
+                            key={source}
                             data={idl.instructions}
                             onSectionsExpanded={idlAnalytics.trackSectionsExpanded}
                             onTabOpened={idlAnalytics.trackTabOpened}

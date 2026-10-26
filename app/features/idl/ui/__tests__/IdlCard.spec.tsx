@@ -31,7 +31,27 @@ import { IdlCard } from '../IdlCard';
 const mocks = vi.hoisted(() => ({ brokenIdlName: 'broken_program', useProgramIdls: vi.fn() }));
 
 vi.hoisted(() => vi.stubEnv('NEXT_PUBLIC_INTERACTIVE_IDL_ENABLED', 'true'));
-vi.mock('../../interactive-idl/ui/InteractWithIdl', () => ({ InteractWithIdl: () => <div>Interactive IDL</div> }));
+vi.mock('../../interactive-idl/ui/InteractWithIdl', async () => {
+    const { useState } = await import('react');
+    return {
+        // The real view keeps its expanded sections in state and adds each expanded instruction to them.
+        InteractWithIdl: ({
+            data,
+            onSectionsExpanded,
+        }: {
+            data?: { name: string }[];
+            onSectionsExpanded?: (programId: string, sections: string[]) => void;
+        }) => {
+            const [expanded, setExpanded] = useState<string[]>([]);
+            const expand = () => {
+                const next = [...expanded, data?.[0]?.name ?? ''];
+                setExpanded(next);
+                onSectionsExpanded?.('mock-program', next);
+            };
+            return <button onClick={expand}>Interactive IDL</button>;
+        },
+    };
+});
 
 // The card reads its IDLs through `useProgramIdls`; mock that entity hook (the card imports it via
 // the `@entities/idl` barrel, which re-exports this module).
@@ -672,6 +692,52 @@ describe('IdlCard', () => {
 
         expect(await screen.findByText('Loading program IDL')).toBeInTheDocument();
         expect(screen.queryByText('Codama (version 1.2.11)')).not.toBeInTheDocument();
+    });
+
+    test('should send no section name from a custom IDL when the user expands an instruction on its Interact tab', async () => {
+        const modernIdl = { ...anchorModernIdl, address: programId } as Idl;
+        mockProgramIdls({ customIdlRecord: customIdlRecord('custom', modernIdl) });
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+        fireEvent.click(await screen.findByText('Interact'));
+        vi.mocked(trackEvent).mockClear();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Interactive IDL' }));
+
+        expect(vi.mocked(trackEvent).mock.calls).toEqual([
+            [
+                'iidl_anchor_sections_expanded',
+                { expanded_sections_count: 1, idl_source: 'custom', program_id: 'mock-program' },
+            ],
+        ]);
+    });
+
+    test('should send no section name from a custom IDL after the user selects the on-chain IDL on the Interact tab', async () => {
+        const modernIdl = { ...anchorModernIdl, address: programId } as Idl;
+        const onChainIdl = { ...modernIdl, instructions: modernIdl.instructions.slice(1) };
+        const card = () => (
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>
+        );
+        mockProgramIdls({ anchorIdl: onChainIdl, customIdlRecord: customIdlRecord('custom', modernIdl) });
+        const { rerender } = render(card());
+        fireEvent.click(await screen.findByText('Interact'));
+        fireEvent.click(screen.getByRole('button', { name: 'Interactive IDL' }));
+
+        mockProgramIdls({ anchorIdl: onChainIdl, customIdlRecord: customIdlRecord('onChain', modernIdl) });
+        rerender(card());
+        expect(await screen.findByRole('button', { name: 'IDL: Anchor' })).toBeInTheDocument();
+        vi.mocked(trackEvent).mockClear();
+        fireEvent.click(screen.getByRole('button', { name: 'Interactive IDL' }));
+
+        expect(trackEvent).toHaveBeenCalledWith(
+            'iidl_anchor_sections_expanded',
+            expect.objectContaining({ expanded_sections_count: 1, idl_source: 'anchor' }),
+        );
     });
 
     function customIdlRecord(selected: CustomIdlRecord['selected'], idl: Idl = createMockAnchorIdl()): CustomIdlRecord {
