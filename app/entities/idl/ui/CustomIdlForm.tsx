@@ -3,8 +3,9 @@
 import { inputVariants } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import { cn, cnPrefixed } from '@components/shared/utils';
+import { useWindowFileDrop } from '@shared/lib/use-window-file-drop';
 import { useSetAtom } from 'jotai';
-import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { type ReactNode, useId, useRef, useState } from 'react';
 import { FileText, Upload, X } from 'react-feather';
 
 import { type CustomIdlUploadError, uploadCustomIdlAtom } from '../model/custom-idl/custom-idl-store';
@@ -185,52 +186,6 @@ function ChooseFileButton({ onClick }: { onClick: () => void }) {
 }
 
 const FILE_BOX = 'min-h-14 rounded border';
-
-// A file dropped outside a drop target replaces the page, so the hook handles a drop anywhere in the window.
-function useWindowFileDrop(onFile: (file: File | undefined) => void): boolean {
-    const [isDragging, setIsDragging] = useState(false);
-    const onFileRef = useRef(onFile);
-    onFileRef.current = onFile;
-
-    useEffect(() => {
-        let depth = 0;
-        const carriesFiles = (event: DragEvent) => Boolean(event.dataTransfer?.types.includes('Files'));
-        const onDragEnter = (event: DragEvent) => {
-            if (!carriesFiles(event)) return;
-            depth += 1;
-            setIsDragging(true);
-        };
-        const onDragLeave = (event: DragEvent) => {
-            if (!carriesFiles(event)) return;
-            depth = Math.max(0, depth - 1);
-            if (depth === 0) setIsDragging(false);
-        };
-        const onDragOver = (event: DragEvent) => {
-            if (!carriesFiles(event)) return;
-            event.preventDefault();
-            if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
-        };
-        const onDrop = (event: DragEvent) => {
-            if (!carriesFiles(event)) return;
-            event.preventDefault();
-            depth = 0;
-            setIsDragging(false);
-            onFileRef.current(event.dataTransfer?.files[0]);
-        };
-        window.addEventListener('dragenter', onDragEnter);
-        window.addEventListener('dragleave', onDragLeave);
-        window.addEventListener('dragover', onDragOver);
-        window.addEventListener('drop', onDrop);
-        return () => {
-            window.removeEventListener('dragenter', onDragEnter);
-            window.removeEventListener('dragleave', onDragLeave);
-            window.removeEventListener('dragover', onDragOver);
-            window.removeEventListener('drop', onDrop);
-        };
-    }, []);
-
-    return isDragging;
-}
 
 function describeUploadError(error: CustomIdlUploadError): string {
     switch (error.kind) {
