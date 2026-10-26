@@ -1,4 +1,3 @@
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import {
     InstructionSurfaceProvider,
@@ -361,10 +360,9 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <MetaplexTokenMetadataDetailsCard
-                        ix={ix}
+                        ix={parsedIx}
+                        raw={ix}
                         index={index}
-                        result={INSPECTOR_RESULT}
-                        InstructionCardComponent={BaseInstructionCard}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />
@@ -472,11 +470,9 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <MetaplexTokenMetadataDetailsCard
-                        ix={ix}
-                        parsedIx={parsedIx}
+                        ix={parsedIx}
+                        raw={ix}
                         index={index}
-                        result={INSPECTOR_RESULT}
-                        InstructionCardComponent={BaseInstructionCard}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />

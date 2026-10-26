@@ -6,6 +6,7 @@ import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsC
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
 import { LIGHTHOUSE_ADDRESS, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { getBase58Decoder } from '@solana/kit';
 import {
     AddressLookupTableAccount,
@@ -144,6 +145,19 @@ describe('Inspector InstructionsSection with a Program Metadata instruction', ()
 
         expect(await screen.findAllByText(/Program Metadata Program/i)).not.toHaveLength(0);
         expect(screen.queryByTestId('pmp-payload-section')).not.toBeInTheDocument();
+    });
+});
+
+describe('Inspector InstructionsSection with a Token Metadata instruction', () => {
+    test.each([
+        { data: [7], title: 'Token Metadata Program: Sign Metadata' },
+        { data: [0xff], title: 'Token Metadata Program: Unknown Instruction' },
+    ])('should render $title in the inspector frame', async ({ data, title }) => {
+        renderSection(buildTokenMetadataMessage(data));
+
+        expect(await screen.findByText(title)).toBeInTheDocument();
+        expect(screen.getAllByRole('button', { name: 'Collapse' })).toHaveLength(2);
+        expect(screen.getAllByText('Program')).toHaveLength(1);
     });
 });
 
@@ -326,6 +340,22 @@ function buildPmpMessage(data: Uint8Array): MessageV0 {
             { isSigner: false, isWritable: false, pubkey: gen.publicKey(3) },
         ],
         programId: new PublicKey(PMP_ADDRESS),
+    });
+    return new TransactionMessage({
+        instructions: [ix],
+        payerKey: gen.publicKey(0),
+        recentBlockhash: PublicKey.default.toBase58(),
+    }).compileToV0Message();
+}
+
+function buildTokenMetadataMessage(data: number[]): MessageV0 {
+    const ix = new TransactionInstruction({
+        data: Buffer.from(data),
+        keys: [
+            { isSigner: false, isWritable: true, pubkey: gen.publicKey(2) },
+            { isSigner: true, isWritable: false, pubkey: gen.publicKey(0) },
+        ],
+        programId: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
     });
     return new TransactionMessage({
         instructions: [ix],

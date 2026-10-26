@@ -2,6 +2,7 @@ import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { useInstructionSurface } from '@entities/instruction-card';
 import { WORMHOLE_PROGRAM_IDS } from '@explorer/decoder-wormhole/detection';
 import { LIGHTHOUSE_ADDRESS } from '@features/decode-instruction-lighthouse';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from '@solana/attestation';
 import { getBase58Decoder } from '@solana/kit';
 import {
@@ -42,6 +43,8 @@ const WORMHOLE_IX = instruction(new PublicKey(WORMHOLE_PROGRAM_IDS[0]), [0]);
 const IDL_PROGRAM_ID = gen.publicKey(2);
 
 const IDL_IX = instruction(IDL_PROGRAM_ID, [1]);
+
+const SIGN_METADATA_IX = instruction(new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID), [7]);
 
 const PARSED_TRANSFER_IX: ParsedInstruction = {
     parsed: {
@@ -175,6 +178,22 @@ describe('Transaction page InstructionsSection', () => {
         renderSection([UNKNOWN_SAS_IX], [COMPUTE_BUDGET_IX, IDL_IX]);
 
         expect(await screen.findByText('IDL card 0/1')).toBeInTheDocument();
+    });
+});
+
+describe('Transaction page InstructionsSection with a Token Metadata instruction', () => {
+    test('should render the decoded card with one Program row', async () => {
+        renderSection([SIGN_METADATA_IX]);
+
+        expect(await screen.findByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
+        expect(screen.getAllByText('Program')).toHaveLength(1);
+    });
+
+    test('should render the inner instructions of a Token Metadata card', async () => {
+        renderSection([SIGN_METADATA_IX], [UNKNOWN_SAS_IX]);
+
+        expect(await screen.findByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
+        expect(screen.getByText('#1.1')).toBeInTheDocument();
     });
 });
 
