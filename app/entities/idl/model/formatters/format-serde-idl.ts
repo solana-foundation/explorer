@@ -1,12 +1,5 @@
-import { formatIdl } from '../converters/convert-legacy-idl';
+import { Idl } from '@coral-xyz/anchor';
 
-/**
- * Format IDL according its type
- *
- * @param idl
- * @param programAddress
- * @returns
- */
-export function formatSerdeIdl(idl: NonNullable<object>, programAddress?: string) {
-    return formatIdl(idl, programAddress);
+export function formatSerdeIdl(idl: NonNullable<object>, _programAddress?: string): Idl {
+    return idl as Idl;
 }

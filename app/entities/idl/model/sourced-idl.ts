@@ -36,6 +36,14 @@ export function getAnchorIdlsWithAccounts(idls: readonly SourcedIdl[]): AnchorId
     return getAnchorIdls(idls).filter(idl => (idl.accounts?.length ?? 0) > 0);
 }
 
+export function getCodamaIdls(idls: readonly SourcedIdl[]): CodamaIdl[] {
+    return idls.flatMap(({ idl, standard }) => (standard === 'Codama' ? [idl] : []));
+}
+
+export function getCodamaIdlsWithAccounts(idls: readonly SourcedIdl[]): CodamaIdl[] {
+    return getCodamaIdls(idls).filter(idl => (idl.program.accounts?.length ?? 0) > 0);
+}
+
 function tagIdl(idl: SupportedIdl): TaggedIdl {
     return isCodamaIdl(idl) ? { idl, standard: 'Codama' } : { idl, standard: 'Anchor' };
 }
