@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useVerifiedProgram } from '../verified-builds';
 
-const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 
 // A cluster without an OSEC registry skips the registry fetch.
 vi.mock('@providers/cluster', async importOriginal => ({

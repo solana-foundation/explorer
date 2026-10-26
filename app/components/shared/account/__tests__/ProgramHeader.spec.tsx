@@ -62,9 +62,9 @@ function mockIdls(idl?: AnchorIdl, source: 'anchor' | 'custom' = 'anchor'): void
             : undefined;
     const onChainIdls = getOnChainIdls(onChain);
     mocks.useProgramIdls.mockReturnValue({
+        customIdl: { record, status: 'ready' },
         idls: getSelectedIdls(onChainIdls, record),
         onChainIdls,
-        stored: { record, status: 'ready' },
     } satisfies ProgramIdls);
 }
 

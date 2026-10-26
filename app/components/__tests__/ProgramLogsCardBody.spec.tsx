@@ -18,7 +18,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramLogsCardBody } from '../ProgramLogsCardBody';
 
-const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({

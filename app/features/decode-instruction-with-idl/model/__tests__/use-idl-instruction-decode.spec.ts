@@ -11,7 +11,7 @@ import { useIdlInstructionDecode } from '../use-idl-instruction-decode';
 // Mock the resolution boundary and the decode helper, so the test covers only the hook's IDL choice,
 // argument forwarding and gating. The SWR and decode code have their own specs. The panic→Unknown degrade
 // belongs to `safeDecodeInstructionWithIdl` and is tested with the lib.
-const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const safeDecodeInstructionWithIdl = vi.fn();
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 

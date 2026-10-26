@@ -137,7 +137,7 @@ describe('useProgramIdls', () => {
             });
 
             await waitForHook(() => expect(mocks.resolveProgramIdlsClient).toHaveBeenCalled());
-            await waitForHook(() => expect(result.current.stored.status).toBe('ready'));
+            await waitForHook(() => expect(result.current.customIdl.status).toBe('ready'));
             expect(result.current.idls).toBeUndefined();
         });
 
@@ -191,7 +191,7 @@ describe('useProgramIdls', () => {
             );
 
             await waitForHook(() => expect(mocks.fetch).toHaveBeenCalled());
-            await waitForHook(() => expect(result.current.stored.status).toBe('ready'));
+            await waitForHook(() => expect(result.current.customIdl.status).toBe('ready'));
             expect(result.current.idls).toBeUndefined();
         });
     });
@@ -246,7 +246,7 @@ describe('useProgramIdls', () => {
             });
 
             await waitForHook(() => expect(result.current.onChainIdls).toHaveLength(1));
-            expect(result.current.stored).toEqual({ status: 'loading' });
+            expect(result.current.customIdl).toEqual({ status: 'loading' });
             expect(result.current.idls).toBeUndefined();
         });
 
@@ -271,7 +271,9 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.stored).toMatchObject({ record: { selected: 'onChain' } }));
+            await waitForHook(() =>
+                expect(result.current.customIdl).toMatchObject({ record: { selected: 'onChain' } }),
+            );
             expect(result.current.idls).toBeUndefined();
         });
 
@@ -282,7 +284,7 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.stored).toEqual({ record: undefined, status: 'ready' }));
+            await waitForHook(() => expect(result.current.customIdl).toEqual({ record: undefined, status: 'ready' }));
             expect(result.current.idls).toBeUndefined();
         });
 
@@ -297,7 +299,7 @@ describe('useProgramIdls', () => {
             });
 
             await waitForHook(() => expect(result.current.idls).toBeDefined());
-            expect(result.current.stored).toEqual({ status: 'failed' });
+            expect(result.current.customIdl).toEqual({ status: 'failed' });
             expect(result.current.idls?.map(({ source }) => source)).toEqual([IdlVariant.ProgramMetadata]);
         });
 
@@ -316,7 +318,7 @@ describe('useProgramIdls', () => {
                 );
 
                 await waitForHook(() => expect(result.current.idls).toBeDefined());
-                expect(result.current.stored).toEqual({ status: 'failed' });
+                expect(result.current.customIdl).toEqual({ status: 'failed' });
                 expect(result.current.idls?.map(({ source }) => source)).toEqual([IdlVariant.ProgramMetadata]);
             } finally {
                 vi.doUnmock('../custom-idl/can-decoder-load');

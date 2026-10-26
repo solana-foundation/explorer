@@ -10,7 +10,7 @@ import { type Account } from '@/app/providers/accounts';
 
 import { AnchorAccountCard } from '../AnchorAccountCard';
 
-const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'devnet', url: 'http://localhost' }) }));

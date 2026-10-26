@@ -13,7 +13,7 @@ import { AnchorProgramName } from '../anchor';
 const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
 const UNBUILDABLE_IDL = referenceIdl as unknown as AnchorIdl;
 
-const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({

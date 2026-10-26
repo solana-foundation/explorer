@@ -96,11 +96,11 @@ const PMP_PDA = gen.vanityAddress('PMP');
 
 function mockProgramIdls({
     customIdlRecord,
-    stored = { record: customIdlRecord, status: 'ready' },
+    customIdl = { record: customIdlRecord, status: 'ready' },
     ...onChainOverrides
 }: Partial<ProgramIdlPair> & {
     customIdlRecord?: CustomIdlRecord;
-    stored?: ProgramIdls['stored'];
+    customIdl?: ProgramIdls['customIdl'];
 }): void {
     const onChain: ProgramIdlPair = {
         anchorIdl: undefined,
@@ -111,12 +111,12 @@ function mockProgramIdls({
     };
     const onChainIdls = getOnChainIdls(onChain);
     mocks.useProgramIdls.mockReturnValue({
+        customIdl,
         idls:
-            stored.status === 'loading'
+            customIdl.status === 'loading'
                 ? undefined
-                : getSelectedIdls(onChainIdls, stored.status === 'ready' ? stored.record : undefined),
+                : getSelectedIdls(onChainIdls, customIdl.status === 'ready' ? customIdl.record : undefined),
         onChainIdls,
-        stored,
     } satisfies ProgramIdls);
 }
 
@@ -440,7 +440,7 @@ describe('IdlCard', () => {
     });
 
     test('should offer no custom IDL action when the store cannot read the browser storage', async () => {
-        mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl(), stored: { status: 'failed' } });
+        mockProgramIdls({ customIdl: { status: 'failed' }, programMetadataIdl: createMockProgramMetadataIdl() });
 
         render(
             <ClusterProvider>
@@ -698,7 +698,7 @@ describe('IdlCard', () => {
     });
 
     test('should show the loading card instead of an on-chain IDL while the store reads the selection', async () => {
-        mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl(), stored: { status: 'loading' } });
+        mockProgramIdls({ customIdl: { status: 'loading' }, programMetadataIdl: createMockProgramMetadataIdl() });
 
         render(
             <ClusterProvider>

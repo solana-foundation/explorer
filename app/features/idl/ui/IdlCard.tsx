@@ -41,7 +41,7 @@ import { IdlSection } from './IdlSection';
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { idls, stored } = useProgramIdls(programId, url, cluster);
+    const { idls, customIdl } = useProgramIdls(programId, url, cluster);
     const [searchStr, setSearchStr] = useState<string>('');
     const [isOrquestraDialogOpen, setIsOrquestraDialogOpen] = useState(false);
 
@@ -82,8 +82,8 @@ export function IdlCard({ programId }: { programId: string }) {
 
     const headerLinks = (
         <div className="flex flex-wrap items-center gap-2">
-            {stored.status === 'ready' &&
-                (stored.record ? (
+            {customIdl.status === 'ready' &&
+                (customIdl.record ? (
                     <ProgramIdlSelector programAddress={programId} />
                 ) : (
                     <AddCustomIdlButton programAddress={programId} />

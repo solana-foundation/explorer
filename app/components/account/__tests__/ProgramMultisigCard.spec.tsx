@@ -10,7 +10,7 @@ import { useSquadsMultisig } from '@/app/providers/squadsMultisig';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
 
-const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 
 vi.mock('@providers/cluster', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/cluster')>()),
