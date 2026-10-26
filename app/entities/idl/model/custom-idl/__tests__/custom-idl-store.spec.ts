@@ -138,7 +138,7 @@ describe('custom IDL store', () => {
                     ...upload(JSON.stringify({ ...anchorModernIdl, address: 'not-an-address' })),
                     programAddress: undefined,
                 },
-                { kind: 'invalid-address' },
+                { kind: 'invalid-declared-address' },
             ],
             [
                 'an IDL without an address and no program address',
