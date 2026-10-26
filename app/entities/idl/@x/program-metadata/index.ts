@@ -2,4 +2,5 @@
 // `program-metadata` entity is allowed to consume.
 export { useProgramIdls } from '../../model/use-program-idls';
 export { IdlVariant } from '../../model/idl-variant';
+export { convertAnchorToCodama } from '../../model/converters/convert-anchor-to-codama';
 export type { AnchorIdl } from '../../lib/types';
