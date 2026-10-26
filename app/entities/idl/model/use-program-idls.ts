@@ -18,7 +18,7 @@ export type ProgramIdls = {
     idls: readonly SourcedIdl[] | undefined;
     /** `undefined` while the on-chain IDLs load. */
     onChainIdls: readonly OnChainIdl[] | undefined;
-    stored: { status: 'loading' } | { status: 'ready'; record: CustomIdlRecord | undefined } | { status: 'failed' };
+    customIdl: { status: 'loading' } | { status: 'ready'; record: CustomIdlRecord | undefined } | { status: 'failed' };
 };
 
 /**
@@ -72,17 +72,17 @@ export function useProgramIdls(
     }, [isOnChainLoading, onChainPair]);
 
     const store = useAtomValue(customIdlStoreAtom);
-    const stored = useMemo<ProgramIdls['stored']>(() => {
+    const customIdl = useMemo<ProgramIdls['customIdl']>(() => {
         if (store.status === 'loading') return { status: 'loading' };
         if (store.status === 'ready') return { record: store.records.get(programId), status: 'ready' };
         return { status: 'failed' };
     }, [store, programId]);
     const idls = useMemo(() => {
-        if (stored.status === 'loading') return undefined;
-        const record = stored.status === 'ready' ? stored.record : undefined;
+        if (customIdl.status === 'loading') return undefined;
+        const record = customIdl.status === 'ready' ? customIdl.record : undefined;
         if (record?.selected !== 'custom' && !onChainIdls) return undefined;
         return getSelectedIdls(onChainIdls ?? [], record);
-    }, [stored, onChainIdls]);
+    }, [customIdl, onChainIdls]);
 
-    return { idls, onChainIdls, stored };
+    return { customIdl, idls, onChainIdls };
 }

@@ -15,13 +15,13 @@ import { CustomIdlUploadDialog } from './CustomIdlUploadDialog';
 
 export function ProgramIdlSelector({ programAddress }: { programAddress: string }) {
     const { url, cluster } = useCluster();
-    const { onChainIdls, stored } = useProgramIdls(programAddress, url, cluster);
+    const { onChainIdls, customIdl } = useProgramIdls(programAddress, url, cluster);
     const setIdlSelection = useSetAtom(setIdlSelectionAtom);
     const removeCustomIdl = useSetAtom(removeCustomIdlAtom);
     const toast = useToast();
     const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-    const record = stored.status === 'ready' ? stored.record : undefined;
+    const record = customIdl.status === 'ready' ? customIdl.record : undefined;
     // eslint-disable-next-line unicorn/no-null -- a React component returns null to render nothing
     if (!record) return null;
 
