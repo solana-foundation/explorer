@@ -9,12 +9,14 @@ export function InstructionCardView({
     node,
     title,
     defaultRaw,
+    collapsible,
     events,
     children,
 }: {
     node: InstructionNode;
     title: string;
     defaultRaw?: boolean;
+    collapsible?: boolean;
     /**
      * Program events the card derived itself — typically from transaction logs
      * via a hook, so they cannot come from the node or the field descriptors.
@@ -35,6 +37,7 @@ export function InstructionCardView({
             raw={node.raw}
             result={result}
             defaultRaw={defaultRaw}
+            collapsible={collapsible}
             innerCards={node.innerCards}
             eventCards={events}
         >

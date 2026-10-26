@@ -42,7 +42,6 @@ export const TwoSubInstructions: Story = {
             ],
             6,
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -61,7 +60,6 @@ export const SingleSubInstruction: Story = {
     args: {
         index: 1,
         ix: makeBatchIx([{ data: transferCheckedData, numAccounts: 4 }], 4),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -78,7 +76,6 @@ export const DecodedTransferAmount: Story = {
     args: {
         index: 5,
         ix: makeBatchIx([{ data: concatBytes(new Uint8Array([3]), writeU64LE(42000n)), numAccounts: 3 }], 3),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -92,7 +89,6 @@ export const UnknownDiscriminator: Story = {
     args: {
         index: 2,
         ix: makeBatchIx([{ data: new Uint8Array([0xfe, 0xab, 0xcd]), numAccounts: 2 }], 2),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -109,7 +105,6 @@ export const ParseError: Story = {
             keys: [],
             programId: TOKEN_2022_PROGRAM_ID,
         }),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -126,7 +121,6 @@ export const EmptyBatch: Story = {
             keys: [],
             programId: TOKEN_2022_PROGRAM_ID,
         }),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -145,7 +139,6 @@ export const SetAuthorityWithNewAuthority: Story = {
             [{ data: makeSetAuthorityData(0, newAuthority), numAccounts: 2 }],
             [makeAccount(true, false), makeAccount(false, true)],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -162,7 +155,6 @@ export const SetAuthorityRevoke: Story = {
     args: {
         index: 8,
         ix: makeBatchIx([{ data: makeSetAuthorityData(3), numAccounts: 2 }], 2),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -190,7 +182,6 @@ export const MultisigCoSigners: Story = {
                 makeAccount(false, true), // Co-signer 2
             ],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -208,7 +199,6 @@ export const UnhandledInstructionType: Story = {
     args: {
         index: 10,
         ix: makeBatchIxWithKeys([{ data: new Uint8Array([17]), numAccounts: 1 }], [makeAccount(true, false)]),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -230,7 +220,6 @@ export const WritableAndSignerBadges: Story = {
                 makeAccount(false, true), // not writable, signer
             ],
         ),
-        result: { err: null },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

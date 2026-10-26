@@ -54,7 +54,6 @@ import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 
 import { ErrorCard } from '../common/ErrorCard';
-import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
@@ -252,13 +251,7 @@ function InspectorInstructionCard({
     if (isTokenBatchInstruction(ix)) {
         return (
             <ErrorBoundary fallback={unknownCard}>
-                <TokenBatchCard
-                    index={index}
-                    ix={ix}
-                    result={INSPECTOR_RESULT}
-                    childIndex={childIndex}
-                    innerCards={innerCards}
-                />
+                <TokenBatchCard index={index} ix={ix} childIndex={childIndex} innerCards={innerCards} />
             </ErrorBoundary>
         );
     }
@@ -455,12 +448,8 @@ function InspectorInstructionCard({
                 <ErrorBoundary fallback={unknownCard}>
                     <TokenDetailsCard
                         ix={parsedIx}
-                        tx={parsedTx}
-                        index={index}
-                        result={INSPECTOR_RESULT}
-                        InstructionCardComponent={InspectorInstructionCardComponent}
-                        alwaysShowProgramRow
                         raw={ix}
+                        index={index}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />

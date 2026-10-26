@@ -29,8 +29,6 @@ type InstructionProps = {
     raw?: TransactionInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
-    /** For a body that has no Program row of its own. */
-    alwaysShowProgramRow?: boolean;
 };
 
 export function InspectorInstructionCard({
@@ -44,7 +42,6 @@ export function InspectorInstructionCard({
     childIndex,
     raw,
     onRequestRaw,
-    alwaysShowProgramRow = false,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
@@ -88,9 +85,7 @@ export function InspectorInstructionCard({
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
-                    {(showRaw || alwaysShowProgramRow) && (
-                        <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
-                    )}
+                    {showRaw && <ProgramField programId={ix.programId} showExtendedInfo />}
                     {showRaw ? (
                         'parsed' in ix ? (
                             <BaseRawParsedDetails ix={ix}>

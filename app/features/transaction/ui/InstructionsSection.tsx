@@ -246,7 +246,6 @@ function InstructionCard({
                             <RpcParsedTokenBatchCard
                                 ix={ix}
                                 index={index}
-                                result={result}
                                 innerCards={innerCards}
                                 childIndex={childIndex}
                             />
@@ -255,7 +254,7 @@ function InstructionCard({
                 }
                 return (
                     <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
-                        <TokenDetailsCard {...props} key={key} />
+                        <TokenDetailsCard ix={parsedIx} index={index} innerCards={innerCards} childIndex={childIndex} />
                     </ErrorBoundary>
                 );
             }
@@ -437,7 +436,7 @@ function InstructionCard({
     if (isTokenBatchInstruction(transactionIx)) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
-                <TokenBatchCard {...props} />
+                <TokenBatchCard {...nodeProps} />
             </ErrorBoundary>
         );
     }

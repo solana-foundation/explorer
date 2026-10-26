@@ -1,42 +1,26 @@
-// Shared shell for the two batch-instruction cards: the raw-decode path
-// (TokenBatchCard) and the RPC-parsed path (RpcParsedTokenBatchCard). Keeps the
-// title format and table frame in one place so the two paths can't drift.
-
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import type { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { InstructionCardView, type InstructionNode, ProgramField } from '@entities/instruction-card';
 import type { ReactNode } from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
 export function BatchInstructionCard({
-    ix,
-    index,
-    result,
-    innerCards,
-    childIndex,
+    node,
     count,
     children,
 }: {
-    ix: TransactionInstruction | ParsedInstruction;
-    index: number;
-    result: SignatureResult;
-    innerCards?: ReactNode[];
-    childIndex?: number;
+    node: InstructionNode;
     count: number;
     children: ReactNode;
 }) {
     return (
-        <InstructionCard
-            title={batchInstructionTitle(count)}
-            collapsible
-            {...{ childIndex, index, innerCards, ix, result }}
-        >
+        <InstructionCardView node={node} title={batchInstructionTitle(count)} collapsible>
+            <ProgramField programId={node.programId} />
             <BaseTable.Row>
                 <BaseTable.Cell colSpan={3} className="p-0">
                     <div className="pb-2">{children}</div>
                 </BaseTable.Cell>
             </BaseTable.Row>
-        </InstructionCard>
+        </InstructionCardView>
     );
 }
 

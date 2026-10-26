@@ -11,6 +11,7 @@ export type InstructionShellProps = {
     index: number;
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
+    collapsible?: boolean;
     innerCards?: JSX.Element[];
     childIndex?: number;
     raw?: TransactionInstruction;
