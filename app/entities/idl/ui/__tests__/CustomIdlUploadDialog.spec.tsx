@@ -203,6 +203,23 @@ describe('CustomIdlUploadDialog', () => {
         expect(screen.getByLabelText('Or paste the IDL JSON')).toHaveValue(IDL_TEXT);
     });
 
+    it('should keep the pasted text when the read of a picked file ends later', async () => {
+        const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
+        let finishRead: (text: string) => void = () => undefined;
+        const file = Object.assign(new File(['{}'], 'picked.json'), {
+            text: () => new Promise<string>(resolve => (finishRead = resolve)),
+        });
+        fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), { target: { files: [file] } });
+
+        fireEvent.change(screen.getByLabelText('Or paste the IDL JSON'), { target: { value: IDL_TEXT } });
+        await act(async () => finishRead('{"from":"file"}'));
+
+        expect(screen.getByLabelText('Or paste the IDL JSON')).toHaveValue(IDL_TEXT);
+        fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+        await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+        expect(recordOf(store)?.origin).toEqual({ kind: 'pasted' });
+    });
+
     it('should store an uploaded file under its file name', async () => {
         const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
 
