@@ -11,7 +11,7 @@ import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
 import { customIdlStoreAtom } from './custom-idl/custom-idl-store';
 import { type CustomIdlRecord } from './custom-idl/types';
-import { getOnChainIdls, getSelectedIdls, type OnChainIdl, type SourcedIdl } from './sourced-idl';
+import { getOnChainIdls, getSelectedIdls, isCustomIdlSelected, type OnChainIdl, type SourcedIdl } from './sourced-idl';
 
 export type ProgramIdls = {
     /** `undefined` while the store or the selected IDLs load. */
@@ -80,7 +80,7 @@ export function useProgramIdls(
     const idls = useMemo(() => {
         if (customIdl.status === 'loading') return undefined;
         const record = customIdl.status === 'ready' ? customIdl.record : undefined;
-        if (record?.selected !== 'custom' && !onChainIdls) return undefined;
+        if (!isCustomIdlSelected(record) && !onChainIdls) return undefined;
         return getSelectedIdls(onChainIdls ?? [], record);
     }, [customIdl, onChainIdls]);
 

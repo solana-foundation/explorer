@@ -13,7 +13,7 @@ import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { customIdlStoreAtom } from './custom-idl/custom-idl-store';
 import { type CustomIdlRecord } from './custom-idl/types';
 import { buildProgramIdlNames, type InstructionNameResolver, type ProgramIdlNames } from './instruction-name-table';
-import { getOnChainIdls, getSelectedIdls } from './sourced-idl';
+import { getOnChainIdls, getSelectedIdls, isCustomIdlSelected } from './sourced-idl';
 
 export type { InstructionNameResolver, ProgramIdlNames };
 
@@ -34,7 +34,7 @@ export function useProgramIdlNames(programIds: string[], cluster: Cluster, url: 
         () =>
             store.status === 'loading' || shouldUseDirectRpc(cluster, url)
                 ? []
-                : uniqueIds.filter(id => !NON_ANCHOR_PROGRAMS.has(id) && records.get(id)?.selected !== 'custom').sort(),
+                : uniqueIds.filter(id => !NON_ANCHOR_PROGRAMS.has(id) && !isCustomIdlSelected(records.get(id))).sort(),
         [uniqueIds, records, store.status, cluster, url],
     );
 

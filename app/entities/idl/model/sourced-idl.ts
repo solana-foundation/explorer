@@ -15,8 +15,14 @@ export function getSelectedIdls(
     onChainIdls: readonly OnChainIdl[],
     record: CustomIdlRecord | undefined,
 ): readonly SourcedIdl[] {
-    if (record?.selected === 'custom') return [{ ...record.customIdl, origin: record.origin, source: 'custom' }];
+    if (isCustomIdlSelected(record)) return [{ ...record.customIdl, origin: record.origin, source: 'custom' }];
     return onChainIdls;
+}
+
+export function isCustomIdlSelected(
+    record: CustomIdlRecord | undefined,
+): record is CustomIdlRecord & { selected: 'custom' } {
+    return record?.selected === 'custom';
 }
 
 export function getOnChainIdls({
