@@ -80,14 +80,16 @@ export function getIdlFormatVersion(idl: SupportedIdl): string | null {
 /**
  * Returns the program's own version — the deployed program's semver, distinct from the IDL
  * spec/standard label that {@link getIdlVersion} returns. Reads `program.version` (Codama),
- * `metadata.version` (modern Anchor), or the top-level `version` (legacy Anchor); `null` when absent.
+ * `metadata.version` (modern Anchor), or the top-level `version` (legacy Anchor); `null` when absent or
+ * not a string.
  */
 export function getIdlProgramVersion(idl: SupportedIdl): string | null {
     if (getSerdeIdlSpecType(idl) === 'codama') {
-        const program = (idl as RootNode).program as { version?: string };
-        return program.version ?? null;
+        const program = (idl as RootNode).program as { version?: unknown };
+        return typeof program.version === 'string' ? program.version : null;
     }
     // Anchor: modern keeps the program version in `metadata.version`; legacy at the top level.
-    const anchorIdl = idl as Idl & { version?: string };
-    return anchorIdl.metadata?.version ?? anchorIdl.version ?? null;
+    const anchorIdl = idl as Idl & { version?: unknown };
+    const version: unknown = anchorIdl.metadata?.version ?? anchorIdl.version;
+    return typeof version === 'string' ? version : null;
 }
