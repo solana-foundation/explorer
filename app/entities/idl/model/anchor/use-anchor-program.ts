@@ -7,10 +7,9 @@ import { Logger } from '@/app/shared/lib/logger';
 import { type Cluster } from '@/app/utils/cluster';
 
 import { type AnchorIdl } from '../../lib/types';
-import { formatSerdeIdl, getFormattedIdl } from '../formatters/format';
 import { type SourcedIdl } from '../sourced-idl';
 import { useProgramIdls } from '../use-program-idls';
-import { getProvider } from './anchor-provider';
+import { buildAnchorProgram } from './build-anchor-program';
 
 export function useAnchorProgram({
     cluster,
@@ -42,7 +41,7 @@ export function useAnchorProgram({
 
 function buildProgram(idl: AnchorIdl, programAddress: string, url: string): Program | null {
     try {
-        return new Program(getFormattedIdl(formatSerdeIdl, idl, programAddress), getProvider(url));
+        return buildAnchorProgram(idl, programAddress, url);
     } catch (e) {
         Logger.error(new Error('[idl] Error creating anchor program', { cause: e }), { idl, programAddress });
         return null;

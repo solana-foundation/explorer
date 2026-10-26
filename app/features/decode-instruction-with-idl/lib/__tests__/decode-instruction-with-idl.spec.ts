@@ -9,13 +9,20 @@ const programCtor = vi.fn();
 
 vi.mock('@codama/dynamic-parsers', () => ({ parseInstruction: (...a: unknown[]) => parseInstruction(...a) }));
 vi.mock('@codama/nodes-from-anchor', () => ({ rootNodeFromAnchor: (...a: unknown[]) => rootNodeFromAnchor(...a) }));
-vi.mock('@entities/idl', async () => ({
-    formatSerdeIdl: '',
-    getFormattedIdl: (_fmt: unknown, idl: unknown) => idl,
-    getIdlDeclaredAddress: (await vi.importActual<typeof import('@entities/idl/lib/utils')>('@entities/idl/lib/utils'))
-        .getIdlDeclaredAddress,
-    getProvider: () => ({}),
-}));
+vi.mock('@entities/idl', async () => {
+    const { Program } = await import('@coral-xyz/anchor');
+    return {
+        buildAnchorProgram: (idl: unknown) => new Program(idl as never),
+        convertAnchorToCodama: (
+            await vi.importActual<typeof import('@entities/idl/model/converters/convert-anchor-to-codama')>(
+                '@entities/idl/model/converters/convert-anchor-to-codama',
+            )
+        ).convertAnchorToCodama,
+        getIdlDeclaredAddress: (
+            await vi.importActual<typeof import('@entities/idl/lib/utils')>('@entities/idl/lib/utils')
+        ).getIdlDeclaredAddress,
+    };
+});
 vi.mock('@coral-xyz/anchor', () => ({
     Program: class {
         constructor(...args: unknown[]) {

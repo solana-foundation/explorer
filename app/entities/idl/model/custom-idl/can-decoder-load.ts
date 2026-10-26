@@ -1,49 +1,28 @@
-import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
-import { Program } from '@coral-xyz/anchor';
 import { getValidationItemsVisitor, visit } from 'codama';
 
-import { type AnchorIdl, type CodamaIdl, type TaggedIdl } from '../../lib/types';
-import { getProvider } from '../anchor/anchor-provider';
-import { formatSerdeIdl } from '../formatters/format';
+import { type CodamaIdl, type TaggedIdl } from '../../lib/types';
+import { buildAnchorProgram } from '../anchor/build-anchor-program';
+import { convertAnchorToCodama } from '../converters/convert-anchor-to-codama';
 import { buildProgramIdlNames } from '../instruction-name-table';
-
-export function canDecoderLoad(tagged: TaggedIdl, programAddress: string): boolean {
-    if (!canBuildNames(tagged.idl)) return false;
-    if (tagged.standard === 'Codama') return hasNoValidationErrors(tagged.idl);
-    return canBuildAnchorProgram(tagged.idl, programAddress) || canConvertToCodama(tagged.idl, programAddress);
-}
-
-function canBuildNames(idl: AnchorIdl | CodamaIdl): boolean {
-    try {
-        buildProgramIdlNames([idl]);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-function hasNoValidationErrors(root: CodamaIdl): boolean {
-    try {
-        return visit(root, getValidationItemsVisitor()).every(item => item.level !== 'error');
-    } catch {
-        return false;
-    }
-}
 
 const UNUSED_RPC_URL = 'http://localhost:8899';
 
-function canBuildAnchorProgram(idl: AnchorIdl, programAddress: string): boolean {
-    try {
-        new Program(formatSerdeIdl(idl, programAddress), getProvider(UNUSED_RPC_URL));
-        return true;
-    } catch {
-        return false;
-    }
+export function canDecoderLoad(tagged: TaggedIdl, programAddress: string): boolean {
+    if (!succeeds(() => buildProgramIdlNames([tagged.idl]))) return false;
+    if (tagged.standard === 'Codama') return hasNoValidationErrors(tagged.idl);
+    return (
+        succeeds(() => buildAnchorProgram(tagged.idl, programAddress, UNUSED_RPC_URL)) ||
+        convertAnchorToCodama(tagged.idl)?.program.publicKey === programAddress
+    );
 }
 
-function canConvertToCodama(idl: AnchorIdl, programAddress: string): boolean {
+function hasNoValidationErrors(root: CodamaIdl): boolean {
+    return succeeds(() => visit(root, getValidationItemsVisitor()).every(item => item.level !== 'error'));
+}
+
+function succeeds(check: () => unknown): boolean {
     try {
-        return rootNodeFromAnchor(idl as Parameters<typeof rootNodeFromAnchor>[0]).program.publicKey === programAddress;
+        return check() !== false;
     } catch {
         return false;
     }
