@@ -1,5 +1,3 @@
-import { isQuotaExceededError } from '@shared/lib/errors';
-
 export type StoredEntry = { programAddress: string; value: string };
 
 export type ReadEntry = { programAddress: string; value: unknown };
@@ -110,6 +108,10 @@ async function write(operation: (store: IDBObjectStore) => void): Promise<Storag
     } catch (error) {
         return { ok: false, reason: isQuotaExceededError(error) ? 'quota-exceeded' : 'unavailable' };
     }
+}
+
+function isQuotaExceededError(error: unknown): boolean {
+    return error instanceof DOMException && error.name === 'QuotaExceededError';
 }
 
 // Callers close each connection after one operation, so an idle tab never blocks a version upgrade in another tab.

@@ -92,6 +92,18 @@ describe('useProgramIdls', () => {
 
             await waitForHook(() => expect(result.current.idls).toEqual([]));
         });
+
+        it('should load without @solana/idl outside the dynamic-import loader', async () => {
+            vi.resetModules();
+            vi.doMock('@solana/idl', () => {
+                throw new Error('@solana/idl loaded');
+            });
+            try {
+                await expect(import('../use-program-idls')).resolves.toHaveProperty('useProgramIdls');
+            } finally {
+                vi.doUnmock('@solana/idl');
+            }
+        });
     });
 
     describe('custom / local clusters (client-side @solana/idl resolver)', () => {
