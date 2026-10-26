@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
 import { type SupportedIdl } from '../../lib/types';
-import { getIdlBadgeLabel, getIdlFormatVersion, getIdlVersion } from '../idl-version';
+import { getIdlBadgeLabel, getIdlFormatVersion, getIdlProgramVersion, getIdlVersion } from '../idl-version';
 import { isIdlProgramIdMismatch, isInteractiveIdlSupported } from '../interactive-idl';
 
 const DEFAULT_PUBKEY = PublicKey.default.toString();
@@ -70,6 +70,24 @@ describe('getIdlFormatVersion', () => {
     });
 });
 
+describe('getIdlProgramVersion', () => {
+    it.each([
+        ['a Codama IDL', { kind: 'rootNode', program: { version: '1.2.3' }, standard: 'codama' }],
+        ['a modern Anchor IDL', { metadata: { spec: '0.1.0', version: '1.2.3' } }],
+        ['a legacy Anchor IDL', { name: 'test', version: '1.2.3' }],
+    ])('should return the program version of %s', (_, idl) => {
+        expect(getIdlProgramVersion(idl as unknown as SupportedIdl)).toBe('1.2.3');
+    });
+
+    it.each([
+        ['a Codama IDL', { kind: 'rootNode', program: { version: {} }, standard: 'codama' }],
+        ['a modern Anchor IDL', { metadata: { spec: '0.1.0', version: {} } }],
+        ['a legacy Anchor IDL', { name: 'test', version: {} }],
+    ])('should return null when the program version of %s is not a string', (_, idl) => {
+        expect(getIdlProgramVersion(idl as unknown as SupportedIdl)).toBeNull();
+    });
+});
+
 describe('getIdlBadgeLabel', () => {
     it('should render "Codama (version X)" for Codama IDL', () => {
         expect(getIdlBadgeLabel(createMockIdl('codama', '1.5.1'))).toBe('Codama (version 1.5.1)');
@@ -127,6 +145,15 @@ describe('isInteractiveIdlSupported', () => {
 
     it('should return false for Anchor IDL missing metadata.spec', () => {
         expect(isInteractiveIdlSupported(createAnchorIdlWithoutSpec())).toBe(false);
+    });
+
+    it('should return false for Anchor IDL with a metadata.spec that is not a string', () => {
+        const idl = {
+            address: DEFAULT_PUBKEY,
+            instructions: [],
+            metadata: { name: 'test', spec: {}, version: '0.1.0' },
+        } as unknown as SupportedIdl;
+        expect(isInteractiveIdlSupported(idl)).toBe(false);
     });
 });
 

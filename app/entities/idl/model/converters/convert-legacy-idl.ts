@@ -490,7 +490,8 @@ export type IdlSpec = '0.1.0' | 'legacy' | 'codama';
 
 export function getIdlSpecType(idl: any): IdlSpec {
     if (isCodamaRoot(idl)) return 'codama';
-    return idl?.metadata?.spec ?? 'legacy';
+    const spec = idl?.metadata?.spec;
+    return typeof spec === 'string' ? (spec as IdlSpec) : 'legacy';
 }
 
 export function formatIdl(idl: any, programAddress?: string): Idl {
