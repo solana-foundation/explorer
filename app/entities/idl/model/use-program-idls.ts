@@ -8,6 +8,7 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
+import { normalizeAnchorIdl } from './normalize-anchor-idl';
 import { getOnChainIdls, type SourcedIdl } from './sourced-idl';
 
 export type ProgramIdls = {
@@ -59,10 +60,19 @@ export function useProgramIdls(
     const onChainIdls = isCustom ? customIdls : serverIdls;
     const isOnChainLoading = isCustom ? customLoading : serverLoading;
 
+    // Normalize both slots before sourcing: legacy pre-0.30 Anchor IDLs — from the Anchor PDA or the
+    // Program Metadata Program — become Codama root nodes so they tag as Codama and flow through the
+    // Codama display/decode paths; modern Anchor and Codama IDLs pass through. A legacy IDL whose
+    // conversion fails resolves to `undefined` and drops out of the list.
     const idls = useMemo(() => {
         if (isOnChainLoading) return undefined;
-        return onChainIdls ? getOnChainIdls(onChainIdls) : [];
-    }, [isOnChainLoading, onChainIdls]);
+        if (!onChainIdls) return [];
+        return getOnChainIdls({
+            ...onChainIdls,
+            anchorIdl: normalizeAnchorIdl(onChainIdls.anchorIdl, programId),
+            programMetadataIdl: normalizeAnchorIdl(onChainIdls.programMetadataIdl, programId),
+        });
+    }, [isOnChainLoading, onChainIdls, programId]);
 
     return { idls };
 }

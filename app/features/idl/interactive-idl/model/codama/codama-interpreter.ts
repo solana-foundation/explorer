@@ -1,5 +1,5 @@
 import { createProgramClient } from '@codama/dynamic-client';
-import { getIdlSpecType } from '@entities/idl/model/converters/convert-legacy-idl';
+import { getIdlSpecType } from '@entities/idl/model/idl-spec';
 import type { Connection, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 

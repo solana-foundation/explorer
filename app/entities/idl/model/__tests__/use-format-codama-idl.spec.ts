@@ -44,6 +44,21 @@ describe('formatCodamaIdl', () => {
         expect(ixs?.[0].accounts).toHaveLength(2);
     });
 
+    it('should leave constants undefined for a native Codama IDL', () => {
+        expect(formatCodamaIdl(minimalMock as any).constants).toBeUndefined();
+    });
+
+    it('should render legacyConstants carried from a converted legacy Anchor IDL', () => {
+        const withConstants = {
+            ...minimalMock,
+            legacyConstants: [{ name: 'SEED', type: 'bytes', value: '[1, 2, 3]' }],
+        };
+
+        const constants = formatCodamaIdl(withConstants as any).constants;
+        expect(constants).toHaveLength(1);
+        expect(constants?.[0]).toMatchObject({ name: 'SEED', type: 'bytes', value: [1, 2, 3] });
+    });
+
     it('should correctly format instruction accounts', () => {
         const formatted = formatCodamaIdl(minimalMock as any);
 

@@ -9,7 +9,6 @@ import {
     PdaNode,
     PdaValueNode,
     RegisteredPdaSeedNode,
-    RootNode,
     TypeNode,
     ValueNode,
 } from 'codama';
@@ -18,6 +17,8 @@ import { useMemo } from 'react';
 import { arrayOrEmpty } from '@/app/shared/lib/array';
 import { Logger } from '@/app/shared/lib/logger';
 
+import type { CodamaIdl } from '../lib/types';
+import { formatConstants } from './formatters/format-constants';
 import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
 
 function parseEnumNodeVariants(type: EnumTypeNode): string[] {
@@ -247,11 +248,11 @@ function getSeedsFromPda(pda: PdaNode): PdaData['seeds'] {
     }));
 }
 
-export function useFormatCodamaIdl(idl?: RootNode): FormattedIdl | null {
+export function useFormatCodamaIdl(idl?: CodamaIdl): FormattedIdl | null {
     return useMemo(() => (idl ? formatCodamaIdl(idl) : null), [idl]);
 }
 
-export function formatCodamaIdl(idl: RootNode): FormattedIdl {
+export function formatCodamaIdl(idl: CodamaIdl): FormattedIdl {
     const linkedPdas = new Map<string, PdaNode>(arrayOrEmpty(idl.program.pdas).map(item => [item.name, item]));
     const uniqPdaNodes = getUniqPdaNodesFromIxs(arrayOrEmpty(idl.program.instructions));
 
@@ -261,7 +262,7 @@ export function formatCodamaIdl(idl: RootNode): FormattedIdl {
             fieldType: parseTypeNode(acc.data),
             name: acc.name,
         })),
-        constants: undefined, // codama does not have constants
+        constants: formatConstants(idl.legacyConstants),
         errors: idl.program.errors?.map(err => ({
             code: err.code.toString(),
             message: err.message || '',

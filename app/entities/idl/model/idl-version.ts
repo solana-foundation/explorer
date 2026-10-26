@@ -2,7 +2,7 @@ import type { Idl } from '@coral-xyz/anchor';
 import type { RootNode } from 'codama';
 
 import { type IdlStandard, type IdlVersion, type SupportedIdl } from '../lib/types';
-import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
+import { getIdlSpecType as getSerdeIdlSpecType } from './idl-spec';
 
 /**
  * Wildcard label used for all modern Anchor IDL versions (>= 0.30.1).
