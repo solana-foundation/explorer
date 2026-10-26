@@ -111,14 +111,33 @@ describe('AnchorAccountCard', () => {
         ).toBeInTheDocument();
     });
 
-    it('should show "No Anchor IDL found" when the only IDL is Codama', () => {
+    it('should show "No Anchor IDL found" when the only IDL is Codama without account types', () => {
+        const codamaNoAccounts = {
+            ...codamaIdl,
+            program: { ...codamaIdl.program, accounts: [] },
+        } as unknown as CodamaIdl;
+        idlState.idls = [
+            { idl: codamaNoAccounts, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+        ];
+
+        render(<AnchorAccountCard account={ACCOUNT} />);
+
+        expect(screen.getByText('No Anchor IDL found')).toBeInTheDocument();
+    });
+
+    it('should decode through the Codama card when the only IDL is Codama with account types', () => {
         idlState.idls = [
             { idl: CODAMA_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
         ];
 
         render(<AnchorAccountCard account={ACCOUNT} />);
 
-        expect(screen.getByText('No Anchor IDL found')).toBeInTheDocument();
+        // The Codama card owns the render — the mismatched fixture account surfaces its decode error,
+        // which is what proves AnchorAccountCard delegated instead of reporting "No Anchor IDL found".
+        expect(screen.queryByText('No Anchor IDL found')).not.toBeInTheDocument();
+        expect(
+            screen.getByText('Failed to decode account data according to the public Anchor interface'),
+        ).toBeInTheDocument();
     });
 
     it('should show the loading card while the IDLs load', () => {

@@ -30,6 +30,7 @@ export { InstructionSurfaceProvider, useInstructionSurface } from './model/surfa
 export type { InstructionSurface } from './model/surface';
 export { ArgRows } from './ui/ArgRows';
 export { DecodedInstructionCard } from './ui/DecodedInstructionCard';
+export { FieldValueView } from './ui/ValueCell';
 export { InstructionCardView } from './ui/InstructionCardView';
 export { inspectorSurface } from './ui/inspector-surface';
 export { InstructionFieldRows, InstructionFields } from './ui/InstructionFields';
