@@ -109,7 +109,7 @@ export function InspectorInstructionCard({
                             </BaseTable.SectionRow>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div className="m-6">{innerCards}</div>
+                                    <div>{innerCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>
