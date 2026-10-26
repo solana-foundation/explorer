@@ -1,4 +1,5 @@
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStore, Provider as JotaiProvider } from 'jotai';
@@ -6,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { customIdlStorage } from '../../api/custom-idl-storage';
+import { customIdlStorage, type StorageWriteResult } from '../../api/custom-idl-storage';
 import { customIdlStoreAtom } from '../../model/custom-idl/custom-idl-store';
 import { CustomIdlUploadDialog } from '../CustomIdlUploadDialog';
 
@@ -67,6 +68,49 @@ describe('CustomIdlUploadDialog', () => {
         submitPasted(IDL_TEXT);
 
         expect(await screen.findByRole('alert')).toHaveTextContent(message);
+        expect(screen.getByRole('button', { name: 'Add' })).toBeEnabled();
+    });
+
+    it('should disable Add and Cancel until the IDL is saved', async () => {
+        let finishPut: (result: StorageWriteResult) => void = () => undefined;
+        vi.spyOn(customIdlStorage, 'put').mockReturnValue(new Promise(resolve => (finishPut = resolve)));
+        const { onOpenChange } = renderDialog(PROGRAM_ADDRESS);
+
+        submitPasted(IDL_TEXT);
+
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled());
+        expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+        await act(async () => finishPut({ ok: true }));
+        await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+    });
+
+    it('should stay open on Escape until the IDL is saved, and show a failed write', async () => {
+        let finishPut: (result: StorageWriteResult) => void = () => undefined;
+        vi.spyOn(customIdlStorage, 'put').mockReturnValue(new Promise(resolve => (finishPut = resolve)));
+        const { onOpenChange } = renderDialog(PROGRAM_ADDRESS);
+
+        submitPasted(IDL_TEXT);
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled());
+        await userEvent.keyboard('{Escape}');
+        await act(async () => finishPut({ ok: false, reason: 'quota-exceeded' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('This IDL does not fit in the browser storage.');
+        expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('should enable Add again when the upload throws', async () => {
+        const depth = 100_000;
+        const deepIdl = JSON.stringify({ ...codamaIdl, x: '' }).replace(
+            '"x":""',
+            `"x":${'['.repeat(depth)}${']'.repeat(depth)}`,
+        );
+        renderDialog(codamaIdl.program.publicKey);
+
+        submitPasted(deepIdl);
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('The browser did not save the change');
+        expect(screen.getByRole('button', { name: 'Add' })).toBeEnabled();
+        expect(screen.getByRole('button', { name: 'Cancel' })).toBeEnabled();
     });
 
     it('should ask the user to try again when the decoder check does not load', async () => {
