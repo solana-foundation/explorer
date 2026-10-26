@@ -94,6 +94,7 @@ export function CustomIdlForm({
                     value={text}
                     aria-invalid={error !== undefined}
                     onChange={event => {
+                        latestFile.current = undefined;
                         setText(event.target.value);
                         setOrigin({ kind: 'pasted' });
                         setError(undefined);
