@@ -1,6 +1,13 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
 import { Idl, Program } from '@coral-xyz/anchor';
-import { type AnchorIdl, buildAnchorProgram, convertAnchorToCodama, getIdlDeclaredAddress } from '@entities/idl';
+import {
+    type AnchorIdl,
+    buildAnchorProgram,
+    convertAnchorToCodama,
+    getIdlDeclaredAddress,
+    isIdlProgramIdMismatch,
+    type SupportedIdl,
+} from '@entities/idl';
 import { TransactionInstruction } from '@solana/web3.js';
 import { type RootNode } from 'codama';
 
@@ -29,9 +36,9 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
 
     // A resolved IDL whose declared program differs from the instruction's is a wiring bug (wrong IDL
     // routed to this instruction) — fail loud rather than mis-decode against the wrong interface.
-    const declared = getIdlDeclaredAddress(idl);
-    const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
-    if (declared.kind === 'malformed' || (declaredProgram && declaredProgram !== kitIx.programAddress)) {
+    if (isIdlProgramIdMismatch(idl as SupportedIdl, kitIx.programAddress)) {
+        const declared = getIdlDeclaredAddress(idl);
+        const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
         const error = new Error(
             `[decode-instruction-with-idl] IDL program ${declaredProgram ?? '(malformed)'} does not match instruction program ${kitIx.programAddress}`,
         );
