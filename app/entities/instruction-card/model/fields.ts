@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
-export type InstructionField = InstructionValueField | InstructionHeadingField;
+export type InstructionField = InstructionValueField | InstructionHeadingField | InstructionAccountField;
 
 /** A label paired with a value, which is every row except a group's heading. */
 export type InstructionValueField = FieldValue & { label: string };
@@ -22,6 +22,15 @@ export type FieldValue =
 /** Names the rows that follow it, so it fills the row instead of pairing a label with a value. */
 export type InstructionHeadingField = { kind: 'heading'; label: string };
 
+/** An account of the instruction. Its role shows beside the label, as in the account rows of a decoded card. */
+export type InstructionAccountField = {
+    kind: 'account';
+    label: string;
+    address: Address;
+    isSigner: boolean;
+    isWritable: boolean;
+};
+
 /**
  * Falsy entries are dropped, so optional fields read as `cond && address(...)`.
  *
@@ -33,6 +42,20 @@ export type InstructionFieldList = ReadonlyArray<InstructionField | false | unde
 
 export function address(label: string, value: PublicKey | Address): InstructionField {
     return { address: typeof value === 'string' ? value : toKitAddress(value), kind: 'address', label };
+}
+
+export function account(
+    label: string,
+    value: PublicKey | Address,
+    { isSigner, isWritable }: { isSigner: boolean; isWritable: boolean },
+): InstructionField {
+    return {
+        address: typeof value === 'string' ? value : toKitAddress(value),
+        isSigner,
+        isWritable,
+        kind: 'account',
+        label,
+    };
 }
 
 /** A lamport amount, rendered as SOL. */

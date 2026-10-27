@@ -47,10 +47,8 @@ export const TwoSubInstructions: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (2 instructions)', { exact: false })).toBeInTheDocument();
-        await expect(canvas.getByText('Transfer')).toBeInTheDocument();
-        await expect(canvas.getByText('Burn')).toBeInTheDocument();
-        await expect(canvas.getByTestId('sub-ix-0')).toBeInTheDocument();
-        await expect(canvas.getByTestId('sub-ix-1')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 Transfer')).toBeInTheDocument();
+        await expect(canvas.getByText('#2 Burn')).toBeInTheDocument();
     },
 };
 
@@ -62,9 +60,9 @@ export const SingleSubInstruction: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (1 instruction)', { exact: false })).toBeInTheDocument();
-        await expect(canvas.getByText('TransferChecked')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 TransferChecked')).toBeInTheDocument();
         await expect(canvas.getByText('5')).toBeInTheDocument();
-        await expect(canvas.getByText('Decimals:')).toBeInTheDocument();
+        await expect(canvas.getByText('Decimals')).toBeInTheDocument();
         await expect(canvas.getByText('6')).toBeInTheDocument();
     },
 };
@@ -78,7 +76,7 @@ export const DecodedTransferAmount: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('42000')).toBeInTheDocument();
-        await expect(canvas.getByText('Amount:')).toBeInTheDocument();
+        await expect(canvas.getByText('Amount')).toBeInTheDocument();
     },
 };
 
@@ -87,7 +85,7 @@ export const UnknownDiscriminator: Story = {
     args: batchArgs(makeBatchIx([{ data: new Uint8Array([0xfe, 0xab, 0xcd]), numAccounts: 2 }], 2), 2),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByTestId('batch-error')).toBeInTheDocument();
+        await expect(canvas.getByText('Parse Error')).toBeInTheDocument();
     },
 };
 
@@ -103,7 +101,7 @@ export const ParseError: Story = {
     ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByTestId('batch-error')).toBeInTheDocument();
+        await expect(canvas.getByText('Parse Error')).toBeInTheDocument();
     },
 };
 
@@ -120,7 +118,7 @@ export const EmptyBatch: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (0 instructions)', { exact: false })).toBeInTheDocument();
-        await expect(canvas.getByTestId('batch-empty')).toBeInTheDocument();
+        await expect(canvas.queryByText('#1 ', { exact: false })).not.toBeInTheDocument();
     },
 };
 
@@ -137,11 +135,11 @@ export const SetAuthorityWithNewAuthority: Story = {
     ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('SetAuthority')).toBeInTheDocument();
-        await expect(canvas.getByText('Authority Type:')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 SetAuthority')).toBeInTheDocument();
+        await expect(canvas.getByText('Authority Type')).toBeInTheDocument();
         await expect(canvas.getByText('MintTokens')).toBeInTheDocument();
-        await expect(canvas.getByText('New Authority:')).toBeInTheDocument();
-        await expect(canvasElement.querySelector(`[aria-label="${newAuthority.toBase58()}"]`)).toBeTruthy();
+        await expect(canvas.getByText('New Authority')).toBeInTheDocument();
+        await expect(canvasElement.querySelector(`[data-address="${newAuthority.toBase58()}"]`)).toBeTruthy();
     },
 };
 
@@ -150,10 +148,10 @@ export const SetAuthorityRevoke: Story = {
     args: batchArgs(makeBatchIx([{ data: makeSetAuthorityData(3), numAccounts: 2 }], 2), 8),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('SetAuthority')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 SetAuthority')).toBeInTheDocument();
         // Scope to the Authority Type field row to avoid false positives if a
-        // CloseAccount sub-instruction badge is ever added to this story.
-        const authorityTypeRow = canvas.getByText('Authority Type:').closest('div');
+        // CloseAccount sub-instruction heading is ever added to this story.
+        const authorityTypeRow = canvas.getByText('Authority Type').closest('tr');
         if (!authorityTypeRow) throw new Error('Expected Authority Type row');
         await expect(within(authorityTypeRow).getByText('CloseAccount')).toBeInTheDocument();
         await expect(canvas.getByText('(none)')).toBeInTheDocument();
@@ -177,11 +175,11 @@ export const MultisigCoSigners: Story = {
     ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('Transfer')).toBeInTheDocument();
-        await expect(canvas.getByText('Amount:')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 Transfer')).toBeInTheDocument();
+        await expect(canvas.getByText('Amount')).toBeInTheDocument();
         await expect(canvas.getByText('7500')).toBeInTheDocument();
-        await expect(canvas.getByText('Signer 1:')).toBeInTheDocument();
-        await expect(canvas.getByText('Signer 2:')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 1')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 2')).toBeInTheDocument();
     },
 };
 
@@ -194,9 +192,9 @@ export const UnhandledInstructionType: Story = {
     ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('SyncNative')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 SyncNative')).toBeInTheDocument();
         // Generic fallback should render the account address
-        await expect(canvas.getByText('Account:')).toBeInTheDocument();
+        await expect(canvas.getByText('Account')).toBeInTheDocument();
     },
 };
 

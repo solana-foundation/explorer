@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { readCardRows, renderTxCard, renderWithProviders } from '@/app/__tests__/card-harness';
 import { concatBytes, writeU64LE } from '@/app/shared/lib/bytes';
 
-import { makeBatchIx } from '../../lib/__tests__/test-utils';
+import { makeAccount, makeBatchIx, makeBatchIxWithKeys } from '../../lib/__tests__/test-utils';
 import { TokenBatchCard } from '../TokenBatchCard';
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
@@ -45,6 +45,33 @@ describe('TokenBatchCard', () => {
         );
 
         expect(await screen.findByTestId('shell')).toHaveTextContent('Token Program: Batch (1 instruction)');
+    });
+
+    it('should draw a heading and the rows of each sub-instruction', async () => {
+        const accounts = [makeAccount(true, false), makeAccount(true, false), makeAccount(false, true)];
+        const ix = makeBatchIxWithKeys([{ data: TRANSFER_DATA, numAccounts: 3 }], accounts);
+        renderTxCard(<TokenBatchCard node={toRawInstructionNode({ index: 0, ix })} />);
+
+        await waitFor(() => {
+            expect(readCardRows().map(([label]) => label)).toEqual([
+                'Program',
+                '#1 Transfer',
+                'Amount',
+                'SourceWritable',
+                'DestinationWritable',
+                'Owner/DelegateSigner',
+            ]);
+        });
+        expect(readCardRows()[3]).toEqual(['SourceWritable', accounts[0].pubkey.toBase58()]);
+    });
+
+    it('should show why the batch does not parse', async () => {
+        const ix = makeBatchIx([{ data: new Uint8Array([0xfe]), numAccounts: 1 }], 1);
+        renderTxCard(<TokenBatchCard node={toRawInstructionNode({ index: 0, ix })} />);
+
+        await waitFor(() => {
+            expect(readCardRows().map(([label]) => label)).toEqual(['Program', 'Parse Error']);
+        });
     });
 });
 

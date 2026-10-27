@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { string } from '../model/fields';
+import { account, string } from '../model/fields';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { InstructionFields } from '../ui/InstructionFields';
 
@@ -43,5 +43,26 @@ describe('InstructionFields', () => {
         await userEvent.click(copyIcon as SVGElement);
 
         expect(writeText).toHaveBeenCalledWith('abc');
+    });
+
+    it.each([
+        { badges: ['Writable', 'Signer'], role: { isSigner: true, isWritable: true } },
+        { badges: [], role: { isSigner: false, isWritable: false } },
+    ])('should show the badges $badges beside the label of an account field', ({ badges, role }) => {
+        render(
+            <InstructionSurfaceProvider surface={STUB_SURFACE}>
+                <table>
+                    <tbody>
+                        <InstructionFields
+                            fields={[account('Source', PublicKey.default, role)]}
+                            programId={PublicKey.default}
+                        />
+                    </tbody>
+                </table>
+            </InstructionSurfaceProvider>,
+        );
+
+        const labelCell = within(screen.getAllByRole('row')[1]).getAllByRole('cell')[0];
+        expect(labelCell).toHaveTextContent(['Source', ...badges].join(''));
     });
 });

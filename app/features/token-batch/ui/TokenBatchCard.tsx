@@ -1,4 +1,4 @@
-import type { RawInstructionNode } from '@entities/instruction-card';
+import { InstructionFieldRows, type RawInstructionNode, text } from '@entities/instruction-card';
 
 import { parseBatchInstruction, type ParsedSubInstruction } from '../lib/batch-parser';
 import { BatchMintRegistryProvider } from '../model/batch-mint-registry';
@@ -16,23 +16,12 @@ export function TokenBatchCard({ node }: { node: RawInstructionNode }) {
 
     return (
         <BatchInstructionCard node={node} count={instructions.length}>
-            {error && (
-                <div className="mb-2 text-sm text-red-500" data-testid="batch-error">
-                    Parse error: {error}
-                </div>
-            )}
-            {instructions.length > 0 && (
-                <BatchMintRegistryProvider>
-                    {instructions.map((sub, i) => (
-                        <SubInstructionRow key={i} parsed={sub.parsed} extraSigners={sub.extraSigners} index={i} />
-                    ))}
-                </BatchMintRegistryProvider>
-            )}
-            {instructions.length === 0 && !error && (
-                <div className="text-sm text-neutral-500" data-testid="batch-empty">
-                    No sub-instructions found
-                </div>
-            )}
+            {error && <InstructionFieldRows fields={[text('Parse Error', error)]} />}
+            <BatchMintRegistryProvider>
+                {instructions.map((sub, i) => (
+                    <SubInstructionRow key={i} parsed={sub.parsed} extraSigners={sub.extraSigners} index={i} />
+                ))}
+            </BatchMintRegistryProvider>
         </BatchInstructionCard>
     );
 }

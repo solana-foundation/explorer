@@ -1,6 +1,7 @@
 export { defineInstructionCard } from './model/define-instruction-card';
 export type { InstructionCardProps, InstructionCardSpec } from './model/define-instruction-card';
 export {
+    account,
     address,
     bytes,
     compactFields,
@@ -25,7 +26,7 @@ export { ArgRows } from './ui/ArgRows';
 export { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from './ui/DecodedInstructionCard';
 export { InstructionAddress } from './ui/InstructionAddress';
 export { InstructionCardView } from './ui/InstructionCardView';
-export { InstructionFields } from './ui/InstructionFields';
+export { InstructionFieldRows, InstructionFields } from './ui/InstructionFields';
 export { InstructionNodeCards } from './ui/InstructionNodeCards';
 export { NameOnlyDetailsCard } from './ui/NameOnlyDetailsCard';
 export { ProgramField } from './ui/ProgramField';

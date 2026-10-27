@@ -2,15 +2,14 @@ import { ExpandToggleCell } from '@shared/ui/expandable-row';
 import { isSignerRole, isWritableRole } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
-import { CornerDownRight } from 'react-feather';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
-import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { type AccountName, type AccountRow, labelAccounts, visibleAccountRows } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
 import type { RawInstructionNode } from '../model/node';
+import { AccountNameCell } from './AccountNameCell';
 import { ArgRows, nestedRowVariants } from './ArgRows';
 import { InstructionAddress } from './InstructionAddress';
 import { InstructionCardView } from './InstructionCardView';
@@ -105,16 +104,12 @@ function AccountRows({ rows }: { rows: readonly AccountRow[] }) {
                         data-testid={`account-row-${row.position}`}
                         className={nestedRowVariants({ nested: row.depth > 0 })}
                     >
-                        <BaseTable.Cell>
-                            <div className="mr-1.5 md:inline">
-                                {row.depth > 0 && <CornerDownRight className="mb-[3px] mr-1.5 inline" size={14} />}
-                                {row.label}
-                            </div>
-                            <AccountRoleBadges
-                                isWritable={isWritableRole(row.role)}
-                                isSigner={isSignerRole(row.role)}
-                            />
-                        </BaseTable.Cell>
+                        <AccountNameCell
+                            label={row.label}
+                            isSigner={isSignerRole(row.role)}
+                            isWritable={isWritableRole(row.role)}
+                            nested={row.depth > 0}
+                        />
                         <BaseTable.Cell className="text-right" colSpan={VALUE_COLUMNS}>
                             <InstructionAddress address={row.address} />
                         </BaseTable.Cell>
