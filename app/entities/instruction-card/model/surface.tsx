@@ -3,6 +3,7 @@
 import type { ParsedInstruction, SignatureResult, TransactionInstruction, TransactionSignature } from '@solana/web3.js';
 import React, { createContext, useContext } from 'react';
 
+import type { InstructionEvent } from './events';
 import type { InstructionNode } from './node';
 
 /** The subset of shell props every instruction shell accepts. */
@@ -18,11 +19,11 @@ export type InstructionShellProps = {
     childIndex?: number;
     raw?: TransactionInstruction;
     /**
-     * Program events, e.g. Anchor's `ProgramEventsCard`. Unlike `childCards`,
-     * these are *derived by the card* from transaction logs rather than passed
-     * down, so they arrive as a prop on `InstructionCardView`, not on the node.
+     * Program events. Unlike `childCards`, these are *derived by the card* from
+     * transaction logs rather than passed down, so they arrive as a prop on
+     * `InstructionCardView`, not on the node.
      */
-    eventCards?: React.ReactNode[];
+    events?: readonly InstructionEvent[];
 };
 
 export type InstructionSurface = {

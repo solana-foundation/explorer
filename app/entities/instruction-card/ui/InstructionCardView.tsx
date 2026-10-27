@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import type { InstructionEvent } from '../model/events';
 import type { InstructionNode } from '../model/node';
 import { useInstructionSurface } from '../model/surface';
 import { InstructionNodeCards } from './InstructionNodeCards';
@@ -23,7 +24,7 @@ export function InstructionCardView({
      * via a hook, so they cannot come from the node or the field descriptors.
      * The inspector has no transaction logs, so its cards have no events.
      */
-    events?: React.ReactNode[];
+    events?: readonly InstructionEvent[];
     /** Optional: a card that opens in raw mode has no field table to draw behind it. */
     children?: React.ReactNode;
 }) {
@@ -44,7 +45,7 @@ export function InstructionCardView({
                     <InstructionNodeCards nodes={node.children} parent={node} />
                 ) : undefined
             }
-            eventCards={events}
+            events={events}
         >
             {children}
         </Shell>

@@ -7,6 +7,7 @@ import { FetchStatus } from '@providers/cache';
 import { useTransactionDetails } from '@providers/transactions';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -128,6 +129,28 @@ describe('AnchorDetailsCard', () => {
 
         expect(screen.getByText('Config Change Event')).toBeInTheDocument();
         expect(screen.queryByText('Unknown Event')).not.toBeInTheDocument();
+    });
+
+    it('should show the bytes of an event when the Raw view opens', async () => {
+        const parent = gen.publicKey(2);
+        mockTransactionLogs(
+            [
+                `Program ${parent} invoke [1]`,
+                `Program ${program.programId} invoke [2]`,
+                `Program data: ${CONFIG_CHANGE_EVENT}`,
+                `Program ${program.programId} success`,
+                `Program ${parent} success`,
+            ],
+            [parent],
+        );
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
+        expect(screen.getByText('Field Name')).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
+
+        expect(screen.getByText('Config Change Event')).toBeInTheDocument();
+        expect(screen.getByText('Event Data')).toBeInTheDocument();
+        expect(screen.queryByText('Field Name')).not.toBeInTheDocument();
     });
 
     it('should number the event badge of a CPI child with its child index', () => {

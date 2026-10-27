@@ -60,14 +60,20 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
                 </BaseTable.Row>
             ))}
 
-            <BaseTable.Row>
-                <BaseTable.Cell>
-                    Instruction Data <span className="text-dk-gray-700">(Hex)</span>
-                </BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <HexData raw={ix.data} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <HexDataRow label="Instruction Data" data={ix.data} />
         </>
+    );
+}
+
+export function HexDataRow({ label, data }: { label: string; data: Uint8Array }) {
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell>
+                {label} <span className="text-dk-gray-700">(Hex)</span>
+            </BaseTable.Cell>
+            <BaseTable.Cell className="text-right">
+                <HexData raw={data} />
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

@@ -4,6 +4,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/tra
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import type { InstructionEvent } from '../model/events';
 import { useInstructionSurface } from '../model/surface';
 
 type InstructionProps = {
@@ -14,7 +15,7 @@ type InstructionProps = {
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
     childCards?: React.ReactNode;
-    eventCards?: React.ReactNode[];
+    events?: readonly InstructionEvent[];
     childIndex?: number;
     raw?: TransactionInstruction;
     headerButtons?: React.ReactNode;
@@ -29,7 +30,7 @@ export function TxInstructionShell({
     ix,
     defaultRaw,
     childCards,
-    eventCards,
+    events,
     childIndex,
     raw: rawProp,
     headerButtons,
@@ -63,7 +64,7 @@ export function TxInstructionShell({
             ix={ix}
             defaultRaw={defaultRaw}
             childCards={childCards}
-            eventCards={eventCards}
+            events={events}
             childIndex={childIndex}
             raw={raw}
             onRequestRaw={canFetchRaw ? () => fetchRaw(signature) : undefined}

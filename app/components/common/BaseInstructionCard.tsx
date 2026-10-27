@@ -2,7 +2,9 @@ import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { cn } from '@components/shared/utils';
+import type { InstructionEvent } from '@entities/instruction-card';
 // The entity barrel imports this frame, so a barrel import would form a cycle.
+import { EventRows } from '@entities/instruction-card/ui/EventRows';
 import { ProgramField } from '@entities/instruction-card/ui/ProgramField';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
@@ -23,7 +25,7 @@ type InstructionProps = {
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
     childCards?: React.ReactNode;
-    eventCards?: React.ReactNode[];
+    events?: readonly InstructionEvent[];
     childIndex?: number;
     // raw can be used to display raw instruction information
     raw?: TransactionInstruction;
@@ -46,7 +48,7 @@ export function BaseInstructionCard({
     index,
     ix,
     defaultRaw,
-    eventCards,
+    events,
     childCards,
     childIndex,
     raw,
@@ -135,17 +137,8 @@ export function BaseInstructionCard({
                             </BaseTable.Row>
                         </>
                     )}
-                    {eventCards && eventCards.length > 0 && (
-                        <>
-                            <BaseTable.SectionRow>
-                                <BaseTable.Cell colSpan={3}>Events</BaseTable.Cell>
-                            </BaseTable.SectionRow>
-                            <BaseTable.Row>
-                                <BaseTable.Cell colSpan={3}>
-                                    <div className="m-6">{eventCards}</div>
-                                </BaseTable.Cell>
-                            </BaseTable.Row>
-                        </>
+                    {events && events.length > 0 && (
+                        <EventRows events={events} index={index} childIndex={childIndex} raw={showRaw} />
                     )}
                 </BaseTable.Body>
             </BaseTable>

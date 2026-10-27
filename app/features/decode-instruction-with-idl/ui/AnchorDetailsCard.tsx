@@ -12,7 +12,6 @@ import { anchorInstructionArgs } from '@utils/anchor';
 import { anchorAccountNames } from '../lib/anchor-account-names';
 import { type AnchorInstructionDecoded } from '../lib/decode-anchor-instruction';
 import { useAnchorEvents } from '../model/use-anchor-events';
-import { ProgramEventsCard } from './ProgramEventsCard';
 
 export function AnchorDetailsCard({
     node,
@@ -23,19 +22,7 @@ export function AnchorDetailsCard({
     program: Program<Idl>;
     decoded: AnchorInstructionDecoded;
 }) {
-    const entries = useAnchorEvents(node, program);
-    const events =
-        entries.length > 0
-            ? [
-                  <ProgramEventsCard
-                      key="events"
-                      entries={entries}
-                      program={program}
-                      instructionIndex={node.index}
-                      childIndex={node.childIndex}
-                  />,
-              ]
-            : undefined;
+    const events = useAnchorEvents(node, program);
     const { decodedIxData, ixAccounts, ixDef } = decoded;
 
     if (!ixAccounts || !decodedIxData || !ixDef) {

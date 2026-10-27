@@ -130,13 +130,18 @@ A card SHALL receive the instruction it renders as one `InstructionNode`, not as
 
 `InstructionNode.programId` SHALL carry the program id separately from `ix`. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
 
-Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs _inside_ the card and exist only on the tx page, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail.
+Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs _inside_ the card and exist only on the tx page, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail. The frame draws each event as rows of the card, and in the raw view it MUST show the bytes of each event.
 
 #### Scenario: Program events reach the frame
 
 - **WHEN** a card derives program events from transaction logs
 - **THEN** it MUST pass them to `InstructionCardView` as `events`, not through the node
 - **AND** on a surface with no logs the frame MUST render the card without them
+
+#### Scenario: Program event in the raw view
+
+- **WHEN** a card with program events opens its raw view
+- **THEN** each event MUST show its bytes instead of its fields
 
 #### Scenario: Program event logged by a CPI
 

@@ -8,9 +8,10 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 import { type AccountName, type AccountRow, labelAccounts, visibleAccountRows } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
+import type { InstructionEvent } from '../model/events';
 import type { RawInstructionNode } from '../model/node';
 import { AccountNameCell } from './AccountNameCell';
-import { ArgRows, nestedRowVariants } from './ArgRows';
+import { ArgTable, nestedRowVariants } from './ArgRows';
 import { InstructionAddress } from './InstructionAddress';
 import { InstructionCardView } from './InstructionCardView';
 import { ProgramField } from './ProgramField';
@@ -31,7 +32,7 @@ export function DecodedInstructionCard({
     programName?: string;
     accountNames: readonly AccountName[];
     args: readonly InstructionArg[];
-    events?: React.ReactNode[];
+    events?: readonly InstructionEvent[];
     /** Rows below the arguments. A row must span `DECODED_TABLE_COLUMNS`. */
     children?: React.ReactNode;
 }) {
@@ -68,16 +69,7 @@ function DecodedInstructionBody({
                 </BaseTable.SectionRow>
             )}
             <AccountRows rows={accounts} />
-            {args.length > 0 && (
-                <>
-                    <BaseTable.SectionRow>
-                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
-                        <BaseTable.Cell>Type</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
-                    </BaseTable.SectionRow>
-                    <ArgRows args={args} />
-                </>
-            )}
+            <ArgTable label="Argument Name" args={args} />
         </>
     );
 }

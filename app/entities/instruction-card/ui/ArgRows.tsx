@@ -8,6 +8,22 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { InstructionArg } from '../model/args';
 import { ValueCell } from './ValueCell';
 
+/** The header row and the rows of an argument table. An empty list draws nothing. */
+export function ArgTable({ label, args }: { label: string; args: readonly InstructionArg[] }) {
+    return (
+        args.length > 0 && (
+            <>
+                <BaseTable.SectionRow>
+                    <BaseTable.Cell>{label}</BaseTable.Cell>
+                    <BaseTable.Cell>Type</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
+                </BaseTable.SectionRow>
+                <ArgRows args={args} />
+            </>
+        )
+    );
+}
+
 export function ArgRows({ args, depth = 0 }: { args: readonly InstructionArg[]; depth?: number }) {
     return (
         <>

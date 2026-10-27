@@ -19,6 +19,7 @@ export { remainingAccountLabel } from './model/accounts';
 export type { AccountName } from './model/accounts';
 export { parseCodamaArgs } from './model/args';
 export type { InstructionArg } from './model/args';
+export type { InstructionEvent } from './model/events';
 export { instructionDataOf, toInstructionNode, toRawInstructionNode } from './model/node';
 export type { InstructionNode, RawInstructionNode } from './model/node';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';
