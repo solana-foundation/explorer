@@ -1,5 +1,5 @@
-import type { BlockData } from '@entities/block-data';
-import { address, blockhash, lamports, type Reward } from '@solana/kit';
+import { makeBlock } from '@entities/block-data/__fixtures__/block-builders';
+import { address, lamports, type Reward } from '@solana/kit';
 import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -31,14 +31,7 @@ const meta: Meta<typeof BlockRewardsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const block: BlockData = {
-    blockTime: null,
-    blockhash: blockhash('11111111111111111111111111111111'),
-    parentSlot: 0n,
-    previousBlockhash: blockhash('11111111111111111111111111111111'),
-    rewards: Array.from({ length: 4 }, (_, index) => sampleReward(index)),
-    transactions: [],
-};
+const block = { ...makeBlock([]), rewards: Array.from({ length: 4 }, (_, index) => sampleReward(index)) };
 const args = { block };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };

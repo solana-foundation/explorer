@@ -1,19 +1,9 @@
-import type { BlockData } from '@entities/block-data';
-import { blockhash } from '@solana/kit';
+import { makeBlock } from '@entities/block-data/__fixtures__/block-builders';
 import { withCluster } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockHistoryCard } from '../BlockHistoryCard';
-
-const emptyBlock: BlockData = {
-    blockTime: null,
-    blockhash: blockhash('11111111111111111111111111111111'),
-    parentSlot: 0n,
-    previousBlockhash: blockhash('11111111111111111111111111111111'),
-    rewards: [],
-    transactions: [],
-};
 
 const meta: Meta<typeof BlockHistoryCard> = {
     component: BlockHistoryCard,
@@ -25,7 +15,7 @@ const meta: Meta<typeof BlockHistoryCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { block: emptyBlock, epoch: 500n };
+const args = { block: makeBlock([]), epoch: 500n };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

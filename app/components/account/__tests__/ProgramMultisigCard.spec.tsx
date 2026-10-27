@@ -1,12 +1,11 @@
 import { gen } from '@__fixtures__/gen';
+import { makeProgramAccountData } from '@entities/account/__fixtures__/account';
 import { type AnchorIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useSquadsMultisig, useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
@@ -24,10 +23,7 @@ vi.mock('@/app/providers/squadsMultisig', async importOriginal => ({
     useSquadsMultisigLookup: vi.fn(),
 }));
 
-const PROGRAM_DATA: UpgradeableLoaderAccountData = {
-    parsed: { info: { programData: PublicKey.default }, type: 'program' },
-    program: 'bpf-upgradeable-loader',
-};
+const PROGRAM_DATA = makeProgramAccountData();
 
 describe('ProgramMultisigCard', () => {
     beforeEach(() => {

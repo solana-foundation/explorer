@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import {
@@ -215,11 +216,7 @@ function expectProgramLink() {
 }
 
 function makeIx(data: number[]) {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: [{ isSigner: false, isWritable: true, pubkey: gen.publicKey(1) }],
-        programId: program.programId,
-    });
+    return makeInstruction({ data, keys: [gen.publicKey(1)], programId: program.programId, writable: true });
 }
 
 function mockTransactionLogs(logMessages: string[], programIds: PublicKey[]) {

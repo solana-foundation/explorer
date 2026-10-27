@@ -3,8 +3,9 @@ import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
+import { buildParsedTransaction } from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { getBase58Decoder } from '@solana/kit';
-import { type ParsedTransaction, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -34,29 +35,26 @@ const SET_DATA = getSetDataInstructionDataEncoder().encode({
     format: Format.Json,
 }) as Uint8Array;
 
-// A minimal ParsedTransaction with one PMP instruction. `intoTransactionInstruction` looks each ix account up in
+// A transaction with one PMP instruction. `intoTransactionInstruction` looks each ix account up in
 // `message.accountKeys` and base58-decodes `data`, so both have to line up for the raw path to produce an ix.
 // Built once at module scope for a stable identity across renders. Safe to reference from the vi.mock factory
 // below even though vi.mock is hoisted, because it is only ever READ inside the returned arrow, which runs at
-// render time. `as unknown as` because the fixture carries only the fields the section actually reads.
-const PARSED_TX = {
-    message: {
-        accountKeys: [
-            { pubkey: METADATA, signer: false, source: 'transaction', writable: true },
-            { pubkey: AUTHORITY, signer: true, source: 'transaction', writable: false },
-        ],
-        addressTableLookups: null,
-        instructions: [
-            {
-                accounts: [METADATA, AUTHORITY],
-                data: BASE58_DECODER.decode(SET_DATA),
-                programId: new PublicKey(PMP_ADDRESS),
-            },
-        ],
-        recentBlockhash: PublicKey.default.toBase58(),
-    },
-    signatures: [SIGNATURE],
-} as unknown as ParsedTransaction;
+// render time.
+const PARSED_TX = buildParsedTransaction({
+    accountKeys: [
+        { pubkey: METADATA, signer: false },
+        { pubkey: AUTHORITY, signer: true, writable: false },
+    ],
+    instructions: [
+        {
+            accounts: [METADATA, AUTHORITY],
+            data: BASE58_DECODER.decode(SET_DATA),
+            programId: new PublicKey(PMP_ADDRESS),
+        },
+    ],
+    meta: null,
+    slot: 1,
+});
 
 vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
@@ -67,7 +65,7 @@ vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 vi.mock('@providers/transactions', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/transactions')>()),
     useTransactionDetails: vi.fn(() => ({
-        data: { transactionWithMeta: { meta: null, slot: 1, transaction: PARSED_TX } },
+        data: { transactionWithMeta: PARSED_TX },
     })),
     useTransactionStatus: vi.fn(() => ({ data: { info: { result: { err: null } } } })),
 }));

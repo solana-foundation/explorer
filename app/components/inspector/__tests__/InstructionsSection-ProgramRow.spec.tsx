@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { type MessageV0, PublicKey, SystemProgram, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
+import { compileV0Message } from '@entities/transaction-data/__fixtures__/wire-transactions';
+import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -73,19 +74,11 @@ function renderSection(ix: TransactionInstruction) {
                 <TransactionsProvider>
                     <AccountsProvider>
                         <InstructionParserProvider dispatcher={instructionParserDispatcher}>
-                            <InstructionsSection message={buildMessage(ix)} />
+                            <InstructionsSection message={compileV0Message(PAYER, ix)} />
                         </InstructionParserProvider>
                     </AccountsProvider>
                 </TransactionsProvider>
             </ClusterProvider>
         </ScrollAnchorProvider>,
     );
-}
-
-function buildMessage(ix: TransactionInstruction): MessageV0 {
-    return new TransactionMessage({
-        instructions: [ix],
-        payerKey: PAYER,
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
 }

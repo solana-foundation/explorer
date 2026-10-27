@@ -1,4 +1,4 @@
-import { Account } from '@providers/accounts';
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { PublicKey } from '@solana/web3.js';
 import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -7,14 +7,11 @@ import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '../Account';
 
-const sampleAccount: Account = {
-    data: {},
-    executable: false,
+const sampleAccount = makeAccount({
     lamports: 4_200_000_000,
-    owner: new PublicKey('11111111111111111111111111111111'),
     pubkey: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
     space: 0,
-};
+});
 
 const meta = {
     decorators: [withCluster, withTokenInfoBatch],

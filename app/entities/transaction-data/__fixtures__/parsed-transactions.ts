@@ -1,4 +1,4 @@
-import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import { DEFAULT_BLOCKHASH, DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import {
     type ParsedInnerInstruction,
     type ParsedInstruction,
@@ -11,8 +11,6 @@ import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 
 const SYSTEM_PROGRAM = SystemProgram.programId;
 const TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ADDRESS);
-
-const DEFAULT_BLOCKHASH = 'AHK7TnmvzPAk4WsmWqVgL7v6YccGkANoWUmrSY7aQDzw';
 
 export function buildSolTransferIx(opts: {
     source: PublicKey;
@@ -113,35 +111,42 @@ export type ParsedTokenBalance = {
     uiTokenAmount: { amount: string; decimals: number; uiAmount: number; uiAmountString: string };
 };
 
+type AccountKey = PublicKey | { pubkey: PublicKey; signer?: boolean; writable?: boolean };
+
 export function buildParsedTransaction(opts: {
-    accountKeys: PublicKey[];
+    accountKeys?: AccountKey[];
     instructions: (ParsedInstruction | PartiallyDecodedInstruction)[];
     innerInstructions?: ParsedInnerInstruction[];
     postTokenBalances?: ParsedTokenBalance[];
     fee?: number;
     blockTime?: number;
+    logMessages?: string[];
+    meta?: null;
+    slot?: number;
 }): ParsedTransactionWithMeta {
+    const accountKeys = opts.accountKeys ?? [];
+    const meta = {
+        computeUnitsConsumed: 1200,
+        err: null,
+        fee: opts.fee ?? 5000,
+        innerInstructions: opts.innerInstructions ?? [],
+        logMessages: opts.logMessages ?? [],
+        postBalances: accountKeys.map(() => 0),
+        postTokenBalances: opts.postTokenBalances ?? [],
+        preBalances: accountKeys.map(() => 0),
+        preTokenBalances: opts.postTokenBalances ?? [],
+    };
     return {
         blockTime: opts.blockTime ?? 1768831450,
-        meta: {
-            computeUnitsConsumed: 1200,
-            err: null,
-            fee: opts.fee ?? 5000,
-            innerInstructions: opts.innerInstructions ?? [],
-            logMessages: [],
-            postBalances: opts.accountKeys.map(() => 0),
-            postTokenBalances: opts.postTokenBalances ?? [],
-            preBalances: opts.accountKeys.map(() => 0),
-            preTokenBalances: opts.postTokenBalances ?? [],
-        },
-        slot: 436228237,
+        meta: opts.meta === null ? null : meta,
+        slot: opts.slot ?? 436228237,
         transaction: {
             message: {
-                accountKeys: opts.accountKeys.map((pubkey, i) => ({
-                    pubkey,
+                accountKeys: accountKeys.map((key, i) => ({
                     signer: i === 0,
                     source: 'transaction',
                     writable: true,
+                    ...(key instanceof PublicKey ? { pubkey: key } : key),
                 })),
                 instructions: opts.instructions,
                 recentBlockhash: DEFAULT_BLOCKHASH,

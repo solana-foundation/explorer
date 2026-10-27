@@ -29,10 +29,11 @@ export function getMockAccountWithNFTData(): Account {
     } as unknown as Account; // Account type is incomplete and incorrect for some fields, fixing it would require a lot of unrelated changes
 }
 
-export function getMockAccountWithTokenMetadata(): Account {
+export function getMockAccountWithTokenMetadata(nftData?: NFTData): Account {
     return {
         data: {
             parsed: {
+                nftData,
                 parsed: {
                     info: {
                         decimals: 6,
@@ -56,30 +57,7 @@ export function getMockAccountWithTokenMetadata(): Account {
 }
 
 export function getMockAccountWithTokenMetadataAndMetaplexMetadata(): Account {
-    return {
-        data: {
-            parsed: {
-                nftData: getNftData(),
-                parsed: {
-                    info: {
-                        decimals: 6,
-                        extensions: getTokenExtension(),
-                        freezeAuthority: '2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk',
-                        isInitialized: true,
-                        mintAuthority: 'FtrZqgM9begkaLHq3f4hGEUrAK1jjJpkc8hZ1hVk3EDN',
-                        supply: '997647954721900',
-                    },
-                    type: 'mint',
-                },
-                program: 'spl-token-2022',
-            },
-        },
-        executable: false,
-        lamports: 2064720952,
-        owner: new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'),
-        pubkey: new PublicKey('2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo'),
-        space: 866,
-    };
+    return getMockAccountWithTokenMetadata(getNftData());
 }
 
 export function getMockAccountWithCompressedNft(): Account {
