@@ -1,4 +1,3 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import FLAGGED_ACCOUNTS_WARNING from '../flagged-accounts';
@@ -6,7 +5,6 @@ import FLAGGED_ACCOUNTS_WARNING from '../flagged-accounts';
 // Each story renders one of the three unique IncidentDescription JSX entries from FLAGGED_ACCOUNTS_WARNING.
 // The map keys (account addresses) are stable; addresses below were picked one per incident type.
 const meta = {
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Providers/Accounts/FlaggedAccountWarnings',
 } satisfies Meta;

@@ -15,9 +15,6 @@ const meta = {
                 story: 'Render security.txt Card',
             },
         },
-        nextjs: {
-            appDirectory: true,
-        },
     },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/security/ProgramSecurityTxtCard',

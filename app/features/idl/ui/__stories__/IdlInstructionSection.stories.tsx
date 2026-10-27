@@ -1,4 +1,4 @@
-import { nextjsParameters, withClipboardMock } from '@storybook-config/decorators';
+import { withClipboardMock } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { IdlInstructionSection } from '../IdlInstructionSection';
@@ -6,7 +6,6 @@ import { IdlInstructionSection } from '../IdlInstructionSection';
 const meta = {
     component: IdlInstructionSection,
     decorators: [withClipboardMock],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/IdlInstructionSection',
 } satisfies Meta<typeof IdlInstructionSection>;

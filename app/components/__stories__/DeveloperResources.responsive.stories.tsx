@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { DeveloperResources } from '../DeveloperResources';
@@ -7,7 +7,6 @@ import { DeveloperResources } from '../DeveloperResources';
 const meta = {
     component: DeveloperResources,
     decorators: [withViewportFromGlobal],
-    parameters: { viewport: { options: INITIAL_VIEWPORTS } },
     tags: ['autodocs', 'test'],
     title: 'Components/DeveloperResources@Media',
 } satisfies Meta<typeof DeveloperResources>;

@@ -3,7 +3,6 @@ import { toRawInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -35,7 +34,6 @@ const dispatched = createInstructionParserDispatcher([solanaAttestationInstructi
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionSas/SolanaAttestationDetailsCard',
 };

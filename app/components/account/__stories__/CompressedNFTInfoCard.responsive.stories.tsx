@@ -1,7 +1,7 @@
 import { DEFAULT_BLOCKHASH, gen } from '@__fixtures__/gen';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { CompressedNft, CompressedNftProof } from '@/app/providers/compressed-nft';
@@ -35,10 +35,6 @@ const sampleCompressedNft = {
 const meta = {
     component: DasCompressionInfoCard,
     decorators: [withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/CompressedNFTInfoCard@Media',
 } satisfies Meta<typeof DasCompressionInfoCard>;

@@ -1,5 +1,5 @@
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VotesCard } from '../VotesCard';
@@ -9,10 +9,6 @@ import { BASE_SLOT, voteAccountFixture } from './fixtures';
 const meta: Meta<typeof VotesCard> = {
     component: VotesCard,
     decorators: [withViewportFromGlobal, withCluster],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VotesCard@Media',
 };

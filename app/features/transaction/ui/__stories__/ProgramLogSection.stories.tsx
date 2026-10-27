@@ -1,4 +1,3 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import {
@@ -17,9 +16,6 @@ const meta: Meta<typeof ProgramLogSection> = {
         signature: DEFAULT_SIGNATURE,
     },
     component: ProgramLogSection,
-    parameters: {
-        ...nextjsParameters,
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/ProgramLogSection',
 };

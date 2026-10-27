@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ConcurrentMerkleTreeCard } from '../ConcurrentMerkleTreeCard';
@@ -7,7 +7,6 @@ import { buildConcurrentMerkleTreeData } from './mocks/concurrent-merkle-tree';
 const meta = {
     component: ConcurrentMerkleTreeCard,
     decorators: [withCluster, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/ConcurrentMerkleTreeCard',
 } satisfies Meta<typeof ConcurrentMerkleTreeCard>;

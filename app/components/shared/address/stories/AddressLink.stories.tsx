@@ -1,10 +1,5 @@
 import { address } from '@solana/kit';
-import {
-    nextjsParameters,
-    withClipboardMock,
-    withClipboardMockErrored,
-    withCluster,
-} from '@storybook-config/decorators';
+import { withClipboardMock, withClipboardMockErrored, withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
@@ -15,7 +10,6 @@ const SAMPLE_ADDRESS = address('7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4');
 const meta: Meta<typeof AddressLink> = {
     component: AddressLink,
     decorators: [withClipboardMock, withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Shared/Address/AddressLink',
 };

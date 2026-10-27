@@ -12,7 +12,6 @@ const meta = {
     decorators: [withViewportFromGlobal],
     parameters: {
         docs: { story: { height: INITIAL_VIEWPORTS.iphonex.styles.height } },
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Components/Shared/Badge@Media',

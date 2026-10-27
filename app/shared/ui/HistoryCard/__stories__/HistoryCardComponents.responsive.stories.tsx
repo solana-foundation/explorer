@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { HistoryCardFooter, HistoryCardHeader } from '..';
@@ -6,9 +6,6 @@ import { HistoryCardFooter, HistoryCardHeader } from '..';
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta = {
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     // TODO(storybook): rename to 'Shared/UI/HistoryCard@Media' once the Dashkit migration settles — kept stable for now to avoid churning the Storybook tree mid-migration.
     title: 'Components/Account/HistoryCardComponents@Media',

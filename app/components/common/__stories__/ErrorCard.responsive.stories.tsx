@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ErrorCard } from '../ErrorCard';
@@ -8,9 +8,6 @@ import { ErrorCard } from '../ErrorCard';
 const meta: Meta<typeof ErrorCard> = {
     component: ErrorCard,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Common/ErrorCard@Media',
 };

@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
@@ -15,7 +15,6 @@ const meta = {
     globals: { backgrounds: { value: 'dark' } },
     parameters: {
         layout: 'fullscreen',
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Design System/Page Layout@Media',

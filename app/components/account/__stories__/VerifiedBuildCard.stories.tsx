@@ -1,4 +1,4 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { OsecRegistryInfo } from '@/app/utils/verified-builds';
@@ -57,7 +57,6 @@ const PDA_UPLOADED_FIXTURE: OsecRegistryInfo = {
 const meta = {
     component: BaseVerifiedBuildCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/VerifiedBuildCard',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;

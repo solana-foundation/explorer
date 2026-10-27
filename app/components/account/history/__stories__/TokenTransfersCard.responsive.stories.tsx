@@ -1,6 +1,6 @@
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
-import { nextjsParameters, withHistory } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withHistory } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenTransfersCard } from '../TokenTransfersCard';
@@ -11,14 +11,12 @@ const meta: Meta<typeof TokenTransfersCard> = {
     component: TokenTransfersCard,
     decorators: [withHistory, withViewportFromGlobal],
     parameters: {
-        ...nextjsParameters,
         history: {
             [ADDRESS]: mockAccountHistory({
                 fetched: [mockConfirmedSignatureInfo({ blockTime: null, slot: 312_456_789 })],
                 foundOldest: true,
             }),
         },
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/History/TokenTransfersCard@Media',

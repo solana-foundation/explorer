@@ -9,7 +9,6 @@ import {
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -58,7 +57,6 @@ const withFailedInstructionSurface: Decorator = Story => (
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard',
 };

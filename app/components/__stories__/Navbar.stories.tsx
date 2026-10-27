@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster, withClusterState } from '@storybook-config/decorators';
+import { withCluster, withClusterState } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 
@@ -8,7 +8,6 @@ const meta = {
     component: Navbar,
     decorators: [withCluster],
     parameters: {
-        ...nextjsParameters,
         // Logo + navbar drawer need vertical room; pin the docs canvas so the full row is visible.
         docs: { story: { height: '80px' } },
     },

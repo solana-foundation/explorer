@@ -1,7 +1,6 @@
 import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -29,7 +28,6 @@ const fallbackParsedIx = { path: [{ kind: 'unknownNode' }] } as any;
 const meta: Meta<typeof CodamaInstructionCard> = {
     component: CodamaInstructionCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
     // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.

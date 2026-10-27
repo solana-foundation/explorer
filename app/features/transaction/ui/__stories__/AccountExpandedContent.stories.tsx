@@ -3,7 +3,7 @@ import { gen } from '@__fixtures__/gen';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
+import { withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 
@@ -23,9 +23,6 @@ const meta: Meta<typeof AccountExpandedContent> = {
     },
     component: AccountExpandedContent,
     decorators: [withClusterAccountsAndTokenInfo],
-    parameters: {
-        ...nextjsParameters,
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/AccountExpandedContent',
 };

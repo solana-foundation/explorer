@@ -4,14 +4,13 @@ import { createInstructionParserDispatcher, isParsedInstruction } from '@entitie
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { invariant } from '@/app/shared/lib/invariant';
@@ -51,10 +50,6 @@ const meta: Meta<typeof SerumDetailsCard> = {
         withMockTransactions,
         withViewportFromGlobal,
     ],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionProgramSerum/SerumDetailsCard@Media',
 };

@@ -1,6 +1,6 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
@@ -18,7 +18,6 @@ const sampleAccount: Account = {
 
 const meta = {
     decorators: [withCluster, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Common/Account',
 } satisfies Meta;

@@ -17,7 +17,6 @@ import {
     PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -76,7 +75,6 @@ function setDataIx({
 const meta = {
     component: PmpDetailsCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionPmp/PmpDetailsCard',
 } satisfies Meta<typeof PmpDetailsCard>;

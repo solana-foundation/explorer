@@ -1,6 +1,6 @@
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { OsecRegistryInfo } from '@/app/utils/verified-builds';
@@ -33,10 +33,6 @@ const VERIFIED_FIXTURE: OsecRegistryInfo = {
 const meta = {
     component: BaseVerifiedBuildCard,
     decorators: [withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/VerifiedBuildCard@Media',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;

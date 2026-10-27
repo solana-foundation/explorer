@@ -4,7 +4,6 @@ import { createInstructionParserDispatcher, isParsedInstruction } from '@entitie
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -45,7 +44,6 @@ function storyArgs(data: Buffer, keyCount: number) {
 const meta: Meta<typeof SerumDetailsCard> = {
     component: SerumDetailsCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionProgramSerum/SerumDetailsCard',
 };

@@ -9,7 +9,6 @@ import {
     PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -42,7 +41,6 @@ function makeIx(data: Buffer, accountCount: number): TransactionInstruction {
 const meta = {
     component: IdlInstructionCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
     // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.

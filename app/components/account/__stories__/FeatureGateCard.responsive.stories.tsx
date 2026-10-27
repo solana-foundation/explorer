@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureGateCard } from '../FeatureGateCard';
@@ -12,9 +12,6 @@ const meta: Meta<typeof FeatureGateCard> = {
     },
     component: FeatureGateCard,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/FeatureGateCard@Media',
 };

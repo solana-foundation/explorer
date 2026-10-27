@@ -6,12 +6,8 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
-import {
-    INITIAL_VIEWPORTS,
-    withMockRpc,
-    withViewportFromGlobal,
-} from '../../../../../.storybook/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { withMockRpc, withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
@@ -62,10 +58,6 @@ const args = {
 const meta = {
     component: StakeAccountSection,
     decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Stake/StakeAccountSection@Media',
 } satisfies Meta<typeof StakeAccountSection>;

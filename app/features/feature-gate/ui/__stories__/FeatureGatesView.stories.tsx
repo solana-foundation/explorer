@@ -1,6 +1,5 @@
 import { toConnectableUrl } from '@entities/cluster';
 import { defaultEpochInfo, MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import { expect, within } from 'storybook/test';
@@ -45,7 +44,6 @@ const SLOT_TIME_KEY = unstable_serialize([
 const meta: Meta<typeof FeatureGatesView> = {
     component: FeatureGatesView,
     decorators: [atEpoch(1075n)],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/FeatureGatesView',
 };

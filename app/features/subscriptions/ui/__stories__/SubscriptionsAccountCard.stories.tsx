@@ -11,7 +11,7 @@ import {
     PlanStatus,
     SUBSCRIPTIONS_PROGRAM_ADDRESS,
 } from '@solana/subscriptions';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withMockRpc } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
@@ -121,7 +121,6 @@ function makeAccount(raw: Uint8Array): Account {
 const meta = {
     component: SubscriptionsAccountCard,
     decorators: [withMockRpc, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Subscriptions/SubscriptionsAccountCard',
 } satisfies Meta<typeof SubscriptionsAccountCard>;

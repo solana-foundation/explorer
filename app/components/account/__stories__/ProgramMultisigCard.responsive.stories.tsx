@@ -1,7 +1,7 @@
 import { DEFAULT_SLOT } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
@@ -15,7 +15,6 @@ const meta = {
     decorators: [withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
     parameters: {
         ...createNextjsParameters({ query: { cluster: 'devnet' } }),
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/ProgramMultisigCard@Media',

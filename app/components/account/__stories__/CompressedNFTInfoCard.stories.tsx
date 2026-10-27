@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { CompressedNft, CompressedNftProof } from '@/app/providers/compressed-nft';
@@ -43,7 +43,6 @@ const meta = {
     component: DasCompressionInfoCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: {
-        ...nextjsParameters,
         docs: {
             description: {
                 component: [

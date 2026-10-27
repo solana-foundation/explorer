@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlEvents } from '../BaseIdlEvents';
@@ -6,10 +6,6 @@ import { BaseIdlEvents } from '../BaseIdlEvents';
 const meta: Meta<typeof BaseIdlEvents> = {
     component: BaseIdlEvents,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlEvents@Media',
 };

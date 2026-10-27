@@ -1,6 +1,6 @@
 import type { BlockData, BlockTransaction } from '@entities/block-data';
 import { address, blockhash, getBase58Decoder, lamports, signature } from '@solana/kit';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockHistoryCard } from '../BlockHistoryCard';
@@ -90,7 +90,6 @@ function makeBlock(txCount: number): BlockData {
 const meta = {
     component: BlockHistoryCard,
     decorators: [withCluster, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockHistoryCard',
 } satisfies Meta<typeof BlockHistoryCard>;

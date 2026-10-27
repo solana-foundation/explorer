@@ -1,6 +1,5 @@
 import { toInstructionNode } from '@entities/instruction-card';
 import {
-    nextjsParameters,
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
@@ -25,7 +24,6 @@ import {
 const meta = {
     component: VoteDetailsCard,
     decorators: [withTxInstructionSurface, withMockTransactions, withScrollAnchor, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard',
 } satisfies Meta<typeof VoteDetailsCard>;

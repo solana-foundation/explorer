@@ -1,6 +1,6 @@
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { withAutoFocusReleased } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withFixedContainer, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withFixedContainer, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
@@ -12,8 +12,6 @@ const meta = {
     decorators: [withAutoFocusReleased, withFixedContainer, withViewportFromGlobal],
     parameters: {
         layout: 'fullscreen', // NicknameEditor renders as a position:fixed overlay; fullscreen removes the canvas padding so it anchors to the iframe viewport.
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Features/Nicknames/NicknameEditor@Media',

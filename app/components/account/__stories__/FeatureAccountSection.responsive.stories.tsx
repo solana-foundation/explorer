@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureAccountSection } from '../FeatureAccountSection';
@@ -10,10 +10,6 @@ import { FeatureAccountSection } from '../FeatureAccountSection';
 const meta = {
     component: FeatureAccountSection,
     decorators: [withClusterAndAccounts, withTokenInfoBatch, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/FeatureAccountSection@Media',
 } satisfies Meta<typeof FeatureAccountSection>;
