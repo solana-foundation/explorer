@@ -6,7 +6,6 @@ import { screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { type CardRow, readCardRows, renderTxCard, renderWithProviders } from '@/app/__tests__/card-harness';
-import { Logger } from '@/app/shared/lib/logger';
 
 import { BpfUpgradeableLoaderDetailsCard } from '../BpfUpgradeableLoaderDetailsCard';
 
@@ -88,13 +87,10 @@ describe('BpfUpgradeableLoaderDetailsCard', () => {
         expect(screen.getByText('BPF Upgradeable Loader: Unknown Instruction')).toBeInTheDocument();
     });
 
-    it('should log the error and show the unknown card for an instruction it cannot decode', () => {
-        const logged = vi.spyOn(Logger, 'error').mockImplementation(() => undefined);
+    it('should throw for an instruction it cannot decode', () => {
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-        renderTxCard(card('upgrade', { authority: AUTHORITY }));
-
-        expect(screen.getByText('BPF Upgradeable Loader: Unknown Instruction')).toBeInTheDocument();
-        expect(logged).toHaveBeenCalled();
+        expect(() => renderTxCard(card('upgrade', { authority: AUTHORITY }))).toThrow();
     });
 });
 

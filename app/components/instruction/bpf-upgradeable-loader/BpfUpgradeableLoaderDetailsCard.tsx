@@ -7,14 +7,11 @@ import {
     preformatted,
     text,
     UnknownDetailsCard,
-    useInstructionSurface,
 } from '@entities/instruction-card';
 import { ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { camelToTitleCase, wrap } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import { create, is } from 'superstruct';
-
-import { Logger } from '@/app/shared/lib/logger';
 
 import {
     CloseInfo,
@@ -34,24 +31,17 @@ type DetailsProps = {
 };
 
 export function BpfUpgradeableLoaderDetailsCard({ node, ix }: DetailsProps) {
-    const { signature } = useInstructionSurface();
-
-    try {
-        const parsed = create(ix.parsed, ParsedInfo);
-        if (!is(parsed.type, UpgradeableBpfLoaderInstructionType)) {
-            return <UnknownDetailsCard node={node} />;
-        }
-        const info = decodeInfo(parsed.type, parsed.info);
-
-        return (
-            <InstructionCardView node={node} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsed.type)}`}>
-                <InstructionFields programId={node.programId} fields={infoFields(info)} />
-            </InstructionCardView>
-        );
-    } catch (error) {
-        Logger.error(error, { signature });
+    const parsed = create(ix.parsed, ParsedInfo);
+    if (!is(parsed.type, UpgradeableBpfLoaderInstructionType)) {
         return <UnknownDetailsCard node={node} />;
     }
+    const info = decodeInfo(parsed.type, parsed.info);
+
+    return (
+        <InstructionCardView node={node} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsed.type)}`}>
+            <InstructionFields programId={node.programId} fields={infoFields(info)} />
+        </InstructionCardView>
+    );
 }
 
 function decodeInfo(type: UpgradeableBpfLoaderInstructionType, info: unknown): object {

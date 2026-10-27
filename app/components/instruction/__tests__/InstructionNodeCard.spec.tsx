@@ -212,6 +212,23 @@ describe('InstructionNodeCard', () => {
         consoleError.mockRestore();
     });
 
+    it.each([
+        ['System Program', SystemProgram.programId, 'system', 'transfer'],
+        ['Stake Program', StakeProgram.programId, 'stake', 'deactivate'],
+        ['Vote Program', VoteProgram.programId, 'vote', 'withdraw'],
+        ['BPF Upgradeable Loader', BPF_UPGRADEABLE_LOADER_PROGRAM_ID, 'bpf-upgradeable-loader', 'upgrade'],
+    ])(
+        'should show the unknown card for a %s instruction that its card cannot decode',
+        (name, programId, program, type) => {
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+            renderCard(toInstructionNode({ index: 0, ix: rpcParsed(programId, program, type, {}) }));
+
+            expect(screen.getByText(`${name}: Unknown Instruction`)).toBeInTheDocument();
+            consoleError.mockRestore();
+        },
+    );
+
     it('should resolve ed25519 offsets against the instruction data of the surface', () => {
         const signatureInInstruction1 = new Uint8Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]);
         const ed25519 = new TransactionInstruction({
