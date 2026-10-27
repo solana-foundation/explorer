@@ -13,8 +13,8 @@ import { TxInstructionShell } from './TxInstructionShell';
  * Lives here rather than in the transaction feature so tests that render a card
  * in isolation can pick a surface without reaching across layers. The inspector
  * declares its own surface next to its `InstructionsSection`, because
- * `InspectorInstructionCard` imports this entity's barrel and moving it here
- * would close an import cycle.
+ * `InstructionNodeCard` imports this entity's barrel and moving the surface
+ * here would close an import cycle.
  */
 export function TxInstructionSurface({
     result,

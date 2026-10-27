@@ -30,7 +30,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { findCell, readCell, renderWithProviders } from '@/app/__tests__/card-harness';
-import { useAddressLookupTables } from '@/app/providers/accounts';
+import { useAccountInfo, useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
@@ -64,14 +64,15 @@ vi.mock('@components/instruction/system/SystemDetailsCard', async importOriginal
     return { ...actual, SystemDetailsCard: vi.fn(actual.SystemDetailsCard) };
 });
 
-vi.mock('@/app/providers/accounts', async importOriginal => ({
-    ...(await importOriginal<typeof import('@/app/providers/accounts')>()),
-    useAddressLookupTables: vi.fn(() => []),
-}));
+vi.mock('@/app/providers/accounts', async importOriginal => {
+    const actual = await importOriginal<typeof import('@/app/providers/accounts')>();
+    return { ...actual, useAccountInfo: vi.fn(actual.useAccountInfo), useAddressLookupTables: vi.fn(() => []) };
+});
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 beforeEach(() => {
+    vi.mocked(useAccountInfo).mockReset();
     vi.mocked(useAddressLookupTables).mockReturnValue([]);
     vi.mocked(useIdlInstructionDecode).mockReturnValue(undefined);
 });
@@ -158,6 +159,18 @@ describe('Inspector InstructionsSection with a Token Metadata instruction', () =
         expect(await screen.findByText(title)).toBeInTheDocument();
         expect(screen.getAllByRole('button', { name: 'Collapse' })).toHaveLength(2);
         expect(screen.getAllByText('Program')).toHaveLength(1);
+    });
+
+    test('should check the program of the instruction in the Raw view', async () => {
+        vi.mocked(useAccountInfo).mockReturnValue({
+            data: { data: {}, executable: false, lamports: 1, owner: PublicKey.default, pubkey: PublicKey.default },
+            status: FetchStatus.Fetched,
+        });
+        renderSection(buildTokenMetadataMessage([7]));
+
+        await userEvent.click(await screen.findByRole('button', { name: /Raw/ }));
+
+        expect(screen.getByText('Only executable accounts can be invoked')).toBeInTheDocument();
     });
 });
 

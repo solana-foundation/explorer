@@ -21,7 +21,7 @@ export function InstructionCardView({
     /**
      * Program events the card derived itself — typically from transaction logs
      * via a hook, so they cannot come from the node or the field descriptors.
-     * The inspector's shell ignores them.
+     * The inspector has no transaction logs, so its cards have no events.
      */
     events?: React.ReactNode[];
     /** Optional: a card that opens in raw mode has no field table to draw behind it. */

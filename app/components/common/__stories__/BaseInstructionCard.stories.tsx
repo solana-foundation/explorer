@@ -1,5 +1,11 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { nextjsParameters, withCluster, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
+import {
+    nextjsParameters,
+    withCluster,
+    withClusterAndAccounts,
+    withScrollAnchor,
+    withTokenInfoBatch,
+} from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -70,4 +76,16 @@ export const Collapsible: Story = {
         result: { err: null },
         title: 'Collapsible Instruction',
     },
+};
+
+export const ValidatedProgram: Story = {
+    args: {
+        defaultRaw: true,
+        index: 0,
+        ix: sampleIx,
+        result: { err: null },
+        title: 'Inspected Instruction',
+        validateProgram: true,
+    },
+    decorators: [withClusterAndAccounts],
 };

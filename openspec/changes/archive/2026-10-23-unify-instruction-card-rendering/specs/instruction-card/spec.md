@@ -16,7 +16,15 @@ The card body MUST draw the `Program` row in the decoded view, on both surfaces.
 
 An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
 
+Both surfaces SHALL draw the frame with `BaseInstructionCard`. A `Shell` MAY only pass props to it, so the two surfaces differ in behavior and not in markup. The inspector's `Shell` makes every card collapsible, and checks in the raw view that the program exists and is executable, because an inspected message has not run.
+
 The frame and the cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `inspectorSurface` builds the inspector surface for one message. It sets `signature` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` MUST fail to compile, because a missing signature throws no error. The frame then fetches no raw transaction.
+
+#### Scenario: One frame on both surfaces
+
+- **WHEN** a card renders on the tx page or in the inspector
+- **THEN** its frame MUST be `BaseInstructionCard`
+- **AND** in the inspector the raw view MUST check the program of the instruction
 
 #### Scenario: One source for the signature
 

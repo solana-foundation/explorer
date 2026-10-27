@@ -21,7 +21,6 @@ export type InstructionShellProps = {
      * Program events, e.g. Anchor's `ProgramEventsCard`. Unlike `childCards`,
      * these are *derived by the card* from transaction logs rather than passed
      * down, so they arrive as a prop on `InstructionCardView`, not on the node.
-     * The inspector's shell drops them.
      */
     eventCards?: React.ReactNode[];
 };

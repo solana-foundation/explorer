@@ -1,8 +1,9 @@
-import { Address } from '@components/common/Address';
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { cn } from '@components/shared/utils';
+// The entity barrel imports this frame, so a barrel import would form a cycle.
+import { ProgramField } from '@entities/instruction-card/ui/ProgramField';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
@@ -34,6 +35,8 @@ type InstructionProps = {
     headerButtons?: React.ReactNode;
     // Show a Collapse/Expand button that hides all card content
     collapsible?: boolean;
+    // Check in the Raw view that the program exists and is executable
+    validateProgram?: boolean;
 };
 
 export function BaseInstructionCard({
@@ -51,6 +54,7 @@ export function BaseInstructionCard({
     rawUnavailable,
     headerButtons,
     collapsible = false,
+    validateProgram = false,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
@@ -103,12 +107,7 @@ export function BaseInstructionCard({
                 <BaseTable.Body>
                     {showRaw ? (
                         <>
-                            <BaseTable.Row>
-                                <BaseTable.Cell>Program</BaseTable.Cell>
-                                <BaseTable.Cell className="text-right">
-                                    <Address pubkey={ix.programId} alignRight link />
-                                </BaseTable.Cell>
-                            </BaseTable.Row>
+                            <ProgramField programId={ix.programId} showExtendedInfo={validateProgram} />
                             {'parsed' in ix ? (
                                 <BaseRawParsedDetails ix={ix}>
                                     {raw ? (

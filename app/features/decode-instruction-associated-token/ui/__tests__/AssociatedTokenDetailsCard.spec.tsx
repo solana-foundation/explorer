@@ -53,7 +53,7 @@ const CASES = [
 
 const SHELLS = [
     { render: renderBaseCard, shell: 'BaseInstructionCard' },
-    { render: renderInspectorCard, shell: 'InspectorInstructionCard' },
+    { render: renderInspectorCard, shell: 'the inspector shell' },
 ];
 
 describe('AssociatedTokenDetailsCard', () => {
