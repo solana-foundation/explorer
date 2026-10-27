@@ -5,6 +5,7 @@ import { buildAnchorProgram } from '../anchor/build-anchor-program';
 import { convertAnchorToCodama } from '../converters/convert-anchor-to-codama';
 import { buildProgramIdlNames } from '../instruction-name-table';
 
+// The Program constructor requires a provider. canDecoderLoad sends no request to this URL.
 const UNUSED_RPC_URL = 'http://localhost:8899';
 
 export function canDecoderLoad(tagged: TaggedIdl, programAddress: string): boolean {
