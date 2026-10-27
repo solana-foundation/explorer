@@ -208,10 +208,14 @@ export function formatAnchorIdl(idl: Idl): FormattedIdl {
             name: err.name,
         })),
         events: idl.events?.map(event => {
-            const eventType = typesMap.get(event.name)?.type as IdlTypeDefTy;
+            // Modern Anchor events reference a defined type; pre-0.30 events carry their fields inline.
+            const definedType = typesMap.get(event.name)?.type as IdlTypeDefTy | undefined;
+            const inlineFields = (event as { fields?: IdlDefinedFields }).fields;
+            const eventType =
+                definedType ?? (inlineFields ? { fields: inlineFields, kind: 'struct' as const } : undefined);
             return {
                 docs: [],
-                fieldType: parseIdlTypeDef(eventType),
+                fieldType: eventType ? parseIdlTypeDef(eventType) : null,
                 name: event.name,
             };
         }),

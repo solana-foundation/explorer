@@ -557,6 +557,32 @@ describe('formatAnchorIdl', () => {
         expect((events?.[0].fieldType as StructFieldType)?.fields?.[1].type).toBe('publicKey');
     });
 
+    it('should render pre-0.30 events whose fields are inline rather than a defined type', () => {
+        const idl = {
+            events: [
+                {
+                    fields: [
+                        { index: false, name: 'whirlpool', type: 'publicKey' },
+                        { index: false, name: 'liquidity', type: 'u128' },
+                    ],
+                    name: 'LiquidityDecreased',
+                },
+            ],
+            instructions: [],
+        };
+
+        const formatted = formatAnchorIdl(idl as any);
+
+        const events = formatted.events;
+        expect(events).toHaveLength(1);
+        expect(events?.[0].name).toBe('LiquidityDecreased');
+        expect(events?.[0].fieldType?.kind).toBe('struct');
+        expect((events?.[0].fieldType as StructFieldType)?.fields).toMatchObject([
+            { name: 'whirlpool', type: 'publicKey' },
+            { name: 'liquidity', type: 'u128' },
+        ]);
+    });
+
     it('should filter out types that are used as accounts or events', () => {
         const idl = {
             accounts: [{ name: 'UserAccount', type: { fields: [], kind: 'struct' } }],
