@@ -8,8 +8,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { wormholeInstructionParsers } from '../lib/wormhole-client';
 import { WORMHOLE_PROGRAM_LABEL } from '../lib/wormhole-parser';
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
-
 const dispatcher = createInstructionParserDispatcher(wormholeInstructionParsers);
 
 describe('parseWormholeInstruction', () => {

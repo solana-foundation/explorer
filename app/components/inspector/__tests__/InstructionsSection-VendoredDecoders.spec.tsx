@@ -34,9 +34,6 @@ vi.mock('swr', () => ({
     })),
 }));
 
-// The Token Swap and Wormhole parsers report a tag outside their name table through `Logger.error`.
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
-
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(() => '/'),
     useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),

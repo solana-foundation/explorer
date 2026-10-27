@@ -10,8 +10,7 @@ import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 
 import votingIdl029 from '../__mocks__/anchor/anchor-0.29.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
-import votingIdl030 from '../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
-import votingIdl030Variations from '../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
+import votingIdl030 from '../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import donateIdl0301 from '../__mocks__/anchor/anchor-0.30.1-donate-DRLYxueWz6iymdsaRCER6iv6v9zL7gFWANwDL2V5VUx1.json';
 import codamaVotingIdl from '../__mocks__/codama/codama-voting.json';
 import { computePdas } from '../pda-generator/compute-pdas';
@@ -167,7 +166,7 @@ describe('computePdas', () => {
 
     // 0.30 variations tests - nested groups
     it('should skip nested account groups', async () => {
-        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_nested', { arguments: { pollId: '999' } });
+        const pdas = await pdasFor(votingIdl030, 'instruction_with_nested', { arguments: { pollId: '999' } });
 
         expect(Object.keys(pdas)).toEqual(['poll']);
         expect(pdas.poll.generated).toEqual(expect.any(String));
@@ -176,7 +175,7 @@ describe('computePdas', () => {
     // 0.30 variations tests
     it('should handle account seeds', async () => {
         const accountPubkey = PublicKey.default.toString();
-        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_account_seed', {
+        const pdas = await pdasFor(votingIdl030, 'instruction_with_account_seed', {
             accounts: { authority: accountPubkey },
         });
 
@@ -186,7 +185,7 @@ describe('computePdas', () => {
     });
 
     it('should handle const seeds', async () => {
-        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_const_seed');
+        const pdas = await pdasFor(votingIdl030, 'instruction_with_const_seed');
 
         expect(pdas.pdaAccount.generated).not.toBeNull();
         expect(pdas.pdaAccount.seeds).toHaveLength(1);
@@ -194,7 +193,7 @@ describe('computePdas', () => {
     });
 
     it('should return null when account seed value is missing', async () => {
-        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_account_seed');
+        const pdas = await pdasFor(votingIdl030, 'instruction_with_account_seed');
 
         expect(pdas.pdaAccount.generated).toBeNull();
         expect(pdas.pdaAccount.seeds).toHaveLength(1);

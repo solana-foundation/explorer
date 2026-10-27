@@ -8,8 +8,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { tokenSwapInstructionParsers } from '../lib/token-swap-client';
 import { TOKEN_SWAP_PROGRAM_LABEL } from '../lib/token-swap-parser';
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
-
 const dispatcher = createInstructionParserDispatcher(tokenSwapInstructionParsers);
 
 describe('parseTokenSwapInstruction', () => {

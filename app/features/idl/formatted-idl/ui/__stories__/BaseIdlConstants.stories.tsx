@@ -5,13 +5,6 @@ import { SearchHighlightProvider } from '../SearchHighlightContext';
 
 const meta = {
     component: BaseIdlConstants,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlConstants',
 } satisfies Meta<typeof BaseIdlConstants>;
@@ -120,9 +113,7 @@ export const WithSearchTerm: Story = {
     decorators: [
         Story => (
             <SearchHighlightProvider searchStr="deposit">
-                <div>
-                    <Story />
-                </div>
+                <Story />
             </SearchHighlightProvider>
         ),
     ],
