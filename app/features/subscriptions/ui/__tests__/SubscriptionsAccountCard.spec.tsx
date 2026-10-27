@@ -1,16 +1,11 @@
-import { gen } from '@__fixtures__/gen';
+import {
+    SUBSCRIPTION_AUTHORITY_BYTES,
+    subscriptionsAccount,
+} from '@features/subscriptions/__fixtures__/subscriptions-accounts';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
-import { address } from '@solana/kit';
-import {
-    AccountDiscriminator,
-    getSubscriptionAuthorityEncoder,
-    SUBSCRIPTIONS_PROGRAM_ADDRESS,
-} from '@solana/subscriptions';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { SubscriptionsAccountCard } from '../SubscriptionsAccountCard';
 
@@ -47,25 +42,7 @@ describe('SubscriptionsAccountCard', () => {
     });
 });
 
-const RAW = new Uint8Array(
-    getSubscriptionAuthorityEncoder().encode({
-        bump: 254,
-        discriminator: AccountDiscriminator.SubscriptionAuthority,
-        initId: 7n,
-        payer: address(gen.address(1)),
-        tokenMint: address(gen.address(2)),
-        user: address(gen.address(3)),
-    }),
-);
-
-const ACCOUNT: Account = {
-    data: { raw: RAW },
-    executable: false,
-    lamports: 1,
-    owner: toLegacyPublicKey(address(SUBSCRIPTIONS_PROGRAM_ADDRESS)),
-    pubkey: gen.publicKey(0),
-    space: RAW.length,
-};
+const ACCOUNT = subscriptionsAccount(SUBSCRIPTION_AUTHORITY_BYTES);
 
 function renderCard() {
     render(

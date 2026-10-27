@@ -14,17 +14,12 @@ export {
     type BufferHeaderOverrides,
     DOC,
     DOC_PRETTY,
+    IDL_DOC,
     metadataAccountData,
     pack,
 } from '@entities/pmp-account/__fixtures__/pmp-account';
 
 export const YAML_DOC = 'name: orbit\nversion: 1.0.0\n';
-
-export const IDL_DOC = JSON.stringify({
-    instructions: [{ name: 'initialize' }],
-    name: 'company_program',
-    version: '1.0.0',
-});
 
 /** One byte past the render cap, so unpacking it always lands on the `oversized` arm. */
 export const OVERSIZED_DOC = 'x'.repeat(PMP_DECODED_RENDER_CAP_BYTES + 1);

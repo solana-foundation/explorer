@@ -1,3 +1,4 @@
+import { compressedNft, FUNGIBLE_TOKEN } from '@components/account/__fixtures__/compressed-nft';
 import { makeAccount } from '@entities/account/__fixtures__/account';
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey } from '@solana/web3.js';
@@ -29,75 +30,16 @@ vi.mock('../UnknownAccountCard', () => ({
 
 const MINT_ACCOUNT = makeAccount({ data: { raw: Buffer.alloc(82) }, owner: TOKEN_PROGRAM_ID, space: 82 });
 
+const KEY = PublicKey.default.toBase58();
+
 // getAsset resolves fungible mints too, and returns an empty owner for them.
-function makeFungibleAsset(overrides: Partial<CompressedNft> = {}): CompressedNft {
-    return {
-        authorities: [{ address: PublicKey.default.toBase58(), scopes: ['full'] }],
-        burnt: false,
-        compression: {
-            asset_hash: '',
-            compressed: false,
-            creator_hash: '',
-            data_hash: '',
-            eligible: false,
-            leaf_id: 0,
-            seq: 0,
-            tree: '',
-        },
-        content: {
-            $schema: '',
-            files: [],
-            json_uri: '',
-            links: { external_url: '', image: '' },
-            metadata: {
-                attributes: [],
-                description: '',
-                name: 'dogwifhat',
-                symbol: '$WIF',
-                token_standard: 'Fungible',
-            },
-        },
-        creators: [],
-        grouping: [],
-        id: PublicKey.default.toBase58(),
-        interface: 'FungibleToken',
-        mutable: false,
-        ownership: { delegate: null, delegated: false, frozen: false, owner: '', ownership_model: 'token' },
-        royalty: {
-            basis_points: 0,
-            locked: false,
-            percent: 0,
-            primary_sale_happened: false,
-            royalty_model: 'creators',
-            target: null,
-        },
-        supply: { edition_nonce: null, print_current_supply: 0, print_max_supply: 0 },
-        ...overrides,
-    };
+function makeFungibleAsset(assetInterface = FUNGIBLE_TOKEN.assetInterface) {
+    return compressedNft({ ...FUNGIBLE_TOKEN, assetInterface });
 }
 
 // A non-compressed asset that does have an owner, so the card can still describe it.
-function makeCoreAsset(overrides: Partial<CompressedNft> = {}): CompressedNft {
-    const base = makeFungibleAsset();
-    return {
-        ...base,
-        grouping: [{ group_key: 'collection', group_value: PublicKey.default.toBase58() }],
-        interface: 'MplCoreAsset',
-        ownership: { ...base.ownership, owner: PublicKey.default.toBase58(), ownership_model: 'single' },
-        ...overrides,
-    };
-}
-
-function makeCompressedNft(overrides: Partial<CompressedNft> = {}): CompressedNft {
-    const base = makeFungibleAsset();
-    return {
-        ...base,
-        compression: { ...base.compression, compressed: true, eligible: true },
-        grouping: [{ group_key: 'collection', group_value: PublicKey.default.toBase58() }],
-        interface: 'V1_NFT',
-        ownership: { ...base.ownership, owner: PublicKey.default.toBase58(), ownership_model: 'single' },
-        ...overrides,
-    };
+function makeCoreAsset() {
+    return compressedNft({ assetInterface: 'MplCoreAsset', collection: KEY, compressed: false, owner: KEY });
 }
 
 describe('CompressedNftCard', () => {
@@ -122,17 +64,17 @@ describe('CompressedNftCard', () => {
 
 describe('getAssetTypeLabel', () => {
     it('should label a compressed asset as a compressed NFT', () => {
-        expect(getAssetTypeLabel(makeCompressedNft())).toBe('Metaplex Compressed NFT');
+        expect(getAssetTypeLabel(compressedNft({ collection: KEY }))).toBe('Metaplex Compressed NFT');
     });
 
     it('should label an uncompressed asset from its interface', () => {
         expect(getAssetTypeLabel(makeFungibleAsset())).toBe('Token');
-        expect(getAssetTypeLabel(makeFungibleAsset({ interface: 'V1_NFT' }))).toBe('Metaplex NFT');
-        expect(getAssetTypeLabel(makeFungibleAsset({ interface: 'MplCoreAsset' }))).toBe('Metaplex Core Asset');
+        expect(getAssetTypeLabel(makeFungibleAsset('V1_NFT'))).toBe('Metaplex NFT');
+        expect(getAssetTypeLabel(makeFungibleAsset('MplCoreAsset'))).toBe('Metaplex Core Asset');
     });
 
     it('should fall back to a generic label for an unknown interface', () => {
-        expect(getAssetTypeLabel(makeFungibleAsset({ interface: 'SomethingNew' }))).toBe('Asset');
+        expect(getAssetTypeLabel(makeFungibleAsset('SomethingNew'))).toBe('Asset');
     });
 });
 
@@ -148,7 +90,7 @@ describe('CompressedNFTHeader', () => {
     });
 
     it('should keep compressed labels for a real compressed NFT', () => {
-        render(<CompressedNFTHeader compressedNft={makeCompressedNft()} />);
+        render(<CompressedNFTHeader compressedNft={compressedNft({ collection: KEY })} />);
 
         expect(screen.getByText('Metaplex Compressed NFT')).toBeDefined();
         expect(screen.getByText('Compressed')).toBeDefined();

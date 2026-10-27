@@ -6,27 +6,21 @@ import {
 } from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
-    getCreateMetadataAccountV3InstructionDataSerializer,
     getUpdateMetadataAccountV2InstructionDataSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import type { PublicKey } from '@solana/web3.js';
 import { withTokenInfoBatch, withTransactions, withTxInstructionSurface } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { invariant } from '@/app/shared/lib/invariant';
 
+import { createMetadataAccountV3Data, KEYS, tokenMetadataInstruction } from '../../__fixtures__/instructions';
 import { metaplexTokenMetadataInstructionParser } from '../../lib/metaplex-token-metadata-client';
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
 
-const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
-const KEY_A = new PublicKey(new Uint8Array(32).fill(1));
-const KEY_B = new PublicKey(new Uint8Array(32).fill(2));
-const KEY_C = new PublicKey(new Uint8Array(32).fill(3));
-const KEY_D = new PublicKey(new Uint8Array(32).fill(4));
-const KEY_E = PublicKey.default;
+const [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E] = KEYS;
 
 const dispatcher = createInstructionParserDispatcher([metaplexTokenMetadataInstructionParser]);
 
@@ -35,11 +29,7 @@ function makeIx(
     data: Uint8Array | Buffer,
     keys: PublicKey[] = [],
 ): { node: InstructionNode; parsed: ParsedInstructionInfo | undefined } {
-    const raw = new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId: PROGRAM_ID,
-    });
+    const raw = tokenMetadataInstruction(data, keys);
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     invariant(dispatched, 'the token metadata program is registered');
     return {
@@ -48,7 +38,6 @@ function makeIx(
     };
 }
 
-const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
 const updateMetadataV2Serializer = getUpdateMetadataAccountV2InstructionDataSerializer();
 const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataSerializer();
 
@@ -63,25 +52,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const CreateMetadataAccountV3: Story = {
-    args: makeIx(
-        0,
-        Buffer.from(
-            createMetadataV3Serializer.serialize({
-                collectionDetails: none(),
-                data: {
-                    collection: none(),
-                    creators: none(),
-                    name: 'My NFT',
-                    sellerFeeBasisPoints: 500,
-                    symbol: 'MNFT',
-                    uri: 'https://example.com/nft.json',
-                    uses: none(),
-                },
-                isMutable: true,
-            }),
-        ),
-        [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E],
-    ),
+    args: makeIx(0, createMetadataAccountV3Data(), [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E]),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Create Metadata Account V3')).toBeInTheDocument();
