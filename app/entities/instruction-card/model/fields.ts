@@ -13,6 +13,7 @@ export type FieldValue =
     | { kind: 'address'; address: Address }
     | { kind: 'sol'; lamports: number | bigint }
     | { kind: 'bytes'; size: number }
+    | { kind: 'epoch'; epoch: number | bigint }
     | { kind: 'string'; value: string }
     | { kind: 'text'; value: string | number }
     | { kind: 'timestamp'; unixSeconds: number }
@@ -61,6 +62,11 @@ export function account(
 /** A lamport amount, rendered as SOL. */
 export function sol(label: string, lamports: number | bigint): InstructionField {
     return { kind: 'sol', label, lamports };
+}
+
+/** An epoch, rendered as a link to its page. */
+export function epoch(label: string, value: number | bigint): InstructionField {
+    return { epoch: value, kind: 'epoch', label };
 }
 
 /** An account data size, rendered as `N byte(s)`. */

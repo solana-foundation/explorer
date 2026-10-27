@@ -6,6 +6,7 @@ export {
     bytes,
     compactFields,
     custom,
+    epoch,
     heading,
     preformatted,
     sol,

@@ -3,11 +3,14 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { account, string } from '../model/fields';
+import { renderWithProviders } from '@/app/__tests__/card-harness';
+
+import { account, epoch, string } from '../model/fields';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { InstructionFields } from '../ui/InstructionFields';
 
 vi.mock('@/app/components/common/Address', () => ({ Address: () => <div /> }));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const STUB_SURFACE: InstructionSurface = {
     Card: () => undefined,
@@ -64,5 +67,22 @@ describe('InstructionFields', () => {
 
         const labelCell = within(screen.getAllByRole('row')[1]).getAllByRole('cell')[0];
         expect(labelCell).toHaveTextContent(['Source', ...badges].join(''));
+    });
+
+    it('should link an epoch field to the page of the epoch', () => {
+        renderWithProviders(
+            <InstructionSurfaceProvider surface={STUB_SURFACE}>
+                <table>
+                    <tbody>
+                        <InstructionFields fields={[epoch('Lockup Expiry Epoch', 300)]} programId={PublicKey.default} />
+                    </tbody>
+                </table>
+            </InstructionSurfaceProvider>,
+        );
+
+        expect(screen.getByRole('link', { name: '300' })).toHaveAttribute(
+            'href',
+            expect.stringContaining('/epoch/300'),
+        );
     });
 });

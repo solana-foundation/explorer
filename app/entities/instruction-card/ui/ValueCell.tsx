@@ -1,6 +1,7 @@
 'use client';
 
 import { Copyable } from '@components/common/Copyable';
+import { Epoch } from '@components/common/Epoch';
 import { SolBalance } from '@components/common/SolBalance';
 import { cn } from '@components/shared/utils';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
@@ -23,6 +24,7 @@ const CELL_CLASS: Record<FieldValue['kind'], string | undefined> = {
     address: undefined,
     bytes: undefined,
     custom: undefined,
+    epoch: undefined,
     preformatted: undefined,
     sol: undefined,
     string: undefined,
@@ -38,6 +40,8 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
             return <SolBalance lamports={value.lamports} />;
         case 'bytes':
             return <>{`${value.size} byte(s)`}</>;
+        case 'epoch':
+            return <Epoch epoch={value.epoch} link />;
         case 'string':
             return (
                 <Copyable text={value.value}>
