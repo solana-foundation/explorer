@@ -5,8 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type FullTokenInfo, getFullTokenInfo } from '../token-info';
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
-
 describe('getFullTokenInfo', () => {
     beforeEach(() => {
         vi.stubGlobal('fetch', vi.fn());

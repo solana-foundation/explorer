@@ -6,13 +6,6 @@ import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';
 
 const meta = {
     component: ProgramSecurityTxtCard,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         backgrounds: {
             default: 'Card',

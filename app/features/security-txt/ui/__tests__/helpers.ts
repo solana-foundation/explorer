@@ -50,23 +50,3 @@ export function createNeodymeSecurityTxt(fields: Partial<NeodymeSecurityTxtField
         type: 'elf',
     };
 }
-
-export function createNeodymeSecurityTxtWithOptionalFields(
-    fields: Partial<NeodymeSecurityTxtFields> = {},
-): ResolvedSecurityTxt {
-    return {
-        fields: {
-            ...createNeodymeSecurityTxt().fields,
-            acknowledgements: 'Test Acknowledgements',
-            auditors: 'Test Auditors',
-            encryption: 'pgp',
-            expiry: '2025-12-31',
-            preferred_languages: 'en',
-            source_code: 'https://github.com/example/test',
-            source_release: 'v1.0.0',
-            source_revision: 'abc123',
-            ...fields,
-        },
-        type: 'elf',
-    };
-}

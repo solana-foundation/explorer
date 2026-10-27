@@ -17,7 +17,6 @@ vi.mock('@features/account-share/server', () => ({
     loadOgGlows: mocks.loadOgGlows,
 }));
 vi.mock('@/app/shared/lib/og/fonts', () => ({ loadOgFonts: mocks.loadOgFonts }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
 import { GET } from '../route';
 

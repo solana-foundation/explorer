@@ -9,8 +9,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { serumInstructionParsers } from '../lib/serum-client';
 import { parseSerumInstruction, SERUM_PROGRAM_LABEL } from '../lib/serum-parser';
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
-
 const MARKET = address('FagABcRBhZH27JDtu6A1Jo9woXyoznP28QujLkxkN9Hj');
 const EVENT_QUEUE = address('7txXZZD6Um59YoLMF7XUNimbMjsqsWhc7g2EniiTrmp1');
 const OPEN_ORDERS = address('GgU1RSCbCTNfjPqBGnR7NBDZoLQwB7oEjnHqzGtcCLBH');

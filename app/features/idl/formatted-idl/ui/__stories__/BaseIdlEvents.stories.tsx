@@ -4,13 +4,6 @@ import { BaseIdlEvents } from '../BaseIdlEvents';
 
 const meta = {
     component: BaseIdlEvents,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlEvents',
 } satisfies Meta<typeof BaseIdlEvents>;
