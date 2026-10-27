@@ -1,7 +1,9 @@
+import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 // Repo's stored PMP Codama IDL mock (not kept in sync with the published IDL) — drives the real decode path.
 import pmpIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { address } from '@solana/kit';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
     getAllocateInstructionDataEncoder,
     getSetAuthorityInstructionDataEncoder,
@@ -25,16 +27,9 @@ const url = 'https://api.devnet.solana.com';
 
 // Account names are resolved from the IDL by position, so any keys work — only the count and the
 // (real) instruction data matter for decoding.
-function makeIx(data: Buffer, accountCount: number): TransactionInstruction {
-    return new TransactionInstruction({
-        data,
-        keys: Array.from({ length: accountCount }, () => ({
-            isSigner: false,
-            isWritable: false,
-            pubkey: PublicKey.unique(),
-        })),
-        programId: PROGRAM_ID,
-    });
+function makeIx(data: Buffer, accountCount: number) {
+    const keys = Array.from({ length: accountCount }, (_, index) => gen.publicKey(index));
+    return makeInstruction({ data, keys, programId: PROGRAM_ID });
 }
 
 const meta = {

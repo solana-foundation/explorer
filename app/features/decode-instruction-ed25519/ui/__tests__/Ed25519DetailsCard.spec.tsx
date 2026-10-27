@@ -1,6 +1,7 @@
 import { createInstructionParserDispatcher, toParsedInstruction } from '@entities/instruction-parser';
+import { buildParsedTransaction } from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { getBase58Decoder } from '@solana/kit';
-import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { ParsedTransaction, PartiallyDecodedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
@@ -150,14 +151,7 @@ function fromHex(hex: string): Buffer {
 }
 
 function transaction(...instructions: Array<{ data: unknown }>): ParsedTransaction {
-    return {
-        message: {
-            accountKeys: [],
-            instructions,
-            recentBlockhash: '11111111111111111111111111111111',
-        },
-        signatures: [],
-    } as unknown as ParsedTransaction;
+    return buildParsedTransaction({ instructions: instructions as PartiallyDecodedInstruction[] }).transaction;
 }
 
 /** Through the dispatcher when the program id is registered; parsed directly for the foreign-program case. */

@@ -1,6 +1,7 @@
 import { makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
-import { address } from '@solana/kit';
+import { address, type ReadonlyUint8Array } from '@solana/kit';
 import { ComputeBudgetProgram } from '@solana/web3.js';
+import { getSetComputeUnitLimitInstructionDataEncoder } from '@solana-program/compute-budget';
 import { Cluster } from '@utils/cluster';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
@@ -185,7 +186,7 @@ describe('estimateRequestedComputeUnits', () => {
     const createMockTransaction = (
         instructions: Array<{
             programId: string;
-            data: Uint8Array;
+            data: ReadonlyUint8Array;
         }>,
     ): Parameters<typeof estimateRequestedComputeUnits>[0] => {
         const staticAccounts = [...new Set(instructions.map(ix => ix.programId))].map(address);
@@ -206,9 +207,7 @@ describe('estimateRequestedComputeUnits', () => {
     describe('with explicit compute budget', () => {
         it('should return compute units from SetComputeUnitLimit instruction', () => {
             const computeUnits = 300_000;
-            const data = alloc(5);
-            data[0] = 2; // SetComputeUnitLimit instruction type
-            writeUint32LE(data, computeUnits, 1);
+            const data = getSetComputeUnitLimitInstructionDataEncoder().encode({ units: computeUnits });
 
             const tx = createMockTransaction([
                 {
@@ -238,13 +237,8 @@ describe('estimateRequestedComputeUnits', () => {
         });
 
         it('should prioritize first compute budget instruction found', () => {
-            const data1 = alloc(5);
-            data1[0] = 2;
-            writeUint32LE(data1, 100_000, 1);
-
-            const data2 = alloc(5);
-            data2[0] = 2;
-            writeUint32LE(data2, 200_000, 1);
+            const data1 = getSetComputeUnitLimitInstructionDataEncoder().encode({ units: 100_000 });
+            const data2 = getSetComputeUnitLimitInstructionDataEncoder().encode({ units: 200_000 });
 
             const tx = createMockTransaction([
                 {
@@ -366,9 +360,7 @@ describe('estimateRequestedComputeUnits', () => {
         });
 
         it('should handle compute budget with other instructions', () => {
-            const data = alloc(5);
-            data[0] = 2; // SetComputeUnitLimit
-            writeUint32LE(data, 500_000, 1);
+            const data = getSetComputeUnitLimitInstructionDataEncoder().encode({ units: 500_000 });
 
             const tx = createMockTransaction([
                 {
@@ -391,9 +383,7 @@ describe('estimateRequestedComputeUnits', () => {
         const createV1Transaction = (transactionConfig?: {
             computeUnitLimit?: number;
         }): Parameters<typeof estimateRequestedComputeUnits>[0] => {
-            const data = alloc(5);
-            data[0] = 2; // SetComputeUnitLimit
-            writeUint32LE(data, 999_999, 1);
+            const data = getSetComputeUnitLimitInstructionDataEncoder().encode({ units: 999_999 });
 
             const programAddress = address(ComputeBudgetProgram.programId.toBase58());
             const configValues =

@@ -1,3 +1,4 @@
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
@@ -60,14 +61,7 @@ describe('ParsedAccountRenderer', () => {
 
 const ADDRESS = PublicKey.default.toBase58();
 
-const ACCOUNT: Account = {
-    data: {},
-    executable: false,
-    lamports: 1,
-    owner: PublicKey.default,
-    pubkey: PublicKey.default,
-    space: 0,
-};
+const ACCOUNT = makeAccount({ space: 0 });
 
 function ClickCounter() {
     const [clicks, setClicks] = useState(0);

@@ -1,3 +1,4 @@
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
@@ -44,14 +45,7 @@ describe('AccountCard', () => {
     });
 });
 
-const ACCOUNT: Account = {
-    data: {},
-    executable: false,
-    lamports: 1,
-    owner: PublicKey.default,
-    pubkey: new PublicKey(1),
-    space: 0,
-};
+const ACCOUNT = makeAccount({ pubkey: new PublicKey(1), space: 0 });
 
 function renderCard() {
     render(

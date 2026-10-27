@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -121,14 +122,9 @@ describe('SolanaAttestationDetailsCard', () => {
     });
 });
 
-function sasInstruction(data: number[], accountCount: number): TransactionInstruction {
-    const keys = [...ACCOUNTS, SYSTEM_PROGRAM].slice(0, accountCount).map(pubkey => ({
-        isSigner: false,
-        isWritable: false,
-        pubkey: new PublicKey(pubkey),
-    }));
-
-    return new TransactionInstruction({ data: Buffer.from(data), keys, programId: SAS_PROGRAM_ID });
+function sasInstruction(data: number[], accountCount: number) {
+    const keys = [...ACCOUNTS, SYSTEM_PROGRAM].slice(0, accountCount).map(pubkey => new PublicKey(pubkey));
+    return makeInstruction({ data, keys, programId: SAS_PROGRAM_ID });
 }
 
 function renderCard(raw: TransactionInstruction, ix = dispatcher.fromTransactionInstruction(raw)) {

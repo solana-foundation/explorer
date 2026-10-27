@@ -1,25 +1,18 @@
+import { makeNftData } from '@entities/nft/__fixtures__/make-nft-data';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-
-import type { NFTData } from '@/app/providers/accounts';
 
 import { MetaplexNFTHeader } from '../MetaplexNFTHeader';
 
 const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-const nftData = {
+const nftData = makeNftData({
     editionInfo: { masterEdition: { supply: 1000n } as never },
     json: undefined,
-    metadata: {
-        collection: { __option: 'None' },
-        creators: { __option: 'None' },
-        isMutable: true,
-        name: 'Bored Ape #1234',
-        primarySaleHappened: false,
-        symbol: 'BAYC',
-    },
-} as unknown as NFTData;
+    name: 'Bored Ape #1234',
+    symbol: 'BAYC',
+});
 
 const meta: Meta<typeof MetaplexNFTHeader> = {
     component: MetaplexNFTHeader,

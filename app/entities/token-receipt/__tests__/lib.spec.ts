@@ -1,19 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildFormattedReceipt } from '../__fixtures__/formatted-receipt';
+import { buildFormattedReceipt, buildFormattedTokenReceipt } from '../__fixtures__/formatted-receipt';
 import { getReceiptAmount, getReceiptMint, getReceiptSymbol } from '../lib';
-import type { FormattedReceiptToken } from '../types';
 
 const SOL_RECEIPT = buildFormattedReceipt({ total: { formatted: '1.5', raw: 1_500_000_000, unit: 'SOL' } });
 
-const TOKEN_FIELDS: Partial<FormattedReceiptToken> = {
-    kind: 'token',
-    mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-    symbol: 'USDC',
-    total: { formatted: '143.25', raw: 143.25, unit: 'USDC' },
-};
-
-const TOKEN_RECEIPT = buildFormattedReceipt(TOKEN_FIELDS);
+const TOKEN_RECEIPT = buildFormattedTokenReceipt();
 
 describe('getReceiptMint', () => {
     it('should return undefined for SOL receipts', () => {
@@ -25,7 +17,7 @@ describe('getReceiptMint', () => {
     });
 
     it('should return undefined for token receipts without mint', () => {
-        const receipt = buildFormattedReceipt({ ...TOKEN_FIELDS, mint: undefined });
+        const receipt = buildFormattedTokenReceipt({ mint: undefined });
         expect(getReceiptMint(receipt)).toBeUndefined();
     });
 });
@@ -40,7 +32,7 @@ describe('getReceiptSymbol', () => {
     });
 
     it('should return undefined for token receipts without symbol', () => {
-        const receipt = buildFormattedReceipt({ ...TOKEN_FIELDS, symbol: undefined });
+        const receipt = buildFormattedTokenReceipt({ symbol: undefined });
         expect(getReceiptSymbol(receipt)).toBeUndefined();
     });
 });

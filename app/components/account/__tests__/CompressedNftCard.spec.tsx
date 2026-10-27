@@ -1,10 +1,10 @@
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CompressedNftCard, CompressedNFTHeader, getAssetTypeLabel } from '@/app/components/account/CompressedNftCard';
-import type { Account } from '@/app/providers/accounts';
 import type { CompressedNft } from '@/app/providers/compressed-nft';
 
 const useCompressedNft = vi.hoisted(() => vi.fn<() => CompressedNft | null>(() => null));
@@ -27,16 +27,7 @@ vi.mock('../UnknownAccountCard', () => ({
     UnknownAccountCard: () => <div data-testid="unknown-account-card" />,
 }));
 
-function makeAccount(): Account {
-    return {
-        data: { raw: Buffer.alloc(82) },
-        executable: false,
-        lamports: 1_000_000,
-        owner: TOKEN_PROGRAM_ID,
-        pubkey: PublicKey.default,
-        space: 82,
-    };
-}
+const MINT_ACCOUNT = makeAccount({ data: { raw: Buffer.alloc(82) }, owner: TOKEN_PROGRAM_ID, space: 82 });
 
 // getAsset resolves fungible mints too, and returns an empty owner for them.
 function makeFungibleAsset(overrides: Partial<CompressedNft> = {}): CompressedNft {
@@ -113,7 +104,7 @@ describe('CompressedNftCard', () => {
     it('should fall back to the unknown-account card for an asset with no owner', () => {
         useCompressedNft.mockReturnValue(makeFungibleAsset());
 
-        render(<CompressedNftCard account={makeAccount()} />);
+        render(<CompressedNftCard account={MINT_ACCOUNT} />);
 
         expect(screen.getByTestId('unknown-account-card')).toBeDefined();
     });
@@ -121,7 +112,7 @@ describe('CompressedNftCard', () => {
     it('should still describe a non-compressed asset that has an owner', () => {
         useCompressedNft.mockReturnValue(makeCoreAsset());
 
-        render(<CompressedNftCard account={makeAccount()} />);
+        render(<CompressedNftCard account={MINT_ACCOUNT} />);
 
         expect(screen.queryByTestId('unknown-account-card')).toBeNull();
         expect(screen.getByText('Owner')).toBeDefined();

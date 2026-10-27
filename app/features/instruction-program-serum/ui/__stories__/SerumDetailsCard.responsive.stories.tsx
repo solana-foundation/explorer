@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     withCluster,
     withMockTransactions,
@@ -21,14 +21,10 @@ import { SerumDetailsCard } from '../SerumDetailsCard';
 const NEW_ORDER_V3_DATA =
     '000a0000000100000050c30000000000000400000000000000400d03000000000000000000010000000000000000000000ffff';
 
-const raw = new TransactionInstruction({
+const raw = makeInstruction({
     data: Buffer.from(NEW_ORDER_V3_DATA, 'hex'),
-    keys: Array.from({ length: 12 }, (_, i) => ({
-        isSigner: false,
-        isWritable: false,
-        pubkey: gen.publicKey(i),
-    })),
-    programId: new PublicKey(OPEN_BOOK_PROGRAM_IDS.mainnet),
+    keys: Array.from({ length: 12 }, (_, i) => gen.publicKey(i)),
+    programId: OPEN_BOOK_PROGRAM_IDS.mainnet,
 });
 
 const dispatched = createInstructionParserDispatcher(serumInstructionParsers).fromTransactionInstruction(raw);

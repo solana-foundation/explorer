@@ -1,5 +1,6 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { useInstructionSurface } from '@entities/instruction-card';
+import { buildParsedTransaction } from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { WORMHOLE_PROGRAM_IDS } from '@explorer/decoder-wormhole/detection';
 import { LIGHTHOUSE_ADDRESS } from '@features/decode-instruction-lighthouse';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
@@ -8,7 +9,7 @@ import { getBase58Decoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     type ParsedInstruction,
-    type ParsedTransaction,
+    type ParsedTransactionWithMeta,
     type PartiallyDecodedInstruction,
     PublicKey,
     SystemProgram,
@@ -55,7 +56,7 @@ const PARSED_TRANSFER_IX: ParsedInstruction = {
     programId: SystemProgram.programId,
 };
 
-let transactionWithMeta: { meta: unknown; slot: number; transaction: ParsedTransaction };
+let transactionWithMeta: ParsedTransactionWithMeta;
 
 vi.mock('@features/decode-instruction-lighthouse', async importOriginal => ({
     ...(await importOriginal<typeof import('@features/decode-instruction-lighthouse')>()),
@@ -192,19 +193,12 @@ function renderSection(
     instructions: PartiallyDecodedInstruction[],
     inner: (ParsedInstruction | PartiallyDecodedInstruction)[] = [],
 ) {
-    transactionWithMeta = {
-        meta: { innerInstructions: [{ index: 0, instructions: inner }] },
+    transactionWithMeta = buildParsedTransaction({
+        accountKeys: [PAYER],
+        innerInstructions: [{ index: 0, instructions: inner }],
+        instructions,
         slot: INNER_INSTRUCTIONS_START_SLOT,
-        transaction: {
-            message: {
-                accountKeys: [{ pubkey: PAYER, signer: true, source: 'transaction', writable: true }],
-                addressTableLookups: null,
-                instructions,
-                recentBlockhash: PublicKey.default.toBase58(),
-            },
-            signatures: [DEFAULT_SIGNATURE],
-        } as unknown as ParsedTransaction,
-    };
+    });
 
     return render(
         <ScrollAnchorProvider>

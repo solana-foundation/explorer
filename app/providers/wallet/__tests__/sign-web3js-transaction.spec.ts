@@ -1,3 +1,4 @@
+import { compileV0Message } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import {
     generateKeyPairSigner,
     getTransactionCodec,
@@ -9,13 +10,7 @@ import {
     verifySignature,
 } from '@solana/kit';
 import type { WalletSigner } from '@solana/kit-plugin-wallet';
-import {
-    PublicKey,
-    Transaction,
-    TransactionInstruction,
-    TransactionMessage,
-    VersionedTransaction,
-} from '@solana/web3.js';
+import { PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { signWeb3jsTransaction, signWeb3jsTransactions } from '../sign-web3js-transaction';
@@ -41,12 +36,7 @@ function makeLegacyTransaction(): Transaction {
 }
 
 function makeVersionedTransaction(): VersionedTransaction {
-    const message = new TransactionMessage({
-        instructions: [makeInstruction()],
-        payerKey: signerPublicKey,
-        recentBlockhash: blockhash,
-    }).compileToV0Message();
-    return new VersionedTransaction(message);
+    return new VersionedTransaction(compileV0Message(signerPublicKey, makeInstruction()));
 }
 
 function sign(messageBytes: ReadonlyUint8Array): Promise<SignatureBytes> {

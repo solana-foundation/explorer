@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
@@ -49,14 +50,7 @@ describe('TokenExtensionsCard', () => {
 
 const MINT = gen.address(0);
 
-const ACCOUNT: Account = {
-    data: {},
-    executable: false,
-    lamports: 1,
-    owner: PublicKey.default,
-    pubkey: new PublicKey(MINT),
-    space: 0,
-};
+const ACCOUNT = makeAccount({ pubkey: new PublicKey(MINT), space: 0 });
 
 function renderCard() {
     render(<TokenExtensionsCard address={MINT} decimals={6} extensions={[]} />);

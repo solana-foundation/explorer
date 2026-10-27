@@ -1,6 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { describe, expect, it, vi } from 'vitest';
 
+import { tokenInfo } from '@/app/entities/token-info/__fixtures__/token-info';
 import { getTokenInfo } from '@/app/entities/token-info/server';
 import { Cluster, CLUSTERS, clusterSlug } from '@/app/utils/cluster';
 import getReadableTitleFromAddress from '@/app/utils/get-readable-title-from-address';
@@ -27,7 +28,7 @@ describe('getReadableTitleFromAddress', () => {
     });
 
     it('should title a token with its name and a truncated address', async () => {
-        vi.mocked(getTokenInfo).mockResolvedValueOnce(tokenInfo('Wrapped SOL'));
+        vi.mocked(getTokenInfo).mockResolvedValueOnce(tokenInfo(TOKEN_ADDRESS, undefined, { name: 'Wrapped SOL' }));
 
         expect(await getReadableTitleFromAddress(props())).toBe('Token | Wrapped SOL (TK…11)');
     });
@@ -38,10 +39,6 @@ function props(cluster?: string) {
         params: Promise.resolve({ address: TOKEN_ADDRESS }),
         searchParams: Promise.resolve(cluster === undefined ? {} : { cluster }),
     };
-}
-
-function tokenInfo(name: string) {
-    return { address: TOKEN_ADDRESS, decimals: 9, logoURI: null, name, symbol: 'SOL' };
 }
 
 // A vanity address, so the truncated title asserts a literal `TK…11` instead of recomputing

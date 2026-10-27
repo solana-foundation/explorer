@@ -1,19 +1,12 @@
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../../lib/errors';
-import { type TokenInfo } from '../../lib/types';
 import { getTokenInfo, getTokenInfos } from '../fetch-token-mints';
 
-const mockToken: TokenInfo = {
-    address: PublicKey.default.toBase58(),
-    decimals: 9,
-    logoURI: null,
-    name: 'Wrapped SOL',
-    symbol: 'SOL',
-    verified: true,
-};
+const mockToken = tokenInfo(PublicKey.default.toBase58(), true);
 
 describe('getTokenInfos', () => {
     const originalFetch = global.fetch;

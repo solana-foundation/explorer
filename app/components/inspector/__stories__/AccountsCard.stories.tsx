@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
@@ -43,14 +44,7 @@ function MockAccountsProvider({ children }: { children: React.ReactNode }) {
     const mockState: State = {
         entries: {
             [PublicKey.default.toBase58()]: {
-                data: {
-                    data: {},
-                    executable: false,
-                    lamports: 1_000_000_000,
-                    owner: PublicKey.default,
-                    pubkey: PublicKey.default,
-                    space: 0,
-                },
+                data: makeAccount({ space: 0 }),
                 status: FetchStatus.Fetched,
             },
             [TOKEN_PROGRAM_ADDRESS]: {

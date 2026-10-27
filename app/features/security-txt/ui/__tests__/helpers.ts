@@ -1,15 +1,11 @@
+import { makeProgramDataInfo } from '@entities/account/__fixtures__/account';
 import type { NeodymeSecurityTxtFields, SecurityTxtFields } from '@solana/security-txt';
-import { PublicKey } from '@solana/web3.js';
 
 import type { ResolvedSecurityTxt } from '../../model/useSecurityTxt';
 
 // Minimal programData fixture for `SecurityCard`'s `data.programData` guard — its bytes are no longer
 // parsed (security.txt now resolves via `@solana/security-txt`), so the content is arbitrary.
-export const programDataFixture = {
-    authority: PublicKey.default,
-    data: ['deadbeef', 'base64'] as [string, 'base64'],
-    slot: 123,
-};
+export const programDataFixture = makeProgramDataInfo();
 
 // TODO: rebuild these on `gen.securityTxt` (@__fixtures__/gen) so there's one security.txt fixture source.
 export function createPmpSecurityTxt(fields: Partial<SecurityTxtFields> = {}): ResolvedSecurityTxt {

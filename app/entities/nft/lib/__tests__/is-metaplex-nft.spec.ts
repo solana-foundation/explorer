@@ -3,10 +3,9 @@ import { some } from '@metaplex-foundation/umi';
 import { describe, expect, it } from 'vitest';
 
 import { isMetaplexNFT } from '@/app/entities/nft';
+import { makeMetadata } from '@/app/entities/nft/__fixtures__/make-nft-data';
 import type { TokenProgramData } from '@/app/providers/accounts';
 import type { MintAccountInfo } from '@/app/validators/accounts/token';
-
-import { makeMetadata } from './make-nft-data';
 
 function makeMintInfo(overrides: Partial<MintAccountInfo> = {}): MintAccountInfo {
     return {

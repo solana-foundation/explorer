@@ -1,3 +1,4 @@
+import { makeInstruction } from '@__fixtures__/instruction';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
@@ -69,12 +70,8 @@ describe('ZkElGamalProofDetailsCard', () => {
     });
 });
 
-function instruction(data: number[], keys: string[] = []): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: keys.map(key => ({ isSigner: false, isWritable: false, pubkey: new PublicKey(key) })),
-        programId: PROGRAM_ID,
-    });
+function instruction(data: number[], keys: string[] = []) {
+    return makeInstruction({ data, keys: keys.map(key => new PublicKey(key)), programId: PROGRAM_ID });
 }
 
 function renderCard(ix: TransactionInstruction) {

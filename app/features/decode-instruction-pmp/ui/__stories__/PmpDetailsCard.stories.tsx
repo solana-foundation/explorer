@@ -1,8 +1,9 @@
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { PmpDetailsCard } from '@features/decode-instruction-pmp';
 import type { Account, State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -35,16 +36,9 @@ const IDL_DOC = JSON.stringify({
 
 // Account addresses are labelled positionally from the card's static name table, so any keys work here. Seeded
 // so the rendered addresses stay pixel-stable across runs.
-function makeIx(data: Uint8Array, accountCount: number): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: Array.from({ length: accountCount }, (_, index) => ({
-            isSigner: false,
-            isWritable: true,
-            pubkey: gen.publicKey(index),
-        })),
-        programId: PROGRAM_ID,
-    });
+function makeIx(data: Uint8Array, accountCount: number) {
+    const keys = Array.from({ length: accountCount }, (_, index) => gen.publicKey(index));
+    return makeInstruction({ data, keys, programId: PROGRAM_ID, writable: true });
 }
 
 function setDataIx({

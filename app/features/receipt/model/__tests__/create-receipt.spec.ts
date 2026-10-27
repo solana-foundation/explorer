@@ -1,4 +1,12 @@
 import { truncateAddress } from '@entities/address';
+import {
+    buildInnerGroup,
+    buildParsedTransaction,
+    buildPartiallyDecodedIx,
+    buildSolTransferIx,
+    buildSolTransferWithSeedIx,
+    buildTokenTransferCheckedIx,
+} from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,14 +34,6 @@ import {
 import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
 import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
 import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
-import {
-    buildInnerGroup,
-    buildParsedTransaction,
-    buildPartiallyDecodedIx,
-    buildSolTransferIx,
-    buildSolTransferWithSeedIx,
-    buildTokenTransferCheckedIx,
-} from '../__fixtures__/builders';
 import { createReceipt } from '../create-receipt';
 import { type ReceiptResult } from '../receipt-data';
 
