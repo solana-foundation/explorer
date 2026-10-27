@@ -1,9 +1,9 @@
+import { defaultReceipt, forBaseReceipt } from '@features/receipt/__fixtures__/receipts';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { ReceiptView } from '../ReceiptView';
-import { defaultReceipt, forBaseReceipt } from './receipt-fixtures';
 
 const meta: Meta<typeof ReceiptView> = {
     args: {

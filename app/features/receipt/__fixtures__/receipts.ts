@@ -1,25 +1,17 @@
+import { gen } from '@__fixtures__/gen';
+
 import { Cluster } from '@/app/utils/cluster';
 
-import { formatReceiptData } from '../../model/receipt-data';
-import type { Receipt } from '../../model/types';
-import type { FormattedExtendedReceipt, FormattedReceipt } from '../../types';
+import { formatReceiptData } from '../model/receipt-data';
+import type { Receipt, ReceiptToken } from '../model/types';
+import { messageForReason } from '../receipt-page';
+import type { FormattedExtendedReceipt, FormattedReceipt } from '../types';
 
 const CLUSTER = Cluster.MainnetBeta;
 
-// Fixed literal addresses so screenshot captures are deterministic (was Keypair.generate()).
-const SENDER = 'UM1jjYaM2Y4BDSdCw3AiELrP6HDpz62VjUHcHVJosix';
-const RECEIVER = 'UMxTDTS9cXEBVNkNmtaPKY4gZwwNrsLb6K7XiT3MnHP';
-const EXTRA_RECEIVERS = [
-    'UNuAhNHxEFQ2AT8MvxGKyCTuBW7TCRddJYRYVJSEr1p',
-    'UPqtBH9dACJEh67Whonp2FczN8p8mci2tBicQpTDFb1',
-    'UQnbfC1RmvU5NAVVrsUo2idHawqHdsPYoeS6LXk3RsS',
-    'URjK96HJoqgNoA5vzFEyTvSTCDKw3yAnyCQP95LjdLq',
-    'USg2d197RZrDUETv9JvxUPSkR2M5vTxCo1qyLUqFKR8',
-    'UTck4LGQp2t9zBnXr99NfoKSkgiEHRzyiYnndSoMHsV',
-    'UUZTYF8DRm3zfGAX1CqMgGKjyVjP9vnPYNENprKKHpU',
-    'UVVydGP1WgMd5BfpNnrWzun5S6zHgmNvbNfmZVCUhSZ',
-    'UWSh7BEp8QXTkG3oXrYW1NnNev1SZGALRC7MktiShPY',
-];
+const SENDER = gen.address(1);
+const RECEIVER = gen.address(2);
+const EXTRA_RECEIVERS = Array.from({ length: 9 }, (_, i) => gen.address(i + 3));
 
 const raw = {
     date: 1737100062,
@@ -129,70 +121,37 @@ export const receiptMultiTransfer9: FormattedReceipt = formatReceiptData(
     CLUSTER,
 );
 
-export const receiptMultiTokenTransfer: FormattedReceipt = formatReceiptData(
-    {
-        date: raw.date,
-        fee: 10001,
-        logoURI: USDC_LOGO,
-        mint: USDC_MINT,
-        receiver: raw.receiver,
-        sender: raw.sender,
-        symbol: 'USDC',
-        total: 1.000841,
-        transfers: [
-            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
-            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
-        ],
-        type: 'token',
-    },
-    CLUSTER,
-);
+const multiTokenTransfer: ReceiptToken = {
+    date: raw.date,
+    fee: 10001,
+    logoURI: USDC_LOGO,
+    mint: USDC_MINT,
+    receiver: raw.receiver,
+    sender: raw.sender,
+    symbol: 'USDC',
+    total: 1.000841,
+    transfers: [
+        { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
+        { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
+    ],
+    type: 'token',
+};
+
+export const receiptMultiTokenTransfer: FormattedReceipt = formatReceiptData(multiTokenTransfer, CLUSTER);
 
 export const receiptMultiTokenTransferWithMemo: FormattedReceipt = formatReceiptData(
-    {
-        date: raw.date,
-        fee: 10001,
-        logoURI: USDC_LOGO,
-        memo: 'Payroll batch — Q2',
-        mint: USDC_MINT,
-        receiver: raw.receiver,
-        sender: raw.sender,
-        symbol: 'USDC',
-        total: 1.000841,
-        transfers: [
-            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
-            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
-        ],
-        type: 'token',
-    },
+    { ...multiTokenTransfer, memo: 'Payroll batch — Q2' },
     CLUSTER,
 );
 
 export const receiptMultiTokenTransferWithLongMemo: FormattedReceipt = formatReceiptData(
-    {
-        date: raw.date,
-        fee: 10001,
-        logoURI: USDC_LOGO,
-        memo: longMemoText,
-        mint: USDC_MINT,
-        receiver: raw.receiver,
-        sender: raw.sender,
-        symbol: 'USDC',
-        total: 1.000841,
-        transfers: [
-            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
-            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
-        ],
-        type: 'token',
-    },
+    { ...multiTokenTransfer, memo: longMemoText },
     CLUSTER,
 );
 
-export const mixedMintNoReceiptMessage =
-    'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
+export const mixedMintNoReceiptMessage = messageForReason('mixed-mint');
 
-export const innerInstructionsNoReceiptMessage =
-    'Receipts are only available for simple transfers. This transaction contains inner program instructions.';
+export const innerInstructionsNoReceiptMessage = messageForReason('inner-transfers');
 
 export function forBaseReceipt(
     data: FormattedReceipt,

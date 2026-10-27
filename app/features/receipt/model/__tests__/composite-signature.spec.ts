@@ -1,10 +1,9 @@
+import { DEFAULT_SIGNATURE as SIG } from '@__fixtures__/gen';
 import { describe, expect, it } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
 import { buildCompositeSignature, parseCompositeSignature } from '../composite-signature';
-
-const SIG = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
 
 describe('parseCompositeSignature', () => {
     it.each([

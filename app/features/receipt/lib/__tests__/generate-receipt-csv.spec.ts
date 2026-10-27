@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { DEFAULT_SIGNATURE as SIGNATURE } from '@__fixtures__/gen';
 import {
     buildFormattedReceipt,
     buildFormattedTokenReceipt,
@@ -10,8 +11,6 @@ import type { FormattedReceipt } from '../../types';
 import { buildReceiptCsvRows, generateReceiptCsv } from '../generate-receipt-csv';
 
 const RECEIPT = buildFormattedReceipt();
-
-const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
 
 describe('buildReceiptCsvRows', () => {
     it('should include all expected fields in correct column order', () => {
