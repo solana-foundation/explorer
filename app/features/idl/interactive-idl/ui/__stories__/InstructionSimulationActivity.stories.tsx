@@ -3,6 +3,7 @@ import { parsedBaseLogs, parsedErrorLogs } from '@entities/program-logs/model/mo
 import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import type { RpcSimulationFailedResult } from '../../model/transaction/types';
 import { InstructionSimulationActivity } from '../InstructionActivity';
 
 const FINISHED_AT = new Date('2026-01-01T00:00:00Z');
@@ -14,6 +15,17 @@ const LONG_ERROR =
 
 const BASE_LOGS = { parsed: parsedBaseLogs, raw: baseLogs };
 const ERROR_LOGS = { parsed: parsedErrorLogs, raw: errorLogs };
+
+const RPC_SIMULATION_FAILED: RpcSimulationFailedResult = {
+    finishedAt: FINISHED_AT,
+    kind: 'simulation',
+    logs: ERROR_LOGS,
+    message:
+        'Error Message: A has one constraint was violated. The provided account does not match the expected owner.',
+    phase: 'rpc_simulation_failed',
+    serializedTxMessage: SERIALIZED,
+    status: 'error',
+};
 
 const meta = {
     component: InstructionSimulationActivity,
@@ -47,46 +59,15 @@ export const Success: Story = {
 };
 
 export const RpcSimulationFailed: Story = {
-    args: {
-        lastSimulation: {
-            finishedAt: FINISHED_AT,
-            kind: 'simulation',
-            logs: ERROR_LOGS,
-            message:
-                'Error Message: A has one constraint was violated. The provided account does not match the expected owner.',
-            phase: 'rpc_simulation_failed',
-            serializedTxMessage: SERIALIZED,
-            status: 'error',
-        },
-    },
+    args: { lastSimulation: RPC_SIMULATION_FAILED },
 };
 
 export const RpcSimulationFailedEmptyMessage: Story = {
-    args: {
-        lastSimulation: {
-            finishedAt: FINISHED_AT,
-            kind: 'simulation',
-            logs: ERROR_LOGS,
-            message: '',
-            phase: 'rpc_simulation_failed',
-            serializedTxMessage: SERIALIZED,
-            status: 'error',
-        },
-    },
+    args: { lastSimulation: { ...RPC_SIMULATION_FAILED, message: '' } },
 };
 
 export const RpcSimulationFailedLongError: Story = {
-    args: {
-        lastSimulation: {
-            finishedAt: FINISHED_AT,
-            kind: 'simulation',
-            logs: ERROR_LOGS,
-            message: LONG_ERROR,
-            phase: 'rpc_simulation_failed',
-            serializedTxMessage: SERIALIZED,
-            status: 'error',
-        },
-    },
+    args: { lastSimulation: { ...RPC_SIMULATION_FAILED, message: LONG_ERROR } },
 };
 
 /** Local failure before/during the simulate call, no serialized message — error note, no link. */

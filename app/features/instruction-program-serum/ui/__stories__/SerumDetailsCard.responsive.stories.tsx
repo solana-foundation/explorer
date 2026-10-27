@@ -2,13 +2,7 @@ import { gen } from '@__fixtures__/gen';
 import { makeInstruction } from '@__fixtures__/instruction';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
-import {
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -34,14 +28,7 @@ const args = { childIndex: undefined, index: 0, innerCards: undefined, ix: dispa
 
 const meta: Meta<typeof SerumDetailsCard> = {
     component: SerumDetailsCard,
-    decorators: [
-        withCluster,
-        withScrollAnchor,
-        withTokenInfoBatch,
-        withMockTransactions,
-        withTxInstructionSurface,
-        withViewportFromGlobal,
-    ],
+    decorators: [...instructionCardDecorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionProgramSerum/SerumDetailsCard@Media',
 };

@@ -4,7 +4,7 @@ import { toast as sonnerToast } from 'sonner';
 import { expect, fn, within } from 'storybook/test';
 
 import { Button } from '../button';
-import { CustomToast } from './custom';
+import { CustomToast, type CustomToastProps } from './custom';
 import { Toaster } from './toaster';
 
 const meta = {
@@ -35,32 +35,8 @@ export const Success: Story = {
         title: 'Wallet Connected',
         type: 'success',
     },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-
-        const title = await canvas.findByText('Wallet Connected');
-        expect(title).toBeInTheDocument();
-
-        const description = await canvas.findByText('Connected to wallet X5s...GnDZ');
-        expect(description).toBeInTheDocument();
-
-        const closeButton = canvas.getAllByRole('button');
-        expect(closeButton.length).toBeGreaterThan(0);
-    },
-    render: args => (
-        <div className="flex flex-col items-center gap-4">
-            <CustomToast {...args} />
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                    sonnerToast.custom(id => <CustomToast {...args} id={id} />);
-                }}
-            >
-                Show Success Toast
-            </Button>
-        </div>
-    ),
+    play: ({ canvasElement }) => expectToast(canvasElement, 'Wallet Connected', 'Connected to wallet X5s...GnDZ'),
+    render: args => <ToastWithTrigger {...args} trigger="Show Success Toast" />,
 };
 
 export const Error: Story = {
@@ -70,32 +46,9 @@ export const Error: Story = {
         title: 'Transaction Failed',
         type: 'error',
     },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-
-        const title = await canvas.findByText('Transaction Failed');
-        expect(title).toBeInTheDocument();
-
-        const description = await canvas.findByText('Unable to process transaction. Please try again.');
-        expect(description).toBeInTheDocument();
-
-        const closeButton = canvas.getAllByRole('button');
-        expect(closeButton.length).toBeGreaterThan(0);
-    },
-    render: args => (
-        <div className="flex flex-col items-center gap-4">
-            <CustomToast {...args} />
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                    sonnerToast.custom(id => <CustomToast {...args} id={id} />);
-                }}
-            >
-                Show Error Toast
-            </Button>
-        </div>
-    ),
+    play: ({ canvasElement }) =>
+        expectToast(canvasElement, 'Transaction Failed', 'Unable to process transaction. Please try again.'),
+    render: args => <ToastWithTrigger {...args} trigger="Show Error Toast" />,
 };
 
 export const Info: Story = {
@@ -105,32 +58,9 @@ export const Info: Story = {
         title: 'Processing Transaction',
         type: 'info',
     },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-
-        const title = await canvas.findByText('Processing Transaction');
-        expect(title).toBeInTheDocument();
-
-        const description = await canvas.findByText('Your transaction is being confirmed on the blockchain.');
-        expect(description).toBeInTheDocument();
-
-        const closeButton = canvas.getAllByRole('button');
-        expect(closeButton.length).toBeGreaterThan(0);
-    },
-    render: args => (
-        <div className="flex flex-col items-center gap-4">
-            <CustomToast {...args} />
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                    sonnerToast.custom(id => <CustomToast {...args} id={id} />);
-                }}
-            >
-                Show Info Toast
-            </Button>
-        </div>
-    ),
+    play: ({ canvasElement }) =>
+        expectToast(canvasElement, 'Processing Transaction', 'Your transaction is being confirmed on the blockchain.'),
+    render: args => <ToastWithTrigger {...args} trigger="Show Info Toast" />,
 };
 
 export const WithLongTitle: Story = {
@@ -141,32 +71,8 @@ export const WithLongTitle: Story = {
         title: 'This is a very long title that demonstrates how the toast component handles text wrapping when the title exceeds the available width',
         type: 'info',
     },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-
-        const title = await canvas.findByText(/This is a very long title/);
-        expect(title).toBeInTheDocument();
-
-        const description = await canvas.findByText(/This toast demonstrates/);
-        expect(description).toBeInTheDocument();
-
-        const closeButton = canvas.getAllByRole('button');
-        expect(closeButton.length).toBeGreaterThan(0);
-    },
-    render: args => (
-        <div className="flex flex-col items-center gap-4">
-            <CustomToast {...args} />
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                    sonnerToast.custom(id => <CustomToast {...args} id={id} />);
-                }}
-            >
-                Show Toast with Long Title
-            </Button>
-        </div>
-    ),
+    play: ({ canvasElement }) => expectToast(canvasElement, /This is a very long title/, /This toast demonstrates/),
+    render: args => <ToastWithTrigger {...args} trigger="Show Toast with Long Title" />,
 };
 
 export const WithoutDescription: Story = {
@@ -175,29 +81,8 @@ export const WithoutDescription: Story = {
         title: 'Action Completed',
         type: 'success',
     },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-
-        const title = await canvas.findByText('Action Completed');
-        expect(title).toBeInTheDocument();
-
-        const closeButton = canvas.getAllByRole('button');
-        expect(closeButton.length).toBeGreaterThan(0);
-    },
-    render: args => (
-        <div className="flex flex-col items-center gap-4">
-            <CustomToast {...args} />
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                    sonnerToast.custom(id => <CustomToast {...args} id={id} />);
-                }}
-            >
-                Show Toast without Description
-            </Button>
-        </div>
-    ),
+    play: ({ canvasElement }) => expectToast(canvasElement, 'Action Completed'),
+    render: args => <ToastWithTrigger {...args} trigger="Show Toast without Description" />,
 };
 
 export const WithCustomDescription: Story = {
@@ -207,21 +92,8 @@ export const WithCustomDescription: Story = {
         title: 'Transaction Complete',
         type: 'success',
     },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-
-        const title = await canvas.findByText('Transaction Complete');
-        expect(title).toBeInTheDocument();
-
-        const signature = await canvas.findByText(/Transaction signature:/);
-        expect(signature).toBeInTheDocument();
-
-        const link = await canvas.findByText('View on Explorer');
-        expect(link).toBeInTheDocument();
-
-        const closeButton = canvas.getAllByRole('button');
-        expect(closeButton.length).toBeGreaterThan(0);
-    },
+    play: ({ canvasElement }) =>
+        expectToast(canvasElement, 'Transaction Complete', /Transaction signature:/, 'View on Explorer'),
     render: args => {
         const onViewTransaction = fn();
         const description = (
@@ -240,19 +112,31 @@ export const WithCustomDescription: Story = {
             </div>
         );
 
-        return (
-            <div className="flex flex-col items-center gap-4">
-                <CustomToast {...args} description={description} />
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                        sonnerToast.custom(id => <CustomToast {...args} id={id} description={description} />);
-                    }}
-                >
-                    Show Toast with ReactNode Description
-                </Button>
-            </div>
-        );
+        return <ToastWithTrigger {...args} description={description} trigger="Show Toast with ReactNode Description" />;
     },
 };
+
+function ToastWithTrigger({ trigger, ...props }: CustomToastProps & { trigger: string }) {
+    return (
+        <div className="flex flex-col items-center gap-4">
+            <CustomToast {...props} />
+            <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                    sonnerToast.custom(id => <CustomToast {...props} id={id} />);
+                }}
+            >
+                {trigger}
+            </Button>
+        </div>
+    );
+}
+
+async function expectToast(canvasElement: HTMLElement, ...texts: (string | RegExp)[]) {
+    const canvas = within(canvasElement);
+    for (const text of texts) {
+        expect(await canvas.findByText(text)).toBeInTheDocument();
+    }
+    expect(canvas.getAllByRole('button').length).toBeGreaterThan(0);
+}

@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { toInstructionNode } from '@entities/instruction-card';
-import { withMockTransactions, withTokenInfoBatch, withTxInstructionSurface } from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ammV3Instruction, ammV3Program, UPDATE_REWARD_INFOS_DISCRIMINATOR } from '../../__fixtures__/anchor-programs';
@@ -9,7 +9,7 @@ import { AnchorDetailsCard } from '../AnchorDetailsCard';
 
 const meta = {
     component: AnchorDetailsCard,
-    decorators: [withMockTransactions, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
     // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.

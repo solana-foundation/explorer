@@ -1,13 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -32,14 +26,7 @@ const ix = createInstructionParserDispatcher([solanaAttestationInstructionParser
 
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
-    decorators: [
-        withCluster,
-        withScrollAnchor,
-        withTokenInfoBatch,
-        withMockTransactions,
-        withTxInstructionSurface,
-        withViewportFromGlobal,
-    ],
+    decorators: [...instructionCardDecorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionSas/SolanaAttestationDetailsCard@Media',
 };

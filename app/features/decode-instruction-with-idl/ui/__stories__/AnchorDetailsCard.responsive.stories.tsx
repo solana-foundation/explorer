@@ -1,5 +1,5 @@
 import { toInstructionNode } from '@entities/instruction-card';
-import { withMockTransactions, withTokenInfoBatch, withTxInstructionSurface } from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -12,7 +12,7 @@ const ix = ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR);
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: AnchorDetailsCard,
-    decorators: [withMockTransactions, withTokenInfoBatch, withTxInstructionSurface, withViewportFromGlobal],
+    decorators: [...instructionCardDecorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
     // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.

@@ -1,25 +1,10 @@
-import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
-import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
+import { withClusterAndAccounts, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InspectorInstructionCard } from '../InspectorInstructionCard';
-
-const withInspectorProviders: Decorator = Story => (
-    <MockClusterProvider>
-        <MockAccountsProvider>
-            <MockTokenInfoBatchProvider>
-                <ScrollAnchorProvider>
-                    <Story />
-                </ScrollAnchorProvider>
-            </MockTokenInfoBatchProvider>
-        </MockAccountsProvider>
-    </MockClusterProvider>
-);
 
 const programId = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
@@ -44,7 +29,7 @@ const parsedIx: ParsedInstruction = {
 
 const meta: Meta<typeof InspectorInstructionCard> = {
     component: InspectorInstructionCard,
-    decorators: [withInspectorProviders],
+    decorators: [withScrollAnchor, withTokenInfoBatch, withClusterAndAccounts],
     tags: ['autodocs', 'test'],
     title: 'Components/Common/InspectorInstructionCard',
 };

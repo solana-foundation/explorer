@@ -16,13 +16,7 @@ import {
     packDirectData,
     PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
-import {
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { gzip } from 'pako';
 
@@ -61,7 +55,7 @@ function setDataIx({
 
 const meta = {
     component: PmpDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionPmp/PmpDetailsCard',
 } satisfies Meta<typeof PmpDetailsCard>;

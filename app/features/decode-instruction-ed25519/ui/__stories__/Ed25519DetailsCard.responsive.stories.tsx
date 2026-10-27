@@ -1,13 +1,7 @@
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -42,14 +36,7 @@ const tx = {
 
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
-    decorators: [
-        withCluster,
-        withScrollAnchor,
-        withTokenInfoBatch,
-        withMockTransactions,
-        withTxInstructionSurface,
-        withViewportFromGlobal,
-    ],
+    decorators: [...instructionCardDecorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard@Media',
 };

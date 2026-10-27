@@ -36,32 +36,13 @@ export const Default: Story = {
         const trigger = canvas.getByRole('button', { hidden: true, name: /open menu/i });
         expect(trigger).toBeInTheDocument();
     },
-    render: () => (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Open Menu
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem>Option 1</DropdownMenuItem>
-                <DropdownMenuItem>Option 2</DropdownMenuItem>
-                <DropdownMenuItem>Option 3</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    ),
+    render: () => <OptionsMenu trigger="Open Menu" />,
 };
 
 export const WithIcons: Story = {
     render: () => (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Actions
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+            <MenuTrigger>Actions</MenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem>
                     <User size={14} />
@@ -88,12 +69,7 @@ export const WithIcons: Story = {
 export const WithShortcuts: Story = {
     render: () => (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Edit
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+            <MenuTrigger>Edit</MenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem>
                     <Edit size={14} />
@@ -122,12 +98,7 @@ export const WithShortcuts: Story = {
 export const WithGroups: Story = {
     render: () => (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Account
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+            <MenuTrigger>Account</MenuTrigger>
             <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -158,12 +129,7 @@ export const WithCheckboxItems: Story = {
 
         return (
             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        View Options
-                        <ChevronDown size={14} />
-                    </Button>
-                </DropdownMenuTrigger>
+                <MenuTrigger>View Options</MenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -187,12 +153,7 @@ export const WithRadioItems: Story = {
 
         return (
             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        Encoding: {encoding}
-                        <ChevronDown size={14} />
-                    </Button>
-                </DropdownMenuTrigger>
+                <MenuTrigger>Encoding: {encoding}</MenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuLabel>Select encoding</DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -210,12 +171,7 @@ export const WithRadioItems: Story = {
 export const WithSubmenu: Story = {
     render: () => (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    More
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+            <MenuTrigger>More</MenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem>Action 1</DropdownMenuItem>
                 <DropdownMenuItem>Action 2</DropdownMenuItem>
@@ -236,12 +192,7 @@ export const WithSubmenu: Story = {
 export const DisabledItems: Story = {
     render: () => (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Options
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+            <MenuTrigger>Options</MenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem>Enabled action</DropdownMenuItem>
                 <DropdownMenuItem disabled>Disabled action</DropdownMenuItem>
@@ -277,21 +228,7 @@ export const OpenByDefault: Story = {
         const trigger = canvas.getByRole('button', { hidden: true, name: /open menu/i });
         expect(trigger).toHaveAttribute('data-state', 'open');
     },
-    render: () => (
-        <DropdownMenu defaultOpen>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Open Menu
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem>Option 1</DropdownMenuItem>
-                <DropdownMenuItem>Option 2</DropdownMenuItem>
-                <DropdownMenuItem>Option 3</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    ),
+    render: () => <OptionsMenu defaultOpen trigger="Open Menu" />,
 };
 
 // inset (pl-8) on items/labels and disabled checkbox/radio items — no other story renders these
@@ -303,12 +240,7 @@ export const InsetAndDisabledSelectionItems: Story = {
     },
     render: () => (
         <DropdownMenu defaultOpen>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Open Menu
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+            <MenuTrigger>Open Menu</MenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuLabel inset>Inset label</DropdownMenuLabel>
                 <DropdownMenuItem inset>Inset item</DropdownMenuItem>
@@ -338,19 +270,29 @@ export const Interactive: Story = {
         await userEvent.click(trigger);
         expect(trigger).toHaveAttribute('data-state', 'open');
     },
-    render: () => (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Click to open
-                    <ChevronDown size={14} />
-                </Button>
-            </DropdownMenuTrigger>
+    render: () => <OptionsMenu trigger="Click to open" />,
+};
+
+function OptionsMenu({ trigger, ...props }: React.ComponentProps<typeof DropdownMenu> & { trigger: string }) {
+    return (
+        <DropdownMenu {...props}>
+            <MenuTrigger>{trigger}</MenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem>Option 1</DropdownMenuItem>
                 <DropdownMenuItem>Option 2</DropdownMenuItem>
                 <DropdownMenuItem>Option 3</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    ),
-};
+    );
+}
+
+function MenuTrigger({ children }: { children: React.ReactNode }) {
+    return (
+        <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+                {children}
+                <ChevronDown size={14} />
+            </Button>
+        </DropdownMenuTrigger>
+    );
+}

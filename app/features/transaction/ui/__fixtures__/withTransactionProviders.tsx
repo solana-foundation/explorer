@@ -8,6 +8,7 @@ import {
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
+import type { Decorator } from '@storybook-config/types';
 import React from 'react';
 
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
@@ -25,6 +26,17 @@ export function accountsCardWithProviders() {
             <AccountsCard signature={DEFAULT_SIGNATURE} />
         </Wrapper>
     );
+}
+
+export function withTransaction(...data: Parameters<typeof withTransactionProviders>): Decorator {
+    const Wrapper = withTransactionProviders(...data);
+    return function WithTransaction(Story) {
+        return (
+            <Wrapper>
+                <Story />
+            </Wrapper>
+        );
+    };
 }
 
 export function withTransactionProviders(

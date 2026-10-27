@@ -1,10 +1,10 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { toConnectableUrl } from '@entities/cluster';
 import { TxInstructionSurface } from '@entities/instruction-card';
-import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
+import type { State } from '@providers/accounts';
 import type { ClusterState } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { TransactionsProvider } from '@providers/transactions';
+import { IMAGE_SIZE } from '@shared/lib/og/image-size';
 import { type Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
@@ -19,15 +19,6 @@ import { MockStatsProvider } from './__mocks__/MockStatsProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
 import type { Decorator, Parameters } from './types';
-
-const noopFetcher = async () => undefined;
-// MultipleAccountFetcher has private constructor params (nominal-typed) — no structural object matches.
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- decorator-only stub
-const noopAccountsFetchers = {
-    parsed: { fetch: noopFetcher },
-    raw: { fetch: noopFetcher },
-    skip: { fetch: noopFetcher },
-} as unknown as React.ContextType<typeof FetchersContext>;
 
 /** Wraps stories with ClusterProvider. Usage: `decorators: [withCluster]` */
 export const withCluster: Decorator = Story => (
@@ -113,13 +104,9 @@ export function withAccountsState(state: State): Decorator {
     return function WithAccountsState(Story) {
         return (
             <ClusterProvider>
-                <StateContext.Provider value={state}>
-                    <DispatchContext.Provider value={() => undefined}>
-                        <FetchersContext.Provider value={noopAccountsFetchers}>
-                            <Story />
-                        </FetchersContext.Provider>
-                    </DispatchContext.Provider>
-                </StateContext.Provider>
+                <MockAccountsProvider state={state}>
+                    <Story />
+                </MockAccountsProvider>
             </ClusterProvider>
         );
     };
@@ -140,33 +127,11 @@ export const withCardTableField: Decorator = Story => (
     </ClusterProvider>
 );
 
-/** Wraps stories with ClusterProvider, TransactionsProvider, and MockAccountsProvider. Usage: `decorators: [withTransactions]` */
-export const withTransactions: Decorator = Story => (
-    <ClusterProvider>
-        <TransactionsProvider>
-            <MockAccountsProvider>
-                <Story />
-            </MockAccountsProvider>
-        </TransactionsProvider>
-    </ClusterProvider>
-);
-
 /** Wraps stories with MockTokenInfoBatchProvider. Usage: `decorators: [withTokenInfoBatch]` */
 export const withTokenInfoBatch: Decorator = Story => (
     <MockTokenInfoBatchProvider>
         <Story />
     </MockTokenInfoBatchProvider>
-);
-
-/** Wraps stories with ClusterProvider, MockTokenInfoBatchProvider, and MockAccountsProvider. Usage: `decorators: [withClusterAccountsAndTokenInfo]` */
-export const withClusterAccountsAndTokenInfo: Decorator = Story => (
-    <ClusterProvider>
-        <MockTokenInfoBatchProvider>
-            <MockAccountsProvider>
-                <Story />
-            </MockAccountsProvider>
-        </MockTokenInfoBatchProvider>
-    </ClusterProvider>
 );
 
 /** Wraps stories with ClusterProvider and MockStatsProvider. Usage: `decorators: [withStats]` */
@@ -194,6 +159,14 @@ export const withMockTransactions: Decorator = (Story, context) => (
     </ClusterProvider>
 );
 
+/** Wraps stories with the providers an instruction card reads on the tx page. Usage: `decorators: instructionCardDecorators` */
+export const instructionCardDecorators: Decorator[] = [
+    withScrollAnchor,
+    withTokenInfoBatch,
+    withMockTransactions,
+    withTxInstructionSurface,
+];
+
 /**
  * Wraps stories with ClusterProvider, MockAccountsProvider, and MockHistoryProvider.
  * Seeds the history cache from `parameters.history` (empty cache when omitted).
@@ -207,6 +180,13 @@ export const withHistory: Decorator = (Story, context) => (
             </MockHistoryProvider>
         </MockAccountsProvider>
     </ClusterProvider>
+);
+
+/** Sizes stories to an Open Graph image. Usage: `decorators: [withOgImageFrame]` */
+export const withOgImageFrame: Decorator = Story => (
+    <div style={{ height: IMAGE_SIZE.height, width: IMAGE_SIZE.width }}>
+        <Story />
+    </div>
 );
 
 type NextjsNavigationOptions = {

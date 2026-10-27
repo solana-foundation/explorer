@@ -22,12 +22,7 @@ type Story = StoryObj<typeof meta>;
 export const Loading: Story = {
     args: {
         isLoading: true,
-        verificationResult: {
-            rateLimitedSources: [],
-            sources: [],
-            sourcesToApply: [],
-            verificationFoundSources: [],
-        },
+        verificationResult: groupVerificationSources([]),
     },
 };
 

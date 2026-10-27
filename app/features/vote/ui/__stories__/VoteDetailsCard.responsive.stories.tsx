@@ -1,9 +1,4 @@
-import {
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -22,13 +17,7 @@ import {
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: VoteDetailsCard,
-    decorators: [
-        withViewportFromGlobal,
-        withMockTransactions,
-        withScrollAnchor,
-        withTokenInfoBatch,
-        withTxInstructionSurface,
-    ],
+    decorators: [withViewportFromGlobal, ...instructionCardDecorators],
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard@Media',
 } satisfies Meta<typeof VoteDetailsCard>;

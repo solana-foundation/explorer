@@ -3,6 +3,7 @@ import { parsedBaseLogs, parsedErrorLogs } from '@entities/program-logs/model/mo
 import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import type { BroadcastFailedResult } from '../../model/transaction/types';
 import { InstructionExecutionActivity } from '../InstructionActivity';
 
 const FINISHED_AT = new Date('2026-01-01T00:00:00Z');
@@ -15,6 +16,17 @@ const LONG_ERROR =
 
 const BASE_LOGS = { parsed: parsedBaseLogs, raw: baseLogs };
 const ERROR_LOGS = { parsed: parsedErrorLogs, raw: errorLogs };
+
+const BROADCAST_FAILED: BroadcastFailedResult = {
+    finishedAt: FINISHED_AT,
+    kind: 'execution',
+    logs: ERROR_LOGS,
+    message: 'AnchorError occurred. Error Code: ConstraintHasOne. Error Number: 2001.',
+    phase: 'broadcast_failed',
+    serializedTxMessage: SERIALIZED,
+    signature: SIGNATURE,
+    status: 'error',
+};
 
 const meta = {
     component: InstructionExecutionActivity,
@@ -47,49 +59,16 @@ export const Success: Story = {
 
 /** Tx was broadcast but failed on-chain — Error status header with a tx link. */
 export const BroadcastFailed: Story = {
-    args: {
-        lastResult: {
-            finishedAt: FINISHED_AT,
-            kind: 'execution',
-            logs: ERROR_LOGS,
-            message: 'AnchorError occurred. Error Code: ConstraintHasOne. Error Number: 2001.',
-            phase: 'broadcast_failed',
-            serializedTxMessage: SERIALIZED,
-            signature: SIGNATURE,
-            status: 'error',
-        },
-    },
+    args: { lastResult: BROADCAST_FAILED },
 };
 
 export const BroadcastFailedEmptyMessage: Story = {
-    args: {
-        lastResult: {
-            finishedAt: FINISHED_AT,
-            kind: 'execution',
-            logs: ERROR_LOGS,
-            message: '',
-            phase: 'broadcast_failed',
-            serializedTxMessage: SERIALIZED,
-            signature: SIGNATURE,
-            status: 'error',
-        },
-    },
+    args: { lastResult: { ...BROADCAST_FAILED, message: '' } },
 };
 
 /** Long error message — the note wraps below the signature box. */
 export const BroadcastFailedLongError: Story = {
-    args: {
-        lastResult: {
-            finishedAt: FINISHED_AT,
-            kind: 'execution',
-            logs: ERROR_LOGS,
-            message: LONG_ERROR,
-            phase: 'broadcast_failed',
-            serializedTxMessage: SERIALIZED,
-            signature: SIGNATURE,
-            status: 'error',
-        },
-    },
+    args: { lastResult: { ...BROADCAST_FAILED, message: LONG_ERROR } },
 };
 
 /** Local failure before broadcast, with a serialized message — error note + inspector link. */
