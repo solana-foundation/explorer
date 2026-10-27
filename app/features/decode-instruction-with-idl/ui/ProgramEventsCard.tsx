@@ -1,7 +1,8 @@
 import { HexData } from '@components/common/HexData';
 import { Program } from '@coral-xyz/anchor';
 import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
-import { mapIxArgsToRows } from '@utils/anchor';
+import { ArgRows } from '@entities/instruction-card';
+import { anchorInstructionArgs } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
@@ -109,7 +110,13 @@ function EventCard({
                                     <BaseTable.Cell>Type</BaseTable.Cell>
                                     <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
                                 </BaseTable.SectionRow>
-                                {mapIxArgsToRows(event.data, { ...eventDef, accounts: [], args: fields }, program.idl)}
+                                <ArgRows
+                                    args={anchorInstructionArgs(
+                                        event.data,
+                                        { args: fields, name: eventDef.name },
+                                        program.idl,
+                                    )}
+                                />
                             </>
                         )
                     )}

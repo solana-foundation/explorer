@@ -4,7 +4,7 @@ import { decodeEventFromLog } from '@utils/anchor';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-export type DecodedEvent = { name: string; data: unknown };
+export type DecodedEvent = { name: string; data: object };
 export type EventEntry = { event: DecodedEvent | undefined; rawEventData: string };
 
 export function decodeProgramEvents(eventPayloads: ProgramEventPayload[], program: Program): EventEntry[] {

@@ -63,7 +63,7 @@ export const UpdateRewardInfos: Story = {
     },
 };
 
-// Synthetic data won't match any known discriminator → AnchorInstructionBody renders the "Failed to decode" fallback.
+// Synthetic data matches no known discriminator, so the card renders the "Failed to decode" row.
 const failedToDecodeIx = buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), [gen.publicKey(2)]);
 export const FailedToDecode: Story = {
     args: {

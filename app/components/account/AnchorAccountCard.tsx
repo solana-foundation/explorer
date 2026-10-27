@@ -3,9 +3,10 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { getAnchorIdls, getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { ArgRows } from '@entities/instruction-card';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
-import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
+import { anchorAccountArgs, getAnchorProgramName } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
@@ -79,7 +80,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body>
-                        {mapAccountToRows(decodedAccountData, accountDef as IdlTypeDef, idl)}
+                        <ArgRows args={anchorAccountArgs(decodedAccountData, accountDef as IdlTypeDef, idl)} />
                     </BaseTable.Body>
                 </BaseTable>
             </Card>

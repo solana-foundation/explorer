@@ -57,7 +57,7 @@ The frame and the cards SHALL read the signature from `InstructionSurface`, and 
 
 ### Requirement: Fields declared as data
 
-A card SHALL declare its rows as data, not as table markup. Label and value rows are `InstructionField` descriptors. The argument rows of a decoded instruction are `InstructionArg` values. `ValueCell` MUST be the only component that formats a value. `AnchorInstructionBody` and the token batch `SubInstructionRow` are exceptions: they format their own values. Field rows and argument rows both render `ValueCell`, to give each kind one format. `InstructionFields` renders the field rows. `DecodedInstructionCard` renders the account and argument rows. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
+A card SHALL declare its rows as data, not as table markup. Label and value rows are `InstructionField` descriptors. The argument rows of a decoded instruction are `InstructionArg` values. `ValueCell` MUST be the only component that formats a value. The token batch `SubInstructionRow` is an exception: it formats its own values. Field rows and argument rows both render `ValueCell`, to give each kind one format. `InstructionFields` renders the field rows. `DecodedInstructionCard` renders the account and argument rows. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
 
 The union is closed: `address`, `sol`, `bytes`, `string`, `text`, `timestamp`, `preformatted`, `custom`, `heading`. Every kind but `heading` pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. A `string` value is text that the reader copies exactly, such as a seed or a string argument. `string` MUST render its value inside `Copyable`. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. The `address` constructor MUST accept a web3.js `PublicKey` or a kit `Address`. The constructor MUST store a kit `Address`, to give every row one address type. A kit-native slice passes its `Address` without a conversion. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
 
@@ -95,7 +95,7 @@ The union is closed: `address`, `sol`, `bytes`, `string`, `text`, `timestamp`, `
 
 ### Requirement: Decoded instruction card
 
-A card that decodes its instruction with a Codama client SHALL render `DecodedInstructionCard`. `TokenBatchCard` is the exception, because one batch holds several sub-instructions. Every decoded card has the same account rows, role badges and argument table. The body has a Type column, so its `Program` row MUST span all `DECODED_TABLE_COLUMNS` columns.
+A card that decodes its instruction with an IDL, through a Codama client or the Anchor coder, SHALL render `DecodedInstructionCard`. `TokenBatchCard` is the exception, because one batch holds several sub-instructions. Every decoded card has the same account rows, role badges and argument table. The body has a Type column, so its `Program` row MUST span all `DECODED_TABLE_COLUMNS` columns.
 
 A Codama decoder returns only the accounts that its IDL declares, so `DecodedInstructionCard` MUST read its accounts from the instruction. `DecodedInstructionCard` MUST label each account with the IDL account name at the same position.
 
@@ -109,6 +109,12 @@ A Codama decoder returns only the accounts that its IDL declares, so `DecodedIns
 
 - **WHEN** two accounts of an instruction have the same address
 - **THEN** each account MUST have its own row, with its own name and role badges
+
+#### Scenario: IDL that nests accounts in a group
+
+- **WHEN** an IDL nests accounts in a group
+- **THEN** the card MUST show a row for the group before its accounts
+- **AND** the group MUST start collapsed, and MUST show its accounts only after the reader expands it
 
 ### Requirement: Single node prop
 

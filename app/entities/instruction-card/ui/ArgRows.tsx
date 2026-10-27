@@ -27,7 +27,7 @@ function ArgRow({ arg, depth, testId }: { arg: InstructionArg; depth: number; te
         );
     }
     return (
-        <BaseTable.Row data-testid={testId} className={leafRowVariants({ nested: depth > 0 })}>
+        <BaseTable.Row data-testid={testId} className={nestedRowVariants({ nested: depth > 0 })}>
             <FieldNameCell name={arg.name} nestingLevel={depth} />
             <BaseTable.Cell>{arg.type}</BaseTable.Cell>
             {arg.kind === 'leaf' ? <ValueCell value={arg.value} /> : <BaseTable.Cell />}
@@ -35,7 +35,7 @@ function ArgRow({ arg, depth, testId }: { arg: InstructionArg; depth: number; te
     );
 }
 
-const leafRowVariants = cva('', {
+export const nestedRowVariants = cva('', {
     defaultVariants: { nested: false },
     variants: { nested: { false: '', true: 'bg-black/20' } },
 });

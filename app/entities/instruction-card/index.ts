@@ -14,12 +14,14 @@ export {
 } from './model/fields';
 export type { InstructionField, InstructionFieldList } from './model/fields';
 export { remainingAccountLabel } from './model/accounts';
+export type { AccountName } from './model/accounts';
 export { parseCodamaArgs } from './model/args';
 export type { InstructionArg } from './model/args';
 export { instructionDataOf, toInstructionNode, toRawInstructionNode } from './model/node';
 export type { InstructionNode, RawInstructionNode } from './model/node';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';
 export type { InstructionShellProps, InstructionSurface } from './model/surface';
+export { ArgRows } from './ui/ArgRows';
 export { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from './ui/DecodedInstructionCard';
 export { InstructionAddress } from './ui/InstructionAddress';
 export { InstructionCardView } from './ui/InstructionCardView';

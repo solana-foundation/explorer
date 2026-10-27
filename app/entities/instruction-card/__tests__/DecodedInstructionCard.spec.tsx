@@ -1,9 +1,10 @@
 import { gen } from '@__fixtures__/gen';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { AccountName } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
 import { toRawInstructionNode } from '../model/node';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
@@ -52,12 +53,44 @@ describe('DecodedInstructionCard', () => {
         expect(rows.at(-2)).toHaveTextContent('amount');
         expect(rows.at(-1)).toHaveAttribute('data-testid', 'extra-row');
     });
+
+    it('should show the accounts of a group only after the group expands', () => {
+        renderCard({
+            accountCount: 2,
+            accountNames: [
+                { depth: 0, group: true, name: 'Withdraw Accounts' },
+                { depth: 1, group: false, name: 'Owner' },
+                { depth: 0, group: false, name: 'Payer' },
+            ],
+        });
+
+        expect(screen.getByText('Payer')).toBeInTheDocument();
+        expect(screen.queryByText('Owner')).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('Expand'));
+
+        expect(screen.getByText('Owner')).toBeInTheDocument();
+    });
 });
 
-function renderCard({ programName, children }: { programName?: string; children?: React.ReactNode }) {
+function renderCard({
+    programName,
+    accountNames = ['authority'],
+    accountCount = 1,
+    children,
+}: {
+    programName?: string;
+    accountNames?: AccountName[];
+    accountCount?: number;
+    children?: React.ReactNode;
+}) {
     const ix = new TransactionInstruction({
         data: Buffer.from([1]),
-        keys: [{ isSigner: true, isWritable: true, pubkey: gen.publicKey(1) }],
+        keys: Array.from({ length: accountCount }, (_, i) => ({
+            isSigner: true,
+            isWritable: true,
+            pubkey: gen.publicKey(i + 1),
+        })),
         programId: gen.publicKey(0),
     });
 
@@ -67,7 +100,7 @@ function renderCard({ programName, children }: { programName?: string; children?
                 node={toRawInstructionNode({ index: 0, ix })}
                 title="Counter: Increment"
                 programName={programName}
-                accountNames={['authority']}
+                accountNames={accountNames}
                 args={[AMOUNT]}
             >
                 {children}
