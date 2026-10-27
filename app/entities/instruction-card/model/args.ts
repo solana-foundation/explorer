@@ -7,14 +7,27 @@ export type InstructionArg =
     | { kind: 'group'; name: string; type: string; children: readonly [InstructionArg, ...InstructionArg[]] }
     | { kind: 'empty'; name: string; type: string };
 
-export function parseCodamaArgs(data: unknown): readonly InstructionArg[] {
+/**
+ * Parse decoded Codama instruction data into renderable arg rows. `declaredTypes` maps a top-level
+ * argument name to its IDL-declared type (e.g. `u64`, `u128`, `bool`); when present it overrides the
+ * value-derived label so the table shows the precise type rather than a JS `typeof` approximation
+ * (`bignum`/`boolean`). Nested fields keep the value-derived label.
+ */
+export function parseCodamaArgs(data: unknown, declaredTypes?: ReadonlyMap<string, string>): readonly InstructionArg[] {
     if (data === undefined) {
         return [];
     }
     if (!isStruct(data)) {
-        return [parseArg('data', data)];
+        return [withDeclaredType(parseArg('data', data), declaredTypes)];
     }
-    return parseFields(data).filter(arg => arg.name !== 'discriminator');
+    return parseFields(data)
+        .filter(arg => arg.name !== 'discriminator')
+        .map(arg => withDeclaredType(arg, declaredTypes));
+}
+
+function withDeclaredType(arg: InstructionArg, declaredTypes?: ReadonlyMap<string, string>): InstructionArg {
+    const declared = declaredTypes?.get(arg.name);
+    return declared ? { ...arg, type: declared } : arg;
 }
 
 const TAG_KEYS = new Set(['__discriminator', '__kind', '__option']);

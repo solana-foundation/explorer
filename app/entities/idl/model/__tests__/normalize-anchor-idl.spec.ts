@@ -67,6 +67,20 @@ describe('normalizeAnchorIdl', () => {
             expect(root?.legacyConstants).toBeUndefined();
         });
 
+        it('should preserve the 11 inline-field events Codama drops (amm_v3)', () => {
+            const root = normalizeAnchorIdl(anchor029Devi, PROGRAM_ADDRESS) as CodamaIdl | undefined;
+
+            // Codama's rootNodeFromAnchor drops pre-0.30 events entirely — they survive only on legacyEvents.
+            expect(JSON.stringify(root?.program.definedTypes)).not.toContain('swapEvent');
+            expect(root?.legacyEvents).toHaveLength(anchor029Devi.events.length);
+            expect(root?.legacyEvents?.map(event => event.name)).toContain('SwapEvent');
+        });
+
+        it('should omit legacyEvents when the legacy IDL defines none', () => {
+            const root = normalizeAnchorIdl(accountCompression, PROGRAM_ADDRESS) as CodamaIdl | undefined;
+            expect(root?.legacyEvents).toBeUndefined();
+        });
+
         it('should return undefined when conversion fails', () => {
             const broken = {
                 instructions: [{ accounts: [], args: [{ name: 'x', type: 'not-a-real-type' }], name: 'boom' }],
