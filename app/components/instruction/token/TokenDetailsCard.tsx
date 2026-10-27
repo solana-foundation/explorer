@@ -8,10 +8,9 @@ import {
     type InstructionNode,
     preformatted,
     text,
-    toInstructionNode,
 } from '@entities/instruction-card';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
-import { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
@@ -28,15 +27,11 @@ import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './ty
 type TokenInfo = object;
 
 type TokenDetailsCardProps = {
+    node: InstructionNode;
     ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-    raw?: TransactionInstruction;
 };
 
-export function TokenDetailsCard({ ix, index, innerCards, childIndex, raw }: TokenDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
+export function TokenDetailsCard({ node, ix }: TokenDetailsCardProps) {
     const { type: rawType, info } = create(ix.parsed, ParsedInfo);
     const type = create(rawType, TokenInstructionType);
     const title = `${TOKEN_IDS[ix.programId.toString()]}: ${IX_TITLES[type]}`;

@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import { toInstructionNode } from '@entities/instruction-card';
+import type { ParsedInstruction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { screen, waitFor } from '@testing-library/react';
@@ -495,5 +496,5 @@ describe('stake::instruction cards', () => {
 function renderCard(parsed: { info: object; type: string }, programId = PROGRAM_ID) {
     const ix = { parsed, program: 'stake', programId } as unknown as ParsedInstruction;
 
-    return renderTxCard(<StakeDetailsCard tx={{ signatures: ['sig'] } as ParsedTransaction} ix={ix} index={0} />);
+    return renderTxCard(<StakeDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} />);
 }

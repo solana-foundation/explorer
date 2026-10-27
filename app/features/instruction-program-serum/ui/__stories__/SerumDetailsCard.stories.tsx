@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -35,7 +36,7 @@ function storyArgs(data: Buffer, keyCount: number) {
     });
     const ix = dispatcher.fromTransactionInstruction(raw);
     invariant(ix, 'the OpenBook program id is registered');
-    return { childIndex: undefined, index: 0, innerCards: undefined, ix, raw };
+    return { ix, node: toInstructionNode({ index: 0, ix: raw }) };
 }
 
 const meta: Meta<typeof SerumDetailsCard> = {

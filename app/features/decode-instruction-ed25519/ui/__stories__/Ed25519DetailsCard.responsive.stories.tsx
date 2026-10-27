@@ -1,6 +1,6 @@
+import { instructionDataOf, toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
-import { getBase58Decoder } from '@solana/kit';
-import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
     withCluster,
@@ -15,10 +15,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 import { invariant } from '@/app/shared/lib/invariant';
 
 import { ed25519InstructionParser } from '../../lib/ed25519-client';
-import { siblingDataFromParsedTransaction } from '../../lib/sibling-data';
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
-
-const BASE58_DECODER = getBase58Decoder();
 
 const ix = new TransactionInstruction({
     data: Buffer.from('01000c0001004c0001006e008a000100', 'hex'),
@@ -26,20 +23,15 @@ const ix = new TransactionInstruction({
     programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
 });
 
-const surroundingIx = {
-    accounts: [],
-    data: BASE58_DECODER.decode(Buffer.alloc(256)),
+const surroundingIx = new TransactionInstruction({
+    data: Buffer.alloc(256),
+    keys: [],
     programId: new PublicKey('11111111111111111111111111111111'),
-} as any;
+});
 
-const tx = {
-    message: {
-        accountKeys: [],
-        instructions: [ix as any, surroundingIx],
-        recentBlockhash: '',
-    },
-    signatures: [],
-} as unknown as ParsedTransaction;
+const siblingData = instructionDataOf(
+    [ix, surroundingIx].map((instruction, index) => toInstructionNode({ index, ix: instruction })),
+);
 
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
@@ -66,12 +58,9 @@ const dispatched = createInstructionParserDispatcher([ed25519InstructionParser])
 invariant(dispatched, 'the fixture program id is registered');
 
 const args = {
-    childIndex: undefined,
-    index: 0,
-    innerCards: undefined,
     ix: dispatched,
-    raw: ix,
-    siblingData: siblingDataFromParsedTransaction(tx),
+    node: { ...toInstructionNode({ index: 0, ix }), raw: ix },
+    siblingData,
 };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };

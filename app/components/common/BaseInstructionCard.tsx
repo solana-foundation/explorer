@@ -21,7 +21,7 @@ type InstructionProps = {
     index: number;
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
-    innerCards?: React.ReactNode[];
+    childCards?: React.ReactNode;
     eventCards?: React.ReactNode[];
     childIndex?: number;
     // raw can be used to display raw instruction information
@@ -44,7 +44,7 @@ export function BaseInstructionCard({
     ix,
     defaultRaw,
     eventCards,
-    innerCards,
+    childCards,
     childIndex,
     raw,
     onRequestRaw,
@@ -124,14 +124,14 @@ export function BaseInstructionCard({
                     ) : (
                         children
                     )}
-                    {innerCards && innerCards.length > 0 && (
+                    {childCards !== undefined && (
                         <>
                             <BaseTable.SectionRow>
                                 <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
                             </BaseTable.SectionRow>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div>{innerCards}</div>
+                                    <div>{childCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>

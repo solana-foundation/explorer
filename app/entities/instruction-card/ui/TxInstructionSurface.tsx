@@ -1,7 +1,7 @@
 'use client';
 
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import type { SignatureResult, TransactionSignature } from '@solana/web3.js';
+import type { TransactionSignature } from '@solana/web3.js';
 import React from 'react';
 
 import type { InstructionSurface } from '../model/surface';
@@ -19,19 +19,22 @@ import { InstructionSurfaceProvider } from '../model/surface';
 export function TxInstructionSurface({
     result,
     signature,
+    Card,
+    instructionData,
     children,
-}: {
-    result: SignatureResult;
+}: Omit<InstructionSurface, 'Shell' | 'signature'> & {
     signature: TransactionSignature;
     children: React.ReactNode;
 }) {
     const surface = React.useMemo<InstructionSurface>(
         () => ({
+            Card,
             Shell: InstructionCard,
+            instructionData,
             result,
             signature,
         }),
-        [result, signature],
+        [Card, instructionData, result, signature],
     );
 
     return <InstructionSurfaceProvider surface={surface}>{children}</InstructionSurfaceProvider>;

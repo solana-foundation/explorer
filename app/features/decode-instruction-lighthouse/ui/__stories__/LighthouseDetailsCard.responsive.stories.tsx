@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
@@ -33,11 +34,8 @@ const parsed = parseLighthouseInstruction(toKitInstruction(raw));
 if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
 
 const args = {
-    childIndex: undefined,
-    index: 0,
-    innerCards: undefined,
     ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
-    raw,
+    node: { ...toInstructionNode({ index: 0, ix: raw }), raw },
 };
 
 const meta: Meta<typeof LighthouseDetailsCard> = {

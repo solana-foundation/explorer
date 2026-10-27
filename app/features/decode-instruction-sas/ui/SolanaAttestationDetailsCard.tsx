@@ -13,24 +13,13 @@ import type { SolanaAttestationParsed } from '../lib/sas-parser';
 const TITLE_PREFIX = 'Solana Attestation';
 
 type SolanaAttestationDetailsCardProps = {
+    /** The account rows come from `raw`. */
+    node: InstructionNode & { raw: TransactionInstruction };
     /** The dispatcher's verdict for a SAS instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function SolanaAttestationDetailsCard({
-    ix,
-    raw,
-    index,
-    innerCards,
-    childIndex,
-}: SolanaAttestationDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
-
+export function SolanaAttestationDetailsCard({ node, ix }: SolanaAttestationDetailsCardProps) {
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
     }
@@ -40,7 +29,7 @@ export function SolanaAttestationDetailsCard({
     return (
         <DecodedInstructionCard
             node={node}
-            ix={raw}
+            ix={node.raw}
             title={`${TITLE_PREFIX}: ${camelToTitleCase(type)}`}
             accountNames={Object.keys(info.accounts)}
             args={parseCodamaArgs(info.data)}

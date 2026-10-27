@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
+import { inspectorSurface } from '@components/inspector/inspector-surface';
 import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -42,7 +42,13 @@ vi.mock('@components/common/BaseInstructionCard', () => ({
 }));
 
 function renderCard({
-    surface = { Shell: InstructionCard, result: { err: null }, signature: SIGNATURE },
+    surface = {
+        Card: () => undefined,
+        Shell: InstructionCard,
+        instructionData: () => undefined,
+        result: { err: null },
+        signature: SIGNATURE,
+    },
     ...props
 }: Partial<React.ComponentProps<typeof InstructionCard>> & { surface?: InstructionSurface } = {}) {
     const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
@@ -120,8 +126,8 @@ describe('InstructionCard', () => {
         expect(fetchRaw).toHaveBeenCalledWith(SIGNATURE);
     });
 
-    it('should not request raw data in the inspector', async () => {
-        renderCard({ surface: INSPECTOR_SURFACE });
+    it('should not request raw data without a signature', async () => {
+        renderCard({ surface: inspectorSurface(() => undefined) });
         await userEvent.click(screen.getByRole('button'));
 
         expect(screen.getByRole('button').dataset.canRequest).toBe('false');
@@ -141,12 +147,17 @@ describe('InstructionCard', () => {
     it('should reject a surface that omits the signature', () => {
         // An unused `@ts-expect-error` fails tsc, so this breaks if the key turns optional.
         // @ts-expect-error A surface states its signature, even as `undefined`.
-        const surface: InstructionSurface = { Shell: InstructionCard, result: { err: null } };
+        const surface: InstructionSurface = {
+            Card: () => undefined,
+            Shell: InstructionCard,
+            instructionData: () => undefined,
+            result: { err: null },
+        };
 
         expect(surface.signature).toBeUndefined();
     });
 
-    it('should not request raw data for an instruction supplied by the inspector', () => {
+    it('should not request raw data when the node carries the byte form', () => {
         const raw = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
 
         renderCard({ raw });

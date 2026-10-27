@@ -1,7 +1,7 @@
 import { type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { toInstructionNode } from '../model/node';
+import { instructionDataOf, toInstructionNode } from '../model/node';
 
 const PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
@@ -31,15 +31,28 @@ describe('toInstructionNode', () => {
     });
 
     it('should keep the fields it is given', () => {
-        const innerCards = [<div key="inner" />];
+        const children = [toInstructionNode({ childIndex: 0, index: 1, ix: RAW }), undefined];
 
-        expect(toInstructionNode({ childIndex: 2, index: 1, innerCards, ix: PARSED, raw: RAW })).toEqual({
+        expect(toInstructionNode({ childIndex: 2, children, index: 1, ix: PARSED, raw: RAW })).toEqual({
             childIndex: 2,
+            children,
             index: 1,
-            innerCards,
             ix: PARSED,
             programId: PROGRAM_ID,
             raw: RAW,
         });
+    });
+});
+
+describe('instructionDataOf', () => {
+    const nodes = [toInstructionNode({ index: 0, ix: RAW }), toInstructionNode({ index: 1, ix: PARSED }), undefined];
+
+    it.each([
+        ['an instruction in byte form', 0, RAW.data],
+        ['an RPC-parsed instruction', 1, undefined],
+        ['an instruction the page cannot resolve', 2, undefined],
+        ['an index past the last instruction', 3, undefined],
+    ])('should read the data of %s', (_, index, data) => {
+        expect(instructionDataOf(nodes)(index)).toEqual(data);
     });
 });

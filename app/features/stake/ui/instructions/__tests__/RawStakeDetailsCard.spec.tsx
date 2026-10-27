@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { screen, waitFor } from '@testing-library/react';
@@ -35,16 +36,15 @@ describe('stake::RawStakeDetailsCard', () => {
     it.each([
         { discriminator: INITIALIZE, name: 'an instruction the parsed path owns' },
         { discriminator: UNRECOGNIZED, name: 'an unrecognized discriminator' },
-    ])('should fall back to Unknown for $name', async ({ discriminator }) => {
+    ])('should render the fallback for $name', async ({ discriminator }) => {
         renderCard(instruction(discriminator));
 
         await waitFor(() => {
-            expect(screen.getByText('Stake Program: Unknown Instruction')).toBeInTheDocument();
+            expect(screen.getByText('Fallback card')).toBeInTheDocument();
         });
     });
 
-    // The node this card hand-builds carries the address, so a foreign program id proves the
-    // Program row reads the instruction rather than a stake-program constant.
+    // A foreign program id proves the Program row reads the node rather than a stake-program constant.
     it('should build the Program row from the instruction', async () => {
         const foreign = gen.publicKey(1);
         renderCard(instruction(GET_MINIMUM_DELEGATION, foreign));
@@ -56,5 +56,7 @@ describe('stake::RawStakeDetailsCard', () => {
 });
 
 function renderCard(ix: TransactionInstruction) {
-    return renderTxCard(<RawStakeDetailsCard ix={ix} index={0} />);
+    return renderTxCard(
+        <RawStakeDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} fallback={<div>Fallback card</div>} />,
+    );
 }

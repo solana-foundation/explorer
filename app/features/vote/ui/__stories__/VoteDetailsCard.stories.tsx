@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import {
     nextjsParameters,
     withMockTransactions,
@@ -19,7 +20,6 @@ import {
     VOTE_ACCOUNT_ADDRESS,
     VOTE_AUTHORITY_ADDRESS,
     voteParsedInstruction,
-    voteParsedTransaction,
 } from './fixtures';
 
 const meta = {
@@ -284,7 +284,7 @@ export const UnknownInstructionFallback: Story = {
 
 function cardArgs(parsed: { info: object; type: string }) {
     const ix = voteParsedInstruction(parsed);
-    return { index: 0, ix, tx: voteParsedTransaction(ix) };
+    return { ix, node: toInstructionNode({ index: 0, ix }) };
 }
 
 function expectTitle(title: string) {

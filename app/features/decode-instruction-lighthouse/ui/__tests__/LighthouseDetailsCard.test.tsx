@@ -1,5 +1,6 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import { toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -316,13 +317,19 @@ function instruction(data: number[], keys: Array<{ isSigner: boolean; isWritable
 
 // Decode the fixture through the real parser + dispatcher wrapper so the card is
 // exercised exactly as in production (canonical `{ type, info }` + raw ix).
-function renderLighthouse(raw: { data: Buffer; keys: unknown[]; programId: PublicKey }) {
-    const parsed = parseLighthouseInstruction(toKitInstruction(raw as unknown as TransactionInstruction));
+function renderLighthouse(fixture: { data: Buffer; keys: unknown[]; programId: PublicKey }) {
+    const raw = fixture as unknown as TransactionInstruction;
+    const parsed = parseLighthouseInstruction(toKitInstruction(raw));
     invariant(parsed, 'expected fixture to parse as a Lighthouse instruction');
     const ix = toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId);
     const view = render(
-        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
-            <LighthouseDetailsCard ix={ix} raw={raw as unknown as TransactionInstruction} index={0} />
+        <TxInstructionSurface
+            result={{ err: null }}
+            signature={DEFAULT_SIGNATURE}
+            Card={InstructionNodeCard}
+            instructionData={() => undefined}
+        >
+            <LighthouseDetailsCard node={{ ...toInstructionNode({ index: 0, ix: raw }), raw }} ix={ix} />
         </TxInstructionSurface>,
     );
     expandAllGroups();

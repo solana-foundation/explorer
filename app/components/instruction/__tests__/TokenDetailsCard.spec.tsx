@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
-import { InstructionSurfaceProvider } from '@entities/instruction-card';
+import { inspectorSurface } from '@components/inspector/inspector-surface';
+import { InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { isParsedInstruction } from '@entities/instruction-parser';
 import { useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
@@ -377,7 +377,7 @@ function card(type: string, info: Record<string, unknown>, programId: PublicKey 
         program: programId.equals(TOKEN_PROGRAM_ID) ? 'spl-token' : 'spl-token-2022',
         programId,
     };
-    return <TokenDetailsCard ix={ix} index={0} />;
+    return <TokenDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} />;
 }
 
 function byteFormCard(data: ReadonlyUint8Array, accounts: PublicKey[]) {
@@ -388,11 +388,11 @@ function byteFormCard(data: ReadonlyUint8Array, accounts: PublicKey[]) {
     });
     const ix = instructionParserDispatcher.fromTransactionInstruction(raw);
     if (!isParsedInstruction(ix)) throw new Error('The Token-2022 slice did not decode the fixture');
-    return <TokenDetailsCard ix={ix} raw={raw} index={0} />;
+    return <TokenDetailsCard node={toInstructionNode({ index: 0, ix, raw })} ix={ix} />;
 }
 
 function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
-        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{ui}</InstructionSurfaceProvider>,
+        <InstructionSurfaceProvider surface={inspectorSurface(() => undefined)}>{ui}</InstructionSurfaceProvider>,
     );
 }

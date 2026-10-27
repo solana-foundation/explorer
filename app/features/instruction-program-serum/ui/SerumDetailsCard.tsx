@@ -12,23 +12,17 @@ import {
 import type { DispatchResult } from '@entities/instruction-parser';
 import { isDeprecatedSerumProgram, OPENBOOK_DEX_PROGRAM_LABEL, SERUM_INSTRUCTION_NAMES } from '@explorer/decoder-serum';
 import type { Address } from '@solana/kit';
-import type { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
 import type { SerumParsed } from '../lib/serum-parser';
 
 type SerumDetailsCardProps = {
+    node: InstructionNode;
     /** The dispatcher's verdict for a DEX instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function SerumDetailsCard({ ix, raw, index, innerCards, childIndex }: SerumDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
+export function SerumDetailsCard({ node, ix }: SerumDetailsCardProps) {
     const parsed = 'unknown' in ix ? undefined : (ix.parsed as SerumParsed);
     const name = parsed ? SERUM_INSTRUCTION_NAMES[parsed.type] : 'Unknown';
 

@@ -2,11 +2,10 @@ import {
     address,
     defineInstructionCard,
     InstructionCardView,
+    type InstructionNode,
     text,
-    toInstructionNode,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import type { TransactionInstruction } from '@solana/web3.js';
 
 import type { CloseContextStateInfo, VerifyProofInfo, ZkElGamalProofParsed } from '../lib/zk-elgamal-proof-parser';
 
@@ -33,18 +32,12 @@ const VerifyProofCard = defineInstructionCard<VerifyProofInfo>({
 });
 
 type ZkElGamalProofDetailsCardProps = {
+    node: InstructionNode;
     /** The dispatcher's verdict for a ZK ElGamal Proof instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function ZkElGamalProofDetailsCard({ ix, raw, index, innerCards, childIndex }: ZkElGamalProofDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
+export function ZkElGamalProofDetailsCard({ node, ix }: ZkElGamalProofDetailsCardProps) {
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
     }

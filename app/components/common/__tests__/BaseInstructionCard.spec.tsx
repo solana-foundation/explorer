@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { screen } from '@testing-library/react';
@@ -35,6 +36,27 @@ describe('BaseInstructionCard', () => {
         expect(screen.getAllByText(/Associated Token Program/)).toHaveLength(1);
         // we expect specific internal component to be rendered with "defaultRaw"
         expect(screen.getByText('Instruction Data')).toBeInTheDocument();
+    });
+
+    test('should show a bigint of the decoded payload in the Raw view', async () => {
+        const parsedIx = {
+            parsed: { info: { maxSize: 100n }, type: 'initializeTokenGroup' },
+            program: 'spl-token-2022',
+            programId: TOKEN_2022_PROGRAM_ID,
+        };
+
+        renderWithProviders(
+            <BaseInstructionCard
+                ix={parsedIx}
+                index={0}
+                title="Token-2022 Program: Initialize Token Group"
+                result={{ err: null }}
+                defaultRaw
+            />,
+            { transactions: false },
+        );
+
+        expect(await screen.findByText(/"maxSize": "100"/)).toBeInTheDocument();
     });
 
     test('should say so when the accounts and hex data cannot be reconstructed', async () => {

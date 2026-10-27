@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -43,5 +44,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    args: { childIndex: undefined, index: 0, innerCards: undefined, ix, raw },
+    args: { ix, node: { ...toInstructionNode({ index: 0, ix: raw }), raw } },
 };

@@ -6,7 +6,9 @@ import { type InstructionSurface, InstructionSurfaceProvider } from '../model/su
 import { ArgRows } from '../ui/ArgRows';
 
 const STUB_SURFACE: InstructionSurface = {
+    Card: () => undefined,
     Shell: () => undefined,
+    instructionData: () => undefined,
     result: { err: null },
     signature: undefined,
 };

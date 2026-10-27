@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -132,7 +133,12 @@ function sasInstruction(data: number[], accountCount: number): TransactionInstru
 }
 
 function renderCard(raw: TransactionInstruction, ix = dispatcher.fromTransactionInstruction(raw)) {
-    return renderTxCard(<SolanaAttestationDetailsCard ix={ix as DispatchResult} raw={raw} index={0} />);
+    return renderTxCard(
+        <SolanaAttestationDetailsCard
+            node={{ ...toInstructionNode({ index: 0, ix: raw }), raw }}
+            ix={ix as DispatchResult}
+        />,
+    );
 }
 
 /** Rows short of the argument table's three columns, named by their first cell. */

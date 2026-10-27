@@ -4,11 +4,11 @@ import {
     type InstructionField,
     type InstructionFieldList,
     InstructionFields,
+    type InstructionNode,
     text,
-    toInstructionNode,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 
 import type { MetaplexTokenMetadataParsed } from '../lib/metaplex-token-metadata-client';
 import type { MetaplexInstructionType } from '../lib/metaplex-token-metadata-parser';
@@ -59,22 +59,11 @@ const IX_TITLES: Record<MetaplexInstructionType, string> = {
 };
 
 type MetaplexTokenMetadataDetailsCardProps = {
+    node: InstructionNode;
     ix: DispatchResult;
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function MetaplexTokenMetadataDetailsCard({
-    ix,
-    raw,
-    index,
-    innerCards,
-    childIndex,
-}: MetaplexTokenMetadataDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
+export function MetaplexTokenMetadataDetailsCard({ node, ix }: MetaplexTokenMetadataDetailsCardProps) {
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
     }

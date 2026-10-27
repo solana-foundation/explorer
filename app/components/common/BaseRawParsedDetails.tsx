@@ -14,10 +14,15 @@ export function BaseRawParsedDetails({ ix, children }: { ix: ParsedInstruction; 
                 </BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <pre className="inline-block max-w-[36rem] whitespace-pre-wrap break-words text-left">
-                        {JSON.stringify(ix.parsed, null, 2)}
+                        {JSON.stringify(ix.parsed, bigintAsString, 2)}
                     </pre>
                 </BaseTable.Cell>
             </BaseTable.Row>
         </>
     );
+}
+
+// A parser slice decodes a u64 as a bigint, which `JSON.stringify` throws on.
+function bigintAsString(_key: string, value: unknown) {
+    return typeof value === 'bigint' ? value.toString() : value;
 }

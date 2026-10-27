@@ -611,7 +611,6 @@ export default tseslint.config(
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/transaction/ui/AccountDetailDrawer.tsx',
             'app/features/transaction/ui/AccountExpandedSections.tsx',
-            'app/features/transaction/ui/InstructionsSection.tsx',
             'app/features/transaction/ui/SummaryCard.tsx',
             'app/features/vote/ui/VoteAccountSection.tsx',
 
@@ -806,7 +805,6 @@ export default tseslint.config(
             'app/components/inspector/AccountsCard.tsx',
             'app/components/inspector/AddressTableLookupsCard.tsx',
             'app/components/inspector/AddressWithContext.tsx',
-            'app/components/inspector/InstructionsSection.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
             'app/components/shared/StatusBadge.tsx',
             'app/components/shared/account/ProgramHeader.tsx',
@@ -962,7 +960,6 @@ export default tseslint.config(
             'app/components/account/sas/AttestationDataCard.tsx',
             'app/components/common/BaseInstructionCard.tsx',
             'app/components/common/InspectorInstructionCard.tsx',
-            'app/components/inspector/InstructionsSection.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/index.tsx',

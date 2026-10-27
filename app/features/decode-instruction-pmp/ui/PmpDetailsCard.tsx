@@ -1,5 +1,5 @@
 import { RawDataField } from '@components/shared/RawDataField';
-import { DECODED_TABLE_COLUMNS, DecodedInstructionCard, toInstructionNode } from '@entities/instruction-card';
+import { DECODED_TABLE_COLUMNS, DecodedInstructionCard, type InstructionNode } from '@entities/instruction-card';
 import { type TransactionInstruction } from '@solana/web3.js';
 import { capitalizeFirstLetter } from '@utils/index';
 import React from 'react';
@@ -15,13 +15,11 @@ import type { PmpContentInstruction } from '../lib/types';
 import { DataPayloadSection } from './DataPayloadSection';
 
 type PmpDetailsCardProps = {
+    node: InstructionNode;
     ix: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
     /**
-     * What to render when this instruction carries no decodable content, and the ErrorBoundary fallback. Each
-     * surface builds it: the IDL card when an IDL resolved, its own Unknown card otherwise. Injected rather than
+     * What to render when this instruction carries no decodable content, and the ErrorBoundary fallback. The
+     * instruction router builds it: the IDL card when an IDL resolved, the Unknown card otherwise. Injected rather than
      * built here because `boundaries/dependencies` forbids this feature from importing
      * `@features/decode-instruction-with-idl`, and because it keeps the card free of IDL concepts entirely.
      */
@@ -46,7 +44,7 @@ export function PmpDetailsCard(props: PmpDetailsCardProps) {
     );
 }
 
-function PmpDetailsCardBody({ ix, index, innerCards, childIndex, fallback }: PmpDetailsCardProps) {
+function PmpDetailsCardBody({ node, ix, fallback }: PmpDetailsCardProps) {
     const contentInstruction = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
 
     if (!contentInstruction) {
@@ -57,7 +55,7 @@ function PmpDetailsCardBody({ ix, index, innerCards, childIndex, fallback }: Pmp
 
     return (
         <DecodedInstructionCard
-            node={toInstructionNode({ childIndex, index, innerCards, ix })}
+            node={node}
             ix={ix}
             title={`${programName}: ${capitalizeFirstLetter(contentInstruction.kind)}`}
             programName={programName}

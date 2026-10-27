@@ -21,7 +21,7 @@ type InstructionProps = {
     index: number;
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
-    innerCards?: JSX.Element[];
+    childCards?: React.ReactNode;
     childIndex?: number;
     // raw can be used to display raw instruction information
     // depends on whether the transaction was received from blockchain (TransactionInstruction)
@@ -38,7 +38,7 @@ export function InspectorInstructionCard({
     index,
     ix,
     defaultRaw,
-    innerCards,
+    childCards,
     childIndex,
     raw,
     onRequestRaw,
@@ -97,14 +97,14 @@ export function InspectorInstructionCard({
                     ) : (
                         children
                     )}
-                    {innerCards && innerCards.length > 0 && (
+                    {childCards !== undefined && (
                         <>
                             <BaseTable.SectionRow>
                                 <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
                             </BaseTable.SectionRow>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div>{innerCards}</div>
+                                    <div>{childCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>

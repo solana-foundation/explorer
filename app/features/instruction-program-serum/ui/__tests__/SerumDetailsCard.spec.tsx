@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS, SERUM_DEX_V3_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -128,5 +129,5 @@ function renderCard(raw: TransactionInstruction) {
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     if (!dispatched) throw new Error('no Serum parser registered for the fixture program id');
 
-    return renderTxCard(<SerumDetailsCard ix={dispatched} raw={raw} index={0} />);
+    return renderTxCard(<SerumDetailsCard node={toInstructionNode({ index: 0, ix: raw })} ix={dispatched} />);
 }

@@ -14,10 +14,9 @@ type InstructionProps = {
     index: number;
     ix: TransactionInstruction | ParsedInstruction;
     defaultRaw?: boolean;
-    innerCards?: React.ReactNode[];
+    childCards?: React.ReactNode;
     eventCards?: React.ReactNode[];
     childIndex?: number;
-    // Raw instruction for displaying accounts and hex data in raw mode (used by inspector)
     raw?: TransactionInstruction;
     headerButtons?: React.ReactNode;
     collapsible?: boolean;
@@ -30,7 +29,7 @@ export function InstructionCard({
     index,
     ix,
     defaultRaw,
-    innerCards,
+    childCards,
     eventCards,
     childIndex,
     raw: rawProp,
@@ -48,7 +47,7 @@ export function InstructionCard({
 
     const fetchRaw = useFetchRawTransaction();
 
-    // Only allow fetching raw data if we have a valid signature (not in inspector mode), and only
+    // Only allow fetching raw data if we have a valid signature, and only
     // while a fetch could still produce it: a v1 transaction has no web3.js instruction view, so
     // once its raw data has arrived, asking again would refetch on every open of the Raw view.
     const rawFetched = rawDetails?.status === FetchStatus.Fetched;
@@ -64,7 +63,7 @@ export function InstructionCard({
             index={index}
             ix={ix}
             defaultRaw={defaultRaw}
-            innerCards={innerCards}
+            childCards={childCards}
             eventCards={eventCards}
             childIndex={childIndex}
             raw={raw}

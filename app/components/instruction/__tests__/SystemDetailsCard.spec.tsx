@@ -1,8 +1,5 @@
-import {
-    createInstructionParserDispatcher,
-    isParsedInstruction,
-    toParsedTransaction,
-} from '@entities/instruction-parser';
+import { toInstructionNode } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { systemInstructionParser } from '@features/decode-instruction-system';
 import { SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
@@ -134,17 +131,12 @@ const CASES: Array<{ fixture: Fixture; rows: CardRow[]; title: string }> = [
 ];
 
 describe('instruction::SystemDetailsCard', () => {
-    it.each(CASES)('should render $title', async ({ fixture: { instruction, message }, rows, title }) => {
+    it.each(CASES)('should render $title', async ({ fixture: { instruction }, rows, title }) => {
         const parsedIx = dispatcher.fromTransactionInstruction(instruction);
         if (!isParsedInstruction(parsedIx)) throw new Error('System slice did not recognise fixture');
 
         renderTxCard(
-            <SystemDetailsCard
-                index={0}
-                ix={parsedIx}
-                raw={instruction}
-                tx={toParsedTransaction(instruction, message, [parsedIx])}
-            />,
+            <SystemDetailsCard node={toInstructionNode({ index: 0, ix: parsedIx, raw: instruction })} ix={parsedIx} />,
         );
 
         await waitFor(() => {

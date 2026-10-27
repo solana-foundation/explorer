@@ -6,24 +6,19 @@ export type InstructionNode = {
     ix: ParsedInstruction | TransactionInstruction;
     index: number;
     childIndex?: number;
-    /** Raw form, when the card was reached through the RPC-parsed path. */
+    /** Raw form of the instruction, when the page has its bytes. */
     raw?: TransactionInstruction;
-    /**
-     * CPI children. Not yet populated — `InstructionsSection` still builds
-     * inner cards eagerly and hands them over as `innerCards` below. Once tree
-     * construction moves out of the render pass, the view walks this and
-     * `innerCards` goes away.
-     */
-    children?: InstructionNode[];
-    /**
-     * @deprecated Transitional. Pre-rendered inner cards from the legacy
-     * pipeline. The card never reads this — only the view passes it to the
-     * shell. Delete together with the eager building in `InstructionsSection`.
-     */
-    innerCards?: JSX.Element[];
+    children?: ReadonlyArray<InstructionNode | undefined>;
 };
 
 /** Takes `programId` from `ix`, so the two cannot disagree. */
 export function toInstructionNode(fields: Omit<InstructionNode, 'programId'>): InstructionNode {
     return { ...fields, programId: fields.ix.programId };
+}
+
+export function instructionDataOf(nodes: ReadonlyArray<InstructionNode | undefined>) {
+    return (index: number): Uint8Array | undefined => {
+        const ix = nodes[index]?.ix;
+        return ix && !('parsed' in ix) ? ix.data : undefined;
+    };
 }

@@ -1,5 +1,5 @@
-import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
-import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import { type InstructionNode, UnknownDetailsCard, useInstructionSurface } from '@entities/instruction-card';
+import type { ParsedInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
@@ -39,18 +39,15 @@ import { SplitDetailsCard } from './SplitDetailsCard';
 import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 
 type DetailsProps = {
-    tx: ParsedTransaction;
+    node: InstructionNode;
     ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function StakeDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
+export function StakeDetailsCard({ node, ix }: DetailsProps) {
+    const { signature } = useInstructionSurface();
 
-    // TODO: Replace this try/catch + Logger with a React error boundary one level up
-    // (e.g. in InstructionCard). Reasons:
+    // TODO: Replace this try/catch + Logger with the React error boundary one level up
+    // (in InstructionNodeCard). Reasons:
     //   1. try/catch in render code is a smell — error boundaries are React's answer.
     //   2. The catch is too broad: it conflates superstruct schema-validation failures
     //      from create() with downstream render errors in the child *DetailsCard, and
@@ -133,9 +130,7 @@ export function StakeDetailsCard({ childIndex, index, innerCards, ix, tx }: Deta
                 return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
-        Logger.error(error, {
-            signature: tx.signatures[0],
-        });
+        Logger.error(error, { signature });
         return <UnknownDetailsCard node={node} />;
     }
 }

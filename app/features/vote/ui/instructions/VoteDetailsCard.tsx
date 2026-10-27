@@ -1,5 +1,5 @@
-import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
-import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import { type InstructionNode, UnknownDetailsCard, useInstructionSurface } from '@entities/instruction-card';
+import type { ParsedInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
@@ -40,15 +40,12 @@ import {
 import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 
 type DetailsProps = {
-    tx: ParsedTransaction;
+    node: InstructionNode;
     ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function VoteDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
+export function VoteDetailsCard({ node, ix }: DetailsProps) {
+    const { signature } = useInstructionSurface();
 
     // TODO: Replace this try/catch + Logger with a React error boundary one level up
     // (see the matching note in StakeDetailsCard).
@@ -140,9 +137,7 @@ export function VoteDetailsCard({ childIndex, index, innerCards, ix, tx }: Detai
                 return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
-        Logger.error(error, {
-            signature: tx.signatures[0],
-        });
+        Logger.error(error, { signature });
         return <UnknownDetailsCard node={node} />;
     }
 }

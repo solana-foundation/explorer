@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
+import { inspectorSurface } from '@components/inspector/inspector-surface';
 import { InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { screen } from '@testing-library/react';
@@ -105,6 +105,6 @@ function card(type: string, info: Record<string, unknown>) {
 
 function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
-        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{ui}</InstructionSurfaceProvider>,
+        <InstructionSurfaceProvider surface={inspectorSurface(() => undefined)}>{ui}</InstructionSurfaceProvider>,
     );
 }

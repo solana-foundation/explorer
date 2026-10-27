@@ -3,25 +3,14 @@
 // a ParsedInstruction (type "batch") instead of a PartiallyDecodedInstruction
 // with raw bytes. All parsing lives in lib/rpc-parsed-batch; this stays presentational.
 
-import { toInstructionNode } from '@entities/instruction-card';
+import type { InstructionNode } from '@entities/instruction-card';
 import type { ParsedInstruction } from '@solana/web3.js';
 
 import { decodeRpcBatchInstructions } from '../lib/rpc-parsed-batch';
 import { BatchInstructionCard } from './BatchInstructionCard';
 import { SubInstructionRowView } from './SubInstructionRow';
 
-export function RpcParsedTokenBatchCard({
-    ix,
-    index,
-    innerCards,
-    childIndex,
-}: {
-    ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-}) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
+export function RpcParsedTokenBatchCard({ node, ix }: { node: InstructionNode; ix: ParsedInstruction }) {
     const instructions = decodeRpcBatchInstructions(ix);
 
     return (

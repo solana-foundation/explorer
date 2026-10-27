@@ -1,4 +1,3 @@
-export { isSolanaAttestationInstruction } from './lib/is-solana-attestation-instruction';
 export { solanaAttestationInstructionParser } from './lib/sas-client';
 export {
     parseSolanaAttestationKitInstruction,

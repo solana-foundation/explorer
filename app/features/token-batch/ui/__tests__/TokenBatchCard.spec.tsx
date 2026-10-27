@@ -1,5 +1,5 @@
-import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
-import { InstructionSurfaceProvider } from '@entities/instruction-card';
+import { inspectorSurface } from '@components/inspector/inspector-surface';
+import { InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -20,7 +20,7 @@ describe('TokenBatchCard', () => {
         { render: renderInspectorCard, surface: 'inspector' },
     ])('should draw one Program row and a Collapse button on the $surface surface', async ({ render }) => {
         const ix = makeBatchIx([{ data: TRANSFER_DATA, numAccounts: 3 }], 3);
-        render(<TokenBatchCard ix={ix} index={0} />);
+        render(<TokenBatchCard node={toInstructionNode({ index: 0, ix })} ix={ix} />);
 
         await waitFor(() => {
             expect(screen.getByText('Token Program: Batch (1 instruction)')).toBeInTheDocument();
@@ -35,9 +35,12 @@ describe('TokenBatchCard', () => {
         const ix = makeBatchIx([{ data: TRANSFER_DATA, numAccounts: 3 }], 3);
         renderWithProviders(
             <InstructionSurfaceProvider
-                surface={{ ...INSPECTOR_SURFACE, Shell: ({ title }) => <div data-testid="shell">{title}</div> }}
+                surface={{
+                    ...inspectorSurface(() => undefined),
+                    Shell: ({ title }) => <div data-testid="shell">{title}</div>,
+                }}
             >
-                <TokenBatchCard ix={ix} index={0} />
+                <TokenBatchCard node={toInstructionNode({ index: 0, ix })} ix={ix} />
             </InstructionSurfaceProvider>,
         );
 
@@ -47,6 +50,6 @@ describe('TokenBatchCard', () => {
 
 function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
-        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{ui}</InstructionSurfaceProvider>,
+        <InstructionSurfaceProvider surface={inspectorSurface(() => undefined)}>{ui}</InstructionSurfaceProvider>,
     );
 }

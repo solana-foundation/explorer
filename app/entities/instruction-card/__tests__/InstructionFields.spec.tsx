@@ -10,7 +10,9 @@ import { InstructionFields } from '../ui/InstructionFields';
 vi.mock('@/app/components/common/Address', () => ({ Address: () => <div /> }));
 
 const STUB_SURFACE: InstructionSurface = {
+    Card: () => undefined,
     Shell: () => undefined,
+    instructionData: () => undefined,
     result: { err: null },
     signature: undefined,
 };

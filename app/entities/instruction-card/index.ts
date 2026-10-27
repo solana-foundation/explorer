@@ -16,7 +16,7 @@ export type { InstructionField, InstructionFieldList } from './model/fields';
 export { remainingAccountLabel } from './model/accounts';
 export { parseCodamaArgs } from './model/args';
 export type { InstructionArg } from './model/args';
-export { toInstructionNode } from './model/node';
+export { instructionDataOf, toInstructionNode } from './model/node';
 export type { InstructionNode } from './model/node';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';
 export type { InstructionShellProps, InstructionSurface } from './model/surface';
@@ -24,6 +24,7 @@ export { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from './ui/DecodedInstr
 export { InstructionAddress } from './ui/InstructionAddress';
 export { InstructionCardView } from './ui/InstructionCardView';
 export { InstructionFields } from './ui/InstructionFields';
+export { InstructionNodeCards } from './ui/InstructionNodeCards';
 export { NameOnlyDetailsCard } from './ui/NameOnlyDetailsCard';
 export { ProgramField } from './ui/ProgramField';
 export { TxInstructionSurface } from './ui/TxInstructionSurface';

@@ -1,5 +1,5 @@
-import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
-import { ParsedInstruction, ParsedTransaction, TransactionInstruction } from '@solana/web3.js';
+import { type InstructionNode, UnknownDetailsCard, useInstructionSurface } from '@entities/instruction-card';
+import { ParsedInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
@@ -35,20 +35,12 @@ import {
 import { UpgradeNonceDetailsCard } from './UpgradeNonceDetailsCard';
 
 type DetailsProps = {
-    tx: ParsedTransaction;
+    node: InstructionNode;
     ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-    // Raw instruction for displaying accounts and hex data in raw mode (used by inspector)
-    raw?: TransactionInstruction;
 };
 
-export function SystemDetailsCard({ childIndex, index, innerCards, ix, raw, tx }: DetailsProps) {
-    // Transitional. Every System card now takes a single `node`, but the two
-    // `InstructionsSection`s still hand this component the old prop spread. This
-    // shim disappears once they build the node tree themselves.
-    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
+export function SystemDetailsCard({ node, ix }: DetailsProps) {
+    const { signature } = useInstructionSurface();
 
     try {
         const parsed = create(ix.parsed, ParsedInfo);
@@ -109,9 +101,7 @@ export function SystemDetailsCard({ childIndex, index, innerCards, ix, raw, tx }
                 return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
-        Logger.error(error, {
-            signature: tx.signatures[0],
-        });
+        Logger.error(error, { signature });
         return <UnknownDetailsCard node={node} />;
     }
 }

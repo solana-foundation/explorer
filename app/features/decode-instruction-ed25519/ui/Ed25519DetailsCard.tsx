@@ -5,8 +5,8 @@ import {
     heading,
     InstructionCardView,
     type InstructionFieldList,
+    type InstructionNode,
     text,
-    toInstructionNode,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import type { TransactionInstruction } from '@solana/web3.js';
@@ -29,26 +29,21 @@ const Ed25519VerifyCard = defineInstructionCard<Ed25519SignatureDetails[]>({
 });
 
 type Ed25519DetailsCardProps = {
+    /** The signature offsets point into the data of `raw`. */
+    node: InstructionNode & { raw: TransactionInstruction };
     /** The dispatcher's verdict for an ed25519 instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
-    /** Raw form, for the shell's hex view and for offsets that point into this instruction. */
-    raw: TransactionInstruction;
     /** Offsets may point into other instructions, which only the caller can see. */
     siblingData: SiblingInstructionData;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function Ed25519DetailsCard({ ix, raw, siblingData, index, innerCards, childIndex }: Ed25519DetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
+export function Ed25519DetailsCard({ node, ix, siblingData }: Ed25519DetailsCardProps) {
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title="Ed25519: Unknown Instruction" defaultRaw />;
     }
 
     const parsed = ix.parsed as Ed25519Parsed;
-    const signatures = resolveEd25519Signatures(parsed.info.signatures, raw.data, siblingData);
+    const signatures = resolveEd25519Signatures(parsed.info.signatures, node.raw.data, siblingData);
 
     return <Ed25519VerifyCard node={node} info={signatures} />;
 }

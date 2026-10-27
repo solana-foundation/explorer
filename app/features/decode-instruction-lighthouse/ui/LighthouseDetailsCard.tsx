@@ -1,4 +1,4 @@
-import { DecodedInstructionCard, parseCodamaArgs, toInstructionNode } from '@entities/instruction-card';
+import { DecodedInstructionCard, type InstructionNode, parseCodamaArgs } from '@entities/instruction-card';
 import { type ParsedInstruction, type TransactionInstruction } from '@solana/web3.js';
 
 import { withFormattedOperators } from '../lib/format-operators';
@@ -7,20 +7,14 @@ import type { LighthouseInfo, LighthouseInstructionType } from '../lib/types';
 /**
  * Presentational card for a Lighthouse instruction already decoded by the
  * unified dispatcher. `ix` carries the canonical `{ type, info }` payload;
- * `raw` provides the full ordered account list (with roles) for the table.
+ * `node.raw` provides the full ordered account list (with roles) for the table.
  */
 export function LighthouseDetailsCard({
+    node,
     ix,
-    raw,
-    index,
-    innerCards,
-    childIndex,
 }: {
+    node: InstructionNode & { raw: TransactionInstruction };
     ix: ParsedInstruction;
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 }) {
     const title = ix.parsed.type as LighthouseInstructionType;
     const info = ix.parsed.info as LighthouseInfo;
@@ -28,8 +22,8 @@ export function LighthouseDetailsCard({
 
     return (
         <DecodedInstructionCard
-            node={toInstructionNode({ childIndex, index, innerCards, ix: raw })}
-            ix={raw}
+            node={node}
+            ix={node.raw}
             title={`${programName}: ${title}`}
             programName={programName}
             accountNames={Object.keys(info.accounts ?? {})}

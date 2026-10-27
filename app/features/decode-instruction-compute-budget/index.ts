@@ -5,5 +5,4 @@ export {
     type ComputeBudgetParsed,
     parseComputeBudgetKitInstruction,
 } from './lib/compute-budget-parser';
-export { isComputeBudgetInstruction } from './lib/is-compute-budget-instruction';
 export { ComputeBudgetDetailsCard } from './ui/ComputeBudgetDetailsCard';

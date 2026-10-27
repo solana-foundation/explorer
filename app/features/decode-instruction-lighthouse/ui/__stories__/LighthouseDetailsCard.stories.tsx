@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
@@ -18,16 +19,13 @@ import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
 // Build the card's props the same way the unified dispatcher does: decode the
 // raw instruction into the canonical `{ type, info }` shape, then wrap it as a
-// ParsedInstruction. `raw` carries the full account list for the table.
+// ParsedInstruction. `node.raw` carries the full account list for the table.
 function buildArgs(raw: TransactionInstruction) {
     const parsed = parseLighthouseInstruction(toKitInstruction(raw));
     if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
     return {
-        childIndex: undefined,
-        index: 0,
-        innerCards: undefined,
         ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
-        raw,
+        node: { ...toInstructionNode({ index: 0, ix: raw }), raw },
     };
 }
 

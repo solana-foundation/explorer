@@ -1,6 +1,11 @@
-import { defineInstructionCard, InstructionCardView, sol, text, toInstructionNode } from '@entities/instruction-card';
+import {
+    defineInstructionCard,
+    InstructionCardView,
+    type InstructionNode,
+    sol,
+    text,
+} from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import type { TransactionInstruction } from '@solana/web3.js';
 import { microLamportsToLamportsString } from '@utils/index';
 
 import type {
@@ -47,18 +52,12 @@ const SetLoadedAccountsDataSizeLimitCard = defineInstructionCard<SetLoadedAccoun
 });
 
 type ComputeBudgetDetailsCardProps = {
+    node: InstructionNode;
     /** The dispatcher's verdict for a Compute Budget instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function ComputeBudgetDetailsCard({ ix, raw, index, innerCards, childIndex }: ComputeBudgetDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
+export function ComputeBudgetDetailsCard({ node, ix }: ComputeBudgetDetailsCardProps) {
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
     }

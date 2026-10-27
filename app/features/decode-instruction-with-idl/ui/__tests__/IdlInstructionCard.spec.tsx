@@ -1,4 +1,4 @@
-import { UnknownDetailsCard } from '@entities/instruction-card';
+import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -19,9 +19,8 @@ vi.mock('@entities/instruction-card', async importOriginal => ({
 }));
 
 const ix = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PublicKey.unique() });
-const innerCards = [<div key="inner" />];
-const props = { childIndex: 1, index: 2, innerCards, ix };
-const node = { ...props, programId: ix.programId };
+const node = toInstructionNode({ childIndex: 1, index: 2, ix });
+const props = { ix, node };
 
 describe('IdlInstructionCard', () => {
     afterEach(() => {

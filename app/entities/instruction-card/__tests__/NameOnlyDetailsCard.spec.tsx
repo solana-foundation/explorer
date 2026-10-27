@@ -42,7 +42,15 @@ function renderCard({ name, programName }: { name?: string; programName?: string
     const ix = new TransactionInstruction({ data: Buffer.from([2, 0, 0, 0]), keys: [], programId: MANGO });
 
     return render(
-        <InstructionSurfaceProvider surface={{ Shell, result: { err: null }, signature: undefined }}>
+        <InstructionSurfaceProvider
+            surface={{
+                Card: () => undefined,
+                Shell,
+                instructionData: () => undefined,
+                result: { err: null },
+                signature: undefined,
+            }}
+        >
             <NameOnlyDetailsCard node={toInstructionNode({ index: 0, ix })} name={name} programName={programName} />
         </InstructionSurfaceProvider>,
     );

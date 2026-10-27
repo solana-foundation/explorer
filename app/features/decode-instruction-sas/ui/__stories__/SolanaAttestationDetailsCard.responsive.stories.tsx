@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -52,7 +53,7 @@ const meta: Meta<typeof SolanaAttestationDetailsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { childIndex: undefined, index: 0, innerCards: undefined, ix, raw };
+const args = { ix, node: { ...toInstructionNode({ index: 0, ix: raw }), raw } };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

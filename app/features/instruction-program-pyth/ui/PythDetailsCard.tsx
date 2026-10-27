@@ -1,7 +1,6 @@
-import { InstructionCardView, type InstructionNode, toInstructionNode } from '@entities/instruction-card';
+import { InstructionCardView, type InstructionNode } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import { PYTH_INSTRUCTIONS, type PythParsed } from '@explorer/decoder-pyth';
-import type { TransactionInstruction } from '@solana/web3.js';
 
 import { AddMappingDetailsCard } from './instructions/AddMappingDetailsCard';
 import { AddPriceDetailsCard } from './instructions/AddPriceDetailsCard';
@@ -15,18 +14,12 @@ import { UpdatePriceDetailsCard, UpdatePriceNoFailOnErrorDetailsCard } from './i
 import { UpdateProductDetailsCard } from './instructions/UpdateProductDetailsCard';
 
 type PythDetailsCardProps = {
+    node: InstructionNode;
     /** The dispatcher's verdict for a Pyth instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
 };
 
-export function PythDetailsCard({ ix, raw, index, innerCards, childIndex }: PythDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
+export function PythDetailsCard({ node, ix }: PythDetailsCardProps) {
     if ('unknown' in ix) {
         return <RawOnlyPythCard node={node} title="Pyth: Unknown Instruction" />;
     }

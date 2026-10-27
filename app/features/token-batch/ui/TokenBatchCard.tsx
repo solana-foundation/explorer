@@ -1,4 +1,4 @@
-import { toInstructionNode } from '@entities/instruction-card';
+import type { InstructionNode } from '@entities/instruction-card';
 import type { TransactionInstruction } from '@solana/web3.js';
 
 import { parseBatchInstruction, type ParsedSubInstruction } from '../lib/batch-parser';
@@ -6,18 +6,7 @@ import { BatchMintRegistryProvider } from '../model/batch-mint-registry';
 import { BatchInstructionCard } from './BatchInstructionCard';
 import { SubInstructionRow } from './SubInstructionRow';
 
-export function TokenBatchCard({
-    ix,
-    index,
-    innerCards,
-    childIndex,
-}: {
-    ix: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-}) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
+export function TokenBatchCard({ node, ix }: { node: InstructionNode; ix: TransactionInstruction }) {
     const { instructions, error }: { instructions: ParsedSubInstruction[]; error: string | undefined } = (() => {
         try {
             return { error: undefined, instructions: parseBatchInstruction(ix).instructions };

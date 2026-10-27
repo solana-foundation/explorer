@@ -1,4 +1,4 @@
-import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
+import { type InstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import { TransactionInstruction } from '@solana/web3.js';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -7,19 +7,14 @@ import { AnchorDetailsCard } from './AnchorDetailsCard';
 import { CodamaInstructionCard } from './CodamaInstructionCard';
 
 export function IdlInstructionCard({
-    decoded,
+    node,
     ix,
-    index,
-    innerCards,
-    childIndex,
+    decoded,
 }: {
-    decoded: IdlInstructionDecode;
+    node: InstructionNode;
     ix: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    decoded: IdlInstructionDecode;
 }) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
     const unknownCard = <UnknownDetailsCard node={node} />;
     return (
         <ErrorBoundary fallback={unknownCard}>

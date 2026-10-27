@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
@@ -80,5 +81,5 @@ function instruction(data: number[], keys: string[] = []): TransactionInstructio
 function renderCard(ix: TransactionInstruction) {
     const dispatched = dispatcher.fromTransactionInstruction(ix);
     if (!dispatched) throw new Error('parser not registered');
-    return renderTxCard(<ZkElGamalProofDetailsCard ix={dispatched} raw={ix} index={0} />);
+    return renderTxCard(<ZkElGamalProofDetailsCard node={toInstructionNode({ index: 0, ix })} ix={dispatched} />);
 }

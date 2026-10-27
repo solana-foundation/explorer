@@ -15,11 +15,13 @@ vi.mock('@/app/components/common/Address', () => ({
 }));
 
 const STUB_SURFACE: InstructionSurface = {
+    Card: () => undefined,
     Shell: ({ children }) => (
         <table>
             <tbody>{children}</tbody>
         </table>
     ),
+    instructionData: () => undefined,
     result: { err: null },
     signature: undefined,
 };

@@ -4,6 +4,7 @@ import React from 'react';
 
 import type { InstructionNode } from '../model/node';
 import { useInstructionSurface } from '../model/surface';
+import { InstructionNodeCards } from './InstructionNodeCards';
 
 export function InstructionCardView({
     node,
@@ -38,7 +39,11 @@ export function InstructionCardView({
             result={result}
             defaultRaw={defaultRaw}
             collapsible={collapsible}
-            innerCards={node.innerCards}
+            childCards={
+                node.children && node.children.length > 0 ? (
+                    <InstructionNodeCards nodes={node.children} parent={node} />
+                ) : undefined
+            }
             eventCards={events}
         >
             {children}

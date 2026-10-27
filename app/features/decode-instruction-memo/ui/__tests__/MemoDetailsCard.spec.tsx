@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
@@ -72,5 +73,6 @@ function memoInstruction(memo: string): ParsedInstruction {
 }
 
 function renderCard(ix: ParsedInstruction) {
-    return renderTxCard(<MemoDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />);
+    const dispatched = dispatcher.fromParsedInstruction(ix);
+    return renderTxCard(<MemoDetailsCard node={toInstructionNode({ index: 0, ix: dispatched })} ix={dispatched} />);
 }

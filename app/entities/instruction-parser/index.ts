@@ -9,6 +9,6 @@ export {
     type ParserProgramLabel,
     type UnparsedInstruction,
 } from '@explorer/parsers';
-export { toParsedInstruction, toParsedTransaction } from '@explorer/parsers/compat';
+export { toParsedInstruction } from '@explorer/parsers/compat';
 
 export { InstructionParserProvider, useInstructionParser } from './model/provider';

@@ -87,7 +87,7 @@ describe('Inspector InstructionsSection with a Lighthouse instruction', () => {
 
         // Title proves the whole path: the dispatcher decoded the raw bytes into
         // `{ program: 'lighthouse', type: 'Assert Sysvar Clock' }` and the
-        // `case 'lighthouse'` arm rendered the card.
+        // router rendered the card.
         expect(await screen.findByText(/Lighthouse: Assert Sysvar Clock/i)).toBeInTheDocument();
 
         await waitFor(() => {
@@ -158,6 +158,15 @@ describe('Inspector InstructionsSection with a Token Metadata instruction', () =
         expect(await screen.findByText(title)).toBeInTheDocument();
         expect(screen.getAllByRole('button', { name: 'Collapse' })).toHaveLength(2);
         expect(screen.getAllByText('Program')).toHaveLength(1);
+    });
+});
+
+describe('Inspector InstructionsSection with an ed25519 instruction', () => {
+    test('should resolve ed25519 offsets against the data of another instruction', async () => {
+        renderSection(buildEd25519Message());
+
+        expect(await screen.findByText('Ed25519: Verify Signature')).toBeInTheDocument();
+        expect(readCell('Signature')).toBe(Buffer.alloc(64, 7).toString('base64'));
     });
 });
 
@@ -267,6 +276,14 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         /* eslint-enable testing-library/no-node-access */
     });
 
+    test('should render the curated card when an IDL also decodes the instruction', async () => {
+        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'anchor' } as never);
+
+        renderSection(buildMessage());
+
+        expect(await screen.findByText(/Create Idempotent/i)).toBeInTheDocument();
+    });
+
     test('should render the curated card when the IDL declares nothing for the instruction', async () => {
         vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
 
@@ -359,6 +376,20 @@ function buildTokenMetadataMessage(data: number[]): MessageV0 {
     });
     return new TransactionMessage({
         instructions: [ix],
+        payerKey: gen.publicKey(0),
+        recentBlockhash: PublicKey.default.toBase58(),
+    }).compileToV0Message();
+}
+
+function buildEd25519Message(): MessageV0 {
+    const pointingAtInstruction1 = new TransactionInstruction({
+        data: Buffer.from([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]),
+        keys: [],
+        programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
+    });
+    const referenced = new TransactionInstruction({ data: Buffer.alloc(96, 7), keys: [], programId: gen.publicKey(3) });
+    return new TransactionMessage({
+        instructions: [pointingAtInstruction1, referenced],
         payerKey: gen.publicKey(0),
         recentBlockhash: PublicKey.default.toBase58(),
     }).compileToV0Message();

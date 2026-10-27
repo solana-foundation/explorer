@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { type InstructionNode } from '@entities/instruction-card';
+import { type InstructionNode, toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { AddressLookupTableProgram, type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -179,7 +179,10 @@ function renderCard(info: object, type: string) {
         programId: PROGRAM_ID,
     } as unknown as ParsedInstruction;
 
-    return renderTxCard(<AddressLookupTableDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />);
+    const dispatched = dispatcher.fromParsedInstruction(ix);
+    return renderTxCard(
+        <AddressLookupTableDetailsCard node={toInstructionNode({ index: 0, ix: dispatched })} ix={dispatched} />,
+    );
 }
 
 /** The nested table Extend draws, as `[index, address]` pairs. */
