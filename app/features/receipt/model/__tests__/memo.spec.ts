@@ -1,7 +1,6 @@
+import { mockNoTransferTransaction, mockSingleTransferTransaction } from '@features/receipt/__fixtures__/transactions';
 import { describe, expect, it } from 'vitest';
 
-import { mockNoTransferTransaction } from '../../mocks/no-transfers';
-import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { extractMemoFromTransaction } from '../memo';
 
 describe('extractMemoFromTransaction', () => {

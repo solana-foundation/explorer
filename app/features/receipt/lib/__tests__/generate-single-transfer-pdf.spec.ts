@@ -1,7 +1,3 @@
-import { vi } from 'vitest';
-
-import { loadPdfDeps } from '../generate-receipt-pdf';
-import { generateSingleTransferPdf } from '../generate-single-transfer-pdf';
 import {
     collectTextFromMock as collectText,
     mockJsPDF,
@@ -12,11 +8,15 @@ import {
     SOL_RECEIPT,
     stubSvgRasterizationUnsupported,
     USDC_RECEIPT,
-} from './__fixtures__/pdf-mocks';
+} from '@features/receipt/__fixtures__/pdf-mocks';
+import { vi } from 'vitest';
+
+import { loadPdfDeps } from '../generate-receipt-pdf';
+import { generateSingleTransferPdf } from '../generate-single-transfer-pdf';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
 vi.mock('qrcode', () => qrcodeModule);
-vi.mock('../pdf-fonts', async () => (await import('./__fixtures__/pdf-mocks')).pdfFontsModule);
+vi.mock('../pdf-fonts', async () => (await import('@features/receipt/__fixtures__/pdf-mocks')).pdfFontsModule);
 
 describe('generateSingleTransferPdf', () => {
     const mockOnError = vi.fn();

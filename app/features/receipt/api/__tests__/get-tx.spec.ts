@@ -1,10 +1,11 @@
+import { DEFAULT_SIGNATURE as mockSignature } from '@__fixtures__/gen';
 import { fetchTransactionDetails } from '@entities/transaction-data';
 import { findTransactionCluster } from '@entities/transaction-data/server';
+import { mockSingleTransferTransaction } from '@features/receipt/__fixtures__/transactions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
 import { getTx } from '../get-tx';
 
 // Both halves of the read live in the entity now, on separate barrels: the transaction fetch on the
@@ -13,8 +14,6 @@ vi.mock('@entities/transaction-data', () => ({ fetchTransactionDetails: vi.fn() 
 vi.mock('@entities/transaction-data/server', () => ({ findTransactionCluster: vi.fn() }));
 
 describe('getTx', () => {
-    const mockSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
-
     beforeEach(() => {
         vi.clearAllMocks();
         vi.spyOn(console, 'error').mockImplementation(() => {});

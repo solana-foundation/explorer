@@ -1,8 +1,3 @@
-import { IMAGE_SIZE } from '@shared/lib/og/image-size';
-import type { Meta, StoryObj } from '@storybook-config/types';
-import { expect, within } from 'storybook/test';
-
-import { BaseReceiptImage } from '../BaseReceiptImage';
 import {
     defaultReceipt,
     receiptLargeAmountWithMemo,
@@ -13,7 +8,12 @@ import {
     receiptMultiTransfer9,
     receiptTokenTransferSimple,
     receiptWithMemo,
-} from './receipt-fixtures';
+} from '@features/receipt/__fixtures__/receipts';
+import { IMAGE_SIZE } from '@shared/lib/og/image-size';
+import type { Meta, StoryObj } from '@storybook-config/types';
+import { expect, within } from 'storybook/test';
+
+import { BaseReceiptImage } from '../BaseReceiptImage';
 
 const meta: Meta<typeof BaseReceiptImage> = {
     argTypes: {
