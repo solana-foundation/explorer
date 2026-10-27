@@ -58,7 +58,7 @@ import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
-import { INSPECTOR_RESULT, INSPECTOR_SURFACE } from './inspector-surface';
+import { INSPECTOR_SURFACE } from './inspector-surface';
 
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
@@ -432,13 +432,8 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <BpfUpgradeableLoaderDetailsCard
+                        node={toInstructionNode({ childIndex, index, innerCards, ix: parsedIx, raw: ix })}
                         ix={parsedIx}
-                        tx={parsedTx}
-                        index={index}
-                        result={INSPECTOR_RESULT}
-                        raw={ix}
-                        childIndex={childIndex}
-                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );

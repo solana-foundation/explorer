@@ -127,7 +127,7 @@ export function parseBpfUpgradeableLoaderInstruction(ix: KitInstruction): BpfUpg
                 return {
                     info: {
                         additionalBytes: view.getUint32(4, true),
-                        // ExtendProgramInfo types payerAccount as nullable; the card renders `null` as "None".
+                        // ExtendProgramInfo types payerAccount as nullable; the card renders `null` as "(none)".
                         // eslint-disable-next-line unicorn/no-null -- matches the RPC-parsed shape's nullable field
                         payerAccount: acc(3) ?? null,
                         programAccount: req(1),

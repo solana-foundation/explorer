@@ -269,7 +269,7 @@ function InstructionCard({
                     />
                 );
             case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
-                return <BpfUpgradeableLoaderDetailsCard {...props} key={key} />;
+                return <BpfUpgradeableLoaderDetailsCard node={node} ix={parsedIx} key={key} />;
             case SYSTEM_PROGRAM_LABEL:
                 return <SystemDetailsCard {...props} key={key} />;
             case STAKE_PROGRAM_LABEL:
