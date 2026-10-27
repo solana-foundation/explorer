@@ -52,6 +52,7 @@ type MockAccountsProviderProps = {
      * an account by address without touching this shared fixture - see `withMockTransactions`.
      */
     accounts?: State['entries'];
+    state?: State;
 };
 
 /**
@@ -79,10 +80,10 @@ type MockAccountsProviderProps = {
  *
  * To add more mock accounts, add entries to the `mockState.entries` object.
  */
-export function MockAccountsProvider({ accounts, children }: MockAccountsProviderProps) {
+export function MockAccountsProvider({ accounts, children, state: base = mockState }: MockAccountsProviderProps) {
     const state: State = React.useMemo(
-        () => (accounts ? { ...mockState, entries: { ...mockState.entries, ...accounts } } : mockState),
-        [accounts],
+        () => (accounts ? { ...base, entries: { ...base.entries, ...accounts } } : base),
+        [accounts, base],
     );
 
     return (

@@ -7,7 +7,7 @@ import {
     MOCK_PARSED_TX,
     MOCK_STATUS,
 } from '../__fixtures__/transaction';
-import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { withTransaction } from '../__fixtures__/withTransactionProviders';
 import { AccountsCard } from '../AccountsCard';
 
 const meta: Meta<typeof AccountsCard> = {
@@ -23,46 +23,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const WithAccounts: Story = {
-    decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-                { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
-    ],
+    decorators: [withTransaction({ [DEFAULT_SIGNATURE]: MOCK_PARSED_TX }, { [DEFAULT_SIGNATURE]: MOCK_STATUS })],
 };
 
 export const FailedTransaction: Story = {
-    decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_FAILED_TX },
-                { [DEFAULT_SIGNATURE]: MOCK_FAILED_STATUS },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
-    ],
+    decorators: [withTransaction({ [DEFAULT_SIGNATURE]: MOCK_FAILED_TX }, { [DEFAULT_SIGNATURE]: MOCK_FAILED_STATUS })],
 };
 
 export const NoTransaction: Story = {
-    decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders({}, {});
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
-    ],
+    decorators: [withTransaction({}, {})],
 };

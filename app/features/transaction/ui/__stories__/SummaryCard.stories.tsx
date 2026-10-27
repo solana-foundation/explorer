@@ -14,7 +14,7 @@ import {
     MOCK_RAW_TX_NO_BLOCK_TIME,
     MOCK_STATUS,
 } from '../__fixtures__/transaction';
-import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { withTransaction } from '../__fixtures__/withTransactionProviders';
 import { SummaryCard } from '../SummaryCard';
 
 const meta: Meta<typeof SummaryCard> = {
@@ -32,18 +32,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Finalized: Story = {
     decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-                { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-                { [DEFAULT_SIGNATURE]: MOCK_RAW_TX },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
+        withTransaction(
+            { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
+            { [DEFAULT_SIGNATURE]: MOCK_STATUS },
+            { [DEFAULT_SIGNATURE]: MOCK_RAW_TX },
+        ),
     ],
 };
 
@@ -52,55 +45,24 @@ export const Confirming: Story = {
         autoRefresh: AutoRefresh.Active,
     },
     decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-                {
-                    [DEFAULT_SIGNATURE]: mockTransactionStatus({
-                        confirmationStatus: 'confirmed',
-                        confirmations: 10,
-                    }),
-                },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
+        withTransaction(
+            { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
+            { [DEFAULT_SIGNATURE]: mockTransactionStatus({ confirmationStatus: 'confirmed', confirmations: 10 }) },
+        ),
     ],
 };
 
 export const Failed: Story = {
-    decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_FAILED_TX },
-                { [DEFAULT_SIGNATURE]: MOCK_FAILED_STATUS },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
-    ],
+    decorators: [withTransaction({ [DEFAULT_SIGNATURE]: MOCK_FAILED_TX }, { [DEFAULT_SIGNATURE]: MOCK_FAILED_STATUS })],
 };
 
 export const NoTimestamp: Story = {
     decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX_NO_BLOCK_TIME },
-                { [DEFAULT_SIGNATURE]: mockTransactionStatus() },
-                { [DEFAULT_SIGNATURE]: MOCK_RAW_TX_NO_BLOCK_TIME },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
+        withTransaction(
+            { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX_NO_BLOCK_TIME },
+            { [DEFAULT_SIGNATURE]: mockTransactionStatus() },
+            { [DEFAULT_SIGNATURE]: MOCK_RAW_TX_NO_BLOCK_TIME },
+        ),
     ],
 };
 
@@ -113,17 +75,10 @@ export const NoTimestamp: Story = {
  */
 export const LooseComputeBudget: Story = {
     decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_LOOSE_BUDGET_TX },
-                { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-                { [DEFAULT_SIGNATURE]: MOCK_RAW_TX },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
+        withTransaction(
+            { [DEFAULT_SIGNATURE]: MOCK_LOOSE_BUDGET_TX },
+            { [DEFAULT_SIGNATURE]: MOCK_STATUS },
+            { [DEFAULT_SIGNATURE]: MOCK_RAW_TX },
+        ),
     ],
 };

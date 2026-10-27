@@ -1,12 +1,10 @@
-import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
+import type { State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
-import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { withTokenInfoBatch } from '@storybook-config/decorators';
+import { withAccountsState, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
-import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-import React from 'react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
@@ -15,8 +13,6 @@ import { AddressTableLookupsCard } from '../AddressTableLookupsCard';
 const LOOKUP_TABLE_KEY = new PublicKey('AddressLookupTab1e1111111111111111111111111');
 const RESOLVED_A = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const RESOLVED_B = new PublicKey('So11111111111111111111111111111111111111112');
-
-const noop = () => undefined;
 
 const message = mockVersionedMessage({
     addressTableLookups: [{ accountKey: LOOKUP_TABLE_KEY, readonlyIndexes: [1], writableIndexes: [0] }],
@@ -56,23 +52,9 @@ const resolvedState: State = {
     url: MAINNET_BETA_URL,
 };
 
-const withResolved: Decorator = Story => (
-    <ClusterProvider>
-        <StateContext.Provider value={resolvedState}>
-            <DispatchContext.Provider value={noop}>
-                <FetchersContext.Provider
-                    value={{ parsed: { fetch: noop }, raw: { fetch: noop }, skip: { fetch: noop } } as any}
-                >
-                    <Story />
-                </FetchersContext.Provider>
-            </DispatchContext.Provider>
-        </StateContext.Provider>
-    </ClusterProvider>
-);
-
 const meta: Meta<typeof AddressTableLookupsCard> = {
     component: AddressTableLookupsCard,
-    decorators: [withTokenInfoBatch, withResolved, withViewportFromGlobal],
+    decorators: [withTokenInfoBatch, withAccountsState(resolvedState), withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AddressTableLookupsCard@Media',
 };

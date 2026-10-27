@@ -1,12 +1,6 @@
 import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
-import {
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
@@ -49,7 +43,7 @@ const assertAccountInfoIx = {
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',
 };

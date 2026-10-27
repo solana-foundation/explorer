@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { truncateAddress } from '@entities/address';
-import { IMAGE_SIZE } from '@shared/lib/og/image-size';
+import { withOgImageFrame } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -48,13 +48,7 @@ const meta: Meta<typeof BaseAccountImage> = {
     },
     args: { glows: GLOWS },
     component: BaseAccountImage,
-    decorators: [
-        Story => (
-            <div style={{ height: IMAGE_SIZE.height, width: IMAGE_SIZE.width }}>
-                <Story />
-            </div>
-        ),
-    ],
+    decorators: [withOgImageFrame],
     tags: ['autodocs', 'test'],
     title: 'Features/AccountShare/BaseAccountImage',
 };

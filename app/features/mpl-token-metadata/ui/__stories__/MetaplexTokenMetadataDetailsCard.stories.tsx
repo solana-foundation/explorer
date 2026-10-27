@@ -10,7 +10,7 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
 import type { PublicKey } from '@solana/web3.js';
-import { withTokenInfoBatch, withTransactions, withTxInstructionSurface } from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -43,7 +43,7 @@ const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataS
 
 const meta = {
     component: MetaplexTokenMetadataDetailsCard,
-    decorators: [withTxInstructionSurface, withTransactions, withTokenInfoBatch],
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Features/MplTokenMetadata/MetaplexTokenMetadataDetailsCard',
 } satisfies Meta<typeof MetaplexTokenMetadataDetailsCard>;
