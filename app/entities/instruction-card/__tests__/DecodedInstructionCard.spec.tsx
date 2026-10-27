@@ -5,6 +5,7 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InstructionArg } from '../model/args';
+import { toRawInstructionNode } from '../model/node';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from '../ui/DecodedInstructionCard';
 
@@ -63,8 +64,7 @@ function renderCard({ programName, children }: { programName?: string; children?
     return render(
         <InstructionSurfaceProvider surface={STUB_SURFACE}>
             <DecodedInstructionCard
-                node={{ index: 0, ix, programId: ix.programId }}
-                ix={ix}
+                node={toRawInstructionNode({ index: 0, ix })}
                 title="Counter: Increment"
                 programName={programName}
                 accountNames={['authority']}

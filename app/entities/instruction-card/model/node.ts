@@ -16,6 +16,18 @@ export function toInstructionNode(fields: Omit<InstructionNode, 'programId'>): I
     return { ...fields, programId: fields.ix.programId };
 }
 
+/**
+ * Callers must build this type with {@link toRawInstructionNode},
+ * because a spread can set `raw` to another instruction.
+ */
+export type RawInstructionNode = InstructionNode & { raw: TransactionInstruction };
+
+export function toRawInstructionNode(
+    fields: Omit<InstructionNode, 'programId' | 'raw' | 'ix'> & { ix: TransactionInstruction },
+): RawInstructionNode {
+    return { ...fields, programId: fields.ix.programId, raw: fields.ix };
+}
+
 export function instructionDataOf(nodes: ReadonlyArray<InstructionNode | undefined>) {
     return (index: number): Uint8Array | undefined => {
         const ix = nodes[index]?.ix;

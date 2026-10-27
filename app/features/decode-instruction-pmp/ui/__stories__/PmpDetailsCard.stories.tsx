@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PmpDetailsCard } from '@features/decode-instruction-pmp';
 import type { Account, State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
@@ -87,7 +87,7 @@ type Story = StoryObj<typeof meta>;
 // `fallback` is never exercised by these stories - every fixture below is a content instruction, so the card
 // always takes its custom-render path. `null` is fine here: stories are exempt from `unicorn/no-null`.
 function pmpArgs(ix: TransactionInstruction) {
-    return { fallback: null, ix, node: toInstructionNode({ index: 0, ix }) };
+    return { fallback: null, node: toRawInstructionNode({ index: 0, ix }) };
 }
 
 export const SetDataInlineJson: Story = {

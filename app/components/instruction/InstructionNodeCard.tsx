@@ -5,7 +5,9 @@ import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard
 import {
     type InstructionNode,
     NameOnlyDetailsCard,
+    type RawInstructionNode,
     toInstructionNode,
+    toRawInstructionNode,
     UnknownDetailsCard,
     useInstructionSurface,
 } from '@entities/instruction-card';
@@ -38,7 +40,7 @@ import {
     TokenBatchCard,
 } from '@features/token-batch';
 import { VoteDetailsCard } from '@features/vote';
-import type { ParsedInstruction, TransactionInstruction } from '@solana/web3.js';
+import type { ParsedInstruction } from '@solana/web3.js';
 import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -62,7 +64,8 @@ export function InstructionNodeCard({ node }: { node: InstructionNode }) {
 function ProgramCard({ node }: { node: InstructionNode }) {
     const dispatcher = useInstructionParser();
     const { instructionData } = useInstructionSurface();
-    const raw = 'parsed' in node.ix ? undefined : node.ix;
+    const { ix } = node;
+    const rawNode = 'parsed' in ix ? undefined : toRawInstructionNode({ ...node, ix });
     const dispatched = React.useMemo(
         () =>
             'parsed' in node.ix
@@ -70,29 +73,30 @@ function ProgramCard({ node }: { node: InstructionNode }) {
                 : dispatcher.fromTransactionInstruction(node.ix),
         [dispatcher, node.ix],
     );
-    const idlDecode = useIdlInstructionDecode({ programId: node.programId.toBase58(), raw });
+    const idlDecode = useIdlInstructionDecode({ programId: node.programId.toBase58(), raw: rawNode?.raw });
     const fallback =
-        raw && idlDecode ? (
-            <IdlInstructionCard node={node} ix={raw} decoded={idlDecode} />
+        rawNode && idlDecode ? (
+            <IdlInstructionCard node={rawNode} decoded={idlDecode} />
         ) : (
             <UnknownDetailsCard node={node} />
         );
 
     // PMP content instructions decode without an IDL, so the PMP card must come before the IDL card.
-    if (raw && isProgramMetadataInstruction(raw)) {
-        return <PmpDetailsCard node={node} ix={raw} fallback={fallback} />;
+    if (rawNode && isProgramMetadataInstruction(rawNode.raw)) {
+        return <PmpDetailsCard node={rawNode} fallback={fallback} />;
     }
-    if (raw && isStakeInstruction(raw)) {
-        return <RawStakeDetailsCard node={node} ix={raw} fallback={fallback} />;
+    if (rawNode && isStakeInstruction(rawNode.raw)) {
+        return <RawStakeDetailsCard node={rawNode} fallback={fallback} />;
     }
-    const card = dispatched && PROGRAM_CARDS[programLabel(dispatched)]?.({ dispatched, instructionData, node, raw });
+    const card =
+        dispatched && PROGRAM_CARDS[programLabel(dispatched)]?.({ dispatched, instructionData, node, rawNode });
     return card ?? fallback;
 }
 
 type ProgramRoute = (route: {
     node: InstructionNode;
     dispatched: DispatchResult;
-    raw: TransactionInstruction | undefined;
+    rawNode: RawInstructionNode | undefined;
     instructionData: (index: number) => Uint8Array | undefined;
 }) => React.ReactElement | undefined;
 
@@ -104,18 +108,18 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
     'bpf-loader': decoded(BpfLoaderDetailsCard),
     'bpf-upgradeable-loader': decoded(BpfUpgradeableLoaderDetailsCard),
     'compute-budget': ({ node, dispatched }) => <ComputeBudgetDetailsCard node={node} ix={dispatched} />,
-    ed25519: ({ node, dispatched, raw, instructionData }) =>
-        raw && <Ed25519DetailsCard node={{ ...node, raw }} ix={dispatched} siblingData={instructionData} />,
-    lighthouse: ({ node, dispatched, raw }) =>
-        raw && isParsedInstruction(dispatched) ? (
-            <LighthouseDetailsCard node={{ ...node, raw }} ix={dispatched} />
+    ed25519: ({ dispatched, rawNode, instructionData }) =>
+        rawNode && <Ed25519DetailsCard node={rawNode} ix={dispatched} siblingData={instructionData} />,
+    lighthouse: ({ dispatched, rawNode }) =>
+        rawNode && isParsedInstruction(dispatched) ? (
+            <LighthouseDetailsCard node={rawNode} ix={dispatched} />
         ) : undefined,
     mango: nameOnly(),
     'mpl-token-metadata': ({ node, dispatched }) => <MetaplexTokenMetadataDetailsCard node={node} ix={dispatched} />,
     pyth: ({ node, dispatched }) => <PythDetailsCard node={node} ix={dispatched} />,
     serum: ({ node, dispatched }) => <SerumDetailsCard node={node} ix={dispatched} />,
-    'solana-attestation-service': ({ node, dispatched, raw }) =>
-        raw && <SolanaAttestationDetailsCard node={{ ...node, raw }} ix={dispatched} />,
+    'solana-attestation-service': ({ dispatched, rawNode }) =>
+        rawNode && <SolanaAttestationDetailsCard node={rawNode} ix={dispatched} />,
     'spl-associated-token-account': decoded(AssociatedTokenDetailsCard),
     'spl-memo': decoded(MemoDetailsCard),
     'spl-token': tokenCard,
@@ -134,9 +138,12 @@ function programLabel(dispatched: DispatchResult): string {
 
 /** The card node holds the dispatch result to show its parsed payload in the Raw view. */
 function decoded(Card: React.ComponentType<{ node: InstructionNode; ix: ParsedInstruction }>): ProgramRoute {
-    return function decodedRoute({ node, dispatched, raw }) {
+    return function decodedRoute({ node, dispatched, rawNode }) {
         return isParsedInstruction(dispatched) ? (
-            <Card node={toInstructionNode({ ...node, ix: dispatched, raw: raw ?? node.raw })} ix={dispatched} />
+            <Card
+                node={toInstructionNode({ ...node, ix: dispatched, raw: rawNode?.raw ?? node.raw })}
+                ix={dispatched}
+            />
         ) : undefined;
     };
 }
@@ -154,12 +161,12 @@ function nameOnly(programName?: string): ProgramRoute {
 }
 
 function tokenCard(route: Parameters<ProgramRoute>[0]): React.ReactElement | undefined {
-    const { node, dispatched, raw } = route;
+    const { node, dispatched, rawNode } = route;
     if (isParsedInstruction(dispatched) && isRpcParsedBatchInstruction(dispatched.parsed)) {
         return <RpcParsedTokenBatchCard node={node} ix={dispatched} />;
     }
-    if (raw && isTokenBatchInstruction(raw)) {
-        return <TokenBatchCard node={node} ix={raw} />;
+    if (rawNode && isTokenBatchInstruction(rawNode.raw)) {
+        return <TokenBatchCard node={rawNode} />;
     }
     return decoded(TokenDetailsCard)(route);
 }

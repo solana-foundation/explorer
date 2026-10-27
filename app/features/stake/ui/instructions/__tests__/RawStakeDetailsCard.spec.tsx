@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { screen, waitFor } from '@testing-library/react';
@@ -57,6 +57,6 @@ describe('stake::RawStakeDetailsCard', () => {
 
 function renderCard(ix: TransactionInstruction) {
     return renderTxCard(
-        <RawStakeDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} fallback={<div>Fallback card</div>} />,
+        <RawStakeDetailsCard node={toRawInstructionNode({ index: 0, ix })} fallback={<div>Fallback card</div>} />,
     );
 }

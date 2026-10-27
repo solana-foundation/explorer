@@ -1,5 +1,4 @@
-import { type InstructionNode, useInstructionSurface } from '@entities/instruction-card';
-import type { TransactionInstruction } from '@solana/web3.js';
+import { type RawInstructionNode, useInstructionSurface } from '@entities/instruction-card';
 import type { ReactNode } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -8,20 +7,19 @@ import { classifyRawStakeInstruction } from '../../lib/classify-raw-stake-instru
 import { GetMinimumDelegationDetailsCard } from './GetMinimumDelegationDetailsCard';
 
 type RawStakeDetailsCardProps = {
-    node: InstructionNode;
-    ix: TransactionInstruction;
+    node: RawInstructionNode;
     /** The card for a stake instruction that this card cannot decode. */
     fallback: ReactNode;
 };
 
-export function RawStakeDetailsCard({ node, ix, fallback }: RawStakeDetailsCardProps) {
+export function RawStakeDetailsCard({ node, fallback }: RawStakeDetailsCardProps) {
     const { signature } = useInstructionSurface();
 
     // The RPC's jsonParsed parser doesn't recognise GetMinimumDelegation (and may lag
     // behind on future stake instructions) — fall back to identifying by discriminator.
     //
     // 'invalid' here means the discriminator didn't match any known stake instruction.
-    const classification = classifyRawStakeInstruction(ix.data);
+    const classification = classifyRawStakeInstruction(node.raw.data);
     switch (classification.kind) {
         case 'getMinimumDelegation':
             return <GetMinimumDelegationDetailsCard node={node} />;

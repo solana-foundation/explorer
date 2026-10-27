@@ -105,6 +105,10 @@ describe('InstructionNodeCard', () => {
         renderCard(toInstructionNode({ index: 0, ix: unknown }));
 
         expect(screen.getByText('IDL card')).toBeInTheDocument();
+        expect(vi.mocked(IdlInstructionCard).mock.calls[0][0]).toEqual({
+            decoded: { kind: 'anchor' },
+            node: expect.objectContaining({ programId: SystemProgram.programId, raw: unknown }),
+        });
     });
 
     it('should show the unknown card for a program with no card and no IDL', () => {

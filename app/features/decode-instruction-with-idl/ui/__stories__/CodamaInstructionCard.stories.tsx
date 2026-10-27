@@ -1,4 +1,4 @@
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -40,5 +40,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const UnknownFallback: Story = {
-    args: { ix: sampleIx, node: toInstructionNode({ index: 0, ix: sampleIx }), parsedIx: fallbackParsedIx },
+    args: { node: toRawInstructionNode({ index: 0, ix: sampleIx }), parsedIx: fallbackParsedIx },
 };

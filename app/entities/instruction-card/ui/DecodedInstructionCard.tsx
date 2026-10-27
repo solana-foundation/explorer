@@ -8,7 +8,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 import { labelAccounts } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
-import type { InstructionNode } from '../model/node';
+import type { RawInstructionNode } from '../model/node';
 import { ArgRows } from './ArgRows';
 import { InstructionAddress } from './InstructionAddress';
 import { InstructionCardView } from './InstructionCardView';
@@ -18,15 +18,13 @@ export const DECODED_TABLE_COLUMNS = 3;
 
 export function DecodedInstructionCard({
     node,
-    ix,
     title,
     programName,
     accountNames,
     args,
     children,
 }: {
-    node: InstructionNode;
-    ix: TransactionInstruction;
+    node: RawInstructionNode;
     title: string;
     programName?: string;
     accountNames: readonly string[];
@@ -36,7 +34,7 @@ export function DecodedInstructionCard({
 }) {
     return (
         <InstructionCardView node={node} title={title}>
-            <DecodedInstructionBody ix={ix} programName={programName} accountNames={accountNames} args={args} />
+            <DecodedInstructionBody ix={node.raw} programName={programName} accountNames={accountNames} args={args} />
             {children}
         </InstructionCardView>
     );

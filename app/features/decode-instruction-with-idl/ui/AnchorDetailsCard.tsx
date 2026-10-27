@@ -1,6 +1,5 @@
 import { Idl, Program } from '@coral-xyz/anchor';
-import { InstructionCardView, type InstructionNode, ProgramField } from '@entities/instruction-card';
-import { TransactionInstruction } from '@solana/web3.js';
+import { InstructionCardView, ProgramField, type RawInstructionNode } from '@entities/instruction-card';
 
 import { type AnchorInstructionDecoded } from '../lib/decode-anchor-instruction';
 import { useAnchorEvents } from '../model/use-anchor-events';
@@ -9,12 +8,10 @@ import { ProgramEventsCard } from './ProgramEventsCard';
 
 export function AnchorDetailsCard({
     node,
-    ix,
     program,
     decoded,
 }: {
-    node: InstructionNode;
-    ix: TransactionInstruction;
+    node: RawInstructionNode;
     program: Program<Idl>;
     decoded: AnchorInstructionDecoded;
 }) {
@@ -36,7 +33,7 @@ export function AnchorDetailsCard({
         <InstructionCardView node={node} title={decoded.cardTitle} events={events}>
             <ProgramField programId={node.programId} name={decoded.programName} colSpan={2} />
             <AnchorInstructionBody
-                ix={ix}
+                ix={node.raw}
                 idl={program.idl}
                 ixAccounts={decoded.ixAccounts}
                 decodedIxData={decoded.decodedIxData}

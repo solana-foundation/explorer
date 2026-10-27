@@ -145,6 +145,13 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 - **AND** the values the card renders MUST come only from its decoded `info` and from `node.raw`
 - **AND** the card MUST read only `node.programId` and `node.raw` from the node, plus `node.index` and `node.childIndex` when the card reads program events
 
+#### Scenario: Card reads the raw instruction
+
+- **WHEN** a card reads the account list or the data bytes of the instruction, not its decoded `info`
+- **THEN** it MUST read them from `node.raw`
+- **AND** it MUST NOT take a `TransactionInstruction` prop beside `node`
+- **AND** the caller MUST build the node with `toRawInstructionNode`, which takes `programId` and `raw` from one instruction
+
 ### Requirement: One instruction router
 
 Both surfaces SHALL pick the card of an instruction with `InstructionNodeCard`. The router dispatches the instruction through the instruction parser, then renders the first of: the PMP card, the card of a raw stake instruction, the card of the program label, the IDL card, and `UnknownDetailsCard`. A program whose card takes only decoded instructions hands an instruction that its parser slice rejects to the IDL card. The PMP card and the card of a raw stake instruction hand an instruction that they cannot decode to the IDL card in the same way. The router renders every card inside an ErrorBoundary whose fallback is `UnknownDetailsCard`.

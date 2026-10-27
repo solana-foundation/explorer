@@ -1,11 +1,10 @@
 import {
     DecodedInstructionCard,
     InstructionCardView,
-    type InstructionNode,
     parseCodamaArgs,
+    type RawInstructionNode,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import type { TransactionInstruction } from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
 
 import type { SolanaAttestationParsed } from '../lib/sas-parser';
@@ -14,7 +13,7 @@ const TITLE_PREFIX = 'Solana Attestation';
 
 type SolanaAttestationDetailsCardProps = {
     /** The account rows come from `raw`. */
-    node: InstructionNode & { raw: TransactionInstruction };
+    node: RawInstructionNode;
     /** The dispatcher's verdict for a SAS instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
 };
@@ -29,7 +28,6 @@ export function SolanaAttestationDetailsCard({ node, ix }: SolanaAttestationDeta
     return (
         <DecodedInstructionCard
             node={node}
-            ix={node.raw}
             title={`${TITLE_PREFIX}: ${camelToTitleCase(type)}`}
             accountNames={Object.keys(info.accounts)}
             args={parseCodamaArgs(info.data)}

@@ -1,6 +1,5 @@
 import { RawDataField } from '@components/shared/RawDataField';
-import { DECODED_TABLE_COLUMNS, DecodedInstructionCard, type InstructionNode } from '@entities/instruction-card';
-import { type TransactionInstruction } from '@solana/web3.js';
+import { DECODED_TABLE_COLUMNS, DecodedInstructionCard, type RawInstructionNode } from '@entities/instruction-card';
 import { capitalizeFirstLetter } from '@utils/index';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -15,8 +14,7 @@ import type { PmpContentInstruction } from '../lib/types';
 import { DataPayloadSection } from './DataPayloadSection';
 
 type PmpDetailsCardProps = {
-    node: InstructionNode;
-    ix: TransactionInstruction;
+    node: RawInstructionNode;
     /**
      * What to render when this instruction carries no decodable content, and the ErrorBoundary fallback. The
      * instruction router builds it: the IDL card when an IDL resolved, the Unknown card otherwise. Injected rather than
@@ -44,8 +42,8 @@ export function PmpDetailsCard(props: PmpDetailsCardProps) {
     );
 }
 
-function PmpDetailsCardBody({ node, ix, fallback }: PmpDetailsCardProps) {
-    const contentInstruction = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
+function PmpDetailsCardBody({ node, fallback }: PmpDetailsCardProps) {
+    const contentInstruction = React.useMemo(() => decodePmpContentInstruction(node.raw), [node.raw]);
 
     if (!contentInstruction) {
         return <>{fallback}</>;
@@ -56,7 +54,6 @@ function PmpDetailsCardBody({ node, ix, fallback }: PmpDetailsCardProps) {
     return (
         <DecodedInstructionCard
             node={node}
-            ix={ix}
             title={`${programName}: ${capitalizeFirstLetter(contentInstruction.kind)}`}
             programName={programName}
             accountNames={PMP_ACCOUNT_NAMES[contentInstruction.kind]}

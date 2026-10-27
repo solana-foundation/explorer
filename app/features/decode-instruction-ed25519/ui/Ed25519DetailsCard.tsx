@@ -5,11 +5,10 @@ import {
     heading,
     InstructionCardView,
     type InstructionFieldList,
-    type InstructionNode,
+    type RawInstructionNode,
     text,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import type { TransactionInstruction } from '@solana/web3.js';
 
 import { Copyable } from '@/app/components/common/Copyable';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -30,7 +29,7 @@ const Ed25519VerifyCard = defineInstructionCard<Ed25519SignatureDetails[]>({
 
 type Ed25519DetailsCardProps = {
     /** The signature offsets point into the data of `raw`. */
-    node: InstructionNode & { raw: TransactionInstruction };
+    node: RawInstructionNode;
     /** The dispatcher's verdict for an ed25519 instruction: decoded, or registered-but-unparsed. */
     ix: DispatchResult;
     /** Offsets may point into other instructions, which only the caller can see. */

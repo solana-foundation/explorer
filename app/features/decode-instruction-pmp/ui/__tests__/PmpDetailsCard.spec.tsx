@@ -1,6 +1,6 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
-import { toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import { toRawInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     Compression,
@@ -72,8 +72,7 @@ function renderCard(ix: TransactionInstruction) {
             instructionData={() => undefined}
         >
             <PmpDetailsCard
-                node={toInstructionNode({ index: 0, ix })}
-                ix={ix}
+                node={toRawInstructionNode({ index: 0, ix })}
                 fallback={<div data-testid="injected-fallback" />}
             />
         </TxInstructionSurface>,

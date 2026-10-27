@@ -1,6 +1,6 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
-import { toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import { toRawInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -329,7 +329,7 @@ function renderLighthouse(fixture: { data: Buffer; keys: unknown[]; programId: P
             Card={InstructionNodeCard}
             instructionData={() => undefined}
         >
-            <LighthouseDetailsCard node={{ ...toInstructionNode({ index: 0, ix: raw }), raw }} ix={ix} />
+            <LighthouseDetailsCard node={toRawInstructionNode({ index: 0, ix: raw })} ix={ix} />
         </TxInstructionSurface>,
     );
     expandAllGroups();

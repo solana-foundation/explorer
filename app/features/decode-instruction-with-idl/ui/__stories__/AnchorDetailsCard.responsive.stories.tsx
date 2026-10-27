@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -54,8 +54,7 @@ type Story = StoryObj<typeof meta>;
 
 const args = {
     decoded: decodeAnchorInstruction(anchorProgram, ix),
-    ix,
-    node: toInstructionNode({ index: 0, ix }),
+    node: toRawInstructionNode({ index: 0, ix }),
     program: anchorProgram,
 };
 

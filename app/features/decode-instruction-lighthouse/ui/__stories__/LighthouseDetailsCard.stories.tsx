@@ -1,4 +1,4 @@
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
@@ -25,7 +25,7 @@ function buildArgs(raw: TransactionInstruction) {
     if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
     return {
         ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
-        node: { ...toInstructionNode({ index: 0, ix: raw }), raw },
+        node: toRawInstructionNode({ index: 0, ix: raw }),
     };
 }
 

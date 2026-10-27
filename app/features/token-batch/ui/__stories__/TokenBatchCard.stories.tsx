@@ -1,4 +1,4 @@
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -222,5 +222,5 @@ export const WritableAndSignerBadges: Story = {
 };
 
 function batchArgs(ix: TransactionInstruction, index: number) {
-    return { ix, node: toInstructionNode({ index, ix }) };
+    return { node: toRawInstructionNode({ index, ix }) };
 }

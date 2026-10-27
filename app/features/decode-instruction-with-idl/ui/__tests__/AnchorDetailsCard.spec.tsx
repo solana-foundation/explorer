@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import { InstructionSurfaceProvider, toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import { InstructionSurfaceProvider, toRawInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { FetchStatus } from '@providers/cache';
 import { useTransactionDetails } from '@providers/transactions';
@@ -237,8 +237,7 @@ function renderCard(
             <TransactionsProvider>
                 <Surface>
                     <AnchorDetailsCard
-                        node={toInstructionNode({ childIndex, index, ix })}
-                        ix={ix}
+                        node={toRawInstructionNode({ childIndex, index, ix })}
                         program={program}
                         decoded={decodeAnchorInstruction(program, ix)}
                     />

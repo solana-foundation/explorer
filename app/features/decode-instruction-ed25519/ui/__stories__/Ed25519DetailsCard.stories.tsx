@@ -1,6 +1,11 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
-import { instructionDataOf, toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import {
+    instructionDataOf,
+    toInstructionNode,
+    toRawInstructionNode,
+    TxInstructionSurface,
+} from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -66,7 +71,7 @@ invariant(dispatched, 'the fixture program id is registered');
 
 const args = {
     ix: dispatched,
-    node: { ...toInstructionNode({ index: 0, ix }), raw: ix },
+    node: toRawInstructionNode({ index: 0, ix }),
     siblingData,
 };
 

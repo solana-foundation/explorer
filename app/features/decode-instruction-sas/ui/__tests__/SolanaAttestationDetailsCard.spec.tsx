@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -134,10 +134,7 @@ function sasInstruction(data: number[], accountCount: number): TransactionInstru
 
 function renderCard(raw: TransactionInstruction, ix = dispatcher.fromTransactionInstruction(raw)) {
     return renderTxCard(
-        <SolanaAttestationDetailsCard
-            node={{ ...toInstructionNode({ index: 0, ix: raw }), raw }}
-            ix={ix as DispatchResult}
-        />,
+        <SolanaAttestationDetailsCard node={toRawInstructionNode({ index: 0, ix: raw })} ix={ix as DispatchResult} />,
     );
 }
 

@@ -1,7 +1,7 @@
 import { type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { instructionDataOf, toInstructionNode } from '../model/node';
+import { instructionDataOf, toInstructionNode, toRawInstructionNode } from '../model/node';
 
 const PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
@@ -38,6 +38,33 @@ describe('toInstructionNode', () => {
             children,
             index: 1,
             ix: PARSED,
+            programId: PROGRAM_ID,
+            raw: RAW,
+        });
+    });
+});
+
+describe('toRawInstructionNode', () => {
+    it.each([
+        ['raw', { raw: SYSTEM_RAW }],
+        ['a passed programId', { programId: SystemProgram.programId }],
+    ])('should take the program id and the raw instruction from ix, not from %s', (_, other) => {
+        const fields = { index: 0, ix: RAW, ...other };
+
+        const node = toRawInstructionNode(fields);
+
+        expect(node.programId).toBe(PROGRAM_ID);
+        expect(node.raw).toBe(RAW);
+    });
+
+    it('should keep the fields it is given', () => {
+        const children = [toInstructionNode({ childIndex: 0, index: 1, ix: RAW }), undefined];
+
+        expect(toRawInstructionNode({ childIndex: 2, children, index: 1, ix: RAW })).toEqual({
+            childIndex: 2,
+            children,
+            index: 1,
+            ix: RAW,
             programId: PROGRAM_ID,
             raw: RAW,
         });

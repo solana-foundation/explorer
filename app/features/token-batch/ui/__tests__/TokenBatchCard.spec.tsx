@@ -1,5 +1,5 @@
 import { inspectorSurface } from '@components/inspector/inspector-surface';
-import { InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
+import { InstructionSurfaceProvider, toRawInstructionNode } from '@entities/instruction-card';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -20,7 +20,7 @@ describe('TokenBatchCard', () => {
         { render: renderInspectorCard, surface: 'inspector' },
     ])('should draw one Program row and a Collapse button on the $surface surface', async ({ render }) => {
         const ix = makeBatchIx([{ data: TRANSFER_DATA, numAccounts: 3 }], 3);
-        render(<TokenBatchCard node={toInstructionNode({ index: 0, ix })} ix={ix} />);
+        render(<TokenBatchCard node={toRawInstructionNode({ index: 0, ix })} />);
 
         await waitFor(() => {
             expect(screen.getByText('Token Program: Batch (1 instruction)')).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe('TokenBatchCard', () => {
                     Shell: ({ title }) => <div data-testid="shell">{title}</div>,
                 }}
             >
-                <TokenBatchCard node={toInstructionNode({ index: 0, ix })} ix={ix} />
+                <TokenBatchCard node={toRawInstructionNode({ index: 0, ix })} />
             </InstructionSurfaceProvider>,
         );
 

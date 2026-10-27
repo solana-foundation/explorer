@@ -1,4 +1,4 @@
-import { instructionDataOf, toInstructionNode } from '@entities/instruction-card';
+import { instructionDataOf, toInstructionNode, toRawInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
@@ -160,7 +160,7 @@ function dispatched(ix: TransactionInstruction) {
 function renderCard(ix: TransactionInstruction, siblingData: (index: number) => Uint8Array | undefined) {
     return renderTxCard(
         <Ed25519DetailsCard
-            node={{ ...toInstructionNode({ index: 0, ix }), raw: ix }}
+            node={toRawInstructionNode({ index: 0, ix })}
             ix={dispatched(ix)}
             siblingData={siblingData}
         />,
