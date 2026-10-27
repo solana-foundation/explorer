@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { rpcStub } from '@/app/__tests__/mock-rpc';
 import { waitForHook } from '@/app/__tests__/swr-hook';
 
 vi.mock('@providers/cluster', () => ({
@@ -12,21 +13,9 @@ vi.mock('@providers/cluster', () => ({
     })),
 }));
 
-// The kit rpc pattern is rpc.getSignaturesForAddress(address, config).send(); the mock unwraps
-// the pending-request layer so tests can queue results with plain mockResolvedValue*.
 const rpcMocks = vi.hoisted(() => ({ getSignaturesForAddress: vi.fn() }));
 
-vi.mock('@entities/cluster', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster')>('@entities/cluster');
-    return {
-        ...actual,
-        getRpc: () => ({
-            getSignaturesForAddress: (...args: unknown[]) => ({
-                send: () => rpcMocks.getSignaturesForAddress(...args),
-            }),
-        }),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({ getRpc: () => rpcStub(rpcMocks) }));
 
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';

@@ -7,7 +7,7 @@ import { getRpc } from '../get-rpc';
 
 // The wire format under test is produced by kit's real request serializer, so undo the global
 // createSolanaRpc mock from test-setup.specs.ts; the fetch stub keeps the request off the network.
-vi.mock('@solana/kit', () => vi.importActual('@solana/kit'));
+vi.unmock('@solana/kit');
 
 // A global `BigInt.prototype.toJSON` patch runs before kit's replacer inside JSON.stringify,
 // turning every bigint RPC param into a JSON string that the RPC rejects with -32602

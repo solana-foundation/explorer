@@ -1,11 +1,8 @@
+import { createSolanaRpc } from '@solana/kit';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createStore, Provider } from 'jotai';
 import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
-
-import { createSolanaRpc } from '@solana/kit';
 
 import { ClusterStatus } from '../../lib/cluster';
 import { ClusterProvider } from '../cluster-provider';

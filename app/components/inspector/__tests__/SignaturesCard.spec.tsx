@@ -5,9 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { TransactionSignatures } from '../SignaturesCard';
 
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
-}));
+vi.mock('@components/common/Address', () => import('@/app/__tests__/address-stub'));
 vi.mock('@components/common/Signature', () => ({
     Signature: ({ signature }: { signature: string }) => <span>{signature}</span>,
 }));

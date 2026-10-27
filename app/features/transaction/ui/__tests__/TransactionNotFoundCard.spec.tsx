@@ -1,3 +1,4 @@
+import { createSolanaRpc } from '@solana/kit';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,20 +20,11 @@ vi.mock('@/app/utils/url', () => ({
     useClusterPath: vi.fn(({ pathname }: { pathname: string }) => pathname),
 }));
 
-// Mock next/navigation
-vi.mock('next/navigation', () => ({
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 // Mock createSolanaRpc: by default all clusters return null (not found)
 const mockSend = vi.fn().mockResolvedValue({ value: [null] });
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return {
-        ...actual,
-        createSolanaRpc: vi.fn(() => rpcStub({ getSignatureStatuses: mockSend })),
-    };
-});
+vi.mocked(createSolanaRpc).mockImplementation(() => rpcStub({ getSignatureStatuses: mockSend }) as never);
 
 describe('TransactionNotFoundCard', () => {
     beforeEach(() => {

@@ -18,10 +18,9 @@ vi.mock('@providers/cluster', async importOriginal => {
     return { ...actual, useCluster: useClusterMock };
 });
 
-vi.mock('@entities/cluster', async importOriginal => {
-    const actual = await importOriginal<typeof import('@entities/cluster')>();
-    return { ...actual, getRpc: () => rpcStub({ getEpochInfo, getInflationReward }) };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcStub({ getEpochInfo, getInflationReward }),
+}));
 
 import { RewardsProvider, useFetchRewards, useRewards } from '../rewards';
 

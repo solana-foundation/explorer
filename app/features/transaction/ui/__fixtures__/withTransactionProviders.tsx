@@ -12,6 +12,21 @@ import React from 'react';
 
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
+import { AccountsCard } from '../AccountsCard';
+import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS } from './transaction';
+
+export function accountsCardWithProviders() {
+    const Wrapper = withTransactionProviders(
+        { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
+        { [DEFAULT_SIGNATURE]: MOCK_STATUS },
+    );
+    return (
+        <Wrapper>
+            <AccountsCard signature={DEFAULT_SIGNATURE} />
+        </Wrapper>
+    );
+}
+
 export function withTransactionProviders(
     parsed: Record<string, ReturnType<typeof mockParsedTransactionDetails>>,
     status: Record<string, ReturnType<typeof mockTransactionStatus>>,

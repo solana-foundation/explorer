@@ -1,26 +1,19 @@
 import { act, render, screen } from '@testing-library/react';
-import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
+import { swrWrapper } from '@/app/__tests__/swr-hook';
 
 vi.mock('next/navigation');
 
 const mockGetMultipleAccounts = vi.fn();
 
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return {
-        ...actual,
-        getRpc: vi.fn(() => ({
-            getMultipleAccounts: (...args: unknown[]) => ({
-                send: async () => ({ value: await mockGetMultipleAccounts(...args) }),
-            }),
-        })),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getMultipleAccounts: mockGetMultipleAccounts }),
+}));
 
-import { DEFAULT_SIGNATURE, FEE_PAYER, MOCK_PARSED_TX, MOCK_STATUS } from '../__fixtures__/transaction';
-import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
-import { AccountsCard } from '../AccountsCard';
+import { FEE_PAYER } from '../__fixtures__/transaction';
+import { accountsCardWithProviders } from '../__fixtures__/withTransactionProviders';
 
 describe('transaction::AccountsCard total size', () => {
     beforeEach(() => {
@@ -70,17 +63,7 @@ describe('transaction::AccountsCard total size', () => {
 });
 
 function renderCard() {
-    const Wrapper = withTransactionProviders(
-        { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-        { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-    );
-    return render(
-        <SWRConfig value={{ provider: () => new Map() }}>
-            <Wrapper>
-                <AccountsCard signature={DEFAULT_SIGNATURE} />
-            </Wrapper>
-        </SWRConfig>,
-    );
+    return render(accountsCardWithProviders(), { wrapper: swrWrapper() });
 }
 
 async function sizesAnswered() {

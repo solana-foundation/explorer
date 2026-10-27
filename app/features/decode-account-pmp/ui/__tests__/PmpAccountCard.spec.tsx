@@ -31,9 +31,7 @@ vi.mock('@/app/shared/lib/analytics', async importOriginal => ({
     trackEvent: vi.fn(),
 }));
 
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: { toBase58(): string } }) => <div data-testid="address">{pubkey.toBase58()}</div>,
-}));
+vi.mock('@components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'https://api.devnet.solana.com' }) }));
 

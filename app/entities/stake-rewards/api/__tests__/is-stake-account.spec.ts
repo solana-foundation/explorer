@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { address } from '@solana/kit';
+import { address, createSolanaRpc } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -9,14 +9,9 @@ import { isStakeAccount } from '../is-stake-account';
 const ADDRESS = address(gen.address(0));
 const RPC_URL = 'https://rpc.example';
 
-const mocks = vi.hoisted(() => ({ getAccountInfo: vi.fn() }));
+const mocks = { getAccountInfo: vi.fn() };
 
-// The global kit mock in `test-setup.specs.ts` serves an RPC stub without `getAccountInfo`; per its
-// own note, tests needing other methods override it locally.
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return { ...actual, createSolanaRpc: vi.fn(() => ({ getAccountInfo: mocks.getAccountInfo })) };
-});
+vi.mocked(createSolanaRpc).mockImplementation(() => ({ getAccountInfo: mocks.getAccountInfo }) as never);
 
 describe('isStakeAccount', () => {
     beforeEach(() => {

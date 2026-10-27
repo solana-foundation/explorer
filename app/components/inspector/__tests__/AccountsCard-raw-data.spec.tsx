@@ -12,29 +12,15 @@ vi.mock('@/app/entities/cluster/api/fetch-genesis-hash', () => ({
 const mockGetMultipleAccounts = vi.fn();
 const mockGetAccountInfo = vi.fn();
 
-const mockRpc = () => ({
-    getAccountInfo: (...args: unknown[]) => ({
-        send: async () => ({ value: await mockGetAccountInfo(...args) }),
-    }),
-    getMultipleAccounts: (...args: unknown[]) => ({
-        send: async () => ({ value: await mockGetMultipleAccounts(...args) }),
-    }),
-});
-
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return { ...actual, getRpc: vi.fn(() => mockRpc()) };
-});
-
-vi.mock('@entities/cluster', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster')>('@entities/cluster');
-    return { ...actual, getRpc: vi.fn(() => mockRpc()) };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getAccountInfo: mockGetAccountInfo, getMultipleAccounts: mockGetMultipleAccounts }),
+}));
 
 import { DEFAULT_BLOCKHASH, gen } from '@__fixtures__/gen';
 import { Message, MessageV0, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { AccountsProvider, useFetchAccountInfo } from '@/app/providers/accounts';

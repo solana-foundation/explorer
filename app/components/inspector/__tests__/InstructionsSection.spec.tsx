@@ -37,17 +37,7 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 import { InstructionsSection } from '../InstructionsSection';
 import { buildMessage, CREATE_ACCOUNT, INNER_INSTRUCTIONS } from './__fixtures__/create-idempotent-tx';
 
-// The IDL tiers read through SWR. The mock returns no data, so instructions render through the dispatcher.
-vi.mock('swr', () => ({
-    __esModule: true,
-    default: vi.fn(() => ({
-        data: undefined,
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })),
-}));
+vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
 vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@features/decode-instruction-with-idl')>()),

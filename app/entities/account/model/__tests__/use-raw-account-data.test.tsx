@@ -3,6 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
 import { FAST_RETRY, settleRetries, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
@@ -17,17 +18,9 @@ vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ url: MOCK_URL }),
 }));
 
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return {
-        ...actual,
-        getRpc: vi.fn(() => ({
-            getAccountInfo: (...args: unknown[]) => ({
-                send: async () => ({ value: await mockGetAccountInfo(...args) }),
-            }),
-        })),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getAccountInfo: mockGetAccountInfo }),
+}));
 
 function accountInfoValue(data: Uint8Array) {
     return { data: [toBase64(data), 'base64'] };

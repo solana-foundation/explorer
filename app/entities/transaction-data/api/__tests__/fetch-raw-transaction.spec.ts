@@ -1,5 +1,4 @@
 import { gen } from '@__fixtures__/gen';
-import type * as SolanaKit from '@solana/kit';
 import { describe, expect, it, vi } from 'vitest';
 
 import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
@@ -15,7 +14,7 @@ import { fetchRawTransaction } from '../fetch-raw-transaction';
 
 // The global setup stubs `createSolanaRpc` so no test reaches the network; these tests exercise the
 // real client against a stubbed `fetch` instead.
-vi.mock('@solana/kit', async () => await vi.importActual<typeof SolanaKit>('@solana/kit'));
+vi.unmock('@solana/kit');
 
 const URL = 'https://mock.rpc';
 const SIGNATURE = gen.signature(1);

@@ -4,10 +4,11 @@ import {
     SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND,
     SOLANA_ERROR__JSON_RPC__PARSE_ERROR,
     SOLANA_ERROR__RPC__INTEGER_OVERFLOW,
-    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
     SolanaError,
 } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
+
+import { connectionFailure, httpError } from '@/app/__tests__/rpc-errors';
 
 import {
     classifyTransientError,
@@ -42,10 +43,7 @@ describe('isRetryableFetchError', () => {
     it.each([['EAI_AGAIN'], ['EHOSTUNREACH'], ['ENETUNREACH'], ['ECONNABORTED']])(
         'should match a %s connection failure',
         code => {
-            const error = Object.assign(new TypeError('fetch failed'), {
-                cause: Object.assign(new Error('connect'), { code }),
-            });
-            expect(isRetryableFetchError(error)).toBe(true);
+            expect(isRetryableFetchError(connectionFailure(code))).toBe(true);
         },
     );
 
@@ -55,10 +53,7 @@ describe('isRetryableFetchError', () => {
         ['a hostname that does not resolve', 'ENOTFOUND'],
         ['a TLS handshake the client will not complete', 'EPROTO'],
     ])('should not match %s', (_reason, code) => {
-        const error = Object.assign(new TypeError('fetch failed'), {
-            cause: Object.assign(new Error('connect'), { code }),
-        });
-        expect(isRetryableFetchError(error)).toBe(false);
+        expect(isRetryableFetchError(connectionFailure(code))).toBe(false);
     });
 
     it('should not match non-error values', () => {
@@ -134,14 +129,6 @@ describe('isRpcMisconfigError', () => {
         expect(isRpcMisconfigError(busy)).toBe(false);
         expect(isRpcMisconfigError(httpError(429))).toBe(false);
     });
-
-    function httpError(statusCode: number) {
-        return new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
-            headers: new Headers(),
-            message: `HTTP ${statusCode}`,
-            statusCode,
-        });
-    }
 
     it('should not match a failure that is not an RPC error at all', () => {
         expect(isRpcMisconfigError(new Error('boom'))).toBe(false);

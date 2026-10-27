@@ -15,22 +15,9 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 
 import { InstructionsSection } from '../InstructionsSection';
 
-vi.mock('swr', () => ({
-    __esModule: true,
-    default: vi.fn(() => ({
-        data: undefined,
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })),
-}));
+vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(() => '/'),
-    useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('next/link', () => ({
     __esModule: true,

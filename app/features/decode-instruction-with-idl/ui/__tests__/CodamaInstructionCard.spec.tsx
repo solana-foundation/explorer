@@ -40,11 +40,7 @@ vi.mock('@entities/instruction-card', async importOriginal => ({
     UnknownDetailsCard: () => <div data-testid="unknown-card" />,
 }));
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
-        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 const PROGRAM = gen.publicKey(0);
 const AUTHORITY = gen.address(1);

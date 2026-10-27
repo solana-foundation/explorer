@@ -50,9 +50,7 @@ vi.mock('@providers/accounts', () => ({
     useFetchAccountInfo: () => mockFetchAccountInfo,
 }));
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: { toBase58(): string } }) => <div>{pubkey.toBase58()}</div>,
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 const STUB_SURFACE: InstructionSurface = {
     Card: () => undefined,

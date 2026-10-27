@@ -11,9 +11,7 @@ import { useClusterResourceSearch } from '../use-cluster-resource-search';
 
 const RESOURCE_ID = 'test-resource-id';
 
-vi.mock('next/navigation', () => ({
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 describe('useClusterResourceSearch', () => {
     beforeEach(() => {

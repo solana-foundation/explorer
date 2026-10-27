@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
+import { stubFetch } from '@/app/__tests__/rpc-fetch';
 import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
 
@@ -12,18 +13,8 @@ vi.mock('@/app/entities/digital-asset/api', () => ({
     getAssetBatch: vi.fn(),
 }));
 
-const fetchMock = vi.fn();
-vi.stubGlobal('fetch', fetchMock);
+const { fetchMock, respondWith } = stubFetch();
 const getAssetBatchMock = vi.mocked(getAssetBatch);
-
-function mockFetch(status: number, body: unknown) {
-    const ok = status >= 200 && status < 300;
-    fetchMock.mockResolvedValueOnce({
-        json: async () => body,
-        ok,
-        status,
-    } as Response);
-}
 
 let testSeq = 0;
 function makeRequest(q: string, cluster = 'mainnet-beta') {
@@ -33,13 +24,11 @@ function makeRequest(q: string, cluster = 'mainnet-beta') {
 const originalEnv = { ...process.env };
 
 beforeEach(() => {
-    vi.stubGlobal('fetch', fetchMock);
     process.env = { ...originalEnv, JUPITER_API_KEY: 'test-key' };
     getAssetBatchMock.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
-    vi.unstubAllGlobals();
     process.env = originalEnv;
     vi.resetAllMocks();
 });
@@ -55,7 +44,7 @@ describe('GET /api/search', () => {
         });
 
         it('should return results with cache headers for non-mainnet cluster', async () => {
-            mockFetch(200, []);
+            respondWith(200, []);
             const res = await GET(new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=devnet`));
             expect(res.status).toBe(200);
             const data = await res.json();
@@ -74,7 +63,7 @@ describe('GET /api/search', () => {
         });
 
         it('should return empty with cache headers when Jupiter returns empty array', async () => {
-            mockFetch(200, []);
+            respondWith(200, []);
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
             expect(data).toMatchObject({ results: { tokens: [] }, success: true });
@@ -84,7 +73,7 @@ describe('GET /api/search', () => {
 
     describe('Jupiter discovery', () => {
         it('should normalize tokens on success', async () => {
-            mockFetch(200, [makeJupiterToken()]);
+            respondWith(200, [makeJupiterToken()]);
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
 
@@ -100,13 +89,13 @@ describe('GET /api/search', () => {
         });
 
         it('should return cache headers on success', async () => {
-            mockFetch(200, [makeJupiterToken()]);
+            respondWith(200, [makeJupiterToken()]);
             const res = await GET(makeRequest('sol'));
             expect(res.headers.get('Cache-Control')).toContain('s-maxage=30');
         });
 
         it('should detect address query type', async () => {
-            mockFetch(200, [makeJupiterToken()]);
+            respondWith(200, [makeJupiterToken()]);
             const res = await GET(
                 new Request(`http://localhost/api/search?q=${encodeURIComponent(VALID_ADDRESS)}-${++testSeq}`),
             );
@@ -118,10 +107,10 @@ describe('GET /api/search', () => {
 
     describe('Jupiter failure', () => {
         it.each([
-            ['returns 401', () => mockFetch(401, {})],
-            ['returns 429', () => mockFetch(429, {})],
-            ['returns 500', () => mockFetch(500, {})],
-            ['returns an object instead of an array', () => mockFetch(200, { unexpected: 'shape' })],
+            ['returns 401', () => respondWith(401, {})],
+            ['returns 429', () => respondWith(429, {})],
+            ['returns 500', () => respondWith(500, {})],
+            ['returns an object instead of an array', () => respondWith(200, { unexpected: 'shape' })],
             ['rejects with a network error', () => fetchMock.mockRejectedValueOnce(new TypeError('fetch failed'))],
             [
                 'is aborted',
@@ -152,7 +141,7 @@ describe('GET /api/search', () => {
 
     describe('DAS icon enrichment', () => {
         it('should enrich icon from DAS when logoUri is null', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: null })]);
+            respondWith(200, [makeJupiterToken({ logoURI: null })]);
             getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
@@ -161,7 +150,7 @@ describe('GET /api/search', () => {
         });
 
         it('should prefer logoUri over DAS image when both present', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: 'https://original.com/sol.png' })]);
+            respondWith(200, [makeJupiterToken({ logoURI: 'https://original.com/sol.png' })]);
             getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
@@ -170,7 +159,7 @@ describe('GET /api/search', () => {
         });
 
         it('should use undefined icon when DAS returns no asset and logoUri is absent', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: null })]);
+            respondWith(200, [makeJupiterToken({ logoURI: null })]);
             getAssetBatchMock.mockResolvedValueOnce(undefined);
 
             const res = await GET(makeRequest('sol'));
@@ -188,7 +177,7 @@ describe('GET /api/search', () => {
         });
 
         it('should filter out unverified Jupiter tokens when flag is set', async () => {
-            mockFetch(200, [
+            respondWith(200, [
                 makeJupiterToken({ isVerified: true }),
                 makeJupiterToken({ id: OTHER_ADDRESS, isVerified: false, name: 'Other', symbol: 'OTH' }),
             ]);
@@ -202,7 +191,7 @@ describe('GET /api/search', () => {
         });
 
         it('should keep verified Jupiter tokens when flag is set', async () => {
-            mockFetch(200, [makeJupiterToken({ isVerified: true })]);
+            respondWith(200, [makeJupiterToken({ isVerified: true })]);
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
@@ -212,7 +201,7 @@ describe('GET /api/search', () => {
         });
 
         it('should return empty when all Jupiter results are unverified', async () => {
-            mockFetch(200, [
+            respondWith(200, [
                 makeJupiterToken({ isVerified: false }),
                 makeJupiterToken({ id: OTHER_ADDRESS, isVerified: false, name: 'Other', symbol: 'OTH' }),
             ]);
@@ -224,7 +213,7 @@ describe('GET /api/search', () => {
         });
 
         it('should exclude a Jupiter token that omits isVerified when flag is set', async () => {
-            mockFetch(200, [{ decimals: 9, id: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }]);
+            respondWith(200, [{ decimals: 9, id: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }]);
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
@@ -262,7 +251,7 @@ describe('GET /api/search', () => {
         });
 
         it('should resolve Custom + mainnet genesisHash and run search', async () => {
-            mockFetch(200, [makeJupiterToken()]);
+            respondWith(200, [makeJupiterToken()]);
             const res = await GET(
                 new Request(
                     `http://localhost/api/search?q=sol-${++testSeq}&cluster=custom&genesisHash=${GENESIS_HASHES.MAINNET}`,
