@@ -1,11 +1,9 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SimulatedBadge } from '../SimulatedBadge';
 
 const meta: Meta<typeof SimulatedBadge> = {
     component: SimulatedBadge,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SimulatedBadge',
 };

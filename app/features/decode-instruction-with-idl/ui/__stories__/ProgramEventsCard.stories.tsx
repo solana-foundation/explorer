@@ -1,5 +1,4 @@
 import type { Program } from '@coral-xyz/anchor';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { decodeProgramEvents } from '../../lib/decode-program-events';
@@ -49,7 +48,6 @@ const sampleProgram = {
 
 const meta = {
     component: ProgramEventsCard,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/ProgramEventsCard',
 } satisfies Meta<typeof ProgramEventsCard>;

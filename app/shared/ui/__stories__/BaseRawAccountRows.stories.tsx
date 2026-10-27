@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -23,7 +23,6 @@ const mockRawData = new Uint8Array([
 const meta: Meta<typeof BaseRawAccountRows> = {
     component: BaseRawAccountRows,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Shared/BaseRawAccountRows',
 };

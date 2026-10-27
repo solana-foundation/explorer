@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { InfoTooltip } from '../InfoTooltip';
@@ -6,9 +6,6 @@ import { InfoTooltip } from '../InfoTooltip';
 const meta: Meta<typeof InfoTooltip> = {
     component: InfoTooltip,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Common/InfoTooltip@Media',
 };

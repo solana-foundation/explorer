@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureAccountSection } from '../FeatureAccountSection';
@@ -8,7 +8,6 @@ import { FeatureAccountSection } from '../FeatureAccountSection';
 const meta = {
     component: FeatureAccountSection,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/FeatureAccountSection',
 } satisfies Meta<typeof FeatureAccountSection>;

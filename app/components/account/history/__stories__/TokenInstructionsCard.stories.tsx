@@ -2,7 +2,6 @@ import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-confi
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenInstructionsCard } from '../TokenInstructionsCard';
@@ -11,7 +10,6 @@ const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
 const meta: Meta<typeof TokenInstructionsCard> = {
     component: TokenInstructionsCard,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/History/TokenInstructionsCard',
 };

@@ -1,7 +1,7 @@
 import type { BlockData } from '@entities/block-data';
 import { blockhash } from '@solana/kit';
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockProgramsCard } from '../BlockProgramsCard';
@@ -9,10 +9,6 @@ import { BlockProgramsCard } from '../BlockProgramsCard';
 const meta: Meta<typeof BlockProgramsCard> = {
     component: BlockProgramsCard,
     decorators: [withCluster, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockProgramsCard@Media',
 };

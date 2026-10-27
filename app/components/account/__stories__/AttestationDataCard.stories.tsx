@@ -2,7 +2,6 @@ import { Account, DispatchContext, FetchersContext, type State, StateContext } f
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
@@ -64,7 +63,6 @@ function onNotFound(): never {
 
 const meta = {
     component: AttestationDataCard,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/AttestationDataCard',
 } satisfies Meta<typeof AttestationDataCard>;

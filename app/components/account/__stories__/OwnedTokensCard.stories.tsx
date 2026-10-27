@@ -11,7 +11,7 @@ import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { expect, within } from 'storybook/test';
@@ -133,7 +133,6 @@ const withNoTokens: Decorator = Story => (
 const meta = {
     component: OwnedTokensCard,
     decorators: [withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/OwnedTokensCard',
 } satisfies Meta<typeof OwnedTokensCard>;

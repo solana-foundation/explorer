@@ -1,10 +1,5 @@
 import { useClusterModal } from '@entities/cluster';
-import {
-    createNextjsParameters,
-    nextjsParameters,
-    withClusterModalOpen,
-    withClusterState,
-} from '@storybook-config/decorators';
+import { createNextjsParameters, withClusterModalOpen, withClusterState } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster, ClusterStatus } from '@utils/cluster';
@@ -42,9 +37,7 @@ const meta = {
     component: ClusterModal,
     decorators: [withClusterModalOpen, withSavedClusters([]), withViewportFromGlobal],
     parameters: {
-        ...nextjsParameters,
         docs: { story: { height: INITIAL_VIEWPORTS.ipad.styles.height } },
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Features/ClusterSwitcher/ClusterModal@Media',
@@ -86,7 +79,6 @@ export const MobileCustomCluster: Story = {
     parameters: {
         ...createNextjsParameters({ query: { cluster: 'custom', customUrl: CUSTOM_URL } }),
         docs: { story: { height: INITIAL_VIEWPORTS.ipad.styles.height } },
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     render,
 };

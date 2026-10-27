@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withMockTransactions, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withMockTransactions, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import BigNumber from 'bignumber.js';
 
@@ -26,10 +26,6 @@ const sampleRows: TokenBalancesCardInnerProps['rows'] = [
 const meta: Meta<typeof TokenBalancesCardInner> = {
     component: TokenBalancesCardInner,
     decorators: [withTokenInfoBatch, withMockTransactions, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Transaction/TokenBalancesCard@Media',
 };

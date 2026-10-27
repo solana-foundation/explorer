@@ -225,8 +225,6 @@ export const createNextjsParameters = (options?: NextjsNavigationOptions): Param
     },
 });
 
-export const nextjsParameters: Parameters = createNextjsParameters();
-
 /** Mocks navigator.clipboard.writeText for stories that copy text. Usage: `decorators: [withClipboardMock]` */
 export const withClipboardMock: Decorator = Story => {
     Object.defineProperty(navigator, 'clipboard', {

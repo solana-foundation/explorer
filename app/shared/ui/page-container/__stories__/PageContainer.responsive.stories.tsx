@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { PageContainer } from '../PageContainer';
@@ -6,9 +6,6 @@ import { PageContainer } from '../PageContainer';
 const meta: Meta<typeof PageContainer> = {
     component: PageContainer,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Shared/PageContainer@Media',
 };

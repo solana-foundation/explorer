@@ -1,6 +1,6 @@
 import type { BlockData } from '@entities/block-data';
 import { address, blockhash, unixTimestamp } from '@solana/kit';
-import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
+import { withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockOverviewCard } from '../BlockOverviewCard';
@@ -21,7 +21,6 @@ const CHILD_LEADER = address('Stake11111111111111111111111111111111111111');
 const meta = {
     component: BlockOverviewCard,
     decorators: [withClusterAccountsAndTokenInfo],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockOverviewCard',
 } satisfies Meta<typeof BlockOverviewCard>;

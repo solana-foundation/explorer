@@ -3,7 +3,6 @@ import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@sola
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -46,7 +45,6 @@ const parsedIx: ParsedInstruction = {
 const meta: Meta<typeof InspectorInstructionCard> = {
     component: InspectorInstructionCard,
     decorators: [withInspectorProviders],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Common/InspectorInstructionCard',
 };

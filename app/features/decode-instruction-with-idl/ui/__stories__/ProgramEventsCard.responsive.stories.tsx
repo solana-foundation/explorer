@@ -1,6 +1,5 @@
 import type { Program } from '@coral-xyz/anchor';
-import { nextjsParameters } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { decodeProgramEvents } from '../../lib/decode-program-events';
@@ -50,10 +49,6 @@ const sampleProgram = {
 const meta: Meta<typeof ProgramEventsCard> = {
     component: ProgramEventsCard,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/ProgramEventsCard@Media',
 };

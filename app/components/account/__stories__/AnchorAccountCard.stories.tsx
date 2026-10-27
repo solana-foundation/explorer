@@ -1,6 +1,6 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AnchorAccountCard } from '../AnchorAccountCard';
@@ -19,7 +19,6 @@ const sampleAccount: Account = {
 const meta = {
     component: AnchorAccountCard,
     decorators: [withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/AnchorAccountCard',
 } satisfies Meta<typeof AnchorAccountCard>;

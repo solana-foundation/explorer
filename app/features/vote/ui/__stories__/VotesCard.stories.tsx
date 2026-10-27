@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VotesCard } from '../VotesCard';
@@ -7,7 +7,6 @@ import { BASE_SLOT, voteAccountFixture } from './fixtures';
 const meta: Meta<typeof VotesCard> = {
     component: VotesCard,
     decorators: [withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VotesCard',
 };

@@ -2,14 +2,13 @@ import { gen } from '@__fixtures__/gen';
 import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { solanaAttestationInstructionParser } from '../../lib/sas-client';
@@ -41,10 +40,6 @@ const meta: Meta<typeof SolanaAttestationDetailsCard> = {
         withTxInstructionSurface,
         withViewportFromGlobal,
     ],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionSas/SolanaAttestationDetailsCard@Media',
 };

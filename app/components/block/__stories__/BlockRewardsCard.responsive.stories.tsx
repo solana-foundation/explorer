@@ -1,7 +1,7 @@
 import type { BlockData } from '@entities/block-data';
 import { address, blockhash, lamports, type Reward } from '@solana/kit';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockRewardsCard } from '../BlockRewardsCard';
@@ -24,10 +24,6 @@ const sampleReward = (i: number): Reward => ({
 const meta: Meta<typeof BlockRewardsCard> = {
     component: BlockRewardsCard,
     decorators: [withCluster, withTokenInfoBatch, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockRewardsCard@Media',
 };

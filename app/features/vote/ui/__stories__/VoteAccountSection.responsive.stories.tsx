@@ -1,5 +1,5 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VoteAccountSection } from '../VoteAccountSection';
@@ -9,10 +9,6 @@ import { accountFixture, BASE_SLOT, voteAccountV4Fixture } from './fixtures';
 const meta = {
     component: VoteAccountSection,
     decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteAccountSection@Media',
 } satisfies Meta<typeof VoteAccountSection>;

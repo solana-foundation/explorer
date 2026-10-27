@@ -18,11 +18,6 @@ const meta = {
             </OverviewCard>
         ),
     ],
-    parameters: {
-        nextjs: {
-            appDirectory: true,
-        },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/token-extensions/TokenExtensionsStatusRow',
 } satisfies Meta<typeof TokenExtensionsStatusRow>;

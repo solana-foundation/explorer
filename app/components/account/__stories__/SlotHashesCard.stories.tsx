@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { SysvarSlotHashesAccount } from '@/app/validators/accounts/sysvar';
@@ -8,7 +8,6 @@ import { SlotHashesCard } from '../SlotHashesCard';
 const meta: Meta<typeof SlotHashesCard> = {
     component: SlotHashesCard,
     decorators: [withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/SlotHashesCard',
 };

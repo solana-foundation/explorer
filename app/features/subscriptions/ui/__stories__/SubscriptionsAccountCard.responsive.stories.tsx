@@ -2,8 +2,8 @@ import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
 import { AccountDiscriminator, getPlanEncoder, PlanStatus, SUBSCRIPTIONS_PROGRAM_ADDRESS } from '@solana/subscriptions';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
@@ -55,10 +55,6 @@ const args = { account, onNotFound };
 const meta = {
     component: SubscriptionsAccountCard,
     decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Subscriptions/SubscriptionsAccountCard@Media',
 } satisfies Meta<typeof SubscriptionsAccountCard>;

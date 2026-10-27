@@ -1,5 +1,4 @@
 import { mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AutoRefresh } from '@/app/shared/lib/use-auto-refresh';
@@ -24,9 +23,6 @@ const meta: Meta<typeof SummaryCard> = {
         signature: DEFAULT_SIGNATURE,
     },
     component: SummaryCard,
-    parameters: {
-        ...nextjsParameters,
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/SummaryCard',
 };

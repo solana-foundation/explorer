@@ -3,8 +3,8 @@ import { DispatchContext as RewardsDispatch, StateContext as RewardsStateCtx } f
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
@@ -59,10 +59,6 @@ const withRewards: Decorator = Story => (
 const meta = {
     component: RewardsCard,
     decorators: [withViewportFromGlobal, withClusterAndAccounts, withRewards],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/RewardsCard@Media',
 } satisfies Meta<typeof RewardsCard>;

@@ -1,5 +1,4 @@
 import {
-    nextjsParameters,
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
@@ -25,7 +24,6 @@ import {
 const meta = {
     component: VoteDetailsCard,
     decorators: [withMockTransactions, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard',
 } satisfies Meta<typeof VoteDetailsCard>;

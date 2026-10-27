@@ -1,5 +1,4 @@
-import { nextjsParameters } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { NormalMetaplexNFTAttributesCard } from '../MetaplexNFTAttributesCard';
@@ -23,10 +22,6 @@ const withFetchOverride: Decorator = Story => {
 const meta: Meta<typeof NormalMetaplexNFTAttributesCard> = {
     component: NormalMetaplexNFTAttributesCard,
     decorators: [withFetchOverride, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/MetaplexNFTAttributesCard@Media',
 };

@@ -1,7 +1,6 @@
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
@@ -54,7 +53,6 @@ const assertAccountInfoIx = {
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',
 };

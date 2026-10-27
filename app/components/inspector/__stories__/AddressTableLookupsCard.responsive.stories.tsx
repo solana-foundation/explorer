@@ -3,8 +3,8 @@ import { FetchStatus } from '@providers/cache';
 import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
@@ -73,10 +73,6 @@ const withResolved: Decorator = Story => (
 const meta: Meta<typeof AddressTableLookupsCard> = {
     component: AddressTableLookupsCard,
     decorators: [withTokenInfoBatch, withResolved, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AddressTableLookupsCard@Media',
 };

@@ -1,4 +1,3 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
@@ -9,7 +8,6 @@ import { BaseNftokenTile } from '../BaseNftokenTile';
 
 const meta = {
     component: BaseNftokenCollectionGrid,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/NFToken/NftokenCollectionGrid',
 } satisfies Meta<typeof BaseNftokenCollectionGrid>;

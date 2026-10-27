@@ -2,14 +2,13 @@ import { createInstructionParserDispatcher } from '@entities/instruction-parser'
 import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { invariant } from '@/app/shared/lib/invariant';
@@ -51,10 +50,6 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
         withTxInstructionSurface,
         withViewportFromGlobal,
     ],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard@Media',
 };

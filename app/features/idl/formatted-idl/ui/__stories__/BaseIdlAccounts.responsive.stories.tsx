@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlAccounts } from '../BaseIdlAccounts';
@@ -6,10 +6,6 @@ import { BaseIdlAccounts } from '../BaseIdlAccounts';
 const meta: Meta<typeof BaseIdlAccounts> = {
     component: BaseIdlAccounts,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlAccounts@Media',
 };

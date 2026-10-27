@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import type { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 
@@ -11,7 +11,6 @@ type ParsedArgs = { parsedLookupTable: AddressLookupTableAccountInfo };
 const meta = {
     component: LookupTableEntriesCard,
     decorators: [withCluster, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard',
 } satisfies Meta<ParsedArgs>;

@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockhashesCard } from '../BlockhashesCard';
@@ -8,9 +8,6 @@ import { BlockhashesCard } from '../BlockhashesCard';
 const meta: Meta<typeof BlockhashesCard> = {
     component: BlockhashesCard,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/BlockhashesCard@Media',
 };

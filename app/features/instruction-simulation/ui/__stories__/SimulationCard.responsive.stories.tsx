@@ -1,6 +1,6 @@
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SimulatorCard } from '../SimulationCard';
@@ -13,10 +13,6 @@ const idleMessage = mockVersionedMessage({
 const meta = {
     component: SimulatorCard,
     decorators: [withViewportFromGlobal, withCluster],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SimulationCard@Media',
 } satisfies Meta<typeof SimulatorCard>;

@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureGatesView } from '../FeatureGatesView';
@@ -6,7 +6,6 @@ import { FeatureGatesView } from '../FeatureGatesView';
 const meta: Meta<typeof FeatureGatesView> = {
     component: FeatureGatesView,
     decorators: [withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/FeatureGatesView',
 };

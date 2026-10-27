@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
 
@@ -34,9 +34,6 @@ const activated: ActivatedFeature[] = [
 const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
     component: FeatureGateTable<ActivatedFeature>,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/FeatureGateTable@Media',
 };

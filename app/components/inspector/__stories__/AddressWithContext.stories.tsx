@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AddressWithContext, createFeePayerValidator, programValidator } from '../AddressWithContext';
@@ -7,7 +7,6 @@ import { AddressWithContext, createFeePayerValidator, programValidator } from '.
 const meta = {
     component: AddressWithContext,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AddressWithContext',
 } satisfies Meta<typeof AddressWithContext>;

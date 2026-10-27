@@ -8,8 +8,8 @@ import {
     type RecurringDelegation,
     type SubscriptionDelegation,
 } from '@solana/subscriptions';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { WalletSubscriptionsView } from '../WalletSubscriptionsCard';
@@ -87,10 +87,6 @@ const args = {
 const meta = {
     component: WalletSubscriptionsView,
     decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Subscriptions/WalletSubscriptionsCard@Media',
 } satisfies Meta<typeof WalletSubscriptionsView>;

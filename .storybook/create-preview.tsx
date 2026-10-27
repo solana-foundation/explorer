@@ -5,6 +5,7 @@ import { INITIAL_VIEWPORTS } from 'storybook/viewport';
 import { rubikFont } from '@/app/styles';
 
 import { BREAKPOINT_VIEWPORTS } from './breakpoints';
+import { createNextjsParameters } from './decorators';
 import type { Preview } from './types';
 
 // Storybook serialises story args with JSON.stringify (for the controls panel and inter-frame
@@ -39,6 +40,7 @@ export function createPreview({ mswEnabled }: { mswEnabled: boolean }): Preview 
 
     return {
         parameters: {
+            ...createNextjsParameters(),
             a11y: {
                 // Document-scoped rules that can never pass for a component rendered in isolation (no <main>/<h1>/landmark).
                 config: {

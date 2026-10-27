@@ -1,6 +1,6 @@
 import type { BlockData, BlockTransaction } from '@entities/block-data';
 import { address, blockhash, lamports } from '@solana/kit';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockAccountsCard } from '../BlockAccountsCard';
@@ -8,7 +8,6 @@ import { BlockAccountsCard } from '../BlockAccountsCard';
 const meta: Meta<typeof BlockAccountsCard> = {
     component: BlockAccountsCard,
     decorators: [withCluster, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockAccountsCard',
 };

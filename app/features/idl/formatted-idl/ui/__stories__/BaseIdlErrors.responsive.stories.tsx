@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlErrors } from '../BaseIdlErrors';
@@ -6,10 +6,6 @@ import { BaseIdlErrors } from '../BaseIdlErrors';
 const meta: Meta<typeof BaseIdlErrors> = {
     component: BaseIdlErrors,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlErrors@Media',
 };

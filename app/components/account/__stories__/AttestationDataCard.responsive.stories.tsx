@@ -1,8 +1,8 @@
 import { Account, type State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withAccountsState } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withAccountsState } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
@@ -46,10 +46,6 @@ function onNotFound(): never {
 const meta = {
     component: AttestationDataCard,
     decorators: [withViewportFromGlobal, withAccountsState(stateWithSchema)],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/AttestationDataCard@Media',
 } satisfies Meta<typeof AttestationDataCard>;

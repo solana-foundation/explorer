@@ -1,6 +1,6 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { expect, within } from 'storybook/test';
@@ -65,7 +65,6 @@ const meta = {
         ),
         withTokenInfoBatch,
     ],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Common/BaseRawDetails',
 } satisfies Meta<typeof BaseRawDetails>;

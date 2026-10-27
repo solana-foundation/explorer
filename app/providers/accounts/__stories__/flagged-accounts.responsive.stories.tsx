@@ -1,5 +1,4 @@
-import { nextjsParameters } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import FLAGGED_ACCOUNTS_WARNING from '../flagged-accounts';
@@ -7,10 +6,6 @@ import FLAGGED_ACCOUNTS_WARNING from '../flagged-accounts';
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     decorators: [withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Providers/Accounts/FlaggedAccountWarnings@Media',
 } satisfies Meta;

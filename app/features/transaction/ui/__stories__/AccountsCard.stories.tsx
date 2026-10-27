@@ -1,4 +1,3 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import {
@@ -16,9 +15,6 @@ const meta: Meta<typeof AccountsCard> = {
         signature: DEFAULT_SIGNATURE,
     },
     component: AccountsCard,
-    parameters: {
-        ...nextjsParameters,
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/AccountsCard',
 };
