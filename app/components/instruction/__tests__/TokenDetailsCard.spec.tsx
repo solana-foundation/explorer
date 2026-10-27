@@ -195,6 +195,29 @@ describe('TokenDetailsCard', () => {
         });
     });
 
+    it('should render an Update Token Metadata Authority from the RPC without a new authority', async () => {
+        renderTxCard(
+            card(
+                'updateTokenMetadataAuthority',
+                {
+                    metadata: MINT.toBase58(),
+                    newAuthority: null,
+                    updateAuthority: AUTHORITY.toBase58(),
+                },
+                TOKEN_2022_PROGRAM_ID,
+            ),
+        );
+
+        await waitFor(() => {
+            expect(readCardRows()).toEqual([
+                PROGRAM_2022_ROW,
+                ['Metadata', MINT.toBase58()],
+                ['NewAuthority', '(none)'],
+                ['UpdateAuthority', AUTHORITY.toBase58()],
+            ]);
+        });
+    });
+
     it('should show a number as text', async () => {
         renderTxCard(
             card('initializeMint2', {

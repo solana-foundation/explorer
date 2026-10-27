@@ -306,7 +306,7 @@ const UpdateTokenMetadataUpdateAuthority = type({
 export type UpdateTokenMetadataAuthorityInfo = Infer<typeof UpdateTokenMetadataAuthority>;
 const UpdateTokenMetadataAuthority = type({
     metadata: PublicKeyFromString,
-    newAuthority: PublicKeyFromString,
+    newAuthority: nullable(PublicKeyFromString),
     updateAuthority: PublicKeyFromString,
 });
 
