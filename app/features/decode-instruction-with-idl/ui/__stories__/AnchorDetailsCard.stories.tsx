@@ -1,40 +1,11 @@
 import { gen } from '@__fixtures__/gen';
-import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { toInstructionNode } from '@entities/instruction-card';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { withMockTransactions, withTokenInfoBatch, withTxInstructionSurface } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-
+import { ammV3Instruction, ammV3Program, UPDATE_REWARD_INFOS_DISCRIMINATOR } from '../../__fixtures__/anchor-programs';
 import { decodeAnchorInstruction } from '../../lib/decode-anchor-instruction';
 import { AnchorDetailsCard } from '../AnchorDetailsCard';
-
-// Construct a real Anchor Program instance from the bundled amm_v3 IDL fixture; the AccountInfo
-// fetches inside the card no-op because the storybook accounts fetcher is a noop, but the BorshInstructionCoder
-// can decode synthetic instruction data built from the IDL discriminators below.
-const url = 'https://api.devnet.solana.com';
-const noopWallet = {
-    publicKey: PublicKey.default,
-    signAllTransactions: async <T,>(txs: T[]) => txs,
-    signTransaction: async <T,>(tx: T) => tx,
-};
-const mockProvider = {
-    connection: { commitment: 'confirmed', rpcEndpoint: url },
-    opts: { preflightCommitment: 'confirmed' },
-    wallet: noopWallet,
-} as unknown as AnchorProvider;
-const anchorProgram = new Program(anchor030Devi as Idl, mockProvider);
-
-// update_reward_infos has empty args + a single pool_state account — smallest reproducible instruction.
-const UPDATE_REWARD_INFOS_DISCRIMINATOR = Uint8Array.from([163, 172, 224, 52, 11, 154, 106, 223]);
-
-const buildInstruction = (data: Uint8Array, keys: PublicKey[]) =>
-    new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: keys.map(pubkey => ({ isSigner: false, isWritable: true, pubkey })),
-        programId: anchorProgram.programId,
-    });
 
 const meta = {
     component: AnchorDetailsCard,
@@ -48,23 +19,23 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const updateRewardInfosIx = buildInstruction(UPDATE_REWARD_INFOS_DISCRIMINATOR, [gen.publicKey(1)]);
+const updateRewardInfosIx = ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR);
 export const UpdateRewardInfos: Story = {
     args: {
-        decoded: decodeAnchorInstruction(anchorProgram, updateRewardInfosIx),
+        decoded: decodeAnchorInstruction(ammV3Program, updateRewardInfosIx),
         ix: updateRewardInfosIx,
         node: toInstructionNode({ index: 0, ix: updateRewardInfosIx }),
-        program: anchorProgram,
+        program: ammV3Program,
     },
 };
 
 // Synthetic data won't match any known discriminator → AnchorInstructionBody renders the "Failed to decode" fallback.
-const failedToDecodeIx = buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), [gen.publicKey(2)]);
+const failedToDecodeIx = ammV3Instruction([0, 0, 0, 0, 0, 0, 0, 0], gen.publicKey(2));
 export const FailedToDecode: Story = {
     args: {
-        decoded: decodeAnchorInstruction(anchorProgram, failedToDecodeIx),
+        decoded: decodeAnchorInstruction(ammV3Program, failedToDecodeIx),
         ix: failedToDecodeIx,
         node: toInstructionNode({ index: 1, ix: failedToDecodeIx }),
-        program: anchorProgram,
+        program: ammV3Program,
     },
 };

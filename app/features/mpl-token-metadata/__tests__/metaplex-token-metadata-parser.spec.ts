@@ -1,39 +1,24 @@
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
-    getCreateMetadataAccountV3InstructionDataSerializer,
     getUpdateMetadataAccountV2InstructionDataSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { none, publicKey as umiPublicKey, some } from '@metaplex-foundation/umi';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { describe, expect, test } from 'vitest';
 
 import { type KitInstruction, toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
+import { createMetadataAccountV3Data, KEYS, tokenMetadataInstruction } from '../__fixtures__/instructions';
 import { identifyInstructionType, parseMetaplexTokenMetadataInstruction } from '../lib/metaplex-token-metadata-parser';
 
-const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
-
-// Generated test public keys (byte-filled for readability)
-const KEY_A = new PublicKey(new Uint8Array(32).fill(1));
-const KEY_B = new PublicKey(new Uint8Array(32).fill(2));
-const KEY_C = new PublicKey(new Uint8Array(32).fill(3));
-const KEY_D = new PublicKey(new Uint8Array(32).fill(4));
-const KEY_E = PublicKey.default;
+const [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E] = KEYS;
 
 // Hoisted serializers — construction allocates nested objects, so share across tests
-const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
 const updateMetadataV2Serializer = getUpdateMetadataAccountV2InstructionDataSerializer();
 const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataSerializer();
 
 function makeIx(data: Uint8Array | Buffer, keys: PublicKey[] = []): KitInstruction {
-    return toKitInstruction(
-        new TransactionInstruction({
-            data: Buffer.from(data),
-            keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-            programId: PROGRAM_ID,
-        }),
-    );
+    return toKitInstruction(tokenMetadataInstruction(data, keys));
 }
 
 function assertParsed<T>(val: T | null | undefined): T {
@@ -179,28 +164,10 @@ describe('parseMetaplexTokenMetadataInstruction', () => {
     );
 
     describe('createMetadataAccountV3', () => {
-        function buildData(name: string, symbol: string, uri: string, basisPoints: number, isMutable: boolean) {
-            return Buffer.from(
-                createMetadataV3Serializer.serialize({
-                    collectionDetails: none(),
-                    data: {
-                        collection: none(),
-                        creators: none(),
-                        name,
-                        sellerFeeBasisPoints: basisPoints,
-                        symbol,
-                        uri,
-                        uses: none(),
-                    },
-                    isMutable,
-                }),
-            );
-        }
-
         test('should decode data fields and map account keys', () => {
             // keys: metadata[0], mint[1], mintAuthority[2], payer[3], updateAuthority[4]
             const keys = [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E];
-            const ix = makeIx(buildData('My NFT', 'MNFT', 'https://example.com/nft', 500, true), keys);
+            const ix = makeIx(createMetadataAccountV3Data({ uri: 'https://example.com/nft' }), keys);
             const result = assertParsed(parseMetaplexTokenMetadataInstruction(ix));
 
             expect(result.type).toBe('createMetadataAccountV3');

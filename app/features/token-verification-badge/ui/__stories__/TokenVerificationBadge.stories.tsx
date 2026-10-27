@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import { groupVerificationSources } from '../../model/use-verification-sources';
 import { BaseTokenVerificationBadge } from '../BaseTokenVerificationBadge';
 import {
-    createMockVerificationResult,
     mockAllVerifiedSources,
     mockDangerousTokenSources,
     mockNotVerifiedSources,
@@ -33,30 +33,30 @@ export const Loading: Story = {
 
 export const FullyVerified: Story = {
     args: {
-        verificationResult: createMockVerificationResult(mockAllVerifiedSources()),
+        verificationResult: groupVerificationSources(mockAllVerifiedSources()),
     },
 };
 
 export const PartiallyVerified: Story = {
     args: {
-        verificationResult: createMockVerificationResult(mockPartiallyVerifiedSources()),
+        verificationResult: groupVerificationSources(mockPartiallyVerifiedSources()),
     },
 };
 
 export const NotVerified: Story = {
     args: {
-        verificationResult: createMockVerificationResult(mockNotVerifiedSources()),
+        verificationResult: groupVerificationSources(mockNotVerifiedSources()),
     },
 };
 
 export const RateLimited: Story = {
     args: {
-        verificationResult: createMockVerificationResult(mockRateLimitedSources()),
+        verificationResult: groupVerificationSources(mockRateLimitedSources()),
     },
 };
 
 export const DangerousToken: Story = {
     args: {
-        verificationResult: createMockVerificationResult(mockDangerousTokenSources()),
+        verificationResult: groupVerificationSources(mockDangerousTokenSources()),
     },
 };

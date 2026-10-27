@@ -1,34 +1,13 @@
-import { gen } from '@__fixtures__/gen';
-import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { toInstructionNode } from '@entities/instruction-card';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { withMockTransactions, withTokenInfoBatch, withTxInstructionSurface } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-
+import { ammV3Instruction, ammV3Program, UPDATE_REWARD_INFOS_DISCRIMINATOR } from '../../__fixtures__/anchor-programs';
 import { decodeAnchorInstruction } from '../../lib/decode-anchor-instruction';
 import { AnchorDetailsCard } from '../AnchorDetailsCard';
 
-const url = 'https://api.devnet.solana.com';
-const noopWallet = {
-    publicKey: PublicKey.default,
-    signAllTransactions: async <T,>(txs: T[]) => txs,
-    signTransaction: async <T,>(tx: T) => tx,
-};
-const mockProvider = {
-    connection: { commitment: 'confirmed', rpcEndpoint: url },
-    opts: { preflightCommitment: 'confirmed' },
-    wallet: noopWallet,
-} as unknown as AnchorProvider;
-const anchorProgram = new Program(anchor030Devi as Idl, mockProvider);
-
-const ix = new TransactionInstruction({
-    data: Buffer.from([163, 172, 224, 52, 11, 154, 106, 223]),
-    keys: [{ isSigner: false, isWritable: true, pubkey: gen.publicKey(1) }],
-    programId: anchorProgram.programId,
-});
+const ix = ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR);
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
@@ -44,10 +23,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    decoded: decodeAnchorInstruction(anchorProgram, ix),
+    decoded: decodeAnchorInstruction(ammV3Program, ix),
     ix,
     node: toInstructionNode({ index: 0, ix }),
-    program: anchorProgram,
+    program: ammV3Program,
 };
 
 export const Mobile: Story = {

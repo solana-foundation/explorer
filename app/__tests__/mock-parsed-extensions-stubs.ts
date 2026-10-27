@@ -1,4 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
+import { populatePartialParsedTokenExtension } from '@utils/token-extension';
 
 import { TokenExtension } from '../validators/accounts/token-extension';
 
@@ -20,3 +21,9 @@ export const transferFeeConfig0 = {
         withheldAmount: 500000,
     },
 } as TokenExtension;
+
+export const parsedTransferFeeConfig0 = {
+    extension: transferFeeConfig0.extension,
+    parsed: transferFeeConfig0,
+    ...populatePartialParsedTokenExtension(transferFeeConfig0.extension),
+};

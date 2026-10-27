@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { makeInstruction } from '@__fixtures__/instruction';
+import { bufferAccountData, IDL_DOC, pack } from '@entities/pmp-account/__fixtures__/pmp-account';
 import { PmpDetailsCard } from '@features/decode-instruction-pmp';
 import type { Account, State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
@@ -9,7 +10,6 @@ import {
     DataSource,
     Encoding,
     Format,
-    getBufferEncoder,
     getInitializeInstructionDataEncoder,
     getSetDataInstructionDataEncoder,
     getWriteInstructionDataEncoder,
@@ -27,12 +27,6 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 import { gzip } from 'pako';
 
 const PROGRAM_ID = new PublicKey(PROGRAM_METADATA_PROGRAM_ADDRESS);
-
-const IDL_DOC = JSON.stringify({
-    instructions: [{ name: 'initialize' }],
-    name: 'company_program',
-    version: '1.0.0',
-});
 
 // Account addresses are labelled positionally from the card's static name table, so any keys work here. Seeded
 // so the rendered addresses stay pixel-stable across runs.
@@ -254,16 +248,8 @@ function setDataFromBufferIx({ compression, format }: { compression: Compression
     return ix;
 }
 
-/** The library's own encoder, so the fixture carries the real 96-byte Buffer header. */
 function bufferAccountEntry(content: string, compression: Compression): State['entries'] {
-    const packed = packDirectData({ compression, content, encoding: Encoding.Utf8 });
-    const raw = getBufferEncoder().encode({
-        authority: PROGRAM_METADATA_PROGRAM_ADDRESS,
-        canonical: true,
-        data: packed.data,
-        program: PROGRAM_METADATA_PROGRAM_ADDRESS,
-        seed: 'idl',
-    }) as Uint8Array;
+    const raw = bufferAccountData(pack(content, compression));
 
     const data: Account = {
         data: { raw },

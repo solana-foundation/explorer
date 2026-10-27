@@ -1,15 +1,13 @@
-import { gen } from '@__fixtures__/gen';
 import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
 import { InstructionSurfaceProvider } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
-    getCreateMetadataAccountV3InstructionDataSerializer,
     getUpdateMetadataAccountV2InstructionDataSerializer,
     MPL_TOKEN_METADATA_PROGRAM_ID,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { none, publicKey as umiPublicKey, some } from '@metaplex-foundation/umi';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -18,6 +16,7 @@ import { type CardRow, readCardRows, renderTxCard, renderWithProviders } from '@
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 
+import { createMetadataAccountV3Data, KEYS, tokenMetadataInstruction } from '../../__fixtures__/instructions';
 import { metaplexTokenMetadataInstructionParser } from '../../lib/metaplex-token-metadata-client';
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
 
@@ -26,9 +25,7 @@ vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 const dispatcher = createInstructionParserDispatcher([metaplexTokenMetadataInstructionParser]);
 const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 const PROGRAM_ROW: CardRow = ['Program', PROGRAM_ID.toBase58()];
-const KEYS = Array.from({ length: 20 }, (_, n) => gen.publicKey(n + 1));
 
-const createMetadataV3 = getCreateMetadataAccountV3InstructionDataSerializer();
 const updateMetadataV2 = getUpdateMetadataAccountV2InstructionDataSerializer();
 const createMasterEditionV3 = getCreateMasterEditionV3InstructionDataSerializer();
 
@@ -41,7 +38,7 @@ describe('MetaplexTokenMetadataDetailsCard', () => {
         { render: renderTxCard, surface: 'tx page' },
         { render: renderInspectorCard, surface: 'inspector' },
     ])('should render the Create Metadata Account V3 rows on the $surface surface', async ({ render }) => {
-        render(card(createMetadataAccountV3Data(500), KEYS));
+        render(card(createMetadataAccountV3Data(), KEYS));
 
         await waitFor(() => {
             expect(readCardRows()).toEqual([
@@ -66,7 +63,7 @@ describe('MetaplexTokenMetadataDetailsCard', () => {
         { basisPoints: 250, royalty: '2.50%' },
         { basisPoints: 1234, royalty: '12.34%' },
     ])('should show $basisPoints basis points as a $royalty royalty', async ({ basisPoints, royalty }) => {
-        renderTxCard(card(createMetadataAccountV3Data(basisPoints), KEYS));
+        renderTxCard(card(createMetadataAccountV3Data({ sellerFeeBasisPoints: basisPoints }), KEYS));
 
         await waitFor(() => {
             expect(readCardRows()).toContainEqual(['Royalty', royalty]);
@@ -228,11 +225,7 @@ const PRINT_LABELS = [
 ];
 
 function card(data: Uint8Array | number[], keys: PublicKey[]) {
-    const raw = new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId: PROGRAM_ID,
-    });
+    const raw = tokenMetadataInstruction(data, keys);
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     invariant(dispatched, 'the token metadata program is registered');
 
@@ -243,20 +236,4 @@ function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
         <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{ui}</InstructionSurfaceProvider>,
     );
-}
-
-function createMetadataAccountV3Data(sellerFeeBasisPoints: number) {
-    return createMetadataV3.serialize({
-        collectionDetails: none(),
-        data: {
-            collection: none(),
-            creators: none(),
-            name: 'My NFT',
-            sellerFeeBasisPoints,
-            symbol: 'MNFT',
-            uri: 'https://example.com/nft.json',
-            uses: none(),
-        },
-        isMutable: true,
-    });
 }

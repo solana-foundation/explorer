@@ -1,6 +1,5 @@
 import { EVerificationSource, VerificationSource } from '../../lib/types';
 import { ERiskLevel } from '../../model/use-rugcheck';
-import { TokenVerificationResult } from '../../model/use-verification-sources';
 
 const MOCK_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
@@ -83,17 +82,3 @@ export const mockDangerousTokenSources = (): VerificationSource[] => [
     mockSolflareSource({ isVerificationFound: false, verified: false }),
     mockRugCheckSource({ level: ERiskLevel.Danger, score: 85, verified: false }),
 ];
-
-// Helper to create TokenVerificationResult
-export const createMockVerificationResult = (sources: VerificationSource[]): TokenVerificationResult => {
-    const rateLimitedSources = sources.filter(s => s.isRateLimited);
-    const sourcesToApply = sources.filter(s => !s.verified && !s.isVerificationFound && !s.isRateLimited);
-    const verificationFoundSources = sources.filter(s => s.isVerificationFound);
-
-    return {
-        rateLimitedSources,
-        sources,
-        sourcesToApply,
-        verificationFoundSources,
-    };
-};

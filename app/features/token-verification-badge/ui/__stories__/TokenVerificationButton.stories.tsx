@@ -1,31 +1,13 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
-import { EVerificationSource, type VerificationSource } from '../../lib/types';
 import { ERiskLevel } from '../../model/use-rugcheck';
 import { TokenVerificationButton } from '../TokenVerificationButton';
+import { mockJupiterSource, mockRugCheckSource } from './mock-verification-data';
 
-const jupiterVerified: VerificationSource = {
-    name: EVerificationSource.Jupiter,
-    url: 'https://jup.ag',
-    verified: true,
-};
-
-const rugcheckGood: VerificationSource = {
-    level: ERiskLevel.Good,
-    name: EVerificationSource.RugCheck,
-    score: 90,
-    url: 'https://rugcheck.xyz',
-    verified: true,
-};
-
-const rugcheckWarning: VerificationSource = {
-    level: ERiskLevel.Warning,
-    name: EVerificationSource.RugCheck,
-    score: 55,
-    url: 'https://rugcheck.xyz',
-    verified: true,
-};
+const jupiterVerified = mockJupiterSource();
+const rugcheckGood = mockRugCheckSource({ level: ERiskLevel.Good, score: 90 });
+const rugcheckWarning = mockRugCheckSource({ level: ERiskLevel.Warning, score: 55 });
 
 const meta: Meta<typeof TokenVerificationButton> = {
     args: { isOpen: false, onClick: fn() },
