@@ -64,6 +64,13 @@ describe('[idl] convert-legacy-idl', () => {
                 const result = getIdlSpecType(idl);
                 expect(result).toBe('unknown-spec');
             });
+
+            it.each([
+                ['an object', {}],
+                ['a number', 1],
+            ])('should return "legacy" when metadata.spec is %s', (_label, spec) => {
+                expect(getIdlSpecType({ metadata: { spec } })).toBe('legacy');
+            });
         });
 
         describe('edge cases', () => {

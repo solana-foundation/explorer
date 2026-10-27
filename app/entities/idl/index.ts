@@ -27,8 +27,21 @@ export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/conv
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
 export { useFormatAnchorIdl } from './model/anchor/use-format-anchor-idl';
 export { useAnchorProgram } from './model/anchor/use-anchor-program';
-export { getProvider } from './model/anchor/anchor-provider';
+export { buildAnchorProgram } from './model/anchor/build-anchor-program';
+export { convertAnchorToCodama } from './model/converters/convert-anchor-to-codama';
 export { useProgramIdls, type ProgramIdls } from './model/use-program-idls';
+export type { CustomIdlRecord } from './model/custom-idl/types';
+export type { IdlSource } from './model/sourced-idl';
+export { customIdlStoreAtom, removeCustomIdlAtom } from './model/custom-idl/custom-idl-store';
+export { CustomIdlForm } from './ui/CustomIdlForm';
+export {
+    CUSTOM_IDL_PRIVACY_NOTE,
+    CUSTOM_IDL_SAVE_FAILED_MESSAGE,
+    CUSTOM_IDL_STORAGE_UNAVAILABLE_MESSAGE,
+} from './ui/custom-idl-messages';
+export { AddCustomIdlButton } from './ui/AddCustomIdlButton';
+export { IDL_SOURCE_LABELS } from './ui/BaseIdlSourceSelect';
+export { ProgramIdlSelector } from './ui/ProgramIdlSelector';
 export { getAnchorAccountIdls, getAnchorIdls, getAnchorIdlsWithAccounts } from './model/sourced-idl';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType } from './model/converters/convert-legacy-idl';

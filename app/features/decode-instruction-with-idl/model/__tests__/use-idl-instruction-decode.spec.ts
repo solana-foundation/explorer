@@ -11,7 +11,7 @@ import { useIdlInstructionDecode } from '../use-idl-instruction-decode';
 // Mock the resolution boundary and the decode helper, so the test covers only the hook's IDL choice,
 // argument forwarding and gating. The SWR and decode code have their own specs. The panic→Unknown degrade
 // belongs to `safeDecodeInstructionWithIdl` and is tested with the lib.
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const safeDecodeInstructionWithIdl = vi.fn();
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
@@ -33,6 +33,7 @@ describe('useIdlInstructionDecode', () => {
         safeDecodeInstructionWithIdl.mockReset();
         useProgramIdls.mockClear();
         idlState.idls = [];
+        idlState.onChainIdls = [];
     });
 
     it('should decode with the PMP IDL over the IDL from the Anchor IDL account', () => {
@@ -53,6 +54,17 @@ describe('useIdlInstructionDecode', () => {
 
         expect(safeDecodeInstructionWithIdl).toHaveBeenCalledWith(raw, anchorIdl, 'http://localhost');
         expect(result.current).toEqual({ kind: 'anchor' });
+    });
+
+    it('should decode with the selected custom IDL over the PMP IDL', () => {
+        const customIdl = { kind: 'custom' } as unknown as AnchorIdl;
+        idlState.idls = [{ idl: customIdl, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' }];
+        idlState.onChainIdls = [PMP];
+        safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'anchor' });
+
+        renderHook(() => useIdlInstructionDecode({ programId, raw }));
+
+        expect(safeDecodeInstructionWithIdl).toHaveBeenCalledWith(raw, customIdl, 'http://localhost');
     });
 
     it('should read the IDLs of the instruction program', () => {

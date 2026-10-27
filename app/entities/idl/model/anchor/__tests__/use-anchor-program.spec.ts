@@ -19,7 +19,7 @@ import { type ProgramIdls } from '../../use-program-idls';
 import { getProvider } from '../anchor-provider';
 import { useAnchorProgram } from '../use-anchor-program';
 
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 
 // Create a mock provider that matches Anchor's expected structure
 const createMockProvider = (mockUrl: string, mockProgramAddress: string) => ({

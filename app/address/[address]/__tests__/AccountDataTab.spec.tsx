@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AccountDataTab } from '../AccountDataTab';
 
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'mainnet-beta', url: 'http://localhost' }) }));
@@ -97,6 +97,14 @@ describe('AccountDataTab', () => {
         ];
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
+    });
+
+    it('should show the Anchor Data tab when the selected custom IDL declares account types', () => {
+        idlState.idls = [
+            { idl: ANCHOR_WITH_ACCOUNTS, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' },
+        ];
+        renderTab();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
     });
 
     it('should hide the tab when the only IDL is Codama', () => {

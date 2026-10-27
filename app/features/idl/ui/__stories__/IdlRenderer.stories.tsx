@@ -1,4 +1,4 @@
-import type { AnchorIdl, CodamaIdl } from '@entities/idl';
+import { type AnchorIdl, type CodamaIdl, IdlVariant } from '@entities/idl';
 import codamaIdlMock from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { PublicKey } from '@solana/web3.js';
 import { nextjsParameters } from '@storybook-config/decorators';
@@ -67,6 +67,7 @@ export const AnchorFormatted: Story = {
         programId: PROGRAM_ID,
         raw: false,
         searchStr: '',
+        source: IdlVariant.Anchor,
     },
 };
 
@@ -77,6 +78,7 @@ export const CodamaFormatted: Story = {
         programId: PROGRAM_ID,
         raw: false,
         searchStr: '',
+        source: IdlVariant.ProgramMetadata,
     },
 };
 
@@ -87,6 +89,7 @@ export const RawJson: Story = {
         programId: PROGRAM_ID,
         raw: true,
         searchStr: '',
+        source: IdlVariant.Anchor,
     },
 };
 

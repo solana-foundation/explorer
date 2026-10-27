@@ -16,3 +16,4 @@ export type AnchorIdl = Idl;
 export type SupportedIdl = CodamaIdl | AnchorIdl;
 /** The IDL standard name. */
 export type IdlStandard = 'Anchor' | 'Codama';
+export type TaggedIdl = { standard: 'Anchor'; idl: AnchorIdl } | { standard: 'Codama'; idl: CodamaIdl };

@@ -1,7 +1,13 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
-import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
 import { Idl, Program } from '@coral-xyz/anchor';
-import { formatSerdeIdl, getFormattedIdl, getIdlDeclaredAddress, getProvider } from '@entities/idl';
+import {
+    type AnchorIdl,
+    buildAnchorProgram,
+    convertAnchorToCodama,
+    getIdlDeclaredAddress,
+    isIdlProgramIdMismatch,
+    type SupportedIdl,
+} from '@entities/idl';
 import { TransactionInstruction } from '@solana/web3.js';
 import { type RootNode } from 'codama';
 
@@ -30,9 +36,9 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
 
     // A resolved IDL whose declared program differs from the instruction's is a wiring bug (wrong IDL
     // routed to this instruction) — fail loud rather than mis-decode against the wrong interface.
-    const declared = getIdlDeclaredAddress(idl);
-    const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
-    if (declared.kind === 'malformed' || (declaredProgram && declaredProgram !== kitIx.programAddress)) {
+    if (isIdlProgramIdMismatch(idl as SupportedIdl, kitIx.programAddress)) {
+        const declared = getIdlDeclaredAddress(idl);
+        const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
         const error = new Error(
             `[decode-instruction-with-idl] IDL program ${declaredProgram ?? '(malformed)'} does not match instruction program ${kitIx.programAddress}`,
         );
@@ -62,24 +68,16 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
     // Anchor IDLs, but the flat Codama card would drop those features — so keep it only as a last resort,
     // for IDLs the Anchor Program constructor rejects.
     try {
-        const program = new Program(
-            getFormattedIdl(formatSerdeIdl, idl, kitIx.programAddress),
-            getProvider(url),
-        ) as Program<Idl>;
+        const program = buildAnchorProgram(idl as AnchorIdl, kitIx.programAddress, url);
         return { details: decodeAnchorInstruction(program, ix), kind: 'anchor', program };
     } catch (error) {
         Logger.debug('[decode-instruction-with-idl] Anchor Program build failed; trying codama', { error });
     }
 
     // Last resort: convert the Anchor IDL to a Codama root node.
-    try {
-        const parsedIx = tryCodama(
-            rootNodeFromAnchor(idl as Parameters<typeof rootNodeFromAnchor>[0]) as unknown as RootNode,
-        );
-        if (parsedIx) return { kind: 'codama', parsedIx };
-    } catch {
-        // ignore — nothing could decode it
-    }
+    const converted = convertAnchorToCodama(idl as AnchorIdl);
+    const parsedIx = converted && tryCodama(converted);
+    if (parsedIx) return { kind: 'codama', parsedIx };
 
     return { kind: 'unknown' };
 }

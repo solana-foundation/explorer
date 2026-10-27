@@ -1,6 +1,7 @@
 'use client';
 
 import { shouldUseDirectRpc } from '@entities/cluster/@x/idl';
+import { useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
@@ -8,16 +9,22 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
-import { getOnChainIdls, type SourcedIdl } from './sourced-idl';
+import { customIdlStoreAtom } from './custom-idl/custom-idl-store';
+import { type CustomIdlRecord } from './custom-idl/types';
+import { getOnChainIdls, getSelectedIdls, isCustomIdlSelected, type OnChainIdl, type SourcedIdl } from './sourced-idl';
 
 export type ProgramIdls = {
-    /** `undefined` while the on-chain IDLs load. */
+    /** `undefined` while the store or the selected IDLs load. */
     idls: readonly SourcedIdl[] | undefined;
+    /** `undefined` while the on-chain IDLs load. */
+    onChainIdls: readonly OnChainIdl[] | undefined;
+    customIdl: { status: 'loading' } | { status: 'ready'; record: CustomIdlRecord | undefined } | { status: 'failed' };
 };
 
 /**
- * Resolves both IDLs a program exposes (PMP `idl` seed, Anchor PDA). `idls` holds them in PMP-first
- * order. The callers share one cached resolution per program and cluster.
+ * Resolves both IDLs a program exposes (PMP `idl` seed, Anchor PDA). `idls` holds the custom IDL alone
+ * when it is selected, otherwise the on-chain IDLs in PMP-first order. The callers share one cached
+ * resolution per program and cluster.
  *
  * Known public clusters use a single server route (`/api/idl-latest`) backed by `@solana/idl`, which
  * surfaces native-program IDLs via the fndn fallback authority. Custom / localhost clusters can't use
@@ -56,13 +63,26 @@ export function useProgramIdls(
         { errorRetryCount: 3, suspense },
     );
 
-    const onChainIdls = isCustom ? customIdls : serverIdls;
+    const onChainPair = isCustom ? customIdls : serverIdls;
     const isOnChainLoading = isCustom ? customLoading : serverLoading;
 
-    const idls = useMemo(() => {
+    const onChainIdls = useMemo(() => {
         if (isOnChainLoading) return undefined;
-        return onChainIdls ? getOnChainIdls(onChainIdls) : [];
-    }, [isOnChainLoading, onChainIdls]);
+        return onChainPair ? getOnChainIdls(onChainPair) : [];
+    }, [isOnChainLoading, onChainPair]);
 
-    return { idls };
+    const store = useAtomValue(customIdlStoreAtom);
+    const customIdl = useMemo<ProgramIdls['customIdl']>(() => {
+        if (store.status === 'loading') return { status: 'loading' };
+        if (store.status === 'ready') return { record: store.records.get(programId), status: 'ready' };
+        return { status: 'failed' };
+    }, [store, programId]);
+    const idls = useMemo(() => {
+        if (customIdl.status === 'loading') return undefined;
+        const record = customIdl.status === 'ready' ? customIdl.record : undefined;
+        if (!isCustomIdlSelected(record) && !onChainIdls) return undefined;
+        return getSelectedIdls(onChainIdls ?? [], record);
+    }, [customIdl, onChainIdls]);
+
+    return { customIdl, idls, onChainIdls };
 }
