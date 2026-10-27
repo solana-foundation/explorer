@@ -8,6 +8,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
+import { Timestamp } from '@components/shared/ui/timestamp';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { formatTransactionVersion } from '@entities/transaction-data';
 import {
@@ -29,7 +30,6 @@ import {
 import type { TransactionVersion } from '@solana/kit';
 import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
-import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
@@ -266,13 +266,13 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             },
         costUnits !== undefined && {
             label: 'Transaction cost',
-            value: <TextValue>{costUnits.toLocaleString('en-US')}</TextValue>,
+            value: <TextValue mono={false}>{costUnits.toLocaleString('en-US')}</TextValue>,
         },
         computeUnitsConsumed !== undefined &&
             reservedCUs !== undefined && {
                 label: 'CUs Consumed / Limit',
                 value: (
-                    <TextValue>
+                    <TextValue mono={false}>
                         {computeUnitsConsumed.toLocaleString('en-US')} / {reservedCUs.toLocaleString('en-US')}
                     </TextValue>
                 ),
@@ -280,7 +280,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         computeUnitsConsumed !== undefined &&
             reservedCUs === undefined && {
                 label: 'CUs Consumed',
-                value: <TextValue>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>,
+                value: <TextValue mono={false}>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>,
             },
         transactionConfig?.priorityFeeLamports !== undefined && {
             label: (
@@ -301,7 +301,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         version !== undefined && {
             label: 'Transaction Version',
             value: formatTransactionVersion(version),
-            valueClassName: 'font-mono uppercase',
+            valueClassName: 'uppercase',
         },
         serializedSize !== undefined && {
             label: (
@@ -314,20 +314,16 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     {serializedSize.toLocaleString('en-US')} bytes
                     {/* No over-limit styling here, unlike the inspector: a transaction that landed is
                         necessarily within the limit. The cap is context for headroom. */}
-                    <span className="text-xs text-outer-space-300">
+                    <span className="text-outer-space-300">
                         Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
                     </span>
                 </>
             ),
-            valueClassName: 'flex-wrap items-baseline gap-x-2 font-mono',
+            valueClassName: 'flex-wrap items-baseline gap-x-2',
         },
         blockTime !== undefined && {
-            label: 'Timestamp (Local)',
-            value: <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>,
-        },
-        blockTime !== undefined && {
-            label: 'Timestamp (UTC)',
-            value: <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>,
+            label: 'Timestamp',
+            value: <Timestamp unixTimestamp={blockTime} />,
         },
         blockTime === undefined &&
             transactionFetchesSucceeded && {
