@@ -964,7 +964,6 @@ export default tseslint.config(
             'app/components/common/InspectorInstructionCard.tsx',
             'app/components/inspector/InstructionsSection.tsx',
             'app/components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard.tsx',
-            'app/components/instruction/token/TokenDetailsCard.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/index.tsx',

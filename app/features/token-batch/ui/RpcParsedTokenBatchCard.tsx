@@ -3,8 +3,8 @@
 // a ParsedInstruction (type "batch") instead of a PartiallyDecodedInstruction
 // with raw bytes. All parsing lives in lib/rpc-parsed-batch; this stays presentational.
 
-import type { ParsedInstruction, SignatureResult } from '@solana/web3.js';
-import type { ReactNode } from 'react';
+import { toInstructionNode } from '@entities/instruction-card';
+import type { ParsedInstruction } from '@solana/web3.js';
 
 import { decodeRpcBatchInstructions } from '../lib/rpc-parsed-batch';
 import { BatchInstructionCard } from './BatchInstructionCard';
@@ -13,20 +13,19 @@ import { SubInstructionRowView } from './SubInstructionRow';
 export function RpcParsedTokenBatchCard({
     ix,
     index,
-    result,
     innerCards,
     childIndex,
 }: {
     ix: ParsedInstruction;
     index: number;
-    result: SignatureResult;
-    innerCards?: ReactNode[];
+    innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
+    const node = toInstructionNode({ childIndex, index, innerCards, ix });
     const instructions = decodeRpcBatchInstructions(ix);
 
     return (
-        <BatchInstructionCard {...{ childIndex, index, innerCards, ix, result }} count={instructions.length}>
+        <BatchInstructionCard node={node} count={instructions.length}>
             {instructions.length === 0 ? (
                 <div className="text-sm text-neutral-500" data-testid="batch-empty">
                     No sub-instructions found

@@ -1,5 +1,19 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { array, boolean, create, enums, Infer, nullable, number, optional, string, type, union } from 'superstruct';
+import {
+    array,
+    bigint,
+    boolean,
+    coerce,
+    create,
+    enums,
+    Infer,
+    nullable,
+    number,
+    optional,
+    string,
+    type,
+    union,
+} from 'superstruct';
 
 export type TokenAmountUi = Infer<typeof TokenAmountUi>;
 export const TokenAmountUi = type({
@@ -234,15 +248,15 @@ const CreateNativeMint = type({
 
 export type InitializeMetadataPointerInfo = Infer<typeof InitializeMetadataPointer>;
 const InitializeMetadataPointer = type({
-    authority: PublicKeyFromString,
-    metadataAddress: PublicKeyFromString,
+    authority: optional(PublicKeyFromString),
+    metadataAddress: optional(PublicKeyFromString),
     mint: PublicKeyFromString,
 });
 
 export type InitializeGroupMemberPointerInfo = Infer<typeof InitializeGroupMemberPointer>;
 const InitializeGroupMemberPointer = type({
-    authority: PublicKeyFromString,
-    memberAddress: PublicKeyFromString,
+    authority: optional(PublicKeyFromString),
+    memberAddress: optional(PublicKeyFromString),
     mint: PublicKeyFromString,
 });
 
@@ -285,14 +299,14 @@ const RemoveTokenMetadataKey = type({
 export type UpdateTokenMetadataUpdateAuthorityInfo = Infer<typeof UpdateTokenMetadataUpdateAuthority>;
 const UpdateTokenMetadataUpdateAuthority = type({
     metadata: PublicKeyFromString,
-    newUpdateAuthority: PublicKeyFromString,
+    newUpdateAuthority: optional(PublicKeyFromString),
     updateAuthority: PublicKeyFromString,
 });
 
 export type UpdateTokenMetadataAuthorityInfo = Infer<typeof UpdateTokenMetadataAuthority>;
 const UpdateTokenMetadataAuthority = type({
     metadata: PublicKeyFromString,
-    newAuthority: PublicKeyFromString,
+    newAuthority: nullable(PublicKeyFromString),
     updateAuthority: PublicKeyFromString,
 });
 
@@ -312,8 +326,8 @@ const UpdateMetadataPointer = type({
 
 export type InitializeGroupPointerInfo = Infer<typeof InitializeGroupPointer>;
 const InitializeGroupPointer = type({
-    authority: PublicKeyFromString,
-    groupAddress: PublicKeyFromString,
+    authority: optional(PublicKeyFromString),
+    groupAddress: optional(PublicKeyFromString),
     mint: PublicKeyFromString,
 });
 
@@ -331,26 +345,29 @@ const UpdateGroupMemberPointer = type({
     mint: PublicKeyFromString,
 });
 
+// The byte path decodes a u64 as a bigint, and the RPC sends a JSON number.
+const U64 = coerce(union([number(), string()]), bigint(), value => value.toString());
+
 export type InitializeTokenGroupInfo = Infer<typeof InitializeTokenGroup>;
 const InitializeTokenGroup = type({
     group: PublicKeyFromString,
-    maxSize: number(),
+    maxSize: U64,
     mint: PublicKeyFromString,
     mintAuthority: PublicKeyFromString,
-    updateAuthority: PublicKeyFromString,
+    updateAuthority: optional(nullable(PublicKeyFromString)),
 });
 
 export type UpdateTokenGroupMaxSizeInfo = Infer<typeof UpdateTokenGroupMaxSize>;
 const UpdateTokenGroupMaxSize = type({
     group: PublicKeyFromString,
-    maxSize: number(),
+    maxSize: U64,
     updateAuthority: PublicKeyFromString,
 });
 
 export type UpdateTokenGroupUpdateAuthorityInfo = Infer<typeof UpdateTokenGroupUpdateAuthority>;
 const UpdateTokenGroupUpdateAuthority = type({
     group: PublicKeyFromString,
-    newUpdateAuthority: PublicKeyFromString,
+    newUpdateAuthority: optional(PublicKeyFromString),
     updateAuthority: PublicKeyFromString,
 });
 

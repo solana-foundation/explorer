@@ -99,7 +99,7 @@ export function BaseInstructionCard({
                 </div>
             }
         >
-            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
+            <BaseTable ui="dashkit" variant="card" nowrap className={TABLE_CLASS}>
                 <BaseTable.Body>
                     {showRaw ? (
                         <>
@@ -153,6 +153,14 @@ export function BaseInstructionCard({
         </CollapsibleCard>
     );
 }
+
+// Names and values wrap, so a long name or string does not widen the card past its frame.
+// A full-width cell holds nested cards, so the rules skip it and nested names do not inherit `overflow-wrap`.
+const TABLE_CLASS = cn(
+    '[&>tbody>tr:first-child>td]:!border-t-0',
+    '[&_td:first-child:not(:last-child)]:whitespace-normal',
+    '[&_td:last-child:not(:first-child)]:whitespace-normal [&_td:last-child:not(:first-child)]:[overflow-wrap:anywhere]',
+);
 
 function ixResult(result: SignatureResult, index: number) {
     if (result.err) {
