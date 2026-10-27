@@ -28,7 +28,7 @@ export function anchorAccountRows(data: unknown): KeyValueRow[] {
     return argsToRows(parseCodamaArgs(toPlainValue(data)));
 }
 
-function toPlainValue(value: unknown): unknown {
+export function toPlainValue(value: unknown): unknown {
     if (value === null || value === undefined) return value;
     if (value instanceof PublicKey) return value.toBase58();
     if (BN.isBN(value)) return BigInt(value.toString());

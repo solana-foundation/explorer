@@ -136,7 +136,7 @@ describe('AnchorAccountCard', () => {
         // which is what proves AnchorAccountCard delegated instead of reporting "No Anchor IDL found".
         expect(screen.queryByText('No Anchor IDL found')).not.toBeInTheDocument();
         expect(
-            screen.getByText('Failed to decode account data according to the public Anchor interface'),
+            screen.getByText('Failed to decode account data according to the program interface'),
         ).toBeInTheDocument();
     });
 
