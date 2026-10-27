@@ -36,5 +36,5 @@ export {
     getCodamaIdls,
     getCodamaIdlsWithAccounts,
 } from './model/sourced-idl';
-export { useFormatCodamaIdl } from './model/use-format-codama-idl';
+export { parseTypeNodeFieldType, useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType, type IdlSpec } from './model/idl-spec';
