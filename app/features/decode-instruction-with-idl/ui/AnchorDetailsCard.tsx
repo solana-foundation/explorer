@@ -1,14 +1,13 @@
 import { Idl, Program } from '@coral-xyz/anchor';
 import {
-    DECODED_TABLE_COLUMNS,
     DecodedInstructionCard,
     InstructionCardView,
+    InstructionFieldRows,
     ProgramField,
     type RawInstructionNode,
+    text,
 } from '@entities/instruction-card';
 import { anchorInstructionArgs } from '@utils/anchor';
-
-import { BaseTable } from '@/app/shared/ui/Table';
 
 import { anchorAccountNames } from '../lib/anchor-account-names';
 import { type AnchorInstructionDecoded } from '../lib/decode-anchor-instruction';
@@ -42,16 +41,10 @@ export function AnchorDetailsCard({
     if (!ixAccounts || !decodedIxData || !ixDef) {
         return (
             <InstructionCardView node={node} title={decoded.cardTitle} events={events}>
-                <ProgramField
-                    programId={node.programId}
-                    name={decoded.programName}
-                    colSpan={DECODED_TABLE_COLUMNS - 1}
+                <ProgramField programId={node.programId} name={decoded.programName} />
+                <InstructionFieldRows
+                    fields={[text('Error', 'Failed to decode account data according to the public Anchor interface')]}
                 />
-                <BaseTable.Row>
-                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS} className="lg:text-center">
-                        Failed to decode account data according to the public Anchor interface
-                    </BaseTable.Cell>
-                </BaseTable.Row>
             </InstructionCardView>
         );
     }

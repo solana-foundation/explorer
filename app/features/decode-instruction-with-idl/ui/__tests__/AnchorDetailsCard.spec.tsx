@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { readCell } from '@/app/__tests__/card-harness';
 import { inspectorSurface } from '@/app/components/inspector/inspector-surface';
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -77,9 +78,7 @@ describe('AnchorDetailsCard', () => {
         surface => {
             renderCard(makeIx([0, 0, 0, 0, 0, 0, 0, 0]), { surface });
 
-            expect(
-                screen.getByText('Failed to decode account data according to the public Anchor interface'),
-            ).toBeInTheDocument();
+            expect(readCell('Error')).toBe('Failed to decode account data according to the public Anchor interface');
             expect(screen.getAllByText('Program')).toHaveLength(1);
             expectProgramLink();
         },
