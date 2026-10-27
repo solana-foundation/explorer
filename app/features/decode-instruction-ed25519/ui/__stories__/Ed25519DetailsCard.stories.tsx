@@ -47,12 +47,12 @@ const withFailedInstructionSurface: Decorator = Story => (
     </TxInstructionSurface>
 );
 
-const meta: Meta<typeof Ed25519DetailsCard> = {
+const meta = {
     component: Ed25519DetailsCard,
     decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard',
-};
+} satisfies Meta<typeof Ed25519DetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

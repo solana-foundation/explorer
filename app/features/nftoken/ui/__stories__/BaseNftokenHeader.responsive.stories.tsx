@@ -1,9 +1,8 @@
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import solanaHero from '@/app/components/shared/ui/image/__stories__/solana_hero_generated.jpg';
-
 import { BaseNftokenHeader } from '../BaseNftokenHeader';
+import * as Base from './BaseNftokenHeader.stories';
 
 const meta = {
     component: BaseNftokenHeader,
@@ -15,11 +14,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    kind: 'nft',
-    metadata: { kind: 'loaded', metadata: { image: solanaHero.src, name: 'Genesis: friends.glow' } },
-    mutable: true,
-} as const;
+const args = Base.NftMutable.args;
 
 export const Mobile: Story = {
     args,

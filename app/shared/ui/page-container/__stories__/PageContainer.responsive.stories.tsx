@@ -2,6 +2,7 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { PageContainer } from '../PageContainer';
+import * as Base from './PageContainer.stories';
 
 const meta: Meta<typeof PageContainer> = {
     component: PageContainer,
@@ -13,13 +14,7 @@ const meta: Meta<typeof PageContainer> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const render = () => (
-    <PageContainer>
-        <div className="rounded-md border border-solid border-neutral-700 bg-neutral-900 px-4 py-6 text-neutral-200">
-            Page container at current viewport
-        </div>
-    </PageContainer>
-);
+const { render } = Base.Default;
 
 export const Mobile: Story = {
     globals: { viewport: { value: 'iphonex' } },

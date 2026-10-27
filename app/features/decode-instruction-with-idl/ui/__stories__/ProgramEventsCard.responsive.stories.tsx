@@ -1,9 +1,8 @@
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { sampleEvent, sampleProgram } from '../../__fixtures__/anchor-programs';
-import { decodeProgramEvents } from '../../lib/decode-program-events';
 import { ProgramEventsCard } from '../ProgramEventsCard';
+import * as Base from './ProgramEventsCard.stories';
 
 const meta: Meta<typeof ProgramEventsCard> = {
     component: ProgramEventsCard,
@@ -15,11 +14,7 @@ const meta: Meta<typeof ProgramEventsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    entries: decodeProgramEvents([sampleEvent], sampleProgram),
-    instructionIndex: 0,
-    program: sampleProgram,
-};
+const args = Base.WithDecodedEvent.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

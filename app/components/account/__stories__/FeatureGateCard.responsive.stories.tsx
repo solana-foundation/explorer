@@ -2,6 +2,7 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureGateCard } from '../FeatureGateCard';
+import * as Base from './FeatureGateCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta<typeof FeatureGateCard> = {
@@ -14,12 +15,7 @@ const meta: Meta<typeof FeatureGateCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const render = () => (
-    <FeatureGateCard>
-        This feature gate controls the activation of cluster-level functionality. Activate it to enable the new
-        behaviour cluster-wide.
-    </FeatureGateCard>
-);
+const { render } = Base.Default;
 
 export const Mobile: Story = {
     globals: { viewport: { value: 'iphonex' } },

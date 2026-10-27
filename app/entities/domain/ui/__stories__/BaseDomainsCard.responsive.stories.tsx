@@ -1,12 +1,12 @@
-import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseDomainsCard } from '../BaseDomainsCard';
+import * as Base from './BaseDomainsCard.stories';
 
 const meta: Meta<typeof BaseDomainsCard> = {
     component: BaseDomainsCard,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch, withViewportFromGlobal],
+    decorators: [...Base.default.decorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Entities/Domain/BaseDomainsCard@Media',
 };
@@ -14,12 +14,7 @@ const meta: Meta<typeof BaseDomainsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    domains: [
-        { address: '5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo', name: 'example.sns' },
-        { address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', name: 'bob.sns' },
-    ],
-};
+const args = Base.MultipleDomains.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

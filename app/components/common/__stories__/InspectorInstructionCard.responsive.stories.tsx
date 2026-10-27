@@ -1,45 +1,13 @@
-import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
+import { withClusterAndAccounts, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
-import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-
-import { BaseTable } from '@/app/shared/ui/Table';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { InspectorInstructionCard } from '../InspectorInstructionCard';
-
-const withInspectorProviders: Decorator = Story => (
-    <MockClusterProvider>
-        <MockAccountsProvider>
-            <MockTokenInfoBatchProvider>
-                <ScrollAnchorProvider>
-                    <Story />
-                </ScrollAnchorProvider>
-            </MockTokenInfoBatchProvider>
-        </MockAccountsProvider>
-    </MockClusterProvider>
-);
-
-const programId = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-
-const parsedIx: ParsedInstruction = {
-    parsed: {
-        info: {
-            destination: '8Vw25ZackDzaJzzBBqcgcpDsCsDfRSkMGgwFQ3gbReWF',
-            lamports: 1_000_000_000,
-            source: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-        },
-        type: 'transfer',
-    },
-    program: 'system',
-    programId,
-} as any;
+import * as Base from './InspectorInstructionCard.stories';
 
 const meta: Meta<typeof InspectorInstructionCard> = {
     component: InspectorInstructionCard,
-    decorators: [withInspectorProviders, withViewportFromGlobal],
+    decorators: [withScrollAnchor, withTokenInfoBatch, withClusterAndAccounts, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Common/InspectorInstructionCard@Media',
 };
@@ -47,17 +15,7 @@ const meta: Meta<typeof InspectorInstructionCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    children: (
-        <BaseTable.Row>
-            <BaseTable.Cell>Decoded instruction details</BaseTable.Cell>
-        </BaseTable.Row>
-    ),
-    index: 0,
-    ix: parsedIx,
-    result: { err: null },
-    title: 'System Transfer',
-};
+const args = Base.Success.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

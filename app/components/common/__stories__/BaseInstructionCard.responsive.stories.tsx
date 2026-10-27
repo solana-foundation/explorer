@@ -1,17 +1,9 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { withCluster, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { BaseTable } from '@/app/shared/ui/Table';
-
 import { BaseInstructionCard } from '../BaseInstructionCard';
-
-const sampleIx = new TransactionInstruction({
-    data: Buffer.from([1, 2, 3, 4]),
-    keys: [{ isSigner: true, isWritable: true, pubkey: new PublicKey('11111111111111111111111111111111') }],
-    programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-});
+import * as Base from './BaseInstructionCard.stories';
 
 const meta: Meta<typeof BaseInstructionCard> = {
     component: BaseInstructionCard,
@@ -23,17 +15,7 @@ const meta: Meta<typeof BaseInstructionCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    children: (
-        <BaseTable.Row>
-            <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
-        </BaseTable.Row>
-    ),
-    index: 0,
-    ix: sampleIx,
-    result: { err: null },
-    title: 'Token Transfer',
-};
+const args = Base.Success.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

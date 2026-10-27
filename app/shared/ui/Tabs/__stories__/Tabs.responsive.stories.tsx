@@ -1,8 +1,7 @@
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import React, { useState } from 'react';
 
-import { TabsContent, TabsList, TabsTrigger } from '../Tabs';
+import * as Base from './Tabs.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta = {
@@ -14,35 +13,7 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const TABS = [
-    { content: 'Mobile overview content.', id: 'overview', label: 'Overview' },
-    { content: 'Accounts list.', id: 'accounts', label: 'Accounts' },
-    { content: 'Program logs.', id: 'logs', label: 'Logs' },
-];
-
-function ControlledTabs() {
-    const [active, setActive] = useState('overview');
-    return (
-        <div>
-            <TabsList>
-                {TABS.map(tab => (
-                    <TabsTrigger key={tab.id} active={active === tab.id} onClick={() => setActive(tab.id)}>
-                        {tab.label}
-                    </TabsTrigger>
-                ))}
-            </TabsList>
-            <div className="pt-4">
-                {TABS.map(tab => (
-                    <TabsContent key={tab.id} active={active === tab.id}>
-                        {tab.content}
-                    </TabsContent>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-const render = () => <ControlledTabs />;
+const { render } = Base.Default;
 
 export const Mobile: Story = {
     globals: { viewport: { value: 'iphonex' } },

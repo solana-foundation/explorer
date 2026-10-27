@@ -1,21 +1,14 @@
-import { DEFAULT_SLOT } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
-import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
-
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
+import * as Base from './ProgramMultisigCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-// Devnet short-circuits useSquadsMultisigLookup so Suspense resolves without RPC calls.
 const meta = {
     component: ProgramMultisigCard,
-    decorators: [withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...createNextjsParameters({ query: { cluster: 'devnet' } }),
-    },
+    decorators: [withViewportFromGlobal, ...Base.default.decorators],
+    parameters: Base.default.parameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/ProgramMultisigCard@Media',
 } satisfies Meta<typeof ProgramMultisigCard>;
@@ -23,20 +16,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    data: {
-        parsed: {
-            info: { programData: PublicKey.default },
-            type: 'program',
-        },
-        program: 'bpf-upgradeable-loader',
-        programData: {
-            authority: PublicKey.default,
-            data: ['', 'base64'],
-            slot: DEFAULT_SLOT,
-        },
-    } satisfies UpgradeableLoaderAccountData,
-};
+const args = Base.Default.args;
 
 export const Mobile: Story = {
     args,

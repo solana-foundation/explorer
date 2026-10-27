@@ -44,12 +44,12 @@ const assertAccountInfoIx = {
     programId: new PublicKey(LIGHTHOUSE_ADDRESS),
 } as unknown as TransactionInstruction;
 
-const meta: Meta<typeof LighthouseDetailsCard> = {
+const meta = {
     component: LighthouseDetailsCard,
     decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',
-};
+} satisfies Meta<typeof LighthouseDetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

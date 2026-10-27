@@ -1,4 +1,3 @@
-import { withMockTransactions, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -7,7 +6,7 @@ import * as Base from './TokenBalancesCard.stories';
 
 const meta: Meta<typeof TokenBalancesCardInner> = {
     component: TokenBalancesCardInner,
-    decorators: [withTokenInfoBatch, withMockTransactions, withViewportFromGlobal],
+    decorators: [withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Transaction/TokenBalancesCard@Media',
 };
@@ -15,8 +14,8 @@ const meta: Meta<typeof TokenBalancesCardInner> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = Base.Inner_MultipleRows.args;
+const { args, decorators } = Base.Inner_MultipleRows;
 
-export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
-export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };
-export const TabletLandscape: Story = { args, globals: { viewport: { isRotated: true, value: 'ipad' } } };
+export const Mobile: Story = { args, decorators, globals: { viewport: { value: 'iphonex' } } };
+export const TabletPortrait: Story = { args, decorators, globals: { viewport: { value: 'ipad' } } };
+export const TabletLandscape: Story = { args, decorators, globals: { viewport: { isRotated: true, value: 'ipad' } } };

@@ -1,41 +1,14 @@
-import { toParsedInstruction } from '@entities/instruction-parser';
-import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
-import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
-
-import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
-import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
+import * as Base from './LighthouseDetailsCard.stories';
 
-const raw = {
-    data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-    keys: [
-        {
-            isSigner: false,
-            isWritable: false,
-            pubkey: new PublicKey('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV'),
-        },
-    ],
-    programId: new PublicKey(LIGHTHOUSE_ADDRESS),
-} as unknown as TransactionInstruction;
-
-const parsed = parseLighthouseInstruction(toKitInstruction(raw));
-if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
-
-const args = {
-    childIndex: undefined,
-    index: 0,
-    innerCards: undefined,
-    ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
-    raw,
-};
+const args = Base.AssertAccountInfo.args;
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
-    decorators: [...instructionCardDecorators, withViewportFromGlobal],
+    decorators: [...Base.default.decorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard@Media',
 };
