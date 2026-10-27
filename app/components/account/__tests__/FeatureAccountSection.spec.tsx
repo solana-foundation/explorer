@@ -10,9 +10,7 @@ import type { Account } from '@/app/providers/accounts';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@/app/utils/parseFeatureAccount';
 
-vi.mock('next/navigation', () => ({
-    useSearchParams: vi.fn(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: Cluster.Devnet })),

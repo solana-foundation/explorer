@@ -1,13 +1,13 @@
 import { vi } from 'vitest';
 
+import { stubFetch } from '@/app/__tests__/rpc-fetch';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../[mintAddress]/route';
 
 const VALID_MINT = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
 
-const fetchMock = vi.fn();
-vi.stubGlobal('fetch', fetchMock);
+const { fetchMock, respondWith } = stubFetch();
 
 describe('Rugcheck API Route', () => {
     const originalEnv = process.env;
@@ -39,7 +39,7 @@ describe('Rugcheck API Route', () => {
         [422, 'unable to generate report'],
         [404, 'invalid token mint'],
     ])('should return %i when rugcheck responds with 400 (%s)', async (expectedStatus, error) => {
-        mockFetchResponse(400, { error });
+        respondWith(400, { error });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(expectedStatus);
         expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
@@ -47,35 +47,35 @@ describe('Rugcheck API Route', () => {
     });
 
     it('should return 400 and report to sentry when rugcheck responds with 400 and unexpected body', async () => {
-        mockFetchResponse(400, { error: 'bad request' });
+        respondWith(400, { error: 'bad request' });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(400);
         expect(Logger.panic).toHaveBeenCalled();
     });
 
     it('should return 404 when rugcheck responds with 404', async () => {
-        mockFetchResponse(404);
+        respondWith(404, {});
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(404);
         expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
     });
 
     it('should return 429 and log to sentry when rate limited', async () => {
-        mockFetchResponse(429);
+        respondWith(429, {});
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(429);
         expect(Logger.warn).toHaveBeenCalledWith('[api:rugcheck] Rate limit exceeded', { sentry: true });
     });
 
     it('should return 502 when response schema is invalid', async () => {
-        mockFetchResponse(200, { unexpected: 'shape' });
+        respondWith(200, { unexpected: 'shape' });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(502);
         expect(await response.json()).toEqual({ error: 'Invalid response from rugcheck API' });
     });
 
     it('should return score on success', async () => {
-        mockFetchResponse(200, { score_normalised: 85 });
+        respondWith(200, { score_normalised: 85 });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ score: 85 });
@@ -102,16 +102,6 @@ describe('Rugcheck API Route', () => {
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 });
-
-function mockFetchResponse(status: number, body: Record<string, unknown> = {}) {
-    const ok = status >= 200 && status < 300;
-    // Cast: tests only stub the surface of Response that the route touches.
-    fetchMock.mockResolvedValueOnce({
-        json: async () => body,
-        ok,
-        status,
-    } as Response);
-}
 
 function callRoute(mintAddress: string) {
     const request = new Request(`http://localhost:3000/api/verification/rugcheck/${mintAddress}`);

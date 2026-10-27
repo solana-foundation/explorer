@@ -9,18 +9,11 @@ vi.mock('next/navigation');
 
 const mockGetAccountInfo = vi.fn();
 
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return {
-        ...actual,
-        getRpc: vi.fn(() => ({
-            getAccountInfo: (...args: unknown[]) => ({
-                send: async () => ({ value: await mockGetAccountInfo(...args) }),
-            }),
-        })),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getAccountInfo: mockGetAccountInfo }),
+}));
 
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
 import type { Account } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { toBase64 } from '@/app/shared/lib/bytes';

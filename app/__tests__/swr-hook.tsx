@@ -72,3 +72,7 @@ export function clusterContext({
         url,
     };
 }
+
+export function connectedTo(cluster: Cluster, url: string): ClusterContext {
+    return clusterContext({ cluster, connectableUrl: url, status: ClusterStatus.Connected, url });
+}

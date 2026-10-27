@@ -19,9 +19,7 @@ vi.mock('../../InstructionCard', () => ({
     ),
 }));
 
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
-}));
+vi.mock('@components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 const BPF_UPGRADEABLE_LOADER_ID = 'BPFLoaderUpgradeab1e11111111111111111111111';
 

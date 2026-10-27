@@ -38,11 +38,7 @@ vi.mock('@/app/components/instruction/InstructionCard', () => ({
     ),
 }));
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@/app/components/common/Copyable', () => ({
     Copyable: ({ children }: { children: React.ReactNode }) => <div data-testid="copyable">{children}</div>,

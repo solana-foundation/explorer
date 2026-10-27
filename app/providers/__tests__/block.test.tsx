@@ -14,8 +14,7 @@ const getBlocks = vi.fn();
 const getSlotLeaders = vi.fn();
 const getRpc = vi.fn((_url: string) => rpcStub({ getBlocks, getSlotLeaders }));
 
-vi.mock('@entities/cluster', async importOriginal => ({
-    ...((await importOriginal()) as Record<string, unknown>),
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
     getRpc: (...args: [string]) => getRpc(...args),
 }));
 

@@ -1,6 +1,8 @@
 import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
+
 import { fetchAccountSizes } from '../fetch-account-sizes';
 
 const ADDRESS_1 = gen.address(1);
@@ -8,17 +10,9 @@ const ADDRESS_2 = gen.address(2);
 
 const mockGetMultipleAccounts = vi.fn();
 
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return {
-        ...actual,
-        getRpc: vi.fn(() => ({
-            getMultipleAccounts: (...args: unknown[]) => ({
-                send: async () => ({ value: await mockGetMultipleAccounts(...args) }),
-            }),
-        })),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getMultipleAccounts: mockGetMultipleAccounts }),
+}));
 
 describe('fetchAccountSizes', () => {
     beforeEach(() => {

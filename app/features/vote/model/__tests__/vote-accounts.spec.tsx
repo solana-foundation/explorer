@@ -3,9 +3,11 @@ import { Cluster, ClusterStatus } from '@utils/cluster';
 import { type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { reported } from '@/app/__tests__/rpc-errors';
 import {
     type ClusterContext,
     clusterContext,
+    connectedTo,
     FAST_RETRY,
     refocusTab,
     renderHookWithRevalidate,
@@ -27,11 +29,6 @@ const mocks = vi.hoisted(() => ({
     getRpc: vi.fn(),
     getVoteAccounts: vi.fn(),
 }));
-
-/** A connected endpoint the visitor has settled on. */
-function connectedTo(cluster: Cluster, url: string) {
-    return clusterContext({ cluster, connectableUrl: url, status: ClusterStatus.Connected, url });
-}
 
 vi.mock('@entities/cluster', () => ({ getRpc: mocks.getRpc, useCluster: () => mocks.cluster }));
 
@@ -82,10 +79,7 @@ describe('useVoteAccounts', () => {
         // and context outside `sentryExtras` never reaches Sentry, so a plain field goes nowhere at all.
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.any(String),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, rpcError: 'rpc down' }),
-            }),
+            reported({ cluster: Cluster.MainnetBeta, rpcError: 'rpc down' }),
         );
         // One slow cluster must not be able to set the *error* rate: this fires from the browser, once per
         // visitor, with no CDN in front of it and no rate limit behind it.

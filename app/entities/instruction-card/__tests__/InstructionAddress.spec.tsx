@@ -7,11 +7,7 @@ import { ClusterProvider } from '@/app/providers/cluster';
 
 import { InstructionAddress } from '../ui/InstructionAddress';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(() => '/'),
-    useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('next/link', () => ({
     __esModule: true,

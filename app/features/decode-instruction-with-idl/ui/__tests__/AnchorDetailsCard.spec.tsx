@@ -17,11 +17,7 @@ import { TransactionsProvider } from '@/app/providers/transactions';
 import { decodeAnchorInstruction } from '../../lib/decode-anchor-instruction';
 import { AnchorDetailsCard } from '../AnchorDetailsCard';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('@providers/transactions', async importOriginal => {
     const actual = await importOriginal<typeof import('@providers/transactions')>();

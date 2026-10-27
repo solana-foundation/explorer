@@ -58,16 +58,7 @@ const PARSED_TX = {
     signatures: [SIGNATURE],
 } as unknown as ParsedTransaction;
 
-vi.mock('swr', () => ({
-    __esModule: true,
-    default: vi.fn(() => ({
-        data: undefined,
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })),
-}));
+vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 

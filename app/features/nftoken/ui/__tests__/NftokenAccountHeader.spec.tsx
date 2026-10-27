@@ -1,8 +1,8 @@
 import type { Account } from '@providers/accounts';
 import { act, render, screen } from '@testing-library/react';
-import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { swrWrapper } from '@/app/__tests__/swr-hook';
 
 import {
     accountBytes,
@@ -73,9 +73,5 @@ describe('NftokenAccountHeader', () => {
 function renderHeader(account: Account) {
     const nftoken = parseNftokenAccount(account);
     if (!nftoken) throw new Error('the fixture does not decode');
-    return render(<NftokenAccountHeader nftoken={nftoken} />, { wrapper: Providers });
-}
-
-function Providers({ children }: { children: ReactNode }) {
-    return <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map() }}>{children}</SWRConfig>;
+    return render(<NftokenAccountHeader nftoken={nftoken} />, { wrapper: swrWrapper({ dedupingInterval: 0 }) });
 }
