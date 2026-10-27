@@ -52,3 +52,27 @@ export const Loading: Story = {
         rawData: undefined,
     },
 };
+
+export const NotFound: Story = {
+    args: {
+        account: mockAccount,
+        isLoading: false,
+        rawData: undefined,
+    },
+};
+
+export const EmptyData: Story = {
+    args: {
+        account: { ...mockAccount, space: 0 },
+        isLoading: false,
+        rawData: new Uint8Array(0),
+    },
+};
+
+export const Executable: Story = {
+    args: {
+        account: { ...mockAccount, executable: true, space: 36 },
+        isLoading: false,
+        rawData: mockRawData,
+    },
+};

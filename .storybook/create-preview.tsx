@@ -116,6 +116,10 @@ export function createPreview({ mswEnabled }: { mswEnabled: boolean }): Preview 
             },
         ],
 
+        // The check parses the DOM again instead of reading React's nesting warning, because React logs
+        // each warning once per page.
+        afterEach: assertValidMarkup,
+
         initialGlobals: {
             backgrounds: {
                 value: 'dark',
@@ -124,4 +128,18 @@ export function createPreview({ mswEnabled }: { mswEnabled: boolean }): Preview 
 
         loaders: mswEnabled ? [mswLoader] : [],
     };
+}
+
+function assertValidMarkup() {
+    const rendered = document.body.innerHTML;
+    const reparsed = document.createElement('body');
+    reparsed.innerHTML = rendered;
+    if (reparsed.innerHTML === rendered) return;
+
+    let at = 0;
+    while (rendered[at] === reparsed.innerHTML[at]) at++;
+    const around = (html: string) => html.slice(Math.max(0, at - 80), at + 80);
+    throw new Error(
+        `The HTML parser builds a different DOM from the story markup.\nRendered: ${around(rendered)}\nReparsed: ${around(reparsed.innerHTML)}`,
+    );
 }
