@@ -28,12 +28,12 @@ function storyArgs(data: Buffer, keyCount: number) {
     };
 }
 
-const meta: Meta<typeof SerumDetailsCard> = {
+const meta = {
     component: SerumDetailsCard,
     decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionProgramSerum/SerumDetailsCard',
-};
+} satisfies Meta<typeof SerumDetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

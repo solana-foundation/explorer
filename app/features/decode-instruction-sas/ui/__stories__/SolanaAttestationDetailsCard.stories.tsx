@@ -25,12 +25,12 @@ const dispatched = createInstructionParserDispatcher([solanaAttestationInstructi
     raw,
 );
 
-const meta: Meta<typeof SolanaAttestationDetailsCard> = {
+const meta = {
     component: SolanaAttestationDetailsCard,
     decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionSas/SolanaAttestationDetailsCard',
-};
+} satisfies Meta<typeof SolanaAttestationDetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

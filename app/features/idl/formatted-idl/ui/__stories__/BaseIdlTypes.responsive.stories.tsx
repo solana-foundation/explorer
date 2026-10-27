@@ -2,6 +2,7 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlTypes } from '../BaseIdlTypes';
+import * as Base from './BaseIdlTypes.stories';
 
 const meta: Meta<typeof BaseIdlTypes> = {
     component: BaseIdlTypes,
@@ -13,22 +14,7 @@ const meta: Meta<typeof BaseIdlTypes> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    data: [
-        {
-            docs: ['Complete market state'],
-            fieldType: {
-                fields: [
-                    { name: 'id', type: 'u64' },
-                    { name: 'owner', type: 'publicKey' },
-                    { docs: ['Market configuration'], name: 'config', type: 'MarketConfig' },
-                ],
-                kind: 'struct' as const,
-            },
-            name: 'MarketState',
-        },
-    ],
-};
+const args = Base.StructTypes.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

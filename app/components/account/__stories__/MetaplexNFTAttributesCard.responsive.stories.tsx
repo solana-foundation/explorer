@@ -1,27 +1,12 @@
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
-import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { NormalMetaplexNFTAttributesCard } from '../MetaplexNFTAttributesCard';
-
-const METADATA_URI = 'https://example.test/nft-metadata.json';
-
-const sampleAttributesJson = {
-    attributes: [
-        { trait_type: 'Background', value: 'Cosmic Purple' },
-        { trait_type: 'Eyes', value: 'Laser' },
-        { trait_type: 'Mouth', value: 'Smile' },
-        { trait_type: 'Rarity Rank', value: 42 },
-    ],
-};
-
-const withFetchOverride: Decorator = Story => {
-    global.fetch = (async () => ({ json: async () => sampleAttributesJson, ok: true }) as Response) as typeof fetch;
-    return <Story />;
-};
+import * as Base from './MetaplexNFTAttributesCard.stories';
 
 const meta: Meta<typeof NormalMetaplexNFTAttributesCard> = {
     component: NormalMetaplexNFTAttributesCard,
-    decorators: [withFetchOverride, withViewportFromGlobal],
+    decorators: [withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Account/MetaplexNFTAttributesCard@Media',
 };
@@ -29,8 +14,8 @@ const meta: Meta<typeof NormalMetaplexNFTAttributesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { metadataUri: METADATA_URI };
+const { args, decorators } = Base.WithAttributes;
 
-export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
-export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };
-export const TabletLandscape: Story = { args, globals: { viewport: { isRotated: true, value: 'ipad' } } };
+export const Mobile: Story = { args, decorators, globals: { viewport: { value: 'iphonex' } } };
+export const TabletPortrait: Story = { args, decorators, globals: { viewport: { value: 'ipad' } } };
+export const TabletLandscape: Story = { args, decorators, globals: { viewport: { isRotated: true, value: 'ipad' } } };

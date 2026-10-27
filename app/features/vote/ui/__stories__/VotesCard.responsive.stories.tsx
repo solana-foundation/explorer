@@ -1,14 +1,13 @@
-import { withCluster } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VotesCard } from '../VotesCard';
-import { BASE_SLOT, voteAccountFixture } from './fixtures';
+import * as Base from './VotesCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta<typeof VotesCard> = {
     component: VotesCard,
-    decorators: [withViewportFromGlobal, withCluster],
+    decorators: [withViewportFromGlobal, ...Base.default.decorators],
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VotesCard@Media',
 };
@@ -16,14 +15,7 @@ const meta: Meta<typeof VotesCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const votes = Array.from({ length: 6 }, (_, i) => ({
-    confirmationCount: 31 - i,
-    slot: BASE_SLOT + i,
-}));
-
-const args = {
-    voteAccount: voteAccountFixture(votes),
-};
+const args = Base.WithVotes.args;
 
 export const Mobile: Story = {
     args,

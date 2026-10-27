@@ -2,14 +2,11 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureGateCard } from '../FeatureGateCard';
-import { FeatureGateMarkdown } from '../FeatureGateMarkdown';
-import { SIMD_0266_MARKDOWN, SIMD_0266_URL } from './feature-gate-fixtures';
+import * as Base from './FeatureGateCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta<typeof FeatureGateCard> = {
-    args: {
-        children: <FeatureGateMarkdown baseUrl={SIMD_0266_URL}>{SIMD_0266_MARKDOWN}</FeatureGateMarkdown>,
-    },
+    args: Base.Default.args,
     component: FeatureGateCard,
     decorators: [withViewportFromGlobal],
     tags: ['autodocs', 'test'],

@@ -19,14 +19,14 @@ const sampleIx = new TransactionInstruction({
 // parsedIx routes through the UnknownDetailsCard fallback inside CodamaInstructionCard.
 const fallbackParsedIx = { path: [{ kind: 'unknownNode' }] } as any;
 
-const meta: Meta<typeof CodamaInstructionCard> = {
+const meta = {
     component: CodamaInstructionCard,
     decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
     // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.
     title: 'Components/Instruction/CodamaInstructionDetailsCard',
-};
+} satisfies Meta<typeof CodamaInstructionCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

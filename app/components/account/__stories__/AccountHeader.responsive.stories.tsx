@@ -2,6 +2,7 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenMintHeaderCard } from '../AccountHeader';
+import * as Base from './AccountHeader.stories';
 
 const meta: Meta<typeof TokenMintHeaderCard> = {
     component: TokenMintHeaderCard,
@@ -13,9 +14,7 @@ const meta: Meta<typeof TokenMintHeaderCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    token: { logoURI: undefined, name: 'USD Coin', symbol: 'USDC' },
-};
+const args = Base.WithLogo.args;
 
 export const Mobile: Story = {
     args,

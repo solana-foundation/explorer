@@ -2,6 +2,7 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { InfoTooltip } from '../InfoTooltip';
+import * as Base from './InfoTooltip.stories';
 
 const meta: Meta<typeof InfoTooltip> = {
     component: InfoTooltip,
@@ -13,10 +14,7 @@ const meta: Meta<typeof InfoTooltip> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    children: <span>Hover for more info</span>,
-    text: 'This is the tooltip text shown on hover.',
-};
+const args = Base.Default.args;
 
 export const Mobile: Story = {
     args,

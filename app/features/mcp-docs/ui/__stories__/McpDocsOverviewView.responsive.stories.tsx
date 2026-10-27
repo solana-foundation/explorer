@@ -2,13 +2,12 @@ import { withViewportFromGlobal } from '@storybook-config/responsive-decorators'
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { McpDocsOverviewView } from '../McpDocsOverviewView';
+import * as Base from './McpDocsOverviewView.stories';
 
 const meta: Meta<typeof McpDocsOverviewView> = {
     component: McpDocsOverviewView,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        layout: 'fullscreen',
-    },
+    parameters: Base.default.parameters,
     tags: ['autodocs', 'test'],
     title: 'Features/McpDocs/Overview@Media',
 };

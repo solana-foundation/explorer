@@ -1,18 +1,9 @@
-import { makeNftData } from '@entities/nft/__fixtures__/make-nft-data';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { MetaplexNFTHeader } from '../MetaplexNFTHeader';
-
-const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
-const nftData = makeNftData({
-    editionInfo: { masterEdition: { supply: 1000n } as never },
-    json: undefined,
-    name: 'Bored Ape #1234',
-    symbol: 'BAYC',
-});
+import * as Base from './MetaplexNFTHeader.stories';
 
 const meta: Meta<typeof MetaplexNFTHeader> = {
     component: MetaplexNFTHeader,
@@ -24,7 +15,7 @@ const meta: Meta<typeof MetaplexNFTHeader> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { address: ADDRESS, nftData };
+const args = Base.MasterEdition.args;
 
 export const Mobile: Story = {
     args,

@@ -1,5 +1,4 @@
-import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SubscriptionsAccountCard } from '../SubscriptionsAccountCard';
@@ -10,7 +9,7 @@ const args = Base.Plan.args;
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: SubscriptionsAccountCard,
-    decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withViewportFromGlobal, ...Base.default.decorators],
     tags: ['autodocs', 'test'],
     title: 'Features/Subscriptions/SubscriptionsAccountCard@Media',
 } satisfies Meta<typeof SubscriptionsAccountCard>;

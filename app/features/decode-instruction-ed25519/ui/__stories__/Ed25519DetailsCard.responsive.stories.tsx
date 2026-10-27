@@ -1,34 +1,12 @@
-import { instructionDataOf, toInstructionNode, toRawInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { instructionCardDecorators } from '@storybook-config/decorators';
 import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { invariant } from '@/app/shared/lib/invariant';
-
-import { ed25519InstructionParser } from '../../lib/ed25519-client';
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
-
-const ix = new TransactionInstruction({
-    data: Buffer.from('01000c0001004c0001006e008a000100', 'hex'),
-    keys: [],
-    programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
-});
-
-const surroundingIx = new TransactionInstruction({
-    data: Buffer.alloc(256),
-    keys: [],
-    programId: new PublicKey('11111111111111111111111111111111'),
-});
-
-const siblingData = instructionDataOf(
-    [ix, surroundingIx].map((instruction, index) => toInstructionNode({ index, ix: instruction })),
-);
+import * as Base from './Ed25519DetailsCard.stories';
 
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
-    decorators: [...instructionCardDecorators, withViewportFromGlobal],
+    decorators: [...Base.default.decorators, withViewportFromGlobal],
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard@Media',
 };
@@ -36,14 +14,7 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const dispatched = createInstructionParserDispatcher([ed25519InstructionParser]).fromTransactionInstruction(ix);
-invariant(isParsedInstruction(dispatched), 'the fixture decodes as an ed25519 instruction');
-
-const args = {
-    node: toRawInstructionNode({ index: 0, ix }),
-    parsed: dispatched.parsed,
-    siblingData,
-};
+const args = Base.SingleSignature.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };
