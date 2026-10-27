@@ -2,10 +2,10 @@ import { gen } from '@__fixtures__/gen';
 import { type InstructionNode, toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { AddressLookupTableProgram, type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { type CardRow, readAddress, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
+import { type CardRow, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { addressLookupTableInstructionParser } from '../../lib/address-lookup-table-client';
@@ -96,7 +96,7 @@ const CASES: Array<{ info: object; rows: CardRow[]; title: string; type: string 
     },
     {
         info: EXTEND,
-        rows: [...LOOKUP_TABLE_ROWS, ['New Addresses', [A.entryOne, A.entryTwo].join(',')]],
+        rows: [...LOOKUP_TABLE_ROWS, ['New Address #1', A.entryOne], ['New Address #2', A.entryTwo]],
         title: 'Address Lookup Table: Extend Lookup Table',
         type: 'extendLookupTable',
     },
@@ -118,17 +118,6 @@ describe('address-lookup-table cards', () => {
 
         expect(screen.getByText(title)).toBeInTheDocument();
         expect(Logger.error).not.toHaveBeenCalled();
-    });
-
-    it('should number the new addresses in extend order', async () => {
-        renderCard(EXTEND, 'extendLookupTable');
-
-        await waitFor(() => {
-            expect(readNewAddresses()).toEqual([
-                ['0', A.entryOne],
-                ['1', A.entryTwo],
-            ]);
-        });
     });
 
     it('should link the recent slot to its block', async () => {
@@ -183,15 +172,4 @@ function renderCard(info: object, type: string) {
     return renderTxCard(
         <AddressLookupTableDetailsCard node={toInstructionNode({ index: 0, ix: dispatched })} ix={dispatched} />,
     );
-}
-
-/** The nested table Extend draws, as `[index, address]` pairs. */
-function readNewAddresses(): CardRow[] {
-    const [, nested] = screen.getAllByRole('table');
-    return within(nested)
-        .getAllByRole('row')
-        .map(row => {
-            const cells = within(row).getAllByRole('cell');
-            return [cells[0].textContent ?? '', readAddress(cells[1]) ?? ''];
-        });
 }

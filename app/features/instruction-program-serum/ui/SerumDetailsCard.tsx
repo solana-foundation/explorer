@@ -1,7 +1,5 @@
 import {
     address,
-    custom,
-    InstructionAddress,
     InstructionCardView,
     type InstructionField,
     InstructionFields,
@@ -51,16 +49,7 @@ function accountFields(accounts: Record<string, Address | Address[] | undefined>
     return Object.entries(accounts).flatMap(([field, value]) => {
         if (value === undefined) return [];
         if (!Array.isArray(value)) return [address(fieldLabel(field), value)];
-        return [
-            custom(
-                fieldLabel(field),
-                <>
-                    {value.map((account, i) => (
-                        <InstructionAddress key={i} address={account} />
-                    ))}
-                </>,
-            ),
-        ];
+        return value.map((account, i) => address(`${fieldLabel(field)} #${i + 1}`, account));
     });
 }
 

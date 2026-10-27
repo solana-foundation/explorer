@@ -3,16 +3,12 @@ import {
     address,
     custom,
     defineInstructionCard,
-    InstructionAddress,
     InstructionCardView,
     type InstructionNode,
     text,
 } from '@entities/instruction-card';
-import type { ParsedInstruction, PublicKey } from '@solana/web3.js';
+import type { ParsedInstruction } from '@solana/web3.js';
 import { is } from 'superstruct';
-
-import { toKitAddress } from '@/app/shared/lib/web3js-compat';
-import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { AddressLookupTableParsed } from '../lib/address-lookup-table-parser';
 import {
@@ -40,7 +36,7 @@ export const ExtendLookupTableDetailsCard = defineInstructionCard<ExtendLookupTa
     fields: info => [
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
-        custom('New Addresses', <NewAddresses addresses={info.newAddresses} />),
+        ...info.newAddresses.map((pubkey, i) => address(`New Address #${i + 1}`, pubkey)),
     ],
     title: `${TITLE_PREFIX}: Extend Lookup Table`,
 });
@@ -113,24 +109,4 @@ function tableFields(info: FreezeLookupTableInfo) {
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
     ];
-}
-
-function NewAddresses({ addresses }: { addresses: PublicKey[] }) {
-    return (
-        // The card table's edge padding reaches these nested cells and insets every
-        // entry from the rows above; only `tbody tr td` outweighs that selector.
-        <BaseTable className="[&_tbody_tr_td:first-child]:pl-0 [&_tbody_tr_td:last-child]:pr-0">
-            <BaseTable.Body>
-                {/* Keyed by position: an extend may list the same address twice, and the list never reorders. */}
-                {addresses.map((pubkey, index) => (
-                    <BaseTable.Row key={index}>
-                        <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">
-                            <InstructionAddress address={toKitAddress(pubkey)} />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                ))}
-            </BaseTable.Body>
-        </BaseTable>
-    );
 }

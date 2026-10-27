@@ -7,7 +7,7 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderTxCard } from '@/app/__tests__/card-harness';
+import { findCell, readAddress, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { serumInstructionParsers } from '../../lib/serum-client';
 import { SerumDetailsCard } from '../SerumDetailsCard';
@@ -43,7 +43,7 @@ describe('@features/instruction-program-serum', () => {
             expect(screen.queryByText('Fee Discount Pubkey')).not.toBeInTheDocument();
         });
 
-        test('should stack every open-orders account into one row for a Consume Events instruction', async () => {
+        test('should give every open-orders account its own row for a Consume Events instruction', async () => {
             // 6 keys: openOrders = keys[0..1], market = keys[2], eventQueue = keys[3]
             renderCard(makeInstruction(CONSUME_EVENTS_DATA, 6));
 
@@ -51,9 +51,8 @@ describe('@features/instruction-program-serum', () => {
             await waitFor(() => {
                 expect(screen.getByText(/OpenBook Dex Program: Consume Events/)).toBeInTheDocument();
             });
-            expect(screen.getByText('Open Orders')).toBeInTheDocument();
-            expect(screen.getByText(gen.publicKey(0).toBase58())).toBeInTheDocument();
-            expect(screen.getByText(gen.publicKey(1).toBase58())).toBeInTheDocument();
+            expect(readAddress(findCell('Open Orders #1'))).toBe(gen.publicKey(0).toBase58());
+            expect(readAddress(findCell('Open Orders #2'))).toBe(gen.publicKey(1).toBase58());
             expect(screen.getByText('Event Queue')).toBeInTheDocument();
             expect(screen.getByText('Limit')).toBeInTheDocument();
             expect(screen.getByText('32')).toBeInTheDocument();
