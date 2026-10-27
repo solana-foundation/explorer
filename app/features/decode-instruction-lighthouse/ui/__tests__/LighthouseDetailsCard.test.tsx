@@ -13,8 +13,8 @@ import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constant
 import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
-vi.mock('@/app/components/instruction/InstructionCard', () => ({
-    InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
+vi.mock('@entities/instruction-card/ui/TxInstructionShell', () => ({
+    TxInstructionShell: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card" className="card">
             <div className="card-header">
                 <div>{title}</div>

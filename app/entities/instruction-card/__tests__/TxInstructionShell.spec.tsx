@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { InstructionCard } from '../InstructionCard';
+import { TxInstructionShell } from '../ui/TxInstructionShell';
 
 const SIGNATURE = gen.signature(1);
 const PROGRAM_ID = new PublicKey(gen.address(1));
@@ -44,18 +44,18 @@ vi.mock('@components/common/BaseInstructionCard', () => ({
 function renderCard({
     surface = {
         Card: () => undefined,
-        Shell: InstructionCard,
+        Shell: TxInstructionShell,
         instructionData: () => undefined,
         result: { err: null },
         signature: SIGNATURE,
     },
     ...props
-}: Partial<React.ComponentProps<typeof InstructionCard>> & { surface?: InstructionSurface } = {}) {
+}: Partial<React.ComponentProps<typeof TxInstructionShell>> & { surface?: InstructionSurface } = {}) {
     const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
 
     return render(
         <InstructionSurfaceProvider surface={surface}>
-            <InstructionCard title="Transfer" result={{ err: null }} index={0} ix={instruction} {...props} />
+            <TxInstructionShell title="Transfer" result={{ err: null }} index={0} ix={instruction} {...props} />
         </InstructionSurfaceProvider>,
     );
 }
@@ -74,7 +74,7 @@ beforeEach(() => {
     rawDetails = undefined;
 });
 
-describe('InstructionCard', () => {
+describe('TxInstructionShell', () => {
     it('should request raw data the first time the Raw view is opened', async () => {
         renderCard();
 
@@ -139,7 +139,7 @@ describe('InstructionCard', () => {
         const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
 
         expect(() =>
-            render(<InstructionCard title="Transfer" result={{ err: null }} index={0} ix={instruction} />),
+            render(<TxInstructionShell title="Transfer" result={{ err: null }} index={0} ix={instruction} />),
         ).toThrow('InstructionSurfaceProvider');
         consoleError.mockRestore();
     });
@@ -149,7 +149,7 @@ describe('InstructionCard', () => {
         // @ts-expect-error A surface states its signature, even as `undefined`.
         const surface: InstructionSurface = {
             Card: () => undefined,
-            Shell: InstructionCard,
+            Shell: TxInstructionShell,
             instructionData: () => undefined,
             result: { err: null },
         };

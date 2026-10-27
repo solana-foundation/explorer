@@ -72,7 +72,7 @@ vi.mock('swr', () => ({
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 // Override only the two cache reads the section makes. `importOriginal` keeps `TransactionsProvider` real, so the
-// raw-details context the InstructionCard reads is still there.
+// raw-details context that `TxInstructionShell` reads is still there.
 vi.mock('@providers/transactions', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/transactions')>()),
     useTransactionDetails: vi.fn(() => ({

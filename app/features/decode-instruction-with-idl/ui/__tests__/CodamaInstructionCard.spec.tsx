@@ -30,8 +30,8 @@ import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 import { CodamaInstructionCard } from '../CodamaInstructionCard';
 
-vi.mock('@/app/components/instruction/InstructionCard', () => ({
-    InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
+vi.mock('@entities/instruction-card/ui/TxInstructionShell', () => ({
+    TxInstructionShell: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card">
             <div data-testid="instruction-card-title">{title}</div>
             <table>

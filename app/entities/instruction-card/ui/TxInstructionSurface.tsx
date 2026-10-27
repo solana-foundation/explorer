@@ -1,11 +1,11 @@
 'use client';
 
-import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { TransactionSignature } from '@solana/web3.js';
 import React from 'react';
 
 import type { InstructionSurface } from '../model/surface';
 import { InstructionSurfaceProvider } from '../model/surface';
+import { TxInstructionShell } from './TxInstructionShell';
 
 /**
  * Declares how instruction cards render on the transaction page.
@@ -29,7 +29,7 @@ export function TxInstructionSurface({
     const surface = React.useMemo<InstructionSurface>(
         () => ({
             Card,
-            Shell: InstructionCard,
+            Shell: TxInstructionShell,
             instructionData,
             result,
             signature,

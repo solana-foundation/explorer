@@ -28,8 +28,8 @@ vi.mock('../../lib/decode-pmp-instruction', async importOriginal => {
     return { decodePmpContentInstruction: vi.fn(actual.decodePmpContentInstruction) };
 });
 
-vi.mock('@/app/components/instruction/InstructionCard', () => ({
-    InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
+vi.mock('@entities/instruction-card/ui/TxInstructionShell', () => ({
+    TxInstructionShell: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card">
             <div data-testid="instruction-card-title">{title}</div>
             <table>

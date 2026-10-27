@@ -47,7 +47,7 @@ export function InspectorInstructionCard({
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
     const rawClickHandler = () => {
         if (!defaultRaw && !showRaw && !raw) {
-            // trigger handler to simulate behaviour for the InstructionCard for the transcation which contains logic in it to fetch raw transaction data
+            // trigger handler to simulate behaviour for the `TxInstructionShell` for the transcation which contains logic in it to fetch raw transaction data
             onRequestRaw?.();
         }
 

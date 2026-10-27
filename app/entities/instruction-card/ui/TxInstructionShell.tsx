@@ -1,11 +1,10 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-// Imports `model/surface` instead of the barrel, because the barrel re-exports `TxInstructionSurface`,
-// which imports this file.
-import { useInstructionSurface } from '@entities/instruction-card/model/surface';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
+
+import { useInstructionSurface } from '../model/surface';
 
 type InstructionProps = {
     title: string;
@@ -22,7 +21,7 @@ type InstructionProps = {
     collapsible?: boolean;
 };
 
-export function InstructionCard({
+export function TxInstructionShell({
     title,
     children,
     result,
