@@ -1,26 +1,28 @@
-# instruction-card Specification
+# instruction-card
 
 ## Purpose
 
-One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/(inspector)/inspector`. A card declares what an instruction means, and the surface it renders on owns the chrome.
+One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/(inspector)/inspector`. A card declares what an instruction means; the surface it renders on owns the chrome. Adding a field is one descriptor; adding a surface is one Context value.
 
-## Requirements
+**Scope.** These requirements bind every instruction card on both surfaces.
+
+## ADDED Requirements
 
 ### Requirement: Surface-owned chrome
 
-Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the card frame (`Shell`) and the component that picks the card of a node (`Card`), plus the transaction's `SignatureResult`, its signature, and the data of its top-level instructions (`instructionData`).
+Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the component that picks the card of a node (`Card`), the transaction's `SignatureResult`, its signature, the data of its top-level instructions (`instructionData`), the raw instructions that the page can fetch (`rawInstructions`), and the flags `collapsible` and `validateProgram`.
 
 The card body MUST draw the `Program` row in the decoded view, on both surfaces. The frame MUST draw its own `Program` row only in the raw view, where the body does not render. The frame therefore needs neither the width of the body nor the program name.
 
 An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
 
-Both surfaces SHALL draw the frame with `BaseInstructionCard`. A `Shell` MAY only pass props to it, so the two surfaces differ in behavior and not in markup. The inspector's `Shell` makes every card collapsible, and checks in the raw view that the program exists and is executable, because an inspected message has not run.
+Both surfaces SHALL draw the frame of an instruction with `BaseInstructionCard`. The inspector surface makes every card collapsible, and checks in the raw view that the program exists and is executable, because an inspected message has not run.
 
-The frame and the cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `inspectorSurface` builds the inspector surface for one message. It sets `signature` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` MUST fail to compile, because a missing signature throws no error. The frame then fetches no raw transaction.
+The cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `inspectorSurface` builds the inspector surface for one message. It sets `signature` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` MUST fail to compile, because a missing signature throws no error. A card then shows no program events.
 
 #### Scenario: One frame on both surfaces
 
-- **WHEN** a card renders on the tx page or in the inspector
+- **WHEN** a card renders an instruction on the tx page or in the inspector
 - **THEN** its frame MUST be `BaseInstructionCard`
 - **AND** in the inspector the raw view MUST check the program of the instruction
 
@@ -40,7 +42,7 @@ The frame and the cards SHALL read the signature from `InstructionSurface`, and 
 
 #### Scenario: Program row is drawn exactly once
 
-- **WHEN** a card renders on either surface, in the decoded view or in the raw view
+- **WHEN** a card renders an instruction on either surface, in the decoded view or in the raw view
 - **THEN** exactly one `Program` row MUST appear in the rendered card
 - **AND** the body MUST draw it in the decoded view, and the frame MUST draw it in the raw view
 
@@ -63,7 +65,7 @@ The frame and the cards SHALL read the signature from `InstructionSurface`, and 
 
 A card SHALL declare its rows as data, not as table markup. Label and value rows are `InstructionField` descriptors. The argument rows of a decoded instruction are `InstructionArg` values. `ValueCell` MUST be the only component that formats a value. Field rows and argument rows both render `ValueCell`, to give each kind one format. `InstructionFields` renders the field rows. `InstructionFieldRows` renders them without the `Program` row, for a card that repeats groups of rows below one program. `DecodedInstructionCard` renders the account and argument rows. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
 
-The union is closed: `address`, `account`, `sol`, `bytes`, `epoch`, `string`, `text`, `timestamp`, `preformatted`, `custom`, `heading`. Every kind but `heading` pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `account` MUST show the role badges of the account beside its label, as the account rows of `DecodedInstructionCard` do. `epoch` MUST link to the page of the epoch. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. A `string` value is text that the reader copies exactly, such as a seed or a string argument. `string` MUST render its value inside `Copyable`. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. The `address` constructor MUST accept a web3.js `PublicKey` or a kit `Address`. The constructor MUST store a kit `Address`, to give every row one address type. A kit-native slice passes its `Address` without a conversion. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
+The union is closed: `address`, `account`, `sol`, `bytes`, `epoch`, `slot`, `string`, `text`, `timestamp`, `preformatted`, `json`, `heading`, and the blocks `note`, `rawData`, `documentText` and `payload`. A block fills the row without a label column. Every kind but `heading` and the blocks pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `account` MUST show the role badges of the account beside its label, as the account rows of `DecodedInstructionCard` do. `epoch` MUST link to the page of the epoch. `text` MUST accept only `string | number`, and a kind MUST NOT accept markup. A `string` value is text that the reader copies exactly, such as a seed or a string argument. `string` MUST render its value inside `Copyable`. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. The `address` constructor MUST accept a web3.js `PublicKey` or a kit `Address`. The constructor MUST store a kit `Address`, to give every row one address type. A kit-native slice passes its `Address` without a conversion. A field with no value to show MUST be omitted from the list.
 
 `InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids in card sources under `app/**` (the rule is off for tests and stories, and for a per-file legacy list that a card MUST NOT join).
 
@@ -76,7 +78,6 @@ The union is closed: `address`, `account`, `sol`, `bytes`, `epoch`, `string`, `t
 
 - **WHEN** the same value rendering repeats across cards
 - **THEN** it MUST be added as an `InstructionField` kind
-- **AND** those cards MUST NOT each re-implement it through `custom`
 
 #### Scenario: Kind that renders like an existing one
 
@@ -95,7 +96,7 @@ The union is closed: `address`, `account`, `sol`, `bytes`, `epoch`, `string`, `t
 - **WHEN** a card needs a hook to produce a value or its title (async mint decimals, cluster-derived URLs, program events)
 - **THEN** it MUST NOT use `defineInstructionCard`, whose `title` and `fields` are plain functions
 - **AND** it MUST write its own component and render `InstructionCardView`
-- **AND** it SHOULD still use `InstructionFields` for the rows it can express, with `custom()` for the rest
+- **AND** it SHOULD still use `InstructionFields` for the rows it can express
 
 ### Requirement: Decoded instruction card
 
@@ -126,7 +127,7 @@ A card SHALL receive the instruction it renders as one `InstructionNode`, not as
 
 `InstructionNode.children` SHALL hold the CPIs of the instruction. The page builds the node tree from the transaction before it renders a card. `InstructionCardView` renders each child through `InstructionSurface.Card`, so no card renders another card. An `undefined` child marks a CPI that the page cannot resolve.
 
-`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
+`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view, for the router, which dispatches on it, and for `instructionDataOf`. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
 
 `InstructionNode.programId` SHALL carry the program id separately from `ix`. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
 
@@ -158,7 +159,7 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 #### Scenario: CPI that the page cannot resolve
 
 - **WHEN** an instruction has a CPI that the page cannot resolve
-- **THEN** the view MUST render an error card that names the position of the CPI
+- **THEN** the view MUST render a card with a note that names the position of the CPI
 - **AND** the other CPIs MUST keep their positions
 
 #### Scenario: Card reads only its decoded payload
@@ -177,7 +178,7 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 
 ### Requirement: One instruction router
 
-Both surfaces SHALL pick the card of an instruction with `InstructionNodeCard`. The router dispatches the instruction through the instruction parser, then renders the first of: the PMP card, the card of a raw stake instruction, the card of the program label, the IDL card, and `UnknownDetailsCard`. A program whose card takes only decoded instructions hands an instruction that its parser slice rejects to the IDL card. The PMP card and the card of a raw stake instruction hand an instruction that they cannot decode to the IDL card in the same way. The router renders every card inside an ErrorBoundary whose fallback is `UnknownDetailsCard`.
+Both surfaces SHALL pick the card of an instruction with `InstructionNodeCard`. The router dispatches the instruction through the instruction parser, then renders the first of: the PMP card, the card of a raw stake instruction, the card of the program label, the IDL card, and `UnknownDetailsCard`. A program whose card takes only decoded instructions hands an instruction that its parser slice rejects to the IDL card. A program whose card takes only an instruction in byte form hands an RPC-parsed instruction to `UnknownDetailsCard`. The PMP card and the card of a raw stake instruction hand an instruction that they cannot decode to the IDL card in the same way. The router renders every card inside an ErrorBoundary whose fallback is `UnknownDetailsCard`.
 
 #### Scenario: Curated card and a resolved IDL
 
