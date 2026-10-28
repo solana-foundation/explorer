@@ -337,7 +337,7 @@ function argOrFallback(
         return toArg();
     } catch (error) {
         Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
-        return { kind: 'leaf', name: key, type: typeName, value: { kind: 'json', value: data } };
+        return { kind: 'leaf', name: key, type: typeName, value: { kind: 'json', value: { ...data } } };
     }
 }
 

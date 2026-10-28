@@ -19,7 +19,7 @@ export type FieldValue =
     | { kind: 'text'; value: string | number }
     | { kind: 'timestamp'; unixSeconds: number }
     | { kind: 'preformatted'; value: string | ReadonlyArray<string | number> }
-    | { kind: 'json'; value: object };
+    | { kind: 'json'; value: Record<string, unknown> };
 
 /** Names the rows that follow it, so it fills the row instead of pairing a label with a value. */
 export type InstructionHeadingField = { kind: 'heading'; label: string };

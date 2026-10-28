@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/app/__tests__/card-harness';
 
-import { account, epoch, slot, string } from '../model/fields';
+import { account, epoch, type InstructionField, slot, string } from '../model/fields';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { InstructionFields } from '../ui/InstructionFields';
 
@@ -86,6 +86,14 @@ describe('InstructionFields', () => {
             'href',
             expect.stringContaining('/epoch/300'),
         );
+    });
+
+    it('should reject markup as the value of a json field', () => {
+        // An unused `@ts-expect-error` fails tsc, so this breaks if the kind accepts markup.
+        // @ts-expect-error A json field holds data, not markup.
+        const field: InstructionField = { kind: 'json', label: 'Data', value: <div /> };
+
+        expect(field.kind).toBe('json');
     });
 
     it('should link a slot field to the page of its block', () => {
