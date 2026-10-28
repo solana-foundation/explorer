@@ -58,6 +58,15 @@ describe('Ed25519DetailsCard', () => {
         });
 
         expect(screen.getByText(TITLE)).toBeInTheDocument();
+        expect(
+            screen.getByText('N9as9LPJYos0hfOY7XuqIMN8Tf+Ovuk3RWreoQDSfJI+CXyw9Byf91Lvx+0G2zwovPhn88ogPN6SIuctHpPVAw==')
+                .tagName,
+        ).toBe('CODE');
+        expect(
+            screen.getByText(
+                'MDAwMTAxMDA0MDQyMGYwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMDAxYzgwMTk5NTI1ZTczMTcwMDAwMDAwMTMwZGRlZDM3MTcwMDAwMDAwMDAwYzhmNzFlMTUwMDAwMDAwMDM0NzM3MDQxNTQzNDUzNDgwMDAw',
+            ).tagName,
+        ).toBe('CODE');
     });
 
     // XBHwdBYNu8J326yKeHiRyEudMaFVhz3Pb6ahgcfceRLV6kbmd14Z8vE6YnV4zu5WWNESmvhxmjUj4CpoQmwwhLJ

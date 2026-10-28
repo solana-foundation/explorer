@@ -45,19 +45,19 @@ describe('toInstructionNodes', () => {
         expect(toInstructionNodes(transaction([partiallyDecoded([UNLISTED])]), undefined)).toEqual([undefined]);
     });
 
-    it('should give each instruction the CPIs of its index, in order, across groups', () => {
+    it('should give each instruction the CPIs of its index, in order, across groups, past one it cannot resolve', () => {
         const nodes = toInstructionNodes(transaction([PARSED, PARSED]), [
             { index: 1, instructions: [partiallyDecoded([PAYER], [1])] },
-            { index: 1, instructions: [PARSED, partiallyDecoded([UNLISTED])] },
+            { index: 1, instructions: [partiallyDecoded([UNLISTED]), PARSED] },
         ]);
 
         expect(nodes[0]?.children).toBeUndefined();
         expect(nodes[1]?.children?.map(child => child && [child.index, child.childIndex])).toEqual([
             [1, 0],
-            [1, 1],
             undefined,
+            [1, 2],
         ]);
-        expect(nodes[1]?.children?.[1]?.ix).toBe(PARSED);
+        expect(nodes[1]?.children?.[2]?.ix).toBe(PARSED);
     });
 });
 

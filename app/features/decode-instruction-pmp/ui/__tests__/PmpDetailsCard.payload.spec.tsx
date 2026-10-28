@@ -153,6 +153,7 @@ describe('PmpDetailsCard payload', () => {
         // verbatim-text fallback a Json payload lands on when its bytes do not parse.
         expect(decoded.textContent).toContain('\n  "name": "company"');
         expect(findCell('Data Hash')).toHaveTextContent(sha256Hex(fromUtf8(DOC)));
+        expect(screen.getByText(sha256Hex(fromUtf8(DOC))).tagName).toBe('CODE');
     });
 
     it('should also offer the raw encoded bytes on a Raw tab', async () => {

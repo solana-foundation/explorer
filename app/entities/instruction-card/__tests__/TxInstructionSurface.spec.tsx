@@ -1,17 +1,28 @@
 import { gen } from '@__fixtures__/gen';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { render } from '@testing-library/react';
+import { type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderWithProviders } from '@/app/__tests__/card-harness';
 import { invariant } from '@/app/shared/lib/invariant';
 
+import { toInstructionNode } from '../model/node';
 import type { RawInstructions } from '../model/raw-source';
 import { type InstructionSurface, useInstructionSurface } from '../model/surface';
+import { InstructionCardView } from '../ui/InstructionCardView';
 import { TxInstructionSurface } from '../ui/TxInstructionSurface';
+
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const SIGNATURE = gen.signature(1);
 const WIRE_IX = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PublicKey.default });
+const PARSED_IX: ParsedInstruction = {
+    parsed: { info: {}, type: 'transfer' },
+    program: 'system',
+    programId: SystemProgram.programId,
+};
 
 const fetchRaw = vi.fn();
 let rawDetails: { data?: { raw?: unknown }; status: FetchStatus } | undefined;
@@ -88,7 +99,48 @@ describe('TxInstructionSurface', () => {
 
         expect(surface.rawInstructions).toBeUndefined();
     });
+
+    it('should request the raw transaction when the reader clicks Raw on an RPC-parsed card', async () => {
+        renderParsedCard();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
+
+        expect(fetchRaw).toHaveBeenCalledWith(SIGNATURE);
+    });
+
+    it('should show the accounts of the fetched instruction in the Raw view of an RPC-parsed card', async () => {
+        const wireIx = new TransactionInstruction({
+            data: Buffer.from([1]),
+            keys: [{ isSigner: true, isWritable: true, pubkey: gen.publicKey(1) }],
+            programId: SystemProgram.programId,
+        });
+        rawDetails = { data: { raw: { transaction: { instructions: [wireIx] } } }, status: FetchStatus.Fetched };
+        renderParsedCard();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
+
+        expect(screen.getByText('Account #1')).toBeInTheDocument();
+        expect(fetchRaw).not.toHaveBeenCalled();
+    });
 });
+
+function renderParsedCard() {
+    renderWithProviders(
+        <TxInstructionSurface
+            Card={() => undefined}
+            instructionData={() => undefined}
+            result={{ err: null }}
+            signature={SIGNATURE}
+        >
+            <InstructionCardView node={toInstructionNode({ index: 0, ix: PARSED_IX })} title="System Program: Transfer">
+                <tr>
+                    <td>decoded</td>
+                </tr>
+            </InstructionCardView>
+        </TxInstructionSurface>,
+        { transactions: false },
+    );
+}
 
 function readRawInstructions(): RawInstructions | undefined {
     let read: RawInstructions | undefined;

@@ -5,7 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ClusterProvider } from '@/app/providers/cluster';
 
+import { address as addressField } from '../model/fields';
 import { InstructionAddress } from '../ui/InstructionAddress';
+import { InstructionFieldRows } from '../ui/InstructionFields';
 
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(() => '/'),
@@ -57,5 +59,19 @@ describe('InstructionAddress', () => {
         );
 
         expect(screen.getByRole('link')).not.toHaveTextContent('USD Coin');
+    });
+
+    it('should show the token name of a mint in an address field with a token label', () => {
+        render(
+            <ClusterProvider>
+                <table>
+                    <tbody>
+                        <InstructionFieldRows fields={[addressField('Token', ACCOUNT, { tokenLabel: true })]} />
+                    </tbody>
+                </table>
+            </ClusterProvider>,
+        );
+
+        expect(screen.getByRole('link')).toHaveTextContent('USDC - USD Coin');
     });
 });

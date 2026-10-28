@@ -61,6 +61,27 @@ describe('anchor utilities - number overflow handling', () => {
         });
     });
 
+    describe('anchorInstructionArgs with strings and bytes', () => {
+        it('should give a string and base64 bytes the string kind', () => {
+            const ixType: IdlInstruction = {
+                accounts: [],
+                args: [
+                    { name: 'symbol', type: 'string' },
+                    { name: 'payload', type: 'bytes' },
+                ],
+                discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
+                name: 'testInstruction',
+            };
+
+            const args = anchorInstructionArgs({ payload: new Uint8Array([1, 2, 3]), symbol: 'USDC' }, ixType, mockIdl);
+
+            expect(args).toEqual([
+                expect.objectContaining({ name: 'Payload', value: { kind: 'string', value: 'AQID' } }),
+                expect.objectContaining({ name: 'Symbol', value: { kind: 'string', value: 'USDC' } }),
+            ]);
+        });
+    });
+
     describe('anchorAccountArgs with large numbers', () => {
         it('should handle u64 in account data without overflow', () => {
             const largeBalance = new BN('9999999999999999999'); // Larger than MAX_SAFE_INTEGER

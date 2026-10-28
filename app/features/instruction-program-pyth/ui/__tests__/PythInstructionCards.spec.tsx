@@ -251,6 +251,21 @@ describe('instruction-program-pyth cards', () => {
         expect(new Set(titles).size).toBe(titles.length);
     });
 
+    it('should show a product attribute as copyable code', async () => {
+        renderTxCard(
+            <UpdateProductDetailsCard
+                node={node}
+                info={{
+                    attributes: { symbol: 'BTC/USD' },
+                    fundingPubkey: key(A.funding),
+                    productPubkey: key(A.product),
+                }}
+            />,
+        );
+
+        expect((await screen.findByText('BTC/USD')).tagName).toBe('CODE');
+    });
+
     // A foreign program id proves the row reads the node rather than a Pyth constant.
     it('should render the program row from the node', async () => {
         renderTxCard(
