@@ -1,3 +1,4 @@
+import { resolveGenesisInstructionName } from '@entities/genesis/@x/transaction-data';
 import { type ProgramIdlNames } from '@entities/idl/@x/transaction-data';
 import { resolveLighthouseInstructionName } from '@entities/lighthouse/@x/transaction-data';
 import { resolveZkElGamalProofName } from '@entities/zk-elgamal-proof/@x/transaction-data';
@@ -34,6 +35,8 @@ const NAME_SOURCES: readonly NameSource[] = [
     ({ programId, data }) => resolveTokenSwapInstructionName(programId, data),
     // Wormhole v1 is frozen and ships no IDL; its names come from a leading u8 tag.
     ({ programId, data }) => resolveWormholeInstructionName(programId, data),
+    // Genesis publishes no on-chain IDL; its names come from a leading u8 discriminator.
+    ({ programId, data }) => resolveGenesisInstructionName(programId, data),
     // Ahead of the IDL so a simulated System/Token instruction is worded as the RPC words it — see the
     // override map in program-client-name.
     lookup => resolveProgramClientInstructionName(lookup),
