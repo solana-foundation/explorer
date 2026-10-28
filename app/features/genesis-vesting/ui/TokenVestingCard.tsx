@@ -4,7 +4,9 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { useMintAccountInfo } from '@providers/accounts';
+import { useCluster } from '@providers/cluster';
 
+import { isGenesisCluster } from '../lib/clusters';
 import { readVestingLock } from '../lib/read-vesting-lock';
 import { useUnixTime } from '../model/use-unix-time';
 import { useVestingLocks } from '../model/use-vesting-locks';
@@ -16,7 +18,11 @@ export function TokenVestingCard({ mint }: { mint: string }) {
     const mintInfo = useMintAccountInfo(mint);
     // Vested amounts grow with time, so the locks are evaluated at a clock that keeps ticking while the page is open.
     const now = useUnixTime();
+    const { cluster } = useCluster();
 
+    // The lookup is never sent on such a cluster, so without this the card would wait for data forever. The
+    // page is reachable there because the cluster switcher keeps the current route.
+    if (!isGenesisCluster(cluster)) return <ErrorCard text="Genesis vesting is not available on this cluster." />;
     if (error && !accounts) return <ErrorCard text="Failed to load vesting locks." retry={() => mutate()} />;
     if (!accounts || !mintInfo) return <LoadingCard />;
 
