@@ -1,3 +1,4 @@
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import referenceIdl from '@entities/idl/mocks/anchor/reference-0.29.json';
@@ -5,8 +6,6 @@ import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJ
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { type Account } from '@/app/providers/accounts';
 
 import { AnchorAccountCard } from '../AnchorAccountCard';
 
@@ -30,13 +29,11 @@ const ANCHOR_ACCOUNT_IDL = {
 const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
 const UNBUILDABLE_IDL = referenceIdl as unknown as AnchorIdl;
 
-const ACCOUNT: Account = {
+const ACCOUNT = makeAccount({
     data: { raw: Uint8Array.from([...AMM_CONFIG_DISCRIMINATOR, ...new Array(200).fill(0)]) },
-    executable: false,
     lamports: 1,
     owner: new PublicKey(anchorModernIdl.address),
-    pubkey: PublicKey.default,
-};
+});
 
 describe('AnchorAccountCard', () => {
     beforeEach(() => useProgramIdls.mockClear());

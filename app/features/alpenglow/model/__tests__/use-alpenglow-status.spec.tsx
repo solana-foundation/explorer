@@ -1,11 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { Cluster } from '@utils/cluster';
 import { type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
     type ClusterContext,
-    clusterContext,
+    connectedTo,
     FAST_RETRY,
     refocusTab,
     swrWrapper,
@@ -238,8 +238,4 @@ function answerWith(answer: AgGenesisCertAnswer) {
 
 function renderStatus(overrides: SWRConfiguration = {}) {
     return renderHook(() => useAlpenglowStatus(), { wrapper: swrWrapper({ ...FAST_RETRY, ...overrides }) });
-}
-
-function connectedTo(cluster: Cluster, url: string) {
-    return clusterContext({ cluster, connectableUrl: url, status: ClusterStatus.Connected, url });
 }

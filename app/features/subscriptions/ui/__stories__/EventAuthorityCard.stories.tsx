@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { withMockRpc } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
@@ -24,7 +24,6 @@ const account: Account = {
 const meta = {
     component: SubscriptionsEventAuthorityCard,
     decorators: [withMockRpc, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Subscriptions/EventAuthorityCard',
 } satisfies Meta<typeof SubscriptionsEventAuthorityCard>;

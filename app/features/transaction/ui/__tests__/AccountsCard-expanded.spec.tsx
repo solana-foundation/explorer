@@ -4,15 +4,13 @@ import { describe, expect, test, vi } from 'vitest';
 
 vi.mock('next/navigation');
 
-import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS } from '../__fixtures__/transaction';
-import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
-import { AccountsCard } from '../AccountsCard';
+import { accountsCardWithProviders } from '../__fixtures__/withTransactionProviders';
 
 const TOKEN_ACCOUNT_ROW = 2;
 
 describe('transaction::AccountsCard expanded content', () => {
     test('should show the account details when a row expands', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
 
         await expandRow(TOKEN_ACCOUNT_ROW);
 
@@ -21,7 +19,7 @@ describe('transaction::AccountsCard expanded content', () => {
     });
 
     test('should show no details for a row that stays collapsed', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
 
         await expandRow(TOKEN_ACCOUNT_ROW);
         await screen.findByText('Allocated Data Size');
@@ -30,7 +28,7 @@ describe('transaction::AccountsCard expanded content', () => {
     });
 
     test('should show the details again after a collapse', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
         await expandRow(TOKEN_ACCOUNT_ROW);
         await screen.findByText('Allocated Data Size');
 
@@ -42,18 +40,6 @@ describe('transaction::AccountsCard expanded content', () => {
         expect(await screen.findByText('Allocated Data Size')).toBeInTheDocument();
     });
 });
-
-function renderCard() {
-    const Wrapper = withTransactionProviders(
-        { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-        { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-    );
-    return render(
-        <Wrapper>
-            <AccountsCard signature={DEFAULT_SIGNATURE} />
-        </Wrapper>,
-    );
-}
 
 async function expandRow(index: number) {
     await userEvent.click(screen.getAllByRole('button', { name: 'Expand account details' })[index]);

@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -8,11 +8,7 @@ import type { InstructionArg } from '../model/args';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from '../ui/DecodedInstructionCard';
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div>{overrideText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 const STUB_SURFACE: InstructionSurface = {
     Shell: ({ children }) => (

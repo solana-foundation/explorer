@@ -1,22 +1,13 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import { fn } from 'storybook/test';
 
 import { ReceiptView } from '../ReceiptView';
-import { defaultReceipt, forBaseReceipt } from './receipt-fixtures';
+import * as Base from './ReceiptView.stories';
 
 const meta: Meta<typeof ReceiptView> = {
-    args: {
-        downloadCsv: fn().mockResolvedValue(undefined),
-        downloadPdf: fn().mockResolvedValue(undefined),
-        signature: 'ExampleTransactionSignature',
-        transactionPath: 'https://example.com/tx/ExampleTransactionSignature',
-    },
+    args: Base.default.args,
     component: ReceiptView,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Receipt/ReceiptView@Media',
 };
@@ -24,7 +15,7 @@ const meta: Meta<typeof ReceiptView> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { data: forBaseReceipt(defaultReceipt) };
+const args = Base.Default.args;
 
 export const Mobile: Story = {
     args,

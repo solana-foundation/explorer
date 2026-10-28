@@ -3,6 +3,7 @@ import { Cluster, ClusterStatus } from '@utils/cluster';
 import { type SWRConfiguration } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { reported } from '@/app/__tests__/rpc-errors';
 import {
     type ClusterContext,
     clusterContext,
@@ -175,10 +176,7 @@ describe('useSlotTime', () => {
         expect(Logger.warn).toHaveBeenCalledTimes(1);
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.any(String),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, status: 400 }),
-            }),
+            reported({ cluster: Cluster.MainnetBeta, status: 400 }),
         );
         // The bot gate ahead of the route refuses visitors it misjudges, and this fires once per visitor
         // with no CDN in front of it: one gate misfiring must not set the error rate on its own.
@@ -205,13 +203,7 @@ describe('useSlotTime', () => {
         expect(Logger.warn).toHaveBeenCalledTimes(1);
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.any(String),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({
-                    cluster: Cluster.MainnetBeta,
-                    parseError: expect.any(String),
-                }),
-            }),
+            reported({ cluster: Cluster.MainnetBeta, parseError: expect.any(String) }),
         );
         // A captive portal or an interstitial proxy answers for the route this way, once per visitor with
         // no CDN in front of it: someone else's middlebox must not set the error rate.

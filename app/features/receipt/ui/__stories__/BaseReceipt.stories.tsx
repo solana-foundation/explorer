@@ -1,8 +1,3 @@
-import type { Meta, StoryObj } from '@storybook-config/types';
-import { expect, within } from 'storybook/test';
-
-import type { TransferRow } from '../../types';
-import { BaseReceipt, NoReceipt as NoReceiptComponent } from '../BaseReceipt';
 import {
     defaultReceipt,
     forBaseReceipt,
@@ -13,7 +8,12 @@ import {
     receiptTokenTransfer,
     receiptWithDomains,
     receiptWithMemo,
-} from './receipt-fixtures';
+} from '@features/receipt/__fixtures__/receipts';
+import type { Meta, StoryObj } from '@storybook-config/types';
+import { expect, within } from 'storybook/test';
+
+import type { TransferRow } from '../../types';
+import { BaseReceipt, NoReceipt as NoReceiptComponent } from '../BaseReceipt';
 
 const meta: Meta<typeof BaseReceipt> = {
     argTypes: {

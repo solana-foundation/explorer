@@ -1,6 +1,10 @@
-import { gen } from '@__fixtures__/gen';
+import {
+    createWeb3TransactionMessage,
+    FEE_PAYER,
+    RECIPIENT,
+} from '@entities/transaction-data/__fixtures__/wire-transactions';
 import { getBase58Encoder } from '@solana/kit';
-import { PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
+import { PublicKey, SystemProgram, VersionedMessage } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { encodeTransactionData } from '../encoding';
@@ -11,36 +15,13 @@ const BASE58_ENCODER = getBase58Encoder();
 // The production code uses only Uint8Array for browser compatibility.
 
 describe('transaction-data encoding', () => {
-    const FROM_PUBKEY = gen.publicKey(1);
-    const TO_PUBKEY = gen.publicKey(2);
-    const TRANSFER_AMOUNT = 1_000_000n;
+    const FROM_PUBKEY = new PublicKey(FEE_PAYER);
+    const TO_PUBKEY = new PublicKey(RECIPIENT);
+    const TRANSFER_AMOUNT = 1n;
 
-    const createTransferInstruction = () =>
-        SystemProgram.transfer({
-            fromPubkey: FROM_PUBKEY,
-            lamports: TRANSFER_AMOUNT,
-            toPubkey: TO_PUBKEY,
-        });
+    const createLegacyMessage = (): Uint8Array => createWeb3TransactionMessage().compileToLegacyMessage().serialize();
 
-    const createLegacyMessage = (): Uint8Array => {
-        const message = new TransactionMessage({
-            instructions: [createTransferInstruction()],
-            payerKey: FROM_PUBKEY,
-            recentBlockhash: PublicKey.default.toBase58(),
-        }).compileToLegacyMessage();
-
-        return message.serialize();
-    };
-
-    const createV0Message = (): Uint8Array => {
-        const message = new TransactionMessage({
-            instructions: [createTransferInstruction()],
-            payerKey: FROM_PUBKEY,
-            recentBlockhash: PublicKey.default.toBase58(),
-        }).compileToV0Message();
-
-        return message.serialize();
-    };
+    const createV0Message = (): Uint8Array => createWeb3TransactionMessage().compileToV0Message().serialize();
 
     const verifyDecodedMessage = (decoded: Uint8Array) => {
         const message = VersionedMessage.deserialize(decoded);

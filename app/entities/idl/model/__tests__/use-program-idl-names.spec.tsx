@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { reported } from '@/app/__tests__/rpc-errors';
 import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
@@ -107,10 +108,7 @@ describe('useProgramIdlNames', () => {
         await waitForHook(() => expect(result.current.size).toBe(1));
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.stringContaining('IDL fetch failed'),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({ programId: SECOND }),
-            }),
+            reported({ programId: SECOND }),
         );
     });
 

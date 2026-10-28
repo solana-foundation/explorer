@@ -1,14 +1,12 @@
 import { renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '@/app/entities/cluster/lib/cluster';
 import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
 import { type ClusterState, StateContext } from '@/app/entities/cluster/model/cluster-provider';
 import { type CacheEntry, FetchStatus } from '@/app/providers/cache';
 import { useCacheEntries, useCacheEntry } from '@/app/providers/cache-entry';
-
-vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
 
 describe('useCacheEntry', () => {
     it('should report a missing entry as failed once the connection failed', () => {

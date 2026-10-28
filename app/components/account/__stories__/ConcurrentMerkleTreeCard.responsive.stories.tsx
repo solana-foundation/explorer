@@ -1,5 +1,5 @@
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ConcurrentMerkleTreeCard } from '../ConcurrentMerkleTreeCard';
@@ -8,10 +8,6 @@ import { buildConcurrentMerkleTreeData } from './mocks/concurrent-merkle-tree';
 const meta: Meta<typeof ConcurrentMerkleTreeCard> = {
     component: ConcurrentMerkleTreeCard,
     decorators: [withCluster, withTokenInfoBatch, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/ConcurrentMerkleTreeCard@Media',
 };

@@ -13,7 +13,7 @@ export function mockConfirmedSignatureInfo(overrides: SignatureOverrides = {}): 
         confirmationStatus: 'finalized',
         err: null,
         memo: null,
-        signature: gen.signature(),
+        signature: gen.signature(overrides.slot ?? 0),
         slot: 312_456_789,
         ...overrides,
     };

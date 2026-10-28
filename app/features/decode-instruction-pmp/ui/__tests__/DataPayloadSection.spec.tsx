@@ -44,9 +44,7 @@ vi.mock('@providers/accounts', () => ({
     useFetchAccountInfo: () => mockFetchAccountInfo,
 }));
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: { toBase58(): string } }) => <div data-testid="address">{pubkey.toBase58()}</div>,
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 function inline(bytes: Uint8Array, dataSource: DataSource): PmpPayload {
     return { dataSource, source: { bytes, kind: 'inline' } };

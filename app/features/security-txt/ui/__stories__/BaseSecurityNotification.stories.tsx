@@ -13,9 +13,6 @@ const meta = {
                 story: 'Notification component displaying security.txt messages',
             },
         },
-        nextjs: {
-            appDirectory: true,
-        },
     },
     tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/BaseSecurityNotification',

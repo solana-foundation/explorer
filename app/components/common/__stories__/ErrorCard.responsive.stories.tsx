@@ -1,16 +1,14 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ErrorCard } from '../ErrorCard';
+import * as Base from './ErrorCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 // ErrorCard switches button layout under the md breakpoint (full-width on mobile, inline on md+).
 const meta: Meta<typeof ErrorCard> = {
     component: ErrorCard,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Common/ErrorCard@Media',
 };
@@ -18,11 +16,7 @@ const meta: Meta<typeof ErrorCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    retry: () => {},
-    subtext: 'Please check your network connection',
-    text: 'Failed to fetch',
-};
+const args = Base.WithSubtext.args;
 
 export const Mobile: Story = {
     args,

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '@/app/entities/token-info';
+import { tokenInfo } from '@/app/entities/token-info/__fixtures__/token-info';
 import type { TokenInfo } from '@/app/entities/token-info/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
@@ -30,18 +31,6 @@ vi.mock('@entities/token-info/server', async () => {
         getTokenInfosFromMetaplex: mocks.getTokenInfosFromMetaplex,
     };
 });
-
-function token(address: string, overrides: Partial<TokenInfo> = {}): TokenInfo {
-    return {
-        address,
-        decimals: 6,
-        logoURI: null,
-        name: `Token ${address.slice(0, 4)}`,
-        symbol: 'TKN',
-        verified: true,
-        ...overrides,
-    };
-}
 
 describe('POST /api/token-info', () => {
     beforeEach(() => {
@@ -129,23 +118,23 @@ describe('POST /api/token-info', () => {
     });
 
     it('should accept a single address and still answer with an array', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
+        mocks.getTokenInfos.mockResolvedValueOnce([tokenInfo(MINT_A, true)]);
 
         const { POST } = await importRoute();
         const res = await POST(createRequest({ address: MINT_A, cluster: Cluster.MainnetBeta }));
 
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ content: [token(MINT_A)] });
+        expect(await res.json()).toEqual({ content: [tokenInfo(MINT_A, true)] });
         expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.MainnetBeta, undefined, expect.anything());
     });
 
     it('should resolve several addresses in one request', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A), token(MINT_B)]);
+        mocks.getTokenInfos.mockResolvedValueOnce([tokenInfo(MINT_A, true), tokenInfo(MINT_B, true)]);
 
         const { POST } = await importRoute();
         const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
 
-        expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_B)] });
+        expect(await res.json()).toEqual({ content: [tokenInfo(MINT_A, true), tokenInfo(MINT_B, true)] });
         expect(mocks.getTokenInfos).toHaveBeenCalledWith(
             [MINT_A, MINT_B],
             Cluster.MainnetBeta,
@@ -187,8 +176,8 @@ describe('POST /api/token-info', () => {
     });
 
     it('should read on-chain metadata only for mints the list is missing', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
-        mocks.getTokenInfosFromMetaplex.mockResolvedValueOnce([token(MINT_C, { verified: false })]);
+        mocks.getTokenInfos.mockResolvedValueOnce([tokenInfo(MINT_A, true)]);
+        mocks.getTokenInfosFromMetaplex.mockResolvedValueOnce([tokenInfo(MINT_C, false)]);
 
         const { POST } = await importRoute();
         const res = await POST(
@@ -206,11 +195,11 @@ describe('POST /api/token-info', () => {
             expect.any(String),
             expect.not.objectContaining({ baseUrl: expect.anything() }),
         );
-        expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_C, { verified: false })] });
+        expect(await res.json()).toEqual({ content: [tokenInfo(MINT_A, true), tokenInfo(MINT_C, false)] });
     });
 
     it('should skip the on-chain lookup when the list already covers every mint', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A), token(MINT_B)]);
+        mocks.getTokenInfos.mockResolvedValueOnce([tokenInfo(MINT_A, true), tokenInfo(MINT_B, true)]);
 
         const { POST } = await importRoute();
         await POST(
@@ -225,7 +214,7 @@ describe('POST /api/token-info', () => {
     });
 
     it('should still return the listed tokens when the on-chain lookup throws', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
+        mocks.getTokenInfos.mockResolvedValueOnce([tokenInfo(MINT_A, true)]);
         mocks.getTokenInfosFromMetaplex.mockRejectedValueOnce(new Error('rpc exploded'));
 
         const { POST } = await importRoute();
@@ -238,7 +227,7 @@ describe('POST /api/token-info', () => {
         );
 
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ content: [token(MINT_A)] });
+        expect(await res.json()).toEqual({ content: [tokenInfo(MINT_A, true)] });
         expect(Logger.warn).toHaveBeenCalled();
     });
 
@@ -322,13 +311,13 @@ describe('POST /api/token-info', () => {
         });
 
         it('should still answer the tokens it did resolve when only some were dropped', async () => {
-            failUpstream([token(MINT_A)]);
+            failUpstream([tokenInfo(MINT_A, true)]);
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
 
             expect(res.status).toBe(200);
-            expect(await res.json()).toEqual({ content: [token(MINT_A)] });
+            expect(await res.json()).toEqual({ content: [tokenInfo(MINT_A, true)] });
         });
 
         it('should keep answering 200 for a genuine all-not-found, which reports no error', async () => {

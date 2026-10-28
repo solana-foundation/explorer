@@ -1,8 +1,8 @@
+import { buildParsedTransaction } from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { getBase58Decoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     ParsedInstruction,
-    ParsedTransactionWithMeta,
     PartiallyDecodedInstruction,
     PublicKey,
     SystemProgram,
@@ -159,7 +159,7 @@ describe('getInstructionSummaries', () => {
                 programId: SystemProgram.programId,
             } as unknown as ParsedInstruction;
             const version = 1;
-            const results = getInstructionSummaries(makeTxWithMeta([ix], version));
+            const results = getInstructionSummaries(makeTx([ix], version));
 
             expect(results).toEqual([{ name: 'Transfer', programName: 'System Program' }]);
         });
@@ -270,32 +270,9 @@ describe('resolveNamesFromData', () => {
     });
 });
 
-function makeTx(instructions: (ParsedInstruction | PartiallyDecodedInstruction)[]): ParsedTransactionWithMeta {
-    return {
-        meta: null,
-        transaction: {
-            message: {
-                accountKeys: [],
-                instructions,
-            },
-            signatures: [],
-        },
-    } as unknown as ParsedTransactionWithMeta;
-}
-
-function makeTxWithMeta(
+function makeTx(
     instructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
-    version: TransactionWithMeta['version'],
+    version?: TransactionWithMeta['version'],
 ): TransactionWithMeta {
-    return {
-        meta: null,
-        transaction: {
-            message: {
-                accountKeys: [],
-                instructions,
-            },
-            signatures: [],
-        },
-        version,
-    } as unknown as TransactionWithMeta;
+    return { ...buildParsedTransaction({ instructions, meta: null }), version };
 }

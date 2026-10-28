@@ -4,11 +4,6 @@ import { BaseIdlAccounts } from '../BaseIdlAccounts';
 
 const meta = {
     component: BaseIdlAccounts,
-    parameters: {
-        nextjs: {
-            appDirectory: true,
-        },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlAccounts',
 } satisfies Meta<typeof BaseIdlAccounts>;

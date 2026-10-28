@@ -1,46 +1,13 @@
-import { DEFAULT_SLOT } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { toBase64 } from '@/app/shared/lib/bytes';
-
 import { SecurityCard } from '../SecurityCard';
+import * as Base from './SecurityCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const PUBKEY = new PublicKey(TOKEN_PROGRAM_ADDRESS);
-const AUTHORITY = PublicKey.default;
-
-const NEODYME_HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
-const NEODYME_FOOTER = '=======END SECURITY.TXT V1=======\0';
-
-function encodeNeodymeSecurityTxt(fields: Record<string, string>): string {
-    const enc = new TextEncoder();
-    const body = `${Object.entries(fields)
-        .flatMap(([k, v]) => [k, v])
-        .join('\0')}\0`;
-    const bytes = enc.encode(`${NEODYME_HEADER}${body}${NEODYME_FOOTER}`);
-    return toBase64(bytes);
-}
-
-const validSecurityTxt = encodeNeodymeSecurityTxt({
-    auditors: 'Sample Auditor',
-    contacts: 'email:security@example.test,link:https://example.test/security',
-    name: 'Sample Program',
-    policy: 'https://example.test/SECURITY.md',
-    project_url: 'https://example.test',
-    source_code: 'https://github.com/example/sample',
-});
-
 const meta = {
     component: SecurityCard,
-    decorators: [withViewportFromGlobal, withClusterAndAccounts],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
+    decorators: [withViewportFromGlobal, ...Base.default.decorators],
     tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/SecurityCard@Media',
 } satisfies Meta<typeof SecurityCard>;
@@ -48,12 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    data: {
-        programData: { authority: AUTHORITY, data: [validSecurityTxt, 'base64'], slot: DEFAULT_SLOT },
-    } as any,
-    pubkey: PUBKEY,
-};
+const args = Base.WithEmbeddedSecurityTxt.args;
 
 export const Mobile: Story = {
     args,

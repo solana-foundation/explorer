@@ -1,6 +1,14 @@
 import { gen } from '@__fixtures__/gen';
-import { FetchStatus } from '@providers/cache';
-import { PublicKey } from '@solana/web3.js';
+import {
+    ownedToken,
+    ownedTokensEntry,
+    OWNER,
+    TOKEN_ACCOUNT,
+    USDC_HOLDING,
+    USDC_MINT,
+    USDC_TOKEN_INFO,
+} from '@components/account/__fixtures__/owned-tokens';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Cluster } from '@utils/cluster';
@@ -67,44 +75,23 @@ vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', 
 
 import { OwnedTokensCard } from '../OwnedTokensCard';
 
-const OWNER = '11111111111111111111111111111111';
-const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const LOGO = 'https://example.test/usdc.png';
-const TOKEN_ACCOUNT_A = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_ACCOUNT_B = 'SysvarC1ock11111111111111111111111111111111';
 
 // Distinct mints for the ordering specs, named for the tier each is set up to land in.
-const VERIFIED_MINT = MINT;
+const VERIFIED_MINT = USDC_MINT;
 const LISTED_MINT = 'So11111111111111111111111111111111111111112';
 const UNKNOWN_MINT = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 
-type TokenAmount = { amount: string; decimals: number; uiAmountString: string };
-
 /** One base unit at zero decimals, for specs that assert on order rather than on balances. */
-const UNIT_AMOUNT: TokenAmount = { amount: '1', decimals: 0, uiAmountString: '1' };
-
-function makeTokenAccount(tokenAmount: TokenAmount, pubkey: string = TOKEN_ACCOUNT_A, mint: string = MINT) {
-    return { info: { mint: new PublicKey(mint), tokenAmount }, pubkey: new PublicKey(pubkey) };
-}
+const UNIT_AMOUNT = { amount: '1', decimals: 0, uiAmountString: '1' };
 
 // One mint held in two accounts, each scaled by 2: the row totals 8, so the tooltip must show 4 pre-scaling.
 function twoAccountsOfOneMint() {
-    return makeEntryWith([
-        makeTokenAccount({ amount: '1000000', decimals: 6, uiAmountString: '2' }, TOKEN_ACCOUNT_A),
-        makeTokenAccount({ amount: '3000000', decimals: 6, uiAmountString: '6' }, TOKEN_ACCOUNT_B),
+    return ownedTokensEntry([
+        ownedToken({ amount: '1000000', decimals: 6, uiAmountString: '2' }, TOKEN_ACCOUNT),
+        ownedToken({ amount: '3000000', decimals: 6, uiAmountString: '6' }, TOKEN_ACCOUNT_B),
     ]);
-}
-
-function makeEntryWith(tokens: ReturnType<typeof makeTokenAccount>[]) {
-    return { data: { tokens }, status: FetchStatus.Fetched };
-}
-
-function makeEntry() {
-    return makeEntryWith([makeTokenAccount({ amount: '1234560000', decimals: 6, uiAmountString: '1234.56' })]);
-}
-
-function tokenInfo(address: string, verified: boolean) {
-    return { address, decimals: 6, logoURI: null, name: `Token ${address.slice(0, 4)}`, symbol: 'TKN', verified };
 }
 
 /** The resolved lookup, settled. Pass the entries the UTL list is meant to know about. */
@@ -128,7 +115,7 @@ function loadMoreButton() {
 describe('should render OwnedTokensCard from a single bulk lookup', () => {
     beforeEach(() => {
         useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
-        useAccountOwnedTokensMock.mockReturnValue(makeEntry());
+        useAccountOwnedTokensMock.mockReturnValue(ownedTokensEntry([USDC_HOLDING]));
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useTokenInfosMock.mockReturnValue(resolved());
     });
@@ -138,12 +125,7 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
     });
 
     it('should render the symbol and logo from the bulk lookup and label the mint Address without a second fetch', () => {
-        useTokenInfosMock.mockReturnValue({
-            isLoading: false,
-            tokenInfos: new Map([
-                [MINT, { address: MINT, decimals: 6, logoURI: LOGO, name: 'USD Coin', symbol: 'USDC', verified: true }],
-            ]),
-        });
+        useTokenInfosMock.mockReturnValue(resolved([{ ...USDC_TOKEN_INFO, logoURI: LOGO }]));
 
         render(<OwnedTokensCard address={OWNER} />);
 
@@ -151,7 +133,7 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
         const logo = screen.getByTestId('token-logo');
         expect(logo.getAttribute('data-uri')).toBe(LOGO);
         // The card resolves every held mint in one call, so rows fetch nothing themselves.
-        expect(useTokenInfosMock).toHaveBeenCalledWith([MINT], Cluster.MainnetBeta, 'genesis');
+        expect(useTokenInfosMock).toHaveBeenCalledWith([USDC_MINT], Cluster.MainnetBeta, 'genesis');
         // Symbol comes from the lookup, rendered next to the amount in the balance cell.
         expect(screen.getByText('USDC', { exact: false })).toBeInTheDocument();
         // Mint Address is labeled from the already-resolved info (tokenLabelInfo), so it fetches nothing.
@@ -182,8 +164,8 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
     it('should render the pre-scaling raw amount without u64 precision loss', () => {
         // 2^53 + 1 base units: Number() rounds this to ...992, dropping the trailing 3 from the displayed amount.
         useAccountOwnedTokensMock.mockReturnValue(
-            makeEntryWith([
-                makeTokenAccount({ amount: '9007199254740993', decimals: 6, uiAmountString: '18014398509.481986' }),
+            ownedTokensEntry([
+                ownedToken({ amount: '9007199254740993', decimals: 6, uiAmountString: '18014398509.481986' }),
             ]),
         );
 
@@ -220,10 +202,10 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
 
 describe('should order holdings by verification tier', () => {
     function heldInWorstOrder() {
-        return makeEntryWith([
-            makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, UNKNOWN_MINT),
-            makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, LISTED_MINT),
-            makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, VERIFIED_MINT),
+        return ownedTokensEntry([
+            ownedToken(UNIT_AMOUNT, TOKEN_ACCOUNT, UNKNOWN_MINT),
+            ownedToken(UNIT_AMOUNT, TOKEN_ACCOUNT, LISTED_MINT),
+            ownedToken(UNIT_AMOUNT, TOKEN_ACCOUNT, VERIFIED_MINT),
         ]);
     }
 
@@ -258,9 +240,7 @@ describe('should order holdings by verification tier', () => {
     it('should keep RPC order within a tier', () => {
         const [first, second, third, fourth] = [gen.address(1), gen.address(2), gen.address(3), gen.address(4)];
         useAccountOwnedTokensMock.mockReturnValue(
-            makeEntryWith(
-                [first, second, third, fourth].map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint)),
-            ),
+            ownedTokensEntry([first, second, third, fourth].map(mint => ownedToken(UNIT_AMOUNT, TOKEN_ACCOUNT, mint))),
         );
         useTokenInfosMock.mockReturnValue(resolved([tokenInfo(first, true), tokenInfo(third, true)]));
 
@@ -280,7 +260,7 @@ describe('should page the ordered holdings', () => {
         useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useAccountOwnedTokensMock.mockReturnValue(
-            makeEntryWith(allMints.map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint))),
+            ownedTokensEntry(allMints.map(mint => ownedToken(UNIT_AMOUNT, TOKEN_ACCOUNT, mint))),
         );
         useTokenInfosMock.mockReturnValue(resolved(verifiedMints.map(mint => tokenInfo(mint, true))));
     });
@@ -320,7 +300,7 @@ describe('should render the account address column only in detail display', () =
     beforeEach(() => {
         useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
         useTokenInfosMock.mockReturnValue(resolved());
-        useAccountOwnedTokensMock.mockReturnValue(makeEntry());
+        useAccountOwnedTokensMock.mockReturnValue(ownedTokensEntry([USDC_HOLDING]));
     });
 
     afterEach(() => {
@@ -333,7 +313,7 @@ describe('should render the account address column only in detail display', () =
         render(<OwnedTokensCard address={OWNER} />);
 
         expect(screen.getByText('Account Address')).toBeInTheDocument();
-        expect(screen.getAllByTestId('address').map(node => node.textContent)).toEqual([TOKEN_ACCOUNT_A, MINT]);
+        expect(screen.getAllByTestId('address').map(node => node.textContent)).toEqual([TOKEN_ACCOUNT, USDC_MINT]);
     });
 
     it('should omit the account address in summary display', () => {
@@ -342,7 +322,7 @@ describe('should render the account address column only in detail display', () =
         render(<OwnedTokensCard address={OWNER} />);
 
         expect(screen.queryByText('Account Address')).not.toBeInTheDocument();
-        expect(visibleMints()).toEqual([MINT]);
+        expect(visibleMints()).toEqual([USDC_MINT]);
     });
 
     // One row per mint, so a mint held twice shows a summed balance against a single account.
@@ -352,6 +332,6 @@ describe('should render the account address column only in detail display', () =
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        expect(screen.getAllByTestId('address').map(node => node.textContent)).toEqual([TOKEN_ACCOUNT_B, MINT]);
+        expect(screen.getAllByTestId('address').map(node => node.textContent)).toEqual([TOKEN_ACCOUNT_B, USDC_MINT]);
     });
 });

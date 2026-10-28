@@ -1,13 +1,6 @@
 import { toInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    nextjsParameters,
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { CodamaInstructionCard } from '../CodamaInstructionCard';
@@ -26,15 +19,14 @@ const sampleIx = new TransactionInstruction({
 // parsedIx routes through the UnknownDetailsCard fallback inside CodamaInstructionCard.
 const fallbackParsedIx = { path: [{ kind: 'unknownNode' }] } as any;
 
-const meta: Meta<typeof CodamaInstructionCard> = {
+const meta = {
     component: CodamaInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
-    parameters: nextjsParameters,
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
     // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.
     title: 'Components/Instruction/CodamaInstructionDetailsCard',
-};
+} satisfies Meta<typeof CodamaInstructionCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

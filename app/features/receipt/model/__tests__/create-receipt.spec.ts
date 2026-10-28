@@ -1,31 +1,5 @@
+import { DEFAULT_SIGNATURE as mockSignature, gen } from '@__fixtures__/gen';
 import { truncateAddress } from '@entities/address';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { Cluster } from '@/app/utils/cluster';
-
-import { getTokenInfo } from '../../api/get-token-info';
-import { getTx } from '../../api/get-tx';
-import { MULTISIG_AUTHORITY, RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
-import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
-import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
-import { mockMixedMintTransfersTransaction } from '../../mocks/mixed-mint-transfers';
-import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
-import { mockNoTransferTransaction } from '../../mocks/no-transfers';
-import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
-import { mockToken2022TransferTransaction } from '../../mocks/token-2022-transfer';
-import { mockToken2022Transfer2Transaction } from '../../mocks/token-2022-transfer2';
-import { mockUsdcTransferTransaction } from '../../mocks/usdc-checked-transfer';
-import { mockUsdcFpPrecisionTransfersTransaction } from '../../mocks/usdc-fp-precision-transfers';
-import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
-import {
-    mockUsdcMultipleTransfersAddresses,
-    mockUsdcMultipleTransfersTransaction,
-} from '../../mocks/usdc-multiple-transfers';
-import { mockUsdcMultisigTransferTransaction } from '../../mocks/usdc-multisig-transfer';
-import { mockUsdcRegularTransferTransaction } from '../../mocks/usdc-regular-transfer';
-import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
 import {
     buildInnerGroup,
     buildParsedTransaction,
@@ -33,7 +7,37 @@ import {
     buildSolTransferIx,
     buildSolTransferWithSeedIx,
     buildTokenTransferCheckedIx,
-} from '../__fixtures__/builders';
+} from '@entities/transaction-data/__fixtures__/parsed-transactions';
+import {
+    mockCustomFeePayerTransaction,
+    mockJitoOnlyTransferTransaction,
+    mockMixedMintTransfersTransaction,
+    mockMultipleTransfersTransaction,
+    mockNoTransferTransaction,
+    mockSingleTransferTransaction,
+    mockToken2022Transfer2Transaction,
+    mockToken2022TransferTransaction,
+    mockUsdcFpPrecisionTransfersTransaction,
+    mockUsdcJitoTransferTransaction,
+    mockUsdcMultipleTransfersAddresses,
+    mockUsdcMultipleTransfersTransaction,
+    mockUsdcMultisigTransferTransaction,
+    mockUsdcRegularTransferTransaction,
+    mockUsdcTransferTransaction,
+    mockZeroTransferTransaction,
+    MULTISIG_AUTHORITY,
+    RECEIVER,
+    RECEIVER_2,
+    SENDER,
+} from '@features/receipt/__fixtures__/transactions';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Cluster } from '@/app/utils/cluster';
+
+import { getTokenInfo } from '../../api/get-token-info';
+import { getTx } from '../../api/get-tx';
 import { createReceipt } from '../create-receipt';
 import { type ReceiptResult } from '../receipt-data';
 
@@ -47,8 +51,6 @@ function unwrap(result: ReceiptResult) {
 }
 
 describe('createReceipt', () => {
-    const mockSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
-
     beforeEach(() => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
     });
@@ -74,10 +76,10 @@ describe('createReceipt', () => {
                 },
                 network: 'Mainnet Beta',
                 receiver: {
-                    truncated: truncateAddress(RECEIVER.publicKey.toBase58(), 5),
+                    truncated: truncateAddress(RECEIVER.toBase58(), 5),
                 },
                 sender: {
-                    truncated: truncateAddress(SENDER.publicKey.toBase58(), 5),
+                    truncated: truncateAddress(SENDER.toBase58(), 5),
                 },
                 total: {
                     formatted: '0.3',
@@ -104,18 +106,18 @@ describe('createReceipt', () => {
                 transfers: [
                     {
                         amount: { formatted: '0.08', raw: 80000000, unit: 'SOL' },
-                        receiver: { address: RECEIVER.publicKey.toBase58() },
-                        sender: { address: SENDER.publicKey.toBase58() },
+                        receiver: { address: RECEIVER.toBase58() },
+                        sender: { address: SENDER.toBase58() },
                     },
                     {
                         amount: { formatted: '0.05', raw: 50000000, unit: 'SOL' },
-                        receiver: { address: RECEIVER_2.publicKey.toBase58() },
-                        sender: { address: SENDER.publicKey.toBase58() },
+                        receiver: { address: RECEIVER_2.toBase58() },
+                        sender: { address: SENDER.toBase58() },
                     },
                     {
                         amount: { formatted: '0.01', raw: 10000000, unit: 'SOL' },
-                        receiver: { address: RECEIVER.publicKey.toBase58() },
-                        sender: { address: SENDER.publicKey.toBase58() },
+                        receiver: { address: RECEIVER.toBase58() },
+                        sender: { address: SENDER.toBase58() },
                     },
                 ],
             });
@@ -190,13 +192,13 @@ describe('createReceipt', () => {
         });
 
         it('should create a SOL receipt from a transferWithSeed instruction with the derived source as sender', async () => {
-            const base = PublicKey.unique();
-            const derived = PublicKey.unique();
+            const base = gen.publicKey(20);
+            const derived = gen.publicKey(21);
             const tx = buildParsedTransaction({
-                accountKeys: [base, derived, RECEIVER.publicKey, SystemProgram.programId],
+                accountKeys: [base, derived, RECEIVER, SystemProgram.programId],
                 instructions: [
                     buildSolTransferWithSeedIx({
-                        destination: RECEIVER.publicKey,
+                        destination: RECEIVER,
                         lamports: 50000000,
                         source: derived,
                         sourceBase: base,
@@ -211,32 +213,25 @@ describe('createReceipt', () => {
 
             expect(receipt).toMatchObject({
                 kind: 'sol',
-                receiver: { address: RECEIVER.publicKey.toBase58() },
+                receiver: { address: RECEIVER.toBase58() },
                 sender: { address: derived.toBase58() },
                 total: { formatted: '0.05', raw: 50000000, unit: 'SOL' },
             });
         });
 
         it('should aggregate transfer and transferWithSeed instructions into transfers[]', async () => {
-            const base = PublicKey.unique();
-            const derived = PublicKey.unique();
+            const base = gen.publicKey(20);
+            const derived = gen.publicKey(21);
             const tx = buildParsedTransaction({
-                accountKeys: [
-                    SENDER.publicKey,
-                    base,
-                    derived,
-                    RECEIVER.publicKey,
-                    RECEIVER_2.publicKey,
-                    SystemProgram.programId,
-                ],
+                accountKeys: [SENDER, base, derived, RECEIVER, RECEIVER_2, SystemProgram.programId],
                 instructions: [
                     buildSolTransferIx({
-                        destination: RECEIVER.publicKey,
+                        destination: RECEIVER,
                         lamports: 80000000,
-                        source: SENDER.publicKey,
+                        source: SENDER,
                     }),
                     buildSolTransferWithSeedIx({
-                        destination: RECEIVER_2.publicKey,
+                        destination: RECEIVER_2,
                         lamports: 50000000,
                         source: derived,
                         sourceBase: base,
@@ -254,12 +249,12 @@ describe('createReceipt', () => {
             expect(receipt.transfers).toHaveLength(2);
             expect(receipt.transfers?.[0]).toMatchObject({
                 amount: { raw: 80000000, unit: 'SOL' },
-                receiver: { address: RECEIVER.publicKey.toBase58() },
-                sender: { address: SENDER.publicKey.toBase58() },
+                receiver: { address: RECEIVER.toBase58() },
+                sender: { address: SENDER.toBase58() },
             });
             expect(receipt.transfers?.[1]).toMatchObject({
                 amount: { raw: 50000000, unit: 'SOL' },
-                receiver: { address: RECEIVER_2.publicKey.toBase58() },
+                receiver: { address: RECEIVER_2.toBase58() },
                 sender: { address: derived.toBase58() },
             });
         });
@@ -440,8 +435,8 @@ describe('createReceipt', () => {
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
-            expect(receipt.sender.address).toBe(MULTISIG_AUTHORITY.publicKey.toBase58());
-            expect(receipt.receiver.address).toBe(RECEIVER.publicKey.toBase58());
+            expect(receipt.sender.address).toBe(MULTISIG_AUTHORITY.toBase58());
+            expect(receipt.receiver.address).toBe(RECEIVER.toBase58());
         });
 
         it('should create a multi-transfer token receipt summing totals and exposing per-instruction transfers', async () => {
@@ -493,31 +488,25 @@ describe('createReceipt', () => {
 
     describe('inner-instruction transfers', () => {
         it('should build a multi-transfer SOL receipt from inner SystemProgram transfers', async () => {
-            const wrapperProgram = Keypair.generate().publicKey;
+            const wrapperProgram = gen.publicKey(20);
             const tx = buildParsedTransaction({
-                accountKeys: [
-                    SENDER.publicKey,
-                    RECEIVER.publicKey,
-                    RECEIVER_2.publicKey,
-                    SystemProgram.programId,
-                    wrapperProgram,
-                ],
+                accountKeys: [SENDER, RECEIVER, RECEIVER_2, SystemProgram.programId, wrapperProgram],
                 innerInstructions: [
                     buildInnerGroup(0, [
                         buildSolTransferIx({
-                            destination: RECEIVER.publicKey,
+                            destination: RECEIVER,
                             lamports: 80000000,
-                            source: SENDER.publicKey,
+                            source: SENDER,
                         }),
                         buildSolTransferIx({
-                            destination: RECEIVER_2.publicKey,
+                            destination: RECEIVER_2,
                             lamports: 50000000,
-                            source: SENDER.publicKey,
+                            source: SENDER,
                         }),
                         buildSolTransferIx({
-                            destination: RECEIVER.publicKey,
+                            destination: RECEIVER,
                             lamports: 10000000,
-                            source: SENDER.publicKey,
+                            source: SENDER,
                         }),
                     ]),
                 ],
@@ -532,21 +521,21 @@ describe('createReceipt', () => {
             expect(receipt.transfers).toHaveLength(3);
             expect(receipt.transfers?.[0]).toMatchObject({
                 amount: { formatted: '0.08', raw: 80000000, unit: 'SOL' },
-                receiver: { address: RECEIVER.publicKey.toBase58() },
-                sender: { address: SENDER.publicKey.toBase58() },
+                receiver: { address: RECEIVER.toBase58() },
+                sender: { address: SENDER.toBase58() },
             });
         });
 
         it('should build a multi-transfer token receipt from inner transferChecked CPIs', async () => {
-            const wrapperProgram = Keypair.generate().publicKey;
-            const feePayer = Keypair.generate().publicKey;
-            const authority = Keypair.generate().publicKey;
-            const sourceTokenAccount = Keypair.generate().publicKey;
-            const destinationTokenAccount1 = Keypair.generate().publicKey;
-            const destinationTokenAccount2 = Keypair.generate().publicKey;
-            const receiverOwner1 = Keypair.generate().publicKey;
-            const receiverOwner2 = Keypair.generate().publicKey;
-            const mint = Keypair.generate().publicKey;
+            const wrapperProgram = gen.publicKey(20);
+            const feePayer = gen.publicKey(21);
+            const authority = gen.publicKey(22);
+            const sourceTokenAccount = gen.publicKey(23);
+            const destinationTokenAccount1 = gen.publicKey(24);
+            const destinationTokenAccount2 = gen.publicKey(25);
+            const receiverOwner1 = gen.publicKey(26);
+            const receiverOwner2 = gen.publicKey(27);
+            const mint = gen.publicKey(28);
             const tokenProgram = new PublicKey(TOKEN_PROGRAM_ADDRESS);
 
             const accountKeys = [
@@ -622,11 +611,11 @@ describe('createReceipt', () => {
             // SOL-only counterpart to the USDC + ATA case below: top-level System.transfer to the
             // recipient + top-level ATA createIdempotent whose inner System.transfer tops up rent.
             // Only the intentional payment should surface; the rent CPI must be filtered.
-            const feePayer = Keypair.generate().publicKey;
-            const recipient = Keypair.generate().publicKey;
-            const ataAddress = Keypair.generate().publicKey;
-            const owner = Keypair.generate().publicKey;
-            const mint = Keypair.generate().publicKey;
+            const feePayer = gen.publicKey(20);
+            const recipient = gen.publicKey(21);
+            const ataAddress = gen.publicKey(22);
+            const owner = gen.publicKey(23);
+            const mint = gen.publicKey(24);
             const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
             const tx = buildParsedTransaction({
@@ -664,12 +653,12 @@ describe('createReceipt', () => {
             // Realistic combo: send USDC to a fresh ATA. The ATA program's createIdempotent
             // emits an inner SystemProgram transfer (rent funding) which must NOT be surfaced
             // — the user-intended payment is the top-level transferChecked.
-            const feePayer = Keypair.generate().publicKey;
-            const authority = Keypair.generate().publicKey;
-            const sourceTokenAccount = Keypair.generate().publicKey;
-            const destinationTokenAccount = Keypair.generate().publicKey;
-            const receiverOwner = Keypair.generate().publicKey;
-            const mint = Keypair.generate().publicKey;
+            const feePayer = gen.publicKey(20);
+            const authority = gen.publicKey(21);
+            const sourceTokenAccount = gen.publicKey(22);
+            const destinationTokenAccount = gen.publicKey(23);
+            const receiverOwner = gen.publicKey(24);
+            const mint = gen.publicKey(25);
             const tokenProgram = new PublicKey(TOKEN_PROGRAM_ADDRESS);
             const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 

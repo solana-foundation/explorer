@@ -1,6 +1,5 @@
+import { DEFAULT_BLOCKHASH } from '@__fixtures__/gen';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
-
-const DEFAULT_BLOCKHASH = '4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirm';
 
 export function mockVersionedMessage(overrides: Record<string, unknown> = {}): VersionedMessage {
     return {

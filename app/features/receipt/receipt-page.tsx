@@ -119,7 +119,7 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & WithAutoRefre
     return <ReceiptContent receipt={receipt} signature={signature} status={status} transactionPath={transactionPath} />;
 }
 
-function messageForReason(reason: ReceiptUnavailabilityReason | undefined): string | undefined {
+export function messageForReason(reason: ReceiptUnavailabilityReason | undefined): string | undefined {
     switch (reason) {
         case 'mixed-mint':
             return 'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';

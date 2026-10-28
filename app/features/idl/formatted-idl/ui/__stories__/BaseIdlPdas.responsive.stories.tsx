@@ -1,15 +1,12 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlPdas } from '../BaseIdlPdas';
+import * as Base from './BaseIdlPdas.stories';
 
 const meta: Meta<typeof BaseIdlPdas> = {
     component: BaseIdlPdas,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlPdas@Media',
 };
@@ -17,22 +14,7 @@ const meta: Meta<typeof BaseIdlPdas> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    data: [
-        {
-            docs: ['This PDA has defined seeds.'],
-            name: 'SeededPDA',
-            seeds: [
-                {
-                    docs: ['Seed for the PDA'],
-                    kind: 'type' as const,
-                    name: 'seed1',
-                    type: 'bytes',
-                },
-            ],
-        },
-    ],
-};
+const args = Base.PdasWithSeeds.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

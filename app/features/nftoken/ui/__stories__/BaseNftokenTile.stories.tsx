@@ -1,4 +1,3 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import solanaHero from '@/app/components/shared/ui/image/__stories__/solana_hero_generated.jpg';
@@ -7,7 +6,6 @@ import { BaseNftokenTile } from '../BaseNftokenTile';
 
 const meta = {
     component: BaseNftokenTile,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/NFToken/NftokenTile',
 } satisfies Meta<typeof BaseNftokenTile>;

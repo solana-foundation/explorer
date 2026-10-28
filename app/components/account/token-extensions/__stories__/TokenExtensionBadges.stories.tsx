@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
-import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
-import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
+import { parsedTransferFeeConfig0 } from '@/app/__tests__/mock-parsed-extensions-stubs';
 
 import { TokenExtensionBadges } from '../TokenExtensionBadges';
 
@@ -15,16 +14,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const extension = {
-    extension: mockExtensions.transferFeeConfig0.extension,
-    parsed: mockExtensions.transferFeeConfig0,
-    ...populatePartialParsedTokenExtension(mockExtensions.transferFeeConfig0.extension),
-};
-
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
-        extensions: new Array(5).fill(null).map(() => extension),
+        extensions: new Array(5).fill(null).map(() => parsedTransferFeeConfig0),
     },
     async play({ canvasElement }) {
         const canvas = within(canvasElement);

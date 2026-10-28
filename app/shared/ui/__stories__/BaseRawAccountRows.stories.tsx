@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -23,7 +23,6 @@ const mockRawData = new Uint8Array([
 const meta: Meta<typeof BaseRawAccountRows> = {
     component: BaseRawAccountRows,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Shared/BaseRawAccountRows',
 };
@@ -50,5 +49,29 @@ export const Loading: Story = {
         account: mockAccount,
         isLoading: true,
         rawData: undefined,
+    },
+};
+
+export const NotFound: Story = {
+    args: {
+        account: mockAccount,
+        isLoading: false,
+        rawData: undefined,
+    },
+};
+
+export const EmptyData: Story = {
+    args: {
+        account: { ...mockAccount, space: 0 },
+        isLoading: false,
+        rawData: new Uint8Array(0),
+    },
+};
+
+export const Executable: Story = {
+    args: {
+        account: { ...mockAccount, executable: true, space: 36 },
+        isLoading: false,
+        rawData: mockRawData,
     },
 };

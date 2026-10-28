@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -36,7 +36,6 @@ const validSecurityTxt = encodeNeodymeSecurityTxt({
 const meta = {
     component: SecurityCard,
     decorators: [withClusterAndAccounts],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/SecurityCard',
 } satisfies Meta<typeof SecurityCard>;

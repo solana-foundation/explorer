@@ -4,6 +4,7 @@ import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsC
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
+import { compileV0Message } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import { LIGHTHOUSE_ADDRESS, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
@@ -15,7 +16,6 @@ import {
     MessageV0,
     PublicKey,
     TransactionInstruction,
-    TransactionMessage,
 } from '@solana/web3.js';
 import {
     Compression,
@@ -37,17 +37,7 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 import { InstructionsSection } from '../InstructionsSection';
 import { buildMessage, CREATE_ACCOUNT, INNER_INSTRUCTIONS } from './__fixtures__/create-idempotent-tx';
 
-// The IDL tiers read through SWR. The mock returns no data, so instructions render through the dispatcher.
-vi.mock('swr', () => ({
-    __esModule: true,
-    default: vi.fn(() => ({
-        data: undefined,
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })),
-}));
+vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
 vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@features/decode-instruction-with-idl')>()),
@@ -325,11 +315,7 @@ function buildLighthouseMessage(): MessageV0 {
         keys: [],
         programId: new PublicKey(LIGHTHOUSE_ADDRESS),
     });
-    return new TransactionMessage({
-        instructions: [ix],
-        payerKey: Keypair.generate().publicKey,
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
+    return compileV0Message(Keypair.generate().publicKey, ix);
 }
 
 function buildPmpMessage(data: Uint8Array): MessageV0 {
@@ -341,11 +327,7 @@ function buildPmpMessage(data: Uint8Array): MessageV0 {
         ],
         programId: new PublicKey(PMP_ADDRESS),
     });
-    return new TransactionMessage({
-        instructions: [ix],
-        payerKey: gen.publicKey(0),
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
+    return compileV0Message(gen.publicKey(0), ix);
 }
 
 function buildTokenMetadataMessage(data: number[]): MessageV0 {
@@ -357,11 +339,7 @@ function buildTokenMetadataMessage(data: number[]): MessageV0 {
         ],
         programId: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
     });
-    return new TransactionMessage({
-        instructions: [ix],
-        payerKey: gen.publicKey(0),
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
+    return compileV0Message(gen.publicKey(0), ix);
 }
 
 const TABLE_KEY = new PublicKey('4aa42XQFo45wc2PHQH21vahuyuFYCEZAH4G27xpGYqf6');

@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
+import { withCardTableField } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -22,7 +22,6 @@ const sampleIx = {
 const meta: Meta<typeof BaseRawParsedDetails> = {
     component: BaseRawParsedDetails,
     decorators: [withCardTableField],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Common/BaseRawParsedDetails',
 };

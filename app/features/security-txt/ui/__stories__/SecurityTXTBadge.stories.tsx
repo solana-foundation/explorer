@@ -1,11 +1,9 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SecurityTXTBadge } from '../SecurityTXTBadge';
 
 const meta: Meta<typeof SecurityTXTBadge> = {
     component: SecurityTXTBadge,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/SecurityTXTBadge',
 };

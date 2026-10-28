@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AddressWithContext } from '../AddressWithContext';
@@ -9,10 +9,6 @@ import { AddressWithContext } from '../AddressWithContext';
 const meta = {
     component: AddressWithContext,
     decorators: [withClusterAndAccounts, withTokenInfoBatch, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AddressWithContext@Media',
 } satisfies Meta<typeof AddressWithContext>;

@@ -25,6 +25,12 @@ export const DOC = '{"name":"company","version":"1.0.0"}';
 /** The same document as `DOC`, indented - a `Format.Json` payload is re-serialised before it reaches the card. */
 export const DOC_PRETTY = '{\n  "name": "company",\n  "version": "1.0.0"\n}';
 
+export const IDL_DOC = JSON.stringify({
+    instructions: [{ name: 'initialize' }],
+    name: 'company_program',
+    version: '1.0.0',
+});
+
 // `encoding` tells `packDirectData` how to read `content`, so Utf8 is the only choice for a text document.
 export function pack(content: string, compression: Compression): Uint8Array {
     return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;

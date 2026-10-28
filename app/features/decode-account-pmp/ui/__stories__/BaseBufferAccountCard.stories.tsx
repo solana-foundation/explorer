@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { resolveBufferConfigFromBytes } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
@@ -25,7 +25,6 @@ function bufferArgsFor(body: Uint8Array) {
 const meta = {
     component: BaseBufferAccountCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeAccountPmp/BaseBufferAccountCard',
 } satisfies Meta<typeof BaseBufferAccountCard>;

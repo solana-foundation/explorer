@@ -1,9 +1,9 @@
 import type { Account } from '@providers/accounts';
-import type { PublicKey } from '@solana/web3.js';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { swrWrapper } from '@/app/__tests__/swr-hook';
 
 import {
     accountBytes,
@@ -37,9 +37,7 @@ vi.mock('@features/account', () => ({
     ),
 }));
 vi.mock('@components/account/UnknownAccountCard', () => ({ UnknownAccountCard: () => <p>UnknownAccountCard</p> }));
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 vi.mock('../../api/fetch-collection-nfts', () => ({ fetchCollectionNfts: mocks.fetchCollectionNfts }));
 vi.mock('../../api/fetch-nftoken-metadata', () => ({ fetchNftokenMetadata: mocks.fetchNftokenMetadata }));
 
@@ -194,7 +192,7 @@ function expectRow(label: string, value: string) {
 }
 
 function renderSection(account: Account) {
-    return render(<NftokenAccountSection account={account} />, { wrapper: Providers });
+    return render(<NftokenAccountSection account={account} />, { wrapper: swrWrapper({ dedupingInterval: 0 }) });
 }
 
 function renderSectionWithHeader(account: Account) {
@@ -205,10 +203,6 @@ function renderSectionWithHeader(account: Account) {
             <NftokenAccountHeader nftoken={nftoken} />
             <NftokenAccountSection account={account} />
         </>,
-        { wrapper: Providers },
+        { wrapper: swrWrapper({ dedupingInterval: 0 }) },
     );
-}
-
-function Providers({ children }: { children: ReactNode }) {
-    return <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map() }}>{children}</SWRConfig>;
 }

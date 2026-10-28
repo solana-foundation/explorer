@@ -1,20 +1,15 @@
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { withAutoFocusReleased } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withFixedContainer, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import { fn } from 'storybook/test';
 
 import { NicknameEditor } from '../NicknameEditor';
+import * as Base from './NicknameEditor.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
+    args: Base.default.args,
     component: NicknameEditor,
-    decorators: [withAutoFocusReleased, withFixedContainer, withViewportFromGlobal],
-    parameters: {
-        layout: 'fullscreen', // NicknameEditor renders as a position:fixed overlay; fullscreen removes the canvas padding so it anchors to the iframe viewport.
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
+    decorators: [...Base.default.decorators, withViewportFromGlobal],
+    parameters: Base.default.parameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Nicknames/NicknameEditor@Media',
 } satisfies Meta<typeof NicknameEditor>;
@@ -22,11 +17,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    address: TOKEN_PROGRAM_ADDRESS,
-    onClose: fn(),
-    open: true,
-};
+const args = Base.LongAddress.args;
 
 export const Mobile: Story = {
     args,

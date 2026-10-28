@@ -11,9 +11,7 @@ import { SolBalanceChangesCard } from '../SolBalanceChangesCard';
 
 const ARBITRARY_KEY = Keypair.generate().publicKey.toBase58();
 
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
-}));
+vi.mock('@components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@components/common/BalanceDelta', () => ({
     BalanceDelta: ({ delta, isSol }: { delta: BN; isSol: boolean }) => (

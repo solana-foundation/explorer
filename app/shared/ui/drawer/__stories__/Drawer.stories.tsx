@@ -1,5 +1,4 @@
 import { DialogTitle } from '@components/shared/ui/dialog';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, within } from 'storybook/test';
 
@@ -31,7 +30,6 @@ const meta: Meta<typeof Drawer> = {
     },
     component: Drawer,
     parameters: {
-        ...nextjsParameters,
         viewport: { defaultViewport: 'mobile1' },
     },
     tags: ['autodocs', 'test'],

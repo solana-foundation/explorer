@@ -3,7 +3,7 @@ import { gen } from '@__fixtures__/gen';
 import type { Idl } from '@coral-xyz/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
 import type { ProgramIdlPair, ProgramIdls, SupportedIdl } from '@/app/entities/idl';
@@ -20,11 +20,7 @@ const mocks = vi.hoisted(() => ({ useProgramIdls: vi.fn() }));
 // the `@entities/idl` barrel, which re-exports this module).
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({ useProgramIdls: mocks.useProgramIdls }));
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(),
-    useSearchParams: vi.fn(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const DEFAULT_ADDRESS = PublicKey.default.toBase58();
 const PMP_PDA = gen.vanityAddress('PMP');
@@ -118,14 +114,6 @@ describe('IdlCard', () => {
             get: () => clusterSlug(Cluster.MainnetBeta),
             has: (_query?: string) => false,
             toString: () => '',
-        });
-
-        (usePathname as ReturnType<typeof vi.fn>).mockReturnValue('/');
-
-        (useRouter as ReturnType<typeof vi.fn>).mockReturnValue({
-            push: vi.fn(),
-            refresh: vi.fn(),
-            replace: vi.fn(),
         });
     });
 

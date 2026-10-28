@@ -45,11 +45,7 @@ vi.mock('@entities/instruction-card', async importOriginal => ({
     UnknownDetailsCard: () => <div data-testid="unknown-card" />,
 }));
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 const PROGRAM = gen.publicKey(0);
 const AUTHORITY = gen.address(1);

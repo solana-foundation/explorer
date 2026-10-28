@@ -1,8 +1,6 @@
 import { createSolanaRpc } from '@solana/kit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
-
 import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
 import { fetchGenesisHash } from '../fetch-genesis-hash';

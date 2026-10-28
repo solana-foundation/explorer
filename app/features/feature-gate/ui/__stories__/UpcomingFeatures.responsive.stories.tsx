@@ -1,5 +1,5 @@
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UpcomingFeatures } from '../UpcomingFeatures';
@@ -8,10 +8,6 @@ import { UpcomingFeatures } from '../UpcomingFeatures';
 const meta = {
     component: UpcomingFeatures,
     decorators: [withViewportFromGlobal, withCluster, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/UpcomingFeatures@Media',
 } satisfies Meta<typeof UpcomingFeatures>;

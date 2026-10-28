@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SWRConfig } from 'swr';
@@ -9,18 +9,11 @@ vi.mock('next/navigation');
 
 const mockGetAccountInfo = vi.fn();
 
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return {
-        ...actual,
-        getRpc: vi.fn(() => ({
-            getAccountInfo: (...args: unknown[]) => ({
-                send: async () => ({ value: await mockGetAccountInfo(...args) }),
-            }),
-        })),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getAccountInfo: mockGetAccountInfo }),
+}));
 
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
 import type { Account } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -32,14 +25,7 @@ const ADDRESS = PUBKEY.toBase58();
 const ACCOUNT_BYTES = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
 const ACCOUNT_HEX = 'de ad be ef';
 
-const account: Account = {
-    data: {},
-    executable: false,
-    lamports: 1_000_000_000,
-    owner: PublicKey.default,
-    pubkey: PUBKEY,
-    space: 4,
-} as Account;
+const account = makeAccount({ pubkey: PUBKEY, space: 4 });
 
 describe('transaction::AccountExpandedContent raw data', () => {
     beforeEach(() => {

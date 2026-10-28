@@ -17,10 +17,7 @@ vi.mock('@providers/cluster', async importOriginal => {
     return { ...actual, useCluster: useClusterMock };
 });
 
-vi.mock('@entities/cluster', async importOriginal => {
-    const actual = await importOriginal<typeof import('@entities/cluster')>();
-    return { ...actual, getRpc: () => rpcStub({ getTokenAccountsByOwner }) };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({ getRpc: () => rpcStub({ getTokenAccountsByOwner }) }));
 
 import {
     TOKEN_2022_PROGRAM_ID,

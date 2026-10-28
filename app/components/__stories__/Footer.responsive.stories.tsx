@@ -1,16 +1,12 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { nextjsParameters, withCluster } from '../../../.storybook/decorators';
+import { withCluster } from '../../../.storybook/decorators';
 import { Footer } from '../Footer';
 
 const meta: Meta<typeof Footer> = {
     component: Footer,
     decorators: [withCluster, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Layout/Footer@Media',
 };

@@ -1,18 +1,14 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
+import { withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
 import { PmpSecurityTxtTable } from '../PmpSecurityTxtTable';
-import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';
+import * as Base from './PmpSecurityTxtTable.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: PmpSecurityTxtTable,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        backgrounds: { default: 'Card' },
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
+    parameters: Base.default.parameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/security/PmpSecurityTxtTable@Media',
 } satisfies Meta<typeof PmpSecurityTxtTable>;
@@ -20,7 +16,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { data: defaultSecurityTxtMock as any };
+const args = Base.Primary.args;
 
 export const Mobile: Story = {
     args,

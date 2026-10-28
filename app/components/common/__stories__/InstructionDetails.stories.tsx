@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { buildTokenTransferCheckedIx } from '@features/receipt/model/__fixtures__/builders';
+import { buildTokenTransferCheckedIx } from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 import type { Meta, StoryObj } from '@storybook-config/types';
 

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 import type { SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { StakeHistoryCard } from '../StakeHistoryCard';
 
 function sysvar(entries: SysvarStakeHistoryAccount['info']): SysvarStakeHistoryAccount {
@@ -12,7 +12,6 @@ function sysvar(entries: SysvarStakeHistoryAccount['info']): SysvarStakeHistoryA
 const meta = {
     component: StakeHistoryCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Stake/StakeHistoryCard',
 } satisfies Meta<typeof StakeHistoryCard>;

@@ -1,4 +1,4 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -8,7 +8,6 @@ const meta = {
     component: BaseDomainsCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: {
-        ...nextjsParameters,
         docs: {
             description: {
                 component: [

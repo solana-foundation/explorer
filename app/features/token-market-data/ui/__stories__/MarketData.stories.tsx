@@ -14,10 +14,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const MarketCap: Story = {
+export const MarketCap = {
     args: {
         label: 'Market Cap',
-        lastUpdatedAt: new Date(),
+        lastUpdatedAt: new Date('2026-01-01T00:00:00Z'),
         value: {
             volume: 58_800_000_000,
         },
@@ -29,9 +29,9 @@ export const MarketCap: Story = {
         const marketCapValueEl = canvas.getByText('$58.8B');
         expect(marketCapValueEl).toBeInTheDocument();
     },
-};
+} satisfies Story;
 
-export const Volume: Story = {
+export const Volume = {
     args: {
         label: '24 Hour Volume',
         value: { volume: 3_600_000_000 },
@@ -43,69 +43,20 @@ export const Volume: Story = {
         const volumeValueEl = canvas.getByText('$3.6B');
         expect(volumeValueEl).toBeInTheDocument();
     },
-};
+} satisfies Story;
 
-export const PriceUpTrend: Story = {
-    args: {
-        label: 'Price',
-        rank: 1,
-        value: {
-            precision: 6,
-            price: 0.999887,
-            trend: 0.1,
-        },
-    },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-        const priceEl = canvas.getByText('Price');
-        expect(priceEl).toBeInTheDocument();
-        const priceValueEl = canvas.getByText('$0.999887');
-        expect(priceValueEl).toBeInTheDocument();
-        const rankEl = canvas.getByText('Rank #1');
-        expect(rankEl).toBeInTheDocument();
-    },
-};
+export const PriceUpTrend = priceStory(1, 0.1);
+export const PriceDownTrend = priceStory(2, -0.1);
+export const PriceNeutralTrend = priceStory(2, 0, '0%');
 
-export const PriceDownTrend: Story = {
-    args: {
-        label: 'Price',
-        rank: 2,
-        value: {
-            precision: 6,
-            price: 0.999887,
-            trend: -0.1,
+function priceStory(rank: number, trend: number, ...texts: string[]) {
+    return {
+        args: { label: 'Price', rank, value: { precision: 6, price: 0.999887, trend } },
+        async play({ canvasElement }) {
+            const canvas = within(canvasElement);
+            for (const text of ['Price', '$0.999887', `Rank #${rank}`, ...texts]) {
+                expect(canvas.getByText(text)).toBeInTheDocument();
+            }
         },
-    },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-        const priceEl = canvas.getByText('Price');
-        expect(priceEl).toBeInTheDocument();
-        const priceValueEl = canvas.getByText('$0.999887');
-        expect(priceValueEl).toBeInTheDocument();
-        const rankEl = canvas.getByText('Rank #2');
-        expect(rankEl).toBeInTheDocument();
-    },
-};
-
-export const PriceNeutralTrend: Story = {
-    args: {
-        label: 'Price',
-        rank: 2,
-        value: {
-            precision: 6,
-            price: 0.999887,
-            trend: 0,
-        },
-    },
-    async play({ canvasElement }) {
-        const canvas = within(canvasElement);
-        const priceEl = canvas.getByText('Price');
-        expect(priceEl).toBeInTheDocument();
-        const priceValueEl = canvas.getByText('$0.999887');
-        expect(priceValueEl).toBeInTheDocument();
-        const rankEl = canvas.getByText('Rank #2');
-        expect(rankEl).toBeInTheDocument();
-        const trendEl = canvas.getByText('0%');
-        expect(trendEl).toBeInTheDocument();
-    },
-};
+    } satisfies Story;
+}

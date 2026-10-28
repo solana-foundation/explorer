@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE as validSignature } from '@__fixtures__/gen';
 import { createReceipt, ReceiptError } from '@features/receipt/server';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -30,8 +31,6 @@ vi.mock('@features/receipt/server', async () => {
         parseCompositeSignature,
     };
 });
-
-const validSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
 
 describe('GET /og/receipt/[signature]', () => {
     beforeEach(() => {

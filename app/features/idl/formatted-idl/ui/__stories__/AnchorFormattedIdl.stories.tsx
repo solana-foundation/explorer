@@ -12,9 +12,6 @@ const meta = {
                 story: 'Format and render Anchor IDL',
             },
         },
-        nextjs: {
-            appDirectory: true,
-        },
     },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/AnchorFormattedIdl',

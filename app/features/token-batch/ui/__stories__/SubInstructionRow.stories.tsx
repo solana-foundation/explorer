@@ -1,12 +1,12 @@
 import { PublicKey } from '@solana/web3.js';
-import { withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SubInstructionRowView } from '../SubInstructionRow';
 
 const meta = {
     component: SubInstructionRowView,
-    decorators: [withClusterAccountsAndTokenInfo],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     tags: ['autodocs', 'test'],
     title: 'Features/TokenBatch/SubInstructionRow',
 } satisfies Meta<typeof SubInstructionRowView>;

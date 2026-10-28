@@ -1,8 +1,8 @@
+import { buildParsedTransaction } from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { getBase58Decoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     type ParsedInstruction,
-    type ParsedTransactionWithMeta,
     type PartiallyDecodedInstruction,
     PublicKey,
 } from '@solana/web3.js';
@@ -201,11 +201,7 @@ function mockTransaction(
     logLines: string[][],
 ): void {
     useProgramIdlNames.mockReturnValue(new Map());
-    const transactionWithMeta = {
-        meta: { computeUnitsConsumed: 405, err: null, logMessages: logLines.flat() },
-        slot: SLOT,
-        transaction: { message: { accountKeys: [], instructions } },
-    } as unknown as ParsedTransactionWithMeta;
+    const transactionWithMeta = buildParsedTransaction({ instructions, logMessages: logLines.flat(), slot: SLOT });
     useTransactionDetails.mockReturnValue({ data: { transactionWithMeta } });
 }
 

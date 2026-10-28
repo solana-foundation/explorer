@@ -13,9 +13,7 @@ vi.mock('@utils/token-info', async importOriginal => ({
 
 // The specs setup (test-setup.specs.ts) globally no-ops useTokenInfoBatch to prevent network. This suite
 // asserts real batch behavior, so restore the actual provider for this file only.
-vi.mock('@/app/entities/token-info/model/token-info-batch-provider', async () =>
-    vi.importActual('@/app/entities/token-info/model/token-info-batch-provider'),
-);
+vi.unmock('@/app/entities/token-info/model/token-info-batch-provider');
 
 import { TokenInfoBatchProvider, useTokenInfoBatch } from '../token-info-batch-provider';
 

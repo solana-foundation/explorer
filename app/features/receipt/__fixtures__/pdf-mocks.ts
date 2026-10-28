@@ -1,4 +1,8 @@
-import { buildFormattedReceipt } from '@entities/token-receipt/__fixtures__/formatted-receipt';
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import {
+    buildFormattedReceipt,
+    buildFormattedTokenReceipt,
+} from '@entities/token-receipt/__fixtures__/formatted-receipt';
 import { vi } from 'vitest';
 
 export const mockTextField = vi.fn(function () {
@@ -71,19 +75,16 @@ export function stubSvgRasterizationUnsupported(): void {
     });
 }
 
-export const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
-export const RECEIPT_URL = 'https://explorer.solana.com/receipt/5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
+export const SIGNATURE = DEFAULT_SIGNATURE;
+export const RECEIPT_URL = `https://explorer.solana.com/receipt/${SIGNATURE}`;
 export const CLUSTER_LABEL = 'Mainnet Beta';
 
 export const PDF_OPTS = { clusterLabel: CLUSTER_LABEL, receiptUrl: RECEIPT_URL, signature: SIGNATURE } as const;
 
 export const SOL_RECEIPT = buildFormattedReceipt();
 
-export const USDC_RECEIPT = buildFormattedReceipt({
-    kind: 'token',
+export const USDC_RECEIPT = buildFormattedTokenReceipt({
     memo: undefined,
-    mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    symbol: 'USDC',
     total: { formatted: '125.50', raw: 125.5, unit: 'USDC' },
 });
 

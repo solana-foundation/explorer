@@ -30,7 +30,6 @@ vi.mock('../../api/get-program-provenance', () => ({
     getProgramProvenance: mocks.getProgramProvenance,
     verifiedBuildState: mocks.verifiedBuildState,
 }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
 import { getAccountShareData } from '../get-account-share-data';
 

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { createSolanaRpc } from '@solana/kit';
 import { act, renderHook } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,17 +12,9 @@ import { Cluster } from '@/app/utils/cluster';
 
 const mockSend = vi.fn();
 
-vi.mock('next/navigation', () => ({
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return {
-        ...actual,
-        createSolanaRpc: vi.fn(() => rpcStub({ getSignatureStatuses: mockSend })),
-    };
-});
+vi.mocked(createSolanaRpc).mockImplementation(() => rpcStub({ getSignatureStatuses: mockSend }) as never);
 
 const NOT_FOUND = { value: [null] };
 const FOUND = { value: [{ confirmationStatus: 'finalized', confirmations: null, err: null, slot: 100 }] };
@@ -75,7 +68,6 @@ describe('useClusterTransactionSearch', () => {
     });
 
     it('should exclude the current cluster from the probe list', async () => {
-        const { createSolanaRpc } = await import('@solana/kit');
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
         renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.MainnetBeta));
@@ -97,7 +89,6 @@ describe('useClusterTransactionSearch', () => {
                 typeof useSearchParams
             >,
         );
-        const { createSolanaRpc } = await import('@solana/kit');
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
         renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.Custom));

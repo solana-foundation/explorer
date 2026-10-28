@@ -6,13 +6,6 @@ import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';
 
 const meta = {
     component: ProgramSecurityTxtCard,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         backgrounds: {
             default: 'Card',
@@ -21,9 +14,6 @@ const meta = {
             description: {
                 story: 'Render security.txt Card',
             },
-        },
-        nextjs: {
-            appDirectory: true,
         },
     },
     tags: ['autodocs', 'test'],

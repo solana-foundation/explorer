@@ -3,6 +3,7 @@ import { Cluster, ClusterStatus } from '@utils/cluster';
 import { type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { reported } from '@/app/__tests__/rpc-errors';
 import {
     type ClusterContext,
     clusterContext,
@@ -277,10 +278,7 @@ describe('useSupply', () => {
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.any(String),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, status: 400 }),
-            }),
+            reported({ cluster: Cluster.MainnetBeta, status: 400 }),
         );
     });
 
@@ -332,13 +330,7 @@ describe('useSupply', () => {
 
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(Logger.error).toHaveBeenCalledTimes(1);
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.any(Error),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta }),
-            }),
-        );
+        expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), reported({ cluster: Cluster.MainnetBeta }));
     });
 
     it("should not retry at the visitor's own node, where each attempt is another scan", async () => {
@@ -368,13 +360,7 @@ describe('useSupply', () => {
         const { result } = renderSupply();
         await waitForHook(() => expect(result.current.kind).toBe('failed'));
 
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.any(Error),
-            expect.objectContaining({
-                sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.Devnet }),
-            }),
-        );
+        expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), reported({ cluster: Cluster.Devnet }));
     });
 
     it('should keep supply already in hand when a revalidation fails', async () => {

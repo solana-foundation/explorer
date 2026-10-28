@@ -1,4 +1,5 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -38,11 +39,7 @@ vi.mock('@/app/components/instruction/InstructionCard', () => ({
     ),
 }));
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@/app/components/common/Copyable', () => ({
     Copyable: ({ children }: { children: React.ReactNode }) => <div data-testid="copyable">{children}</div>,
@@ -54,13 +51,7 @@ const FOREIGN_BUFFER = gen.publicKey(1);
 const METADATA_PDA = gen.publicKey(2);
 const DOC = '{"name":"company","version":"1.0.0"}';
 
-function makeIx(data: Uint8Array, accounts: PublicKey[]): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: accounts.map(pubkey => ({ isSigner: false, isWritable: true, pubkey })),
-        programId: PMP,
-    });
-}
+const makeIx = (data: Uint8Array, keys: PublicKey[]) => makeInstruction({ data, keys, programId: PMP, writable: true });
 
 function renderCard(ix: TransactionInstruction) {
     return render(

@@ -14,7 +14,13 @@ import {
     setTransactionMessageLoadedAccountsDataSizeLimit,
     setTransactionMessagePriorityFeeLamports,
 } from '@solana/kit';
-import { PublicKey, SystemProgram, TransactionMessage } from '@solana/web3.js';
+import {
+    type MessageV0,
+    PublicKey,
+    SystemProgram,
+    type TransactionInstruction,
+    TransactionMessage,
+} from '@solana/web3.js';
 
 export const FEE_PAYER = address(gen.address(1));
 export const RECIPIENT = address(gen.address(2));
@@ -64,6 +70,14 @@ export function createWeb3TransactionMessage(): TransactionMessage {
         payerKey: new PublicKey(FEE_PAYER),
         recentBlockhash: PublicKey.default.toBase58(),
     });
+}
+
+export function compileV0Message(payer: PublicKey, instruction: TransactionInstruction): MessageV0 {
+    return new TransactionMessage({
+        instructions: [instruction],
+        payerKey: payer,
+        recentBlockhash: PublicKey.default.toBase58(),
+    }).compileToV0Message();
 }
 
 /**

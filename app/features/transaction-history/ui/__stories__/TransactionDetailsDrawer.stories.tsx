@@ -1,6 +1,5 @@
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
@@ -61,7 +60,6 @@ const meta = {
     component: TransactionDetailsDrawer,
     decorators: [withDrawerProviders],
     parameters: {
-        ...nextjsParameters,
         raw: { [SIGNATURE]: FETCHED },
         viewport: { defaultViewport: 'mobile1' },
     },

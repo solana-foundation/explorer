@@ -3,14 +3,7 @@ import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    nextjsParameters,
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { invariant } from '@/app/shared/lib/invariant';
@@ -54,13 +47,12 @@ const withFailedInstructionSurface: Decorator = Story => (
     </TxInstructionSurface>
 );
 
-const meta: Meta<typeof Ed25519DetailsCard> = {
+const meta = {
     component: Ed25519DetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
-    parameters: nextjsParameters,
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard',
-};
+} satisfies Meta<typeof Ed25519DetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

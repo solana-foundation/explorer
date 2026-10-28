@@ -1,4 +1,4 @@
-import { type Address, address } from '@solana/kit';
+import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { makeAnsNameRecordData, makeTldHouseData } from '../../__tests__/fixtures';
@@ -23,16 +23,9 @@ vi.mock('@utils/cluster', () => ({
     serverClusterUrl: () => 'https://unused.test',
 }));
 
-vi.mock('@solana/kit', async importOriginal => {
-    const actual = await importOriginal<typeof import('@solana/kit')>();
-    return {
-        ...actual,
-        createSolanaRpc: () => ({
-            getMultipleAccounts: mockGetMultipleAccounts,
-            getProgramAccounts: mockGetProgramAccounts,
-        }),
-    };
-});
+vi.mocked(createSolanaRpc).mockImplementation(
+    () => ({ getMultipleAccounts: mockGetMultipleAccounts, getProgramAccounts: mockGetProgramAccounts }) as never,
+);
 
 const { fetchAnsDomains } = await import('../fetch-ans-domains');
 

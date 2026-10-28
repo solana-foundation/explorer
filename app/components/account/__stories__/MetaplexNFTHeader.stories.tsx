@@ -1,46 +1,10 @@
+import { makeNftData } from '@entities/nft/__fixtures__/make-nft-data';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import type { NFTData } from '@/app/providers/accounts';
-
 import { MetaplexNFTHeader } from '../MetaplexNFTHeader';
 
-// MetaplexNFTHeader reads flat fields on `metadata`; the local `NFTData` type is acknowledged
-// as incomplete (see app/features/metadata/mocks.ts), so each fixture casts via `as unknown as NFTData`.
-function buildNftData(
-    overrides: Partial<{
-        name: string;
-        symbol: string;
-        isMutable: boolean;
-        primarySaleHappened: boolean;
-        collection: { key: string; verified: boolean } | null;
-        edition: { masterEdition?: { supply: bigint }; edition?: { edition: bigint } };
-        image: string;
-    }> = {},
-): NFTData {
-    const {
-        name = 'Bored Ape #1234',
-        symbol = 'BAYC',
-        isMutable = true,
-        primarySaleHappened = false,
-        collection = null,
-        edition = {},
-        image = '',
-    } = overrides;
-
-    return {
-        editionInfo: edition,
-        json: image ? { image } : undefined,
-        metadata: {
-            collection: collection ? { __option: 'Some', value: collection } : { __option: 'None' },
-            creators: { __option: 'None' },
-            isMutable,
-            name,
-            primarySaleHappened,
-            symbol,
-        },
-    } as unknown as NFTData;
-}
+const BORED_APE = { json: undefined, name: 'Bored Ape #1234', symbol: 'BAYC' };
 
 const meta: Meta<typeof MetaplexNFTHeader> = {
     component: MetaplexNFTHeader,
@@ -54,22 +18,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        nftData: buildNftData(),
+        nftData: makeNftData(BORED_APE),
     },
 };
 
 export const MasterEdition: Story = {
     args: {
-        nftData: buildNftData({
-            edition: { masterEdition: { supply: 1000n } as never },
-        }),
+        nftData: makeNftData({ ...BORED_APE, editionInfo: { masterEdition: { supply: 1000n } as never } }),
     },
 };
 
 export const NumberedEdition: Story = {
     args: {
-        nftData: buildNftData({
-            edition: {
+        nftData: makeNftData({
+            ...BORED_APE,
+            editionInfo: {
                 edition: { edition: 42n } as never,
                 masterEdition: { supply: 1000n } as never,
             },
@@ -79,18 +42,18 @@ export const NumberedEdition: Story = {
 
 export const NoName: Story = {
     args: {
-        nftData: buildNftData({ name: '' }),
+        nftData: makeNftData({ ...BORED_APE, name: '' }),
     },
 };
 
 export const NoSymbol: Story = {
     args: {
-        nftData: buildNftData({ symbol: '' }),
+        nftData: makeNftData({ ...BORED_APE, symbol: '' }),
     },
 };
 
 export const Immutable: Story = {
     args: {
-        nftData: buildNftData({ isMutable: false }),
+        nftData: makeNftData({ ...BORED_APE, isMutable: false }),
     },
 };

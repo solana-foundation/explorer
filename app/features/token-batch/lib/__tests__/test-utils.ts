@@ -24,16 +24,6 @@ export function makeAccount(writable = true, signer = false) {
     };
 }
 
-export function buildBatchData(subInstructions: { numAccounts: number; data: Uint8Array }[]): Uint8Array {
-    const parts: Uint8Array[] = [new Uint8Array([BATCH_DISCRIMINATOR])];
-    for (const sub of subInstructions) {
-        if (sub.data.length > 255) throw new Error(`Sub-instruction data exceeds u8 max (${sub.data.length} bytes)`);
-        parts.push(new Uint8Array([sub.numAccounts, sub.data.length]));
-        parts.push(sub.data);
-    }
-    return concatBytes(...parts);
-}
-
 export function makeTransferData(amount: bigint): Uint8Array {
     return concatBytes(new Uint8Array([3]), writeU64LE(amount));
 }

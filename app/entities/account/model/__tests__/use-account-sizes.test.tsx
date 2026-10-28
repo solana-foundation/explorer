@@ -1,10 +1,10 @@
 import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
 import { renderHook, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import React from 'react';
-import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { rpcValueStub } from '@/app/__tests__/mock-rpc';
+import { FAST_RETRY, settleRetries, swrWrapper } from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { ERROR_RETRY_COUNT, useAccountSizes } from '../use-account-sizes';
@@ -19,17 +19,11 @@ const mockCluster = vi.hoisted(() => ({ current: {} as { cluster: Cluster; url: 
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => mockCluster.current }));
 
-vi.mock('@entities/cluster/@x/account', async () => {
-    const actual = await vi.importActual<typeof import('@entities/cluster/@x/account')>('@entities/cluster/@x/account');
-    return {
-        ...actual,
-        getRpc: vi.fn(() => ({
-            getMultipleAccounts: (...args: unknown[]) => ({
-                send: async () => ({ value: await mockGetMultipleAccounts(...args) }),
-            }),
-        })),
-    };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
+    getRpc: () => rpcValueStub({ getMultipleAccounts: mockGetMultipleAccounts }),
+}));
+
+const wrapper = swrWrapper(FAST_RETRY);
 
 describe('useAccountSizes', () => {
     beforeEach(() => {
@@ -119,12 +113,4 @@ describe('useAccountSizes', () => {
 
 function sizedAccounts(addresses: readonly string[]) {
     return addresses.map((_, index) => ({ data: ['', 'base64'], space: BigInt(100 + index) }));
-}
-
-function wrapper({ children }: { children: React.ReactNode }) {
-    return <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map() }}>{children}</SWRConfig>;
-}
-
-function settleRetries() {
-    return new Promise(resolve => setTimeout(resolve, 100));
 }

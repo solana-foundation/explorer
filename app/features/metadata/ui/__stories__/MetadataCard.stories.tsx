@@ -9,18 +9,6 @@ import { MetadataCard } from '../MetadataCard';
 
 const meta = {
     component: MetadataCard,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
-    parameters: {
-        nextjs: {
-            appDirectory: true,
-        },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Metadata/MetadataCard',
 } satisfies Meta<typeof MetadataCard>;

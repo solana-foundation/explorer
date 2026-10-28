@@ -3,14 +3,9 @@ import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@e
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import referenceIdl from '@entities/idl/mocks/anchor/reference-0.29.json';
 import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
+import { compileV0Message } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import { getBase58Decoder } from '@solana/kit';
-import {
-    type ParsedMessage,
-    PublicKey,
-    TransactionInstruction,
-    TransactionMessage,
-    type VersionedMessage,
-} from '@solana/web3.js';
+import { type ParsedMessage, PublicKey, TransactionInstruction, type VersionedMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -138,19 +133,13 @@ function renamedIdl(name: string): AnchorIdl {
     return { ...anchorModernIdl, instructions: [{ ...first, name }, ...rest] } as unknown as AnchorIdl;
 }
 
-function renderLogs(message: VersionedMessage | ParsedMessage = v0Message()) {
+function renderLogs(
+    message: VersionedMessage | ParsedMessage = compileV0Message(gen.publicKey(0), CREATE_AMM_CONFIG_IX),
+) {
     const logs = [{ computeUnits: 0, failed: false, invokedProgram: DEVI.toBase58(), logs: [], truncated: false }];
     return render(
         <ProgramLogsCardBody message={message} logs={logs} cluster={Cluster.Devnet} url="http://localhost" />,
     );
-}
-
-function v0Message(): VersionedMessage {
-    return new TransactionMessage({
-        instructions: [CREATE_AMM_CONFIG_IX],
-        payerKey: gen.publicKey(0),
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
 }
 
 function parsedMessage(): ParsedMessage {

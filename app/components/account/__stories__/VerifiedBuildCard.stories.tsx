@@ -1,4 +1,5 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { makeProgramAccountData, makeProgramDataInfo } from '@entities/account/__fixtures__/account';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { OsecRegistryInfo } from '@/app/utils/verified-builds';
@@ -10,13 +11,7 @@ import { BaseVerifiedBuildCard } from '../VerifiedBuildCard';
 // calls useVerifiedProgram (verify.osec.io + RPC PDA fetch); Base takes the resolved data as
 // props so stories can drive every variant without mocking the network or the SWR cache.
 
-const PROGRAM_DATA = {
-    programData: {
-        authority: '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r',
-        data: ['', 'base64'],
-        slot: 0,
-    },
-} as any;
+const PROGRAM_DATA = makeProgramAccountData(makeProgramDataInfo());
 
 const VERIFIED_FIXTURE: OsecRegistryInfo = {
     executable_hash: '0000000000000000000000000000000000000000000000000000000000000000',
@@ -57,7 +52,6 @@ const PDA_UPLOADED_FIXTURE: OsecRegistryInfo = {
 const meta = {
     component: BaseVerifiedBuildCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/VerifiedBuildCard',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;
