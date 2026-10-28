@@ -33,6 +33,18 @@ describe('InstructionNodeCards', () => {
         // eslint-disable-next-line testing-library/no-node-access -- the anchor id is what is under test
         expect(document.getElementById('ix-2')).not.toBeNull();
     });
+
+    it.each([
+        { action: 'draw', buttons: 1, collapsible: true },
+        { action: 'not draw', buttons: 0, collapsible: false },
+    ])(
+        'should $action a Collapse button on an instruction the page cannot resolve when collapsible is $collapsible',
+        ({ collapsible, buttons }) => {
+            renderOnSurface(<InstructionNodeCards nodes={[undefined]} />, { collapsible });
+
+            expect(screen.queryAllByRole('button', { name: 'Collapse' })).toHaveLength(buttons);
+        },
+    );
 });
 
 describe('InstructionCardView', () => {

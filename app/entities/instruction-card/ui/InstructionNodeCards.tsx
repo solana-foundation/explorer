@@ -35,10 +35,10 @@ export function InstructionNodeCards({
 
 // The page has no instruction to show, so the card draws the frame without a Raw view.
 function UndisplayableInstructionCard({ position }: { position: InstructionPosition }) {
-    const { result } = useInstructionSurface();
+    const { result, collapsible } = useInstructionSurface();
 
     return (
-        <InstructionCardFrame title="Unknown Instruction" result={result} position={position}>
+        <InstructionCardFrame title="Unknown Instruction" result={result} position={position} collapsible={collapsible}>
             <InstructionFieldRows
                 fields={[note(`Could not display instruction #${positionLabel(position)}, please report`, 'warning')]}
             />
