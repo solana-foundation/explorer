@@ -68,13 +68,8 @@ export function visibleAccountRows(rows: readonly AccountRow[], expanded: Readon
     const visible: AccountRow[] = [];
     let hideBelow: number | undefined;
     for (const row of rows) {
-        if (row.kind === 'group') {
-            hideBelow = expanded.has(row.id) ? undefined : row.depth;
-        } else if (hideBelow !== undefined && row.depth > hideBelow) {
-            continue;
-        } else {
-            hideBelow = undefined;
-        }
+        if (hideBelow !== undefined && row.depth > hideBelow) continue;
+        hideBelow = row.kind === 'group' && !expanded.has(row.id) ? row.depth : undefined;
         visible.push(row);
     }
     return visible;

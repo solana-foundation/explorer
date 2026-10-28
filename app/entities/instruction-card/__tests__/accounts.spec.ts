@@ -104,7 +104,35 @@ describe('visibleAccountRows', () => {
             'Payer',
         ]);
     });
+
+    describe('with a group nested in a group', () => {
+        const nestedRows = labelAccounts(readonlyAccounts(4), VAULT_NAMES);
+        const [outerId, innerId] = nestedRows.flatMap(row => (row.kind === 'group' ? [row.id] : []));
+
+        it.each([
+            { expanded: [], labels: ['Vault Accounts', 'Payer'] },
+            { expanded: ['inner'], labels: ['Vault Accounts', 'Payer'] },
+            { expanded: ['outer'], labels: ['Vault Accounts', 'Fee Accounts', 'Vault', 'Payer'] },
+            {
+                expanded: ['outer', 'inner'],
+                labels: ['Vault Accounts', 'Fee Accounts', 'FeeVault', 'FeeOwner', 'Vault', 'Payer'],
+            },
+        ])('should show $labels when the expanded groups are $expanded', ({ expanded, labels }) => {
+            const ids = new Set(expanded.map(group => (group === 'outer' ? outerId : innerId)));
+
+            expect(visibleAccountRows(nestedRows, ids).map(row => row.label)).toEqual(labels);
+        });
+    });
 });
+
+const VAULT_NAMES: AccountName[] = [
+    group('Vault Accounts', 0),
+    group('Fee Accounts', 1),
+    nested('feeVault', 2),
+    nested('feeOwner', 2),
+    nested('vault', 1),
+    'payer',
+];
 
 const WITHDRAW_NAMES: AccountName[] = [
     group('Withdraw Accounts', 0),
