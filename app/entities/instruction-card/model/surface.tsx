@@ -11,10 +11,7 @@ export type InstructionSurface = {
     Card: React.ComponentType<{ node: InstructionNode }>;
     /** Per-transaction, so it belongs here rather than on every card. */
     result: SignatureResult;
-    /**
-     * The key is required, because a missing signature throws no error. The
-     * frame then fetches no raw transaction, and a card shows no program events.
-     */
+    /** The key is required, because a missing signature throws no error. A card then shows no program events. */
     signature: TransactionSignature | undefined;
     /** Returns the data of the top-level instruction at `index`, which an ed25519 instruction can reference. */
     instructionData: (index: number) => Uint8Array | undefined;

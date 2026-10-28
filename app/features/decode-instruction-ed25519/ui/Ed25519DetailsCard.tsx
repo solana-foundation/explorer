@@ -27,7 +27,7 @@ const Ed25519VerifyCard = defineInstructionCard<Ed25519SignatureDetails[]>({
 });
 
 type Ed25519DetailsCardProps = {
-    /** The signature offsets point into the data of `raw`. */
+    /** Offsets that reference this instruction point into the data of `raw`. */
     node: RawInstructionNode;
     /** `undefined` when the parser of the program cannot decode the instruction. */
     parsed: ParsedInstructionInfo | undefined;

@@ -29,7 +29,7 @@ flowchart TD
     A -. PMP, Stake .-> KK[card self-parses from raw bytes]
     T -. PMP, Stake .-> KK
 
-    I --> J[&lt;DetailsCard ix=… /&gt;]
+    I --> J[&lt;DetailsCard node=… /&gt;]
     R --> J
     KK --> J
 ```
@@ -94,7 +94,7 @@ The entity at `app/entities/instruction-parser/` SHALL expose a factory `createI
 
 - **WHEN** `fromTransactionInstruction(ix)` is called for a program with no registered parser
 - **THEN** the dispatcher MUST return `undefined`
-- **AND** callers MUST render the IDL card when an IDL decodes the instruction, and `UnknownDetailsCard` otherwise
+- **AND** callers MUST render the PMP card or the raw stake card when one of them takes the instruction, else the IDL card when an IDL decodes the instruction, and `UnknownDetailsCard` otherwise
 
 #### Scenario: Parser exists, discriminator unknown
 
@@ -196,7 +196,7 @@ Routing is keyed on `programId` (base58), which MUST be the canonical on-chain p
 
 ### Requirement: Cards consume pre-parsed slice output
 
-A `*DetailsCard` whose program has a registered slice parser MUST consume the dispatcher's already-parsed output rather than re-parsing the raw instruction. `MetaplexTokenMetadataDetailsCard` MUST take the dispatcher's `DispatchResult` as `ix` on both surfaces, and MUST NOT parse the instruction data itself.
+A `*DetailsCard` whose program has a registered slice parser MUST consume the dispatcher's already-parsed output rather than re-parsing the raw instruction. `MetaplexTokenMetadataDetailsCard` MUST take the `{ type, info }` payload of the dispatcher's `DispatchResult` as `parsed` on both surfaces, or `undefined` when the slice cannot decode the instruction, and MUST NOT parse the instruction data itself.
 
 Cards whose program has **no** registered slice (the majority today — Stake, Vote, ALT, Memo, Lighthouse, SAS, Anchor/IDL, …) are unaffected by this change: `fromParsedInstruction` passes their input through unchanged and they continue to render exactly as before. This requirement governs only the cards whose program *does* have a slice; it does not require every card to gain a slice.
 
@@ -209,5 +209,5 @@ Cards whose program has **no** registered slice (the majority today — Stake, V
 #### Scenario: Both surfaces pass the dispatcher result to the MPL card
 
 - **WHEN** the tx page or the inspector routes an MPL instruction to `MetaplexTokenMetadataDetailsCard`
-- **THEN** the caller MUST pass the result of `dispatcher.fromTransactionInstruction` as `ix`
+- **THEN** the router MUST pass the payload of the `dispatcher.fromTransactionInstruction` result as `parsed`
 - **AND** the card MUST NOT call `parseMetaplexTokenMetadataInstruction`

@@ -22,15 +22,15 @@ The card body MUST draw the `Program` row in the decoded view, on both surfaces.
 
 An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
 
-Both surfaces SHALL draw the frame with `BaseInstructionCard`, through `InstructionCardView`. The inspector surface makes every card collapsible, and checks in the raw view that the program exists and is executable, because an inspected message has not run.
+Both surfaces SHALL draw the frame of an instruction with `BaseInstructionCard`, through `InstructionCardView`. The inspector surface makes every card collapsible, and checks in the raw view that the program exists and is executable, because an inspected message has not run.
 
 The frame SHALL receive the raw form of the instruction as one `RawSource` value, which `rawSourceOf` derives from the node and `rawInstructions`. A card that passes no children to `InstructionCardView` has no decoded view, so its frame opens on the raw view.
 
-The frame and the cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `inspectorSurface` builds the inspector surface for one message. It sets `signature` and `rawInstructions` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` or `InstructionSurface.rawInstructions` MUST fail to compile, because a missing value throws no error. The frame then fetches no raw transaction.
+The cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `inspectorSurface` builds the inspector surface for one message. It sets `signature` and `rawInstructions` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` or `InstructionSurface.rawInstructions` MUST fail to compile, because a missing value throws no error. Without `signature` a card shows no program events, and without `rawInstructions` the frame fetches no raw transaction.
 
 #### Scenario: One frame on both surfaces
 
-- **WHEN** a card renders on the tx page or in the inspector
+- **WHEN** a card renders an instruction on the tx page or in the inspector
 - **THEN** its frame MUST be `BaseInstructionCard`
 - **AND** in the inspector the raw view MUST check the program of the instruction
 
@@ -48,7 +48,7 @@ The frame and the cards SHALL read the signature from `InstructionSurface`, and 
 
 #### Scenario: Raw view of an RPC-parsed instruction
 
-- **WHEN** the raw view of a top-level RPC-parsed instruction opens on the tx page before the page has fetched the raw transaction
+- **WHEN** the reader clicks `Raw` on the card of a top-level RPC-parsed instruction on the tx page before the page has fetched the raw transaction
 - **THEN** the frame MUST request the raw transaction
 - **AND** once the transaction arrives, the raw view MUST show the accounts and data of the instruction
 - **AND** when web3.js cannot decompile the transaction, the raw view MUST say that the account list and hex data are not available
@@ -63,7 +63,7 @@ The frame and the cards SHALL read the signature from `InstructionSurface`, and 
 
 #### Scenario: Program row is drawn exactly once
 
-- **WHEN** a card renders on either surface, in the decoded view or in the raw view
+- **WHEN** a card renders an instruction on either surface, in the decoded view or in the raw view
 - **THEN** exactly one `Program` row MUST appear in the rendered card
 - **AND** the body MUST draw it in the decoded view, and the frame MUST draw it in the raw view
 
@@ -158,7 +158,7 @@ The card of a program SHALL receive what the parser of the program decoded as `p
 
 `InstructionNode.children` SHALL hold the CPIs of the instruction. The page builds the node tree from the transaction before it renders a card. The frame renders each child through `InstructionSurface.Card`, so no card renders another card. An `undefined` child marks a CPI that the page cannot resolve.
 
-`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
+`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view, for the router, which dispatches on it, and for `instructionDataOf`. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
 
 `InstructionNode.programId` SHALL carry the program id separately from `ix`. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
 
@@ -216,7 +216,7 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 
 ### Requirement: One instruction router
 
-Both surfaces SHALL pick the card of an instruction with `InstructionNodeCard`. The router dispatches the instruction through the instruction parser, then renders the first of: the PMP card, the card of a raw stake instruction, the card of the program label, the IDL card, and `UnknownDetailsCard`. A program whose card takes only decoded instructions hands an instruction that its parser slice rejects to the IDL card. The PMP card and the card of a raw stake instruction hand an instruction that they cannot decode to the IDL card in the same way. The router renders every card inside an ErrorBoundary whose fallback is `UnknownDetailsCard`. The router loads the code of the PMP card on demand, and MUST draw `LoadingDetailsCard` for the node while that code loads.
+Both surfaces SHALL pick the card of an instruction with `InstructionNodeCard`. The router dispatches the instruction through the instruction parser, then renders the first of: the PMP card, the card of a raw stake instruction, the card of the program label, the IDL card, and `UnknownDetailsCard`. A program whose card takes only decoded instructions hands an instruction that its parser slice rejects to the IDL card. A program whose card takes only an instruction in byte form hands an RPC-parsed instruction to `UnknownDetailsCard`. The PMP card and the card of a raw stake instruction hand an instruction that they cannot decode to the IDL card in the same way. The router renders every card inside an ErrorBoundary whose fallback is `UnknownDetailsCard`. The router loads the code of the PMP card on demand, and MUST draw `LoadingDetailsCard` for the node while that code loads.
 
 #### Scenario: Curated card and a resolved IDL
 

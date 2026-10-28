@@ -6,7 +6,7 @@ export type InstructionNode = {
     ix: ParsedInstruction | TransactionInstruction;
     index: number;
     childIndex?: number;
-    /** Raw form of the instruction, when the page has its bytes. */
+    /** Raw form of the instruction. Only the router sets it, so a node that the page builds has none. */
     raw?: TransactionInstruction;
     children?: ReadonlyArray<InstructionNode | undefined>;
 };
