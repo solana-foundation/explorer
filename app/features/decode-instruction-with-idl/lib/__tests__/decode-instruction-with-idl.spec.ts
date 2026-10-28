@@ -44,8 +44,8 @@ const ix = new TransactionInstruction({
     programId: PublicKey.unique(),
 });
 const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
-// A Codama-native root node (as a PMP IDL is) — routed through Codama, never the Anchor Program.
 const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() }, standard: 'codama' };
+const legacyConvertedIdl = { ...codamaIdl, legacyAnchorIdl: anchorIdl };
 
 describe('decodeInstructionWithIdl', () => {
     beforeEach(() => {
@@ -60,11 +60,24 @@ describe('decodeInstructionWithIdl', () => {
     });
 
     it('should decode an Anchor IDL through the Anchor Program, not Codama (even when Codama could parse it)', () => {
-        // Codama would succeed here, but an Anchor IDL must still take the rich Anchor path so it keeps
-        // event cards + nested account groups. Codama is not consulted first.
         parseInstruction.mockReturnValue({ accounts: [], path: [] });
         expect(decodeInstructionWithIdl(ix, anchorIdl, 'http://localhost').kind).toBe('anchor');
         expect(parseInstruction).not.toHaveBeenCalled();
+    });
+
+    it('should decode a converted legacy Anchor IDL through the Anchor Program so tx events survive', () => {
+        parseInstruction.mockReturnValue({ accounts: [], path: [] });
+        expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('anchor');
+        expect(parseInstruction).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to the existing root (not reconvert) when a legacy Anchor Program cannot be built', () => {
+        programCtor.mockImplementation(() => {
+            throw new Error('bad idl');
+        });
+        parseInstruction.mockReturnValue({ accounts: [], path: [] });
+        expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('codama');
+        expect(rootNodeFromAnchor).not.toHaveBeenCalled();
     });
 
     it('should fall back to Codama-from-Anchor when the Anchor Program cannot be built', () => {

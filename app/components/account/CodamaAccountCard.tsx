@@ -12,29 +12,46 @@ import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { codamaAccountRows } from './decoded-account-rows';
 
-export function CodamaAccountCard({ account, idl }: { account: Account; idl: RootNode }) {
+type DecodeResult =
+    | {
+          kind: 'ok';
+          accountName: string | undefined;
+          programName: string | undefined;
+          rows: ReturnType<typeof codamaAccountRows>;
+      }
+    | { kind: 'failed'; errors: readonly unknown[] };
+
+function decodeCodamaAccount(idl: RootNode, rawData: Uint8Array): DecodeResult {
+    const decode = decodeAccountWithIdl(idl as unknown as Parameters<typeof decodeAccountWithIdl>[0], rawData);
+    if (decode.kind !== IdlStandard.Codama) {
+        return { errors: decode.kind === 'unknown' ? decode.errors : [], kind: 'failed' };
+    }
+
+    const path = decode.decoded.path as ReadonlyArray<{
+        kind?: string;
+        name?: string;
+        program?: { name?: string };
+    }>;
+    const programName = path[0]?.program?.name;
+    const accountName = [...path].reverse().find(node => node?.kind === 'accountNode')?.name;
+
+    return { accountName, kind: 'ok', programName, rows: codamaAccountRows(decode.decoded.data) };
+}
+
+export function CodamaAccountCard({ account, idls }: { account: Account; idls: readonly RootNode[] }) {
     const { lamports } = account;
     const rawData = account.data.raw;
 
     const decoded = useMemo(() => {
         if (!rawData) return undefined;
-        const decode = decodeAccountWithIdl(idl as unknown as Parameters<typeof decodeAccountWithIdl>[0], rawData);
-        // A non-Codama arm means no account type matched; the unknown arm only carries errors when
-        // decoding genuinely threw, as opposed to a plain discriminator miss.
-        if (decode.kind !== IdlStandard.Codama) {
-            return { errors: decode.kind === 'unknown' ? decode.errors : [], kind: 'failed' as const };
+        let lastFailed: DecodeResult | undefined;
+        for (const idl of idls) {
+            const result = decodeCodamaAccount(idl, rawData);
+            if (result.kind === 'ok') return result;
+            lastFailed = result;
         }
-
-        const path = decode.decoded.path as ReadonlyArray<{
-            kind?: string;
-            name?: string;
-            program?: { name?: string };
-        }>;
-        const programName = path[0]?.program?.name;
-        const accountName = [...path].reverse().find(node => node?.kind === 'accountNode')?.name;
-
-        return { accountName, kind: 'ok' as const, programName, rows: codamaAccountRows(decode.decoded.data) };
-    }, [idl, rawData]);
+        return lastFailed ?? { errors: [], kind: 'failed' as const };
+    }, [idls, rawData]);
 
     useEffect(() => {
         if (decoded?.kind === 'failed' && decoded.errors.length > 0) {

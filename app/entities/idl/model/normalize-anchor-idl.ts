@@ -4,7 +4,7 @@ import type { RootNode } from 'codama';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { type CodamaIdl, type LegacyAnchorEvent, type SupportedIdl } from '../lib/types';
+import { type AnchorIdl, type CodamaIdl, type LegacyAnchorEvent, type SupportedIdl } from '../lib/types';
 import { getIdlSpecType } from './idl-spec';
 
 export function normalizeAnchorIdl(idl: unknown, programAddress?: string): SupportedIdl | undefined {
@@ -31,6 +31,7 @@ export function normalizeAnchorIdl(idl: unknown, programAddress?: string): Suppo
         programAddress && !root.program.publicKey ? { ...root.program, publicKey: programAddress } : root.program;
     const normalized: CodamaIdl = {
         ...root,
+        legacyAnchorIdl: withAddress as AnchorIdl,
         program,
         ...(legacyConstants?.length ? { legacyConstants } : {}),
         ...(legacyEvents?.length ? { legacyEvents } : {}),

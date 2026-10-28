@@ -61,10 +61,11 @@ export function AnchorAccountCard({ account }: { account: Account }) {
         return { accountDef, decodedAccountData };
     }, [idl, rawData]);
 
+    const codamaIdls = useMemo(() => (idls ? getCodamaIdlsWithAccounts(idls) : []), [idls]);
+
     if (lamports === undefined) return null;
     if (!idls) return <LoadingCard message="Loading program IDL" />;
 
-    // A buildable Anchor program that decodes this account wins.
     if (idl && decodedAccountData && accountDef) {
         return (
             <OverviewCard
@@ -75,10 +76,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
         );
     }
 
-    // Otherwise a Codama IDL (incl. legacy Anchor IDLs that `normalizeAnchorIdl` converted) with account
-    // types decodes through the Codama pipeline, not an Anchor Program.
-    const codamaIdl = getCodamaIdlsWithAccounts(idls)[0];
-    if (codamaIdl) return <CodamaAccountCard account={account} idl={codamaIdl} />;
+    if (codamaIdls.length > 0) return <CodamaAccountCard account={account} idls={codamaIdls} />;
 
     if (getAnchorIdls(idls).length === 0) return <ErrorCard text="No Anchor IDL found" />;
     return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
