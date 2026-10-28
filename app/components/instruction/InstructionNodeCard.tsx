@@ -47,7 +47,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
 // the branch below can stay static. `React.lazy` rather than `next/dynamic`, because the fallback needs the node
-// to draw the card's frame, and the `loading` option of `next/dynamic` receives no props.
+// to draw the card's frame, and the `loading` option of `next/dynamic` receives the loading state, not the card props.
 const PmpDetailsCard = React.lazy(() =>
     import('@features/decode-instruction-pmp').then(mod => ({ default: mod.PmpDetailsCard })),
 );
@@ -91,8 +91,7 @@ function ProgramCard({ node }: { node: InstructionNode }) {
     if (rawNode && isStakeInstruction(rawNode.raw)) {
         return <RawStakeDetailsCard node={rawNode} fallback={fallback} />;
     }
-    const card =
-        dispatched && PROGRAM_CARDS[programLabel(dispatched)]?.({ dispatched, instructionData, node, rawNode });
+    const card = dispatched && programRoute(dispatched)?.({ dispatched, instructionData, node, rawNode });
     return card ?? fallback;
 }
 
@@ -105,12 +104,13 @@ type ProgramRoute = (route: {
 
 type CardProgramLabel = ParserProgramLabel | typeof STAKE_PROGRAM_LABEL | typeof VOTE_PROGRAM_LABEL;
 
-/** A route that returns `undefined` passes the instruction to the IDL card. */
+/** A route that returns `undefined` renders the fallback: the IDL card when an IDL decodes the bytes, else Unknown. */
 const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
     'address-lookup-table': decoded(AddressLookupTableDetailsCard),
     'bpf-loader': decoded(BpfLoaderDetailsCard),
     'bpf-upgradeable-loader': decoded(BpfUpgradeableLoaderDetailsCard),
-    'compute-budget': ({ node, dispatched }) => <ComputeBudgetDetailsCard node={node} parsed={parsedOf(dispatched)} />,
+    'compute-budget': ({ node, dispatched, rawNode }) =>
+        rawNode && <ComputeBudgetDetailsCard node={node} parsed={parsedOf(dispatched)} />,
     ed25519: ({ dispatched, rawNode, instructionData }) =>
         rawNode && <Ed25519DetailsCard node={rawNode} parsed={parsedOf(dispatched)} siblingData={instructionData} />,
     lighthouse: ({ dispatched, rawNode }) =>
@@ -118,11 +118,10 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
             <LighthouseDetailsCard node={rawNode} parsed={dispatched.parsed} />
         ) : undefined,
     mango: nameOnly(),
-    'mpl-token-metadata': ({ node, dispatched }) => (
-        <MetaplexTokenMetadataDetailsCard node={node} parsed={parsedOf(dispatched)} />
-    ),
-    pyth: ({ node, dispatched }) => <PythDetailsCard node={node} parsed={parsedOf(dispatched)} />,
-    serum: ({ node, dispatched }) => <SerumDetailsCard node={node} parsed={parsedOf(dispatched)} />,
+    'mpl-token-metadata': ({ node, dispatched, rawNode }) =>
+        rawNode && <MetaplexTokenMetadataDetailsCard node={node} parsed={parsedOf(dispatched)} />,
+    pyth: ({ node, dispatched, rawNode }) => rawNode && <PythDetailsCard node={node} parsed={parsedOf(dispatched)} />,
+    serum: ({ node, dispatched, rawNode }) => rawNode && <SerumDetailsCard node={node} parsed={parsedOf(dispatched)} />,
     'solana-attestation-service': ({ dispatched, rawNode }) =>
         rawNode && <SolanaAttestationDetailsCard node={rawNode} parsed={parsedOf(dispatched)} />,
     'spl-associated-token-account': decoded(AssociatedTokenDetailsCard),
@@ -134,13 +133,14 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
     'token-swap': nameOnly('Token Swap'),
     vote: decoded(VoteDetailsCard),
     wormhole: nameOnly('Wormhole'),
-    'zk-elgamal-proof': ({ node, dispatched }) => (
-        <ZkElGamalProofDetailsCard node={node} parsed={parsedOf(dispatched)} />
-    ),
+    'zk-elgamal-proof': ({ node, dispatched, rawNode }) =>
+        rawNode && <ZkElGamalProofDetailsCard node={node} parsed={parsedOf(dispatched)} />,
 } satisfies Partial<Record<CardProgramLabel, ProgramRoute>>;
 
-function programLabel(dispatched: DispatchResult): string {
-    return 'unknown' in dispatched ? dispatched.programLabel : dispatched.program;
+// The RPC sets `program`, so a label such as `toString` must not resolve to a member of `Object.prototype`.
+function programRoute(dispatched: DispatchResult): ProgramRoute | undefined {
+    const label = 'unknown' in dispatched ? dispatched.programLabel : dispatched.program;
+    return Object.hasOwn(PROGRAM_CARDS, label) ? PROGRAM_CARDS[label] : undefined;
 }
 
 function parsedOf(dispatched: DispatchResult): ParsedInstructionInfo | undefined {
@@ -160,13 +160,15 @@ function decoded(Card: React.ComponentType<{ node: InstructionNode; parsed: unkn
 }
 
 function nameOnly(programName?: string): ProgramRoute {
-    return function nameOnlyRoute({ node, dispatched }) {
+    return function nameOnlyRoute({ node, dispatched, rawNode }) {
         return (
-            <NameOnlyDetailsCard
-                node={node}
-                name={isParsedInstruction(dispatched) ? dispatched.parsed.type : undefined}
-                programName={programName}
-            />
+            rawNode && (
+                <NameOnlyDetailsCard
+                    node={node}
+                    name={isParsedInstruction(dispatched) ? dispatched.parsed.type : undefined}
+                    programName={programName}
+                />
+            )
         );
     };
 }

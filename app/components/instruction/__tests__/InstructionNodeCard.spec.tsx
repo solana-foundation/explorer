@@ -18,6 +18,7 @@ import {
     TransactionInstruction,
     VoteProgram,
 } from '@solana/web3.js';
+import { getAllocateInstructionDataEncoder } from '@solana-program/program-metadata';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -200,14 +201,14 @@ describe('InstructionNodeCard', () => {
 
     it('should route a batch that the RPC parses to the batch card', () => {
         const batch: ParsedInstruction = {
-            parsed: { info: { instructions: [] }, type: 'batch' },
+            parsed: { info: { instructions: [{ info: { amount: '5' }, type: 'transfer' }] }, type: 'batch' },
             program: 'spl-token',
             programId: TOKEN_PROGRAM_ID,
         };
 
         renderCard(toInstructionNode({ index: 0, ix: batch }));
 
-        expect(screen.getByText('Token Program: Batch (0 instructions)')).toBeInTheDocument();
+        expect(screen.getByText('Token Program: Batch (1 instruction)')).toBeInTheDocument();
     });
 
     it('should render the card of a new instruction at a position whose previous card threw', () => {
@@ -238,6 +239,51 @@ describe('InstructionNodeCard', () => {
         },
     );
 
+    it.each(['toString', 'hasOwnProperty'])(
+        "should show the unknown card for an RPC-parsed instruction of the program '%s'",
+        program => {
+            renderCard(toInstructionNode({ index: 0, ix: rpcParsed(FOREIGN_PROGRAM, program, 'transfer', {}) }));
+
+            expect(
+                screen.getByText(`Unknown Program (${FOREIGN_PROGRAM.toBase58()}): Unknown Instruction`),
+            ).toBeInTheDocument();
+        },
+    );
+
+    it.each(['compute-budget', 'zk-elgamal-proof', 'serum', 'mango', 'token-swap', 'wormhole'])(
+        "should show the unknown card for an RPC-parsed instruction of the program '%s', whose card takes only an instruction in byte form",
+        program => {
+            renderCard(toInstructionNode({ index: 0, ix: rpcParsed(FOREIGN_PROGRAM, program, 'transfer', {}) }));
+
+            expect(
+                screen.getByText(`Unknown Program (${FOREIGN_PROGRAM.toBase58()}): Unknown Instruction`),
+            ).toBeInTheDocument();
+        },
+    );
+
+    it("should show the unknown card for an RPC-parsed instruction of the program 'mpl-token-metadata'", () => {
+        renderCard(
+            toInstructionNode({
+                index: 0,
+                ix: rpcParsed(FOREIGN_PROGRAM, 'mpl-token-metadata', 'createMetadataAccountV3', {}),
+            }),
+        );
+
+        expect(
+            screen.getByText(`Unknown Program (${FOREIGN_PROGRAM.toBase58()}): Unknown Instruction`),
+        ).toBeInTheDocument();
+    });
+
+    it("should show the unknown card for an RPC-parsed instruction of the program 'pyth' with a text payload", () => {
+        const pyth: ParsedInstruction = { parsed: 'hello', program: 'pyth', programId: FOREIGN_PROGRAM };
+
+        renderCard(toInstructionNode({ index: 0, ix: pyth }));
+
+        expect(
+            screen.getByText(`Unknown Program (${FOREIGN_PROGRAM.toBase58()}): Unknown Instruction`),
+        ).toBeInTheDocument();
+    });
+
     it('should draw the frame of a PMP instruction while its card loads', async () => {
         // A 4-byte header-only setData, which the PMP card decodes without an IDL.
         const setData = new TransactionInstruction({
@@ -250,6 +296,19 @@ describe('InstructionNodeCard', () => {
 
         expect(screen.getByText('Program Metadata Program: Loading')).toBeInTheDocument();
         expect(await screen.findByText('ProgramMetadata: SetData')).toBeInTheDocument();
+    });
+
+    it('should hand the bytes of a PMP instruction that its card cannot decode to the IDL card', async () => {
+        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'anchor' } as never);
+        const allocate = new TransactionInstruction({
+            data: Buffer.from(getAllocateInstructionDataEncoder().encode({ seed: 'idl' })),
+            keys: [],
+            programId: new PublicKey(PMP_ADDRESS),
+        });
+
+        renderCard(toInstructionNode({ index: 0, ix: allocate }));
+
+        expect(await screen.findByText('IDL card')).toBeInTheDocument();
     });
 
     it('should resolve ed25519 offsets against the instruction data of the surface', () => {
