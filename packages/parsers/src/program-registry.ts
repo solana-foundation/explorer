@@ -33,6 +33,7 @@ export type ParserProgramLabel =
     | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
     | 'compute-budget'
     | 'ed25519'
+    | 'genesis'
     | 'lighthouse'
     | 'mango'
     | 'mpl-token-metadata'

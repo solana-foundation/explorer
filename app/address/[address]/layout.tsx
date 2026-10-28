@@ -28,6 +28,8 @@ import {
     SYSVAR_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { AccountCard } from '@features/account';
+import { isVestingLockAccount, useVestingLocks, VestingLockRows } from '@features/genesis-vesting';
 import { isNftokenCollection, NftokenAccountSection } from '@features/nftoken';
 import { SecurityNotification } from '@features/security-txt';
 import { StakeAccountSection } from '@features/stake';
@@ -141,7 +143,8 @@ export type AddressTabPath =
     | 'token-extensions'
     | 'attestation'
     | 'account-data'
-    | 'subscriptions';
+    | 'subscriptions'
+    | 'vesting';
 
 type AddressTab = NavigationTab<AddressTabPath>;
 
@@ -259,6 +262,8 @@ function DetailsSections({
 
     const hasNoAccountData = (!account.data.raw || account.data.raw.length === 0) && !account.data.parsed;
     const authority = (account.data.parsed as UpgradeableLoaderAccountData | undefined)?.programData?.authority;
+    const parsedData = account.data.parsed;
+    const isMint = Boolean(parsedData && isTokenProgramData(parsedData) && parsedData.parsed.type === 'mint');
 
     const asyncTabChildren = (
         <>
@@ -275,6 +280,9 @@ function DetailsSections({
             </Suspense>
             <Suspense fallback={null}>
                 <AccountDataTab programId={account.owner} />
+            </Suspense>
+            <Suspense fallback={null}>
+                <GenesisVestingTab mint={isMint ? address : undefined} />
             </Suspense>
         </>
     );
@@ -357,6 +365,8 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
                 onNotFound={() => redirect(addressPath, RedirectType.replace)}
             />
         );
+    } else if (isVestingLockAccount(account)) {
+        return <VestingLockSection account={account} />;
     } else if (squadsAccountType) {
         return <SquadsAccountSection account={account} accountType={squadsAccountType} />;
     } else {
@@ -369,6 +379,20 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
             </ErrorBoundary>
         );
     }
+}
+
+function VestingLockSection({ account }: { account: Account }) {
+    const refresh = useRefreshAccount();
+    return (
+        <AccountCard
+            title="Genesis Vesting Lock"
+            account={account}
+            analyticsSection="genesis_vesting_lock_card"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
+            <VestingLockRows account={account} />
+        </AccountCard>
+    );
 }
 
 function MoreSection({
@@ -541,4 +565,12 @@ function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string | nul
         (plansData?.plans.length ?? 0) > 0;
     if (!hasAny) return null;
     return <NavigationTabLink path="subscriptions" title="Subscriptions" />;
+}
+
+function GenesisVestingTab({ mint }: { mint: string | undefined }) {
+    // Non-suspense: this runs on every mint page, so an RPC that rejects getProgramAccounts hides the tab
+    // instead of taking down the account page.
+    const { data, error } = useVestingLocks(mint, { suspense: false });
+    if (error || !data?.length) return null;
+    return <NavigationTabLink path="vesting" title="Vesting" />;
 }
