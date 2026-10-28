@@ -72,7 +72,8 @@ vi.mock('@features/decode-instruction-lighthouse', async importOriginal => ({
     },
 }));
 
-vi.mock('@components/instruction/ComputeBudgetDetailsCard', () => ({
+vi.mock('@features/decode-instruction-compute-budget', async importOriginal => ({
+    ...(await importOriginal<typeof import('@features/decode-instruction-compute-budget')>()),
     ComputeBudgetDetailsCard: () => {
         throw new Error('compute budget card failed');
     },
