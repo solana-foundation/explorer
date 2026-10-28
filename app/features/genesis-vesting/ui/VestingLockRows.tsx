@@ -8,11 +8,13 @@ import { useEffect } from 'react';
 import { KeyValueRows } from '@/app/shared/ui/key-value';
 
 import { readVestingLock } from '../lib/read-vesting-lock';
+import { useUnixTime } from '../model/use-unix-time';
 import { BaseVestingLockRows } from './BaseVestingLockRows';
 
 /** Account page rows for a `ClaimScheduleBucketV2`; callers check `isVestingLockAccount` first. */
 export function VestingLockRows({ account }: { account: Account }) {
-    const lock = account.data.raw && readVestingLock(account.data.raw, Math.floor(Date.now() / 1000));
+    const now = useUnixTime();
+    const lock = account.data.raw && readVestingLock(account.data.raw, now);
     const mint = lock ? lock.mint : undefined;
     const mintInfo = useMintAccountInfo(mint);
     const fetchAccountInfo = useFetchAccountInfo();

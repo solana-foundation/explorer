@@ -2,21 +2,24 @@
 
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { useMintAccountInfo } from '@providers/accounts';
 
 import { readVestingLock } from '../lib/read-vesting-lock';
+import { useUnixTime } from '../model/use-unix-time';
 import { useVestingLocks } from '../model/use-vesting-locks';
 import { BaseTokenVesting } from './BaseTokenVesting';
 
-/** Vesting tab content for a token mint. Suspends while the locks load. */
+/** Vesting tab content for a token mint. */
 export function TokenVestingCard({ mint }: { mint: string }) {
-    const { data: accounts = [] } = useVestingLocks(mint);
+    const { data: accounts, error, isValidating, mutate } = useVestingLocks(mint, { revalidateIfStale: true });
     const mintInfo = useMintAccountInfo(mint);
+    // Vested amounts grow with time, so the locks are evaluated at a clock that keeps ticking while the page is open.
+    const now = useUnixTime();
 
-    if (!mintInfo) return <LoadingCard />;
+    if (error && !accounts) return <ErrorCard text="Failed to load vesting locks." retry={() => mutate()} />;
+    if (!accounts || !mintInfo) return <LoadingCard />;
 
-    // Vested amounts grow with time, so each render evaluates the locks at the current time.
-    const now = Math.floor(Date.now() / 1000);
     const locks = accounts
         .flatMap(({ address, data }) => {
             const lock = readVestingLock(data, now);
@@ -27,5 +30,19 @@ export function TokenVestingCard({ mint }: { mint: string }) {
 
     if (locks.length === 0) return <ErrorCard text="No Genesis vesting locks found for this token." />;
 
-    return <BaseTokenVesting locks={locks} supply={BigInt(mintInfo.supply)} decimals={mintInfo.decimals} />;
+    return (
+        <BaseTokenVesting
+            locks={locks}
+            supply={BigInt(mintInfo.supply)}
+            decimals={mintInfo.decimals}
+            actions={
+                <RefreshButton
+                    analyticsSection="genesis_vesting_card"
+                    fetching={isValidating}
+                    failed={Boolean(error)}
+                    onClick={() => mutate()}
+                />
+            }
+        />
+    );
 }

@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import type { Address as KitAddress } from '@solana/kit';
+import type { ReactNode } from 'react';
 
 import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
@@ -16,9 +17,11 @@ export type BaseTokenVestingProps = {
     locks: ReadonlyArray<{ address: KitAddress; lock: VestingLock }>;
     supply: bigint;
     decimals: number;
+    /** Controls in the summary card header, such as a refresh button. */
+    actions?: ReactNode;
 };
 
-export function BaseTokenVesting({ locks, supply, decimals }: BaseTokenVestingProps) {
+export function BaseTokenVesting({ locks, supply, decimals, actions }: BaseTokenVestingProps) {
     const locked = locks.reduce((sum, { lock }) => sum + lock.locked, 0n);
     const summary: KeyValueRowInput[] = [
         { label: 'Total Supply', value: formatAmount(supply, decimals) },
@@ -30,7 +33,7 @@ export function BaseTokenVesting({ locks, supply, decimals }: BaseTokenVestingPr
 
     return (
         <div className="flex flex-col gap-6">
-            <OverviewCard title="Genesis Vesting">
+            <OverviewCard title="Genesis Vesting" actions={actions}>
                 <KeyValueRows rows={summary} />
             </OverviewCard>
             {locks.length > MAX_LOCK_CARDS ? (

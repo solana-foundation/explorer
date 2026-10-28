@@ -573,9 +573,8 @@ function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string | nul
 }
 
 function GenesisVestingTab({ mint }: { mint: string | undefined }) {
-    // Non-suspense: this runs on every mint page, so an RPC that rejects getProgramAccounts hides the tab
-    // instead of taking down the account page.
-    const { data, error } = useVestingLocks(mint, { suspense: false });
+    // Runs on every mint page: an RPC that rejects getProgramAccounts hides the tab instead of failing the page.
+    const { data, error } = useVestingLocks(mint);
     if (error || !data?.length) return null;
     return <NavigationTabLink path="vesting" title="Vesting" />;
 }
