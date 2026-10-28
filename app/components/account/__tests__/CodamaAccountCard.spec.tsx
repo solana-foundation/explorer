@@ -54,7 +54,7 @@ function accountWith(raw: Uint8Array | undefined, lamports: number | undefined):
 
 describe('CodamaAccountCard', () => {
     it('should render the decoded rows and a program-qualified title', () => {
-        render(<CodamaAccountCard account={accountWith(counterAccountData(42n), 1)} idl={root} />);
+        render(<CodamaAccountCard account={accountWith(counterAccountData(42n), 1)} idls={[root]} />);
 
         expect(screen.getByText('42')).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'CounterProgram: Counter' })).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('CodamaAccountCard', () => {
 
     it('should render nothing when lamports is undefined', () => {
         const { container } = render(
-            <CodamaAccountCard account={accountWith(counterAccountData(42n), undefined)} idl={root} />,
+            <CodamaAccountCard account={accountWith(counterAccountData(42n), undefined)} idls={[root]} />,
         );
 
         expect(container).toBeEmptyDOMElement();
@@ -74,10 +74,22 @@ describe('CodamaAccountCard', () => {
     it('should show the decode error when the account bytes match no account type', () => {
         const unmatched = new Uint8Array(48); // zeroed discriminator → no match
 
-        render(<CodamaAccountCard account={accountWith(unmatched, 1)} idl={root} />);
+        render(<CodamaAccountCard account={accountWith(unmatched, 1)} idls={[root]} />);
 
         expect(
             screen.getByText('Failed to decode account data according to the program interface'),
         ).toBeInTheDocument();
+    });
+
+    it('should fall through to the next IDL when an earlier one cannot decode the account', () => {
+        const otherRoot = normalizeAnchorIdl(
+            { accounts: [], instructions: [], name: 'other_program', version: '0.1.0' },
+            PublicKey.unique().toBase58(),
+        ) as RootNode;
+
+        render(<CodamaAccountCard account={accountWith(counterAccountData(42n), 1)} idls={[otherRoot, root]} />);
+
+        expect(screen.getByText('42')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'CounterProgram: Counter' })).toBeInTheDocument();
     });
 });

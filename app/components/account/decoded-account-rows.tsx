@@ -8,7 +8,10 @@ import type { KeyValueRow } from '@/app/shared/ui/key-value';
 export function argsToRows(args: readonly InstructionArg[], prefix = ''): KeyValueRow[] {
     return args.flatMap(arg => {
         const label = prefix ? `${prefix}.${arg.name}` : arg.name;
-        if (arg.kind === 'group') return argsToRows(arg.children, label);
+        if (arg.kind === 'group') {
+            const childRows = argsToRows(arg.children, label);
+            return arg.variant ? [{ label, value: arg.variant }, ...childRows] : childRows;
+        }
         if (arg.kind === 'empty') return [{ label, value: '—' }];
         const value =
             arg.value.kind === 'address' ? (
