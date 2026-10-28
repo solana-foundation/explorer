@@ -1,10 +1,8 @@
 'use client';
 
-import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { ErrorCard } from '@/app/components/common/ErrorCard';
-import { LoadingCard } from '@/app/components/common/LoadingCard';
 import { TokenVestingCard } from '@/app/features/genesis-vesting';
 
 type Props = Readonly<{
@@ -15,10 +13,9 @@ type Props = Readonly<{
 
 export default function VestingPageClient({ params: { address } }: Props) {
     return (
-        <ErrorBoundary fallback={<ErrorCard text="Failed to load vesting locks." />}>
-            <Suspense fallback={<LoadingCard />}>
-                <TokenVestingCard mint={address} />
-            </Suspense>
+        // Fetch errors are handled in the card, with a retry; this boundary only catches rendering errors.
+        <ErrorBoundary fallback={<ErrorCard text="Failed to display vesting locks." />}>
+            <TokenVestingCard mint={address} />
         </ErrorBoundary>
     );
 }

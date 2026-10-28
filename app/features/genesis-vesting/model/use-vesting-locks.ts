@@ -3,7 +3,7 @@ import 'client-only';
 import { useCluster } from '@providers/cluster';
 import { address } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
-import useSWRImmutable from 'swr/immutable';
+import useSWR from 'swr';
 
 import { fetchVestingLocks } from '../api/fetch-vesting-locks';
 
@@ -12,20 +12,26 @@ const ENABLED_CLUSTERS = new Set([Cluster.MainnetBeta, Cluster.Devnet, Cluster.C
 
 type HookOptions = {
     /**
-     * `true` (default) throws to the nearest ErrorBoundary, for the Vesting page. The tab-visibility check runs
-     * on every mint page, so it passes `false` and hides the tab on an RPC error instead.
+     * Refetch when a component mounts with cached locks. The Vesting page sets it, so a lock claimed, paused or
+     * cancelled since the last visit shows its new state. The tab-visibility check runs on every mint page and
+     * keeps the session cache; it shares the key, so each page refetch updates it too.
      */
-    suspense?: boolean;
+    revalidateIfStale?: boolean;
 };
 
 export function useVestingLocks(mint: string | undefined, options?: HookOptions) {
     const { cluster, url } = useCluster();
 
-    return useSWRImmutable(
+    return useSWR(
         mint !== undefined && ENABLED_CLUSTERS.has(cluster)
             ? (['genesis-vesting-locks', mint, url] as const)
             : undefined,
         ([_prefix, mintAddress, rpcUrl]) => fetchVestingLocks(rpcUrl, address(mintAddress)),
-        { suspense: options?.suspense ?? true },
+        // Locks change only through transactions, so focus and reconnect do not refetch them.
+        {
+            revalidateIfStale: options?.revalidateIfStale ?? false,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+        },
     );
 }
