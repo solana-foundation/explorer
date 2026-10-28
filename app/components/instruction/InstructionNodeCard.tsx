@@ -44,6 +44,8 @@ import { VoteDetailsCard } from '@features/vote';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
 // the branch below can stay static. `React.lazy` rather than `next/dynamic`, because the fallback needs the node
@@ -53,8 +55,23 @@ const PmpDetailsCard = React.lazy(() =>
 );
 
 export function InstructionNodeCard({ node }: { node: InstructionNode }) {
+    const { signature } = useInstructionSurface();
     return (
-        <ErrorBoundary resetKeys={[node]} fallback={<UnknownDetailsCard node={node} />}>
+        <ErrorBoundary
+            resetKeys={[node]}
+            fallback={<UnknownDetailsCard node={node} />}
+            onError={error =>
+                Logger.error(error, {
+                    sentry: 'always',
+                    sentryExtras: {
+                        childIndex: node.childIndex,
+                        index: node.index,
+                        programId: node.programId.toBase58(),
+                        signature,
+                    },
+                })
+            }
+        >
             <ProgramCard node={node} />
         </ErrorBoundary>
     );

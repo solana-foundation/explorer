@@ -92,6 +92,15 @@ describe('BpfUpgradeableLoaderDetailsCard', () => {
 
         expect(() => renderTxCard(card('upgrade', { authority: AUTHORITY }))).toThrow();
     });
+
+    it('should name the type of a field that it has no row format for', () => {
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const info = { account: ACCOUNT, authority: AUTHORITY, isFinal: true, newAuthority: NEW_AUTHORITY };
+
+        expect(() => renderTxCard(card('setAuthorityChecked', info))).toThrow(
+            'BPF Upgradeable Loader field isFinal of type boolean has no row format',
+        );
+    });
 });
 
 function card(type: string, info: Record<string, unknown>) {

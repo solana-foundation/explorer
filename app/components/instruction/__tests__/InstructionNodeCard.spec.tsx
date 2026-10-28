@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import {
     inspectorSurface,
     type InstructionNode,
@@ -24,6 +24,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderTxCard, renderWithProviders } from '@/app/__tests__/card-harness';
+import { Logger } from '@/app/shared/lib/logger';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { InstructionNodeCard } from '../InstructionNodeCard';
@@ -220,6 +221,20 @@ describe('InstructionNodeCard', () => {
 
         expect(screen.getByText('System Program: Transfer')).toBeInTheDocument();
         consoleError.mockRestore();
+    });
+
+    it('should report a card that throws to Sentry', () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const loggerError = vi.spyOn(Logger, 'error').mockImplementation(() => undefined);
+
+        renderCard(toInstructionNode({ index: 0, ix: MEMO }));
+
+        expect(loggerError).toHaveBeenCalledWith(new Error('memo card failed'), {
+            sentry: 'always',
+            sentryExtras: { index: 0, programId: MEMO.programId.toBase58(), signature: DEFAULT_SIGNATURE },
+        });
+        consoleError.mockRestore();
+        loggerError.mockRestore();
     });
 
     it.each([

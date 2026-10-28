@@ -73,6 +73,6 @@ function infoFields(info: object): InstructionField[] {
         if (value instanceof PublicKey) return [address(label, value)];
         if (key === 'bytes' && typeof value === 'string') return [preformatted(`${label} (Base 64)`, wrap(value, 50))];
         if (typeof value === 'string' || typeof value === 'number') return [text(label, value)];
-        throw new Error(`BPF Upgradeable Loader field ${key} has no row format`);
+        throw new Error(`BPF Upgradeable Loader field ${key} of type ${typeof value} has no row format`);
     });
 }

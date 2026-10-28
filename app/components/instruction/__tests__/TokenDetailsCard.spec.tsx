@@ -272,6 +272,15 @@ describe('TokenDetailsCard', () => {
 
         expect(() => renderTxCard(card('notAnInstruction', {}))).toThrow();
     });
+
+    it('should name the type of a field that it has no row format for', () => {
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const info = { decimals: 0, extra: {}, mint: MINT.toBase58(), mintAuthority: AUTHORITY.toBase58() };
+
+        expect(() => renderTxCard(card('initializeMint2', info))).toThrow(
+            'Token instruction field extra of type object has no row format',
+        );
+    });
 });
 
 describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {

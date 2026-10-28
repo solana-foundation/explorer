@@ -107,7 +107,7 @@ function infoFields(info: TokenInfo, format: AmountFormat): InstructionField[] {
         if (isNumeric(value)) return [text(label, value)];
         if (typeof value === 'boolean') return [text(label, String(value))];
         if (Array.isArray(value) && value.every(isNumeric)) return [preformatted(label, value)];
-        throw new Error(`Token instruction field ${key} has no row format`);
+        throw new Error(`Token instruction field ${key} of type ${typeof value} has no row format`);
     });
 }
 
