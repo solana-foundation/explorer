@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
-import { type InstructionNode, toInstructionNode } from '../model/node';
+import { type InstructionNode, positionLabel, toInstructionNode } from '../model/node';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { InstructionCardView } from '../ui/InstructionCardView';
 import { InstructionNodeCards } from '../ui/InstructionNodeCards';
@@ -32,6 +32,13 @@ describe('InstructionNodeCards', () => {
         expect(screen.getByText('Unknown Instruction')).toBeInTheDocument();
         // eslint-disable-next-line testing-library/no-node-access -- the anchor id is what is under test
         expect(document.getElementById('ix-2')).not.toBeNull();
+    });
+
+    it('should anchor an inner instruction the page cannot resolve by both numbers', () => {
+        renderOnSurface(<InstructionCardView node={node({ children: [undefined], index: 2 })} title="Parent" />);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the anchor id is what is under test
+        expect(document.getElementById('ix-3-1')).not.toBeNull();
     });
 
     it.each([
@@ -105,6 +112,5 @@ function renderOnSurface(ui: JSX.Element, overrides: Partial<InstructionSurface>
 }
 
 function StubCard({ node }: { node: InstructionNode }) {
-    const position = node.childIndex === undefined ? `${node.index + 1}` : `${node.index + 1}.${node.childIndex + 1}`;
-    return <article>{`card #${position}`}</article>;
+    return <article>{`card #${positionLabel(node)}`}</article>;
 }

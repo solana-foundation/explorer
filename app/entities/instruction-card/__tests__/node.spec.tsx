@@ -1,7 +1,7 @@
 import { type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { instructionDataOf, toInstructionNode, toRawInstructionNode } from '../model/node';
+import { instructionDataOf, positionNumbers, toInstructionNode, toRawInstructionNode } from '../model/node';
 
 const PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
@@ -12,6 +12,16 @@ const PARSED: ParsedInstruction = {
     programId: PROGRAM_ID,
 };
 const SYSTEM_RAW = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: SystemProgram.programId });
+
+describe('positionNumbers', () => {
+    it.each([
+        { numbers: [1], position: { index: 0 } },
+        { numbers: [1, 1], position: { childIndex: 0, index: 0 } },
+        { numbers: [3, 2], position: { childIndex: 1, index: 2 } },
+    ])('should number $position from 1 as $numbers', ({ position, numbers }) => {
+        expect(positionNumbers(position)).toEqual(numbers);
+    });
+});
 
 describe('toInstructionNode', () => {
     it.each([

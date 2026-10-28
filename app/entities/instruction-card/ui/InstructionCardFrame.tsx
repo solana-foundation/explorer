@@ -8,7 +8,7 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { type InstructionPosition, positionLabel } from '../model/node';
+import { type InstructionPosition, positionLabel, positionNumbers } from '../model/node';
 
 /** The chrome every instruction card shares, so a card with no instruction to show still matches its neighbours. */
 export function InstructionCardFrame({
@@ -26,11 +26,8 @@ export function InstructionCardFrame({
     headerButtons?: React.ReactNode;
     children: React.ReactNode;
 }) {
-    const { index, childIndex } = position;
-    const [resultClass] = ixResult(result, index);
-    const scrollAnchorRef = useScrollAnchor(
-        getInstructionCardScrollAnchorId(childIndex !== undefined ? [index + 1, childIndex + 1] : [index + 1]),
-    );
+    const [resultClass] = ixResult(result, position.index);
+    const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId(positionNumbers(position)));
     return (
         <CollapsibleCard
             ref={scrollAnchorRef}

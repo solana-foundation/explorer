@@ -14,8 +14,12 @@ export type InstructionNode = {
 export type InstructionPosition = Pick<InstructionNode, 'index' | 'childIndex'>;
 
 /** Numbers the position from 1, as `3` or `3.2`. */
-export function positionLabel({ index, childIndex }: InstructionPosition): string {
-    return childIndex === undefined ? `${index + 1}` : `${index + 1}.${childIndex + 1}`;
+export function positionLabel(position: InstructionPosition): string {
+    return positionNumbers(position).join('.');
+}
+
+export function positionNumbers({ index, childIndex }: InstructionPosition): number[] {
+    return childIndex === undefined ? [index + 1] : [index + 1, childIndex + 1];
 }
 
 /** Takes `programId` from `ix`, so the two cannot disagree. */
