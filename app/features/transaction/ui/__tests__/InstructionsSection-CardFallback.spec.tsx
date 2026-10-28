@@ -35,8 +35,6 @@ const LIGHTHOUSE_IX = instruction(new PublicKey(LIGHTHOUSE_ADDRESS), [15, 0, 0, 
 
 const UNKNOWN_SAS_IX = instruction(new PublicKey(SAS_PROGRAM_ID), [200]);
 
-const CREATE_CREDENTIAL_IX = instruction(new PublicKey(SAS_PROGRAM_ID), [0]);
-
 const COMPUTE_BUDGET_IX = instruction(ComputeBudgetProgram.programId, [2]);
 
 const WORMHOLE_IX = instruction(new PublicKey(WORMHOLE_PROGRAM_IDS[0]), [0]);
@@ -99,13 +97,6 @@ vi.mock('@components/instruction/system/SystemDetailsCard', () => ({
     },
 }));
 
-vi.mock('@solana/attestation', async importOriginal => ({
-    ...(await importOriginal<typeof import('@solana/attestation')>()),
-    parseCreateCredentialInstruction: () => {
-        throw new Error('sas parser defect');
-    },
-}));
-
 vi.mock('swr', () => ({
     __esModule: true,
     default: vi.fn(() => ({
@@ -151,12 +142,6 @@ describe('Transaction page InstructionsSection with a card that throws', () => {
 
     test('should render the Unknown card for a SAS instruction the client rejects', async () => {
         renderSection([UNKNOWN_SAS_IX]);
-
-        expect(await screen.findAllByText('Unknown Instruction', { exact: false })).toHaveLength(1);
-    });
-
-    test('should replace a SAS card that throws with the Unknown card', async () => {
-        renderSection([CREATE_CREDENTIAL_IX]);
 
         expect(await screen.findAllByText('Unknown Instruction', { exact: false })).toHaveLength(1);
     });

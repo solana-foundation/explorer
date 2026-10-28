@@ -13,10 +13,6 @@ vi.mock('@components/common/JsonViewer', () => ({
     SolarizedJsonViewer: ({ src }: { src: any }) => <div data-testid="json-viewer">{JSON.stringify(src)}</div>,
 }));
 
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: any }) => <span data-testid="address">{pubkey.toString()}</span>,
-}));
-
 describe('anchor utilities - number overflow handling', () => {
     const mockIdl: Idl = {
         address: 'TestProgram111111111111111111111111111111',
