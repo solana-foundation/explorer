@@ -7,7 +7,7 @@ import {
     NameOnlyDetailsCard,
     text,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 import { isDeprecatedSerumProgram, OPENBOOK_DEX_PROGRAM_LABEL, SERUM_INSTRUCTION_NAMES } from '@explorer/decoder-serum';
 import type { Address } from '@solana/kit';
 import React from 'react';
@@ -16,25 +16,25 @@ import type { SerumParsed } from '../lib/serum-parser';
 
 type SerumDetailsCardProps = {
     node: InstructionNode;
-    /** The dispatcher's verdict for a DEX instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function SerumDetailsCard({ node, ix }: SerumDetailsCardProps) {
-    const parsed = 'unknown' in ix ? undefined : (ix.parsed as SerumParsed);
-    const name = parsed ? SERUM_INSTRUCTION_NAMES[parsed.type] : 'Unknown';
+export function SerumDetailsCard({ node, parsed }: SerumDetailsCardProps) {
+    const parsedInfo = parsed as SerumParsed | undefined;
+    const name = parsedInfo ? SERUM_INSTRUCTION_NAMES[parsedInfo.type] : 'Unknown';
 
     // Dead Serum DEX deployments get a name-only card; the active OpenBook fork keeps full decoding.
-    if (isDeprecatedSerumProgram(ix.programId.toBase58())) {
+    if (isDeprecatedSerumProgram(node.programId.toBase58())) {
         return <NameOnlyDetailsCard node={node} name={name} />;
     }
 
     const title = `${OPENBOOK_DEX_PROGRAM_LABEL} Program: ${name}`;
-    if (!parsed || !('accounts' in parsed.info)) {
-        return <InstructionCardView node={node} title={title} defaultRaw />;
+    if (!parsedInfo || !('accounts' in parsedInfo.info)) {
+        return <InstructionCardView node={node} title={title} />;
     }
 
-    const { info } = parsed;
+    const { info } = parsedInfo;
     return (
         <InstructionCardView node={node} title={title}>
             <InstructionFields

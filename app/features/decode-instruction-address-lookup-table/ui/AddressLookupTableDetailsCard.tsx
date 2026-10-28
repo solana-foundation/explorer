@@ -1,13 +1,11 @@
-import { Slot } from '@components/common/Slot';
 import {
     address,
-    custom,
     defineInstructionCard,
     InstructionCardView,
     type InstructionNode,
+    slot,
     text,
 } from '@entities/instruction-card';
-import type { ParsedInstruction } from '@solana/web3.js';
 import { is } from 'superstruct';
 
 import type { AddressLookupTableParsed } from '../lib/address-lookup-table-parser';
@@ -26,7 +24,7 @@ export const CreateLookupTableDetailsCard = defineInstructionCard<CreateLookupTa
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
         address('Payer Account', info.payerAccount),
-        custom('Recent Slot', <Slot slot={info.recentSlot} link />),
+        slot('Recent Slot', info.recentSlot),
         text('Bump Seed', info.bumpSeed),
     ],
     title: `${TITLE_PREFIX}: Create Lookup Table`,
@@ -59,15 +57,14 @@ export const CloseLookupTableDetailsCard = defineInstructionCard<CloseLookupTabl
 type AddressLookupTableDetailsCardProps = {
     node: InstructionNode;
     /** Already normalised by the dispatcher — this card does not decode. */
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function AddressLookupTableDetailsCard({ node, ix }: AddressLookupTableDetailsCardProps) {
-    if (!isAddressLookupTableParsed(ix.parsed)) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX} Program: Unknown Instruction`} defaultRaw />;
+export function AddressLookupTableDetailsCard({ node, parsed }: AddressLookupTableDetailsCardProps) {
+    if (!isAddressLookupTableParsed(parsed)) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX} Program: Unknown Instruction`} />;
     }
 
-    const parsed = ix.parsed;
     switch (parsed.type) {
         case 'createLookupTable':
             return <CreateLookupTableDetailsCard info={parsed.info} node={node} />;

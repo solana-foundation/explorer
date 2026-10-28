@@ -1,16 +1,15 @@
 import {
     address,
-    custom,
     defineInstructionCard,
     heading,
     InstructionCardView,
     type InstructionFieldList,
     type RawInstructionNode,
+    string,
     text,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 
-import { Copyable } from '@/app/components/common/Copyable';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
 import {
@@ -30,19 +29,19 @@ const Ed25519VerifyCard = defineInstructionCard<Ed25519SignatureDetails[]>({
 type Ed25519DetailsCardProps = {
     /** The signature offsets point into the data of `raw`. */
     node: RawInstructionNode;
-    /** The dispatcher's verdict for an ed25519 instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
     /** Offsets may point into other instructions, which only the caller can see. */
     siblingData: SiblingInstructionData;
 };
 
-export function Ed25519DetailsCard({ node, ix, siblingData }: Ed25519DetailsCardProps) {
-    if ('unknown' in ix) {
-        return <InstructionCardView node={node} title="Ed25519: Unknown Instruction" defaultRaw />;
+export function Ed25519DetailsCard({ node, parsed, siblingData }: Ed25519DetailsCardProps) {
+    if (!parsed) {
+        return <InstructionCardView node={node} title="Ed25519: Unknown Instruction" />;
     }
 
-    const parsed = ix.parsed as Ed25519Parsed;
-    const signatures = resolveEd25519Signatures(parsed.info.signatures, node.raw.data, siblingData);
+    const parsedInfo = parsed as Ed25519Parsed;
+    const signatures = resolveEd25519Signatures(parsedInfo.info.signatures, node.raw.data, siblingData);
 
     return <Ed25519VerifyCard node={node} info={signatures} />;
 }
@@ -55,34 +54,15 @@ function signatureFields(
     return [
         heading(`Signature #${index + 1}`),
         text('Signature Reference', referenceText(signature)),
-        signature.bytes
-            ? custom('Signature', <Base64Value value={toBase64(signature.bytes)} />)
-            : text('Signature', INVALID_REFERENCE),
+        signature.bytes ? string('Signature', toBase64(signature.bytes)) : text('Signature', INVALID_REFERENCE),
         text('Public Key Reference', referenceText(publicKey)),
         publicKey.address ? address('Public Key', publicKey.address) : text('Public Key', INVALID_REFERENCE),
         text('Message Reference', `${referenceText(message)}, Size ${message.size}`),
-        message.bytes
-            ? custom('Message', <Base64Value value={toBase64(message.bytes)} wrapped />)
-            : text('Message', INVALID_REFERENCE),
+        message.bytes ? string('Message', toBase64(message.bytes)) : text('Message', INVALID_REFERENCE),
     ];
 }
 
 function referenceText({ instructionIndex, offset }: { instructionIndex?: number; offset: number }): string {
     const source = instructionIndex === undefined ? 'This instruction' : `Instruction ${instructionIndex}`;
     return `${source}, Offset ${offset}`;
-}
-
-/**
- * `wrapped` is for the message, the only field long enough that breaking it beats scrolling. It has
- * to be a block: on an inline span the tighter line-height is inert, because the cell's own
- * line-height still sets each line box.
- */
-function Base64Value({ value, wrapped }: { value: string; wrapped?: boolean }) {
-    const copyable = (
-        <Copyable text={value}>
-            <span className="font-mono">{value}</span>
-        </Copyable>
-    );
-    if (!wrapped) return copyable;
-    return <span className="block whitespace-normal break-all text-[0.85rem] leading-[1.2]">{copyable}</span>;
 }

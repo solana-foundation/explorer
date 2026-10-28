@@ -4,20 +4,19 @@ import React from 'react';
 
 import type { InstructionEvent } from '../model/events';
 import type { InstructionNode } from '../model/node';
+import { rawSourceOf } from '../model/raw-source';
 import { useInstructionSurface } from '../model/surface';
-import { InstructionNodeCards } from './InstructionNodeCards';
+import { BaseInstructionCard } from './BaseInstructionCard';
 
 export function InstructionCardView({
     node,
     title,
-    defaultRaw,
-    collapsible,
+    collapsible = false,
     events,
     children,
 }: {
     node: InstructionNode;
     title: string;
-    defaultRaw?: boolean;
     collapsible?: boolean;
     /**
      * Program events the card derived itself — typically from transaction logs
@@ -25,29 +24,22 @@ export function InstructionCardView({
      * The inspector has no transaction logs, so its cards have no events.
      */
     events?: readonly InstructionEvent[];
-    /** Optional: a card that opens in raw mode has no field table to draw behind it. */
+    /** The decoded view. A card without one opens on the Raw view and cannot leave it. */
     children?: React.ReactNode;
 }) {
-    const { Shell, result } = useInstructionSurface();
+    const surface = useInstructionSurface();
 
     return (
-        <Shell
+        <BaseInstructionCard
+            node={node}
             title={title}
-            ix={node.ix}
-            index={node.index}
-            childIndex={node.childIndex}
-            raw={node.raw}
-            result={result}
-            defaultRaw={defaultRaw}
-            collapsible={collapsible}
-            childCards={
-                node.children && node.children.length > 0 ? (
-                    <InstructionNodeCards nodes={node.children} parent={node} />
-                ) : undefined
-            }
+            result={surface.result}
+            rawSource={rawSourceOf(node, surface.rawInstructions)}
+            collapsible={collapsible || surface.collapsible}
+            validateProgram={surface.validateProgram}
             events={events}
         >
             {children}
-        </Shell>
+        </BaseInstructionCard>
     );
 }

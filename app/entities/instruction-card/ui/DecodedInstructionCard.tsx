@@ -1,4 +1,3 @@
-import { ExpandToggleCell } from '@shared/ui/expandable-row';
 import { isSignerRole, isWritableRole } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
@@ -9,11 +8,14 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { type AccountName, type AccountRow, labelAccounts, visibleAccountRows } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
 import type { InstructionEvent } from '../model/events';
+import type { InstructionFieldList } from '../model/fields';
 import type { RawInstructionNode } from '../model/node';
 import { AccountNameCell } from './AccountNameCell';
 import { ArgTable, nestedRowVariants } from './ArgRows';
+import { ExpandToggleCell } from './ExpandableRow';
 import { InstructionAddress } from './InstructionAddress';
 import { InstructionCardView } from './InstructionCardView';
+import { InstructionFieldRows } from './InstructionFields';
 import { ProgramField } from './ProgramField';
 
 export const DECODED_TABLE_COLUMNS = 3;
@@ -25,7 +27,7 @@ export function DecodedInstructionCard({
     accountNames,
     args,
     events,
-    children,
+    fields,
 }: {
     node: RawInstructionNode;
     title: string;
@@ -33,13 +35,13 @@ export function DecodedInstructionCard({
     accountNames: readonly AccountName[];
     args: readonly InstructionArg[];
     events?: readonly InstructionEvent[];
-    /** Rows below the arguments. A row must span `DECODED_TABLE_COLUMNS`. */
-    children?: React.ReactNode;
+    /** Rows below the arguments. */
+    fields?: InstructionFieldList;
 }) {
     return (
         <InstructionCardView node={node} title={title} events={events}>
             <DecodedInstructionBody ix={node.raw} programName={programName} accountNames={accountNames} args={args} />
-            {children}
+            {fields && <InstructionFieldRows fields={fields} columns={DECODED_TABLE_COLUMNS} />}
         </InstructionCardView>
     );
 }

@@ -1,5 +1,5 @@
 import { toInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -65,5 +65,10 @@ function renderCard(data: number[]) {
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     invariant(dispatched, 'the compute budget program is registered');
 
-    return renderTxCard(<ComputeBudgetDetailsCard node={toInstructionNode({ index: 0, ix: raw })} ix={dispatched} />);
+    return renderTxCard(
+        <ComputeBudgetDetailsCard
+            node={toInstructionNode({ index: 0, ix: raw })}
+            parsed={isParsedInstruction(dispatched) ? dispatched.parsed : undefined}
+        />,
+    );
 }

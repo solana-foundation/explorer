@@ -1,15 +1,20 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
 import { type InstructionNode, toInstructionNode } from '../model/node';
-import { type InstructionShellProps, type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
+import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { InstructionCardView } from '../ui/InstructionCardView';
 import { InstructionNodeCards } from '../ui/InstructionNodeCards';
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+vi.mock('@/app/components/common/Address', () => ({ Address: () => <div /> }));
+vi.mock('@components/inspector/AddressWithContext', () => ({
+    AddressWithContext: () => <div>validated program</div>,
+    programValidator: () => undefined,
+}));
 
 const IX = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PublicKey.default });
 
@@ -24,6 +29,7 @@ describe('InstructionNodeCards', () => {
         renderOnSurface(<InstructionNodeCards nodes={[node({ index: 0 }), undefined]} />);
 
         expect(screen.getByText('Could not display instruction #2, please report')).toBeInTheDocument();
+        expect(screen.getByText('Unknown Instruction')).toBeInTheDocument();
         // eslint-disable-next-line testing-library/no-node-access -- the anchor id is what is under test
         expect(document.getElementById('ix-2')).not.toBeNull();
     });
@@ -35,32 +41,48 @@ describe('InstructionCardView', () => {
 
         renderOnSurface(<InstructionCardView node={parent} title="Parent" />);
 
-        const children = within(screen.getByRole('region', { name: 'Child cards' }));
-        expect(children.getByRole('article')).toHaveTextContent('card #3.1');
-        expect(children.getByText('Could not display instruction #3.2, please report')).toBeInTheDocument();
+        expect(screen.getByText('Inner Instructions')).toBeInTheDocument();
+        expect(screen.getByRole('article')).toHaveTextContent('card #3.1');
+        expect(screen.getByText('Could not display instruction #3.2, please report')).toBeInTheDocument();
     });
 
     it.each([
         ['has no children', node({ index: 0 })],
         ['has an empty list of children', node({ children: [], index: 0 })],
-    ])('should pass no child cards to the frame when the node %s', (_, leaf) => {
+    ])('should draw no Inner Instructions section when the node %s', (_, leaf) => {
         renderOnSurface(<InstructionCardView node={leaf} title="Leaf" />);
 
-        expect(screen.queryByRole('region', { name: 'Child cards' })).not.toBeInTheDocument();
+        expect(screen.getByText('Leaf')).toBeInTheDocument();
+        expect(screen.queryByText('Inner Instructions')).not.toBeInTheDocument();
     });
+
+    it.each([
+        { validateProgram: true, validated: 1 },
+        { validateProgram: false, validated: 0 },
+    ])(
+        'should check the program in the Raw view when validateProgram is $validateProgram',
+        ({ validateProgram, validated }) => {
+            renderOnSurface(<InstructionCardView node={node({ index: 0 })} title="Leaf" />, { validateProgram });
+
+            expect(screen.queryAllByText('validated program')).toHaveLength(validated);
+        },
+    );
 });
 
 function node(fields: Omit<InstructionNode, 'ix' | 'programId'>): InstructionNode {
     return toInstructionNode({ ...fields, ix: IX });
 }
 
-function renderOnSurface(ui: JSX.Element) {
+function renderOnSurface(ui: JSX.Element, overrides: Partial<InstructionSurface> = {}) {
     const surface: InstructionSurface = {
         Card: StubCard,
-        Shell: StubShell,
+        collapsible: false,
         instructionData: () => undefined,
+        rawInstructions: undefined,
         result: { err: null },
         signature: undefined,
+        validateProgram: false,
+        ...overrides,
     };
 
     return render(
@@ -73,13 +95,4 @@ function renderOnSurface(ui: JSX.Element) {
 function StubCard({ node }: { node: InstructionNode }) {
     const position = node.childIndex === undefined ? `${node.index + 1}` : `${node.index + 1}.${node.childIndex + 1}`;
     return <article>{`card #${position}`}</article>;
-}
-
-function StubShell({ title, childCards }: InstructionShellProps) {
-    return (
-        <div>
-            <h2>{title}</h2>
-            {childCards !== undefined && <section aria-label="Child cards">{childCards}</section>}
-        </div>
-    );
 }

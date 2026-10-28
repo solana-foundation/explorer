@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it } from 'vitest';
 
-import { ExpandableRow, FieldNameCell } from '../ExpandableRow';
+import { ExpandableRow, FieldNameCell } from '../ui/ExpandableRow';
 
 describe('ExpandableRow', () => {
     it('should mount the children only while the row is expanded', () => {

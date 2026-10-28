@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { toRawInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor, within } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -132,9 +132,12 @@ function sasInstruction(data: number[], accountCount: number): TransactionInstru
     return new TransactionInstruction({ data: Buffer.from(data), keys, programId: SAS_PROGRAM_ID });
 }
 
-function renderCard(raw: TransactionInstruction, ix = dispatcher.fromTransactionInstruction(raw)) {
+function renderCard(raw: TransactionInstruction, dispatched = dispatcher.fromTransactionInstruction(raw)) {
     return renderTxCard(
-        <SolanaAttestationDetailsCard node={toRawInstructionNode({ index: 0, ix: raw })} ix={ix as DispatchResult} />,
+        <SolanaAttestationDetailsCard
+            node={toRawInstructionNode({ index: 0, ix: raw })}
+            parsed={isParsedInstruction(dispatched) ? dispatched.parsed : undefined}
+        />,
     );
 }
 

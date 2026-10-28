@@ -18,7 +18,7 @@ import { TokenBatchCard } from '../TokenBatchCard';
 
 const meta = {
     component: TokenBatchCard,
-    decorators: [withTransactions, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
     },

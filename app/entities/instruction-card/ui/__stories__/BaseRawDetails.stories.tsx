@@ -67,28 +67,11 @@ const meta = {
     ],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/BaseRawDetails',
+    title: 'Entities/Instruction Card/BaseRawDetails',
 } satisfies Meta<typeof BaseRawDetails>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-export const LoadingState: Story = {
-    args: {
-        ix: undefined,
-    },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-
-        // Loader (spinner + label) renders only when ix has not arrived yet
-        await expect(canvas.getByText('Loading instruction data...')).toBeInTheDocument();
-        await expect(canvasElement.querySelector('.spinner-grow')).toBeInTheDocument();
-
-        // No account/data rows leak through while loading
-        await expect(canvas.queryByText('Account #1')).not.toBeInTheDocument();
-        await expect(canvas.queryByText('Instruction Data')).not.toBeInTheDocument();
-    },
-};
 
 export const EmptyAccountsList: Story = {
     args: {
@@ -97,8 +80,6 @@ export const EmptyAccountsList: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // Empty keys is a valid instruction shape, not a loading state
-        await expect(canvas.queryByText('Loading instruction data...')).not.toBeInTheDocument();
         await expect(canvas.queryByText('Account #1')).not.toBeInTheDocument();
 
         // Data row always renders; empty data falls through to HexData's "No data"
@@ -113,10 +94,6 @@ export const LoadedWithAccounts: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-
-        // Should NOT show loading message
-        const loadingMessage = canvas.queryByText('Loading instruction data...');
-        await expect(loadingMessage).not.toBeInTheDocument();
 
         // Should show account rows
         await expect(canvas.getByText('Account #1')).toBeInTheDocument();

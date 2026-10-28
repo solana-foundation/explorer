@@ -1,4 +1,3 @@
-import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
@@ -338,12 +337,7 @@ function argOrFallback(
         return toArg();
     } catch (error) {
         Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
-        const json = (
-            <div className="[&_.string-value]:break-all">
-                <ReactJson src={data} />
-            </div>
-        );
-        return { kind: 'leaf', name: key, type: typeName, value: { kind: 'custom', value: json } };
+        return { kind: 'leaf', name: key, type: typeName, value: { kind: 'json', value: data } };
     }
 }
 

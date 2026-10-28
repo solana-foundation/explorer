@@ -1,5 +1,5 @@
-import { inspectorSurface } from '@components/inspector/inspector-surface';
-import { InstructionSurfaceProvider, toRawInstructionNode } from '@entities/instruction-card';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import { inspectorSurface, InstructionSurfaceProvider, toRawInstructionNode } from '@entities/instruction-card';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -29,22 +29,6 @@ describe('TokenBatchCard', () => {
             ['Program', TOKEN_2022_PROGRAM_ID.toBase58()],
         ]);
         expect(screen.getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
-    });
-
-    it('should draw its frame with the Shell of the surface', async () => {
-        const ix = makeBatchIx([{ data: TRANSFER_DATA, numAccounts: 3 }], 3);
-        renderWithProviders(
-            <InstructionSurfaceProvider
-                surface={{
-                    ...inspectorSurface(() => undefined),
-                    Shell: ({ title }) => <div data-testid="shell">{title}</div>,
-                }}
-            >
-                <TokenBatchCard node={toRawInstructionNode({ index: 0, ix })} />
-            </InstructionSurfaceProvider>,
-        );
-
-        expect(await screen.findByTestId('shell')).toHaveTextContent('Token Program: Batch (1 instruction)');
     });
 
     it('should draw a heading and the rows of each sub-instruction', async () => {
@@ -77,6 +61,10 @@ describe('TokenBatchCard', () => {
 
 function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
-        <InstructionSurfaceProvider surface={inspectorSurface(() => undefined)}>{ui}</InstructionSurfaceProvider>,
+        <InstructionSurfaceProvider
+            surface={inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined })}
+        >
+            {ui}
+        </InstructionSurfaceProvider>,
     );
 }

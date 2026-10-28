@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { toInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -36,7 +36,10 @@ const raw = new TransactionInstruction({
 const dispatched = createInstructionParserDispatcher(serumInstructionParsers).fromTransactionInstruction(raw);
 invariant(dispatched, 'the OpenBook program id is registered');
 
-const args = { ix: dispatched, node: toInstructionNode({ index: 0, ix: raw }) };
+const args = {
+    node: toInstructionNode({ index: 0, ix: raw }),
+    parsed: isParsedInstruction(dispatched) ? dispatched.parsed : undefined,
+};
 
 const meta: Meta<typeof SerumDetailsCard> = {
     component: SerumDetailsCard,
@@ -44,8 +47,8 @@ const meta: Meta<typeof SerumDetailsCard> = {
         withCluster,
         withScrollAnchor,
         withTokenInfoBatch,
-        withMockTransactions,
         withTxInstructionSurface,
+        withMockTransactions,
         withViewportFromGlobal,
     ],
     parameters: {

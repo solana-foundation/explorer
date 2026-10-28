@@ -1,5 +1,5 @@
 import { instructionDataOf, toInstructionNode, toRawInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -39,8 +39,8 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
         withCluster,
         withScrollAnchor,
         withTokenInfoBatch,
-        withMockTransactions,
         withTxInstructionSurface,
+        withMockTransactions,
         withViewportFromGlobal,
     ],
     parameters: {
@@ -55,11 +55,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const dispatched = createInstructionParserDispatcher([ed25519InstructionParser]).fromTransactionInstruction(ix);
-invariant(dispatched, 'the fixture program id is registered');
+invariant(isParsedInstruction(dispatched), 'the fixture decodes as an ed25519 instruction');
 
 const args = {
-    ix: dispatched,
     node: toRawInstructionNode({ index: 0, ix }),
+    parsed: dispatched.parsed,
     siblingData,
 };
 

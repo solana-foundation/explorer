@@ -10,15 +10,17 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
+import { toInstructionNode } from '../../model/node';
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
-const meta: Meta<typeof BaseInstructionCard> = {
+const meta = {
+    args: { collapsible: false, rawSource: { kind: 'none' }, result: { err: null }, validateProgram: false },
     component: BaseInstructionCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/BaseInstructionCard',
-};
+    title: 'Entities/Instruction Card/BaseInstructionCard',
+} satisfies Meta<typeof BaseInstructionCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -42,9 +44,7 @@ export const Success: Story = {
                 <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
             </BaseTable.Row>
         ),
-        index: 0,
-        ix: sampleIx,
-        result: { err: null },
+        node: toInstructionNode({ index: 0, ix: sampleIx }),
         title: 'Token Transfer',
     },
 };
@@ -56,8 +56,7 @@ export const Failed: Story = {
                 <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
             </BaseTable.Row>
         ),
-        index: 0,
-        ix: sampleIx,
+        node: toInstructionNode({ index: 0, ix: sampleIx }),
         result: { err: { InstructionError: [0, 'Custom'] } },
         title: 'Token Transfer',
     },
@@ -71,19 +70,14 @@ export const Collapsible: Story = {
             </BaseTable.Row>
         ),
         collapsible: true,
-        index: 1,
-        ix: sampleIx,
-        result: { err: null },
+        node: toInstructionNode({ index: 1, ix: sampleIx }),
         title: 'Collapsible Instruction',
     },
 };
 
 export const ValidatedProgram: Story = {
     args: {
-        defaultRaw: true,
-        index: 0,
-        ix: sampleIx,
-        result: { err: null },
+        node: toInstructionNode({ index: 0, ix: sampleIx }),
         title: 'Inspected Instruction',
         validateProgram: true,
     },

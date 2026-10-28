@@ -24,7 +24,7 @@ const meta: Meta<typeof BaseRawParsedDetails> = {
     decorators: [withCardTableField],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/BaseRawParsedDetails',
+    title: 'Entities/Instruction Card/BaseRawParsedDetails',
 };
 
 export default meta;

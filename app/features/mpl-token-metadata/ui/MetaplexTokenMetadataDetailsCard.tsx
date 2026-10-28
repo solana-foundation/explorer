@@ -7,7 +7,7 @@ import {
     type InstructionNode,
     text,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 import { PublicKey } from '@solana/web3.js';
 
 import type { MetaplexTokenMetadataParsed } from '../lib/metaplex-token-metadata-client';
@@ -60,15 +60,16 @@ const IX_TITLES: Record<MetaplexInstructionType, string> = {
 
 type MetaplexTokenMetadataDetailsCardProps = {
     node: InstructionNode;
-    ix: DispatchResult;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function MetaplexTokenMetadataDetailsCard({ node, ix }: MetaplexTokenMetadataDetailsCardProps) {
-    if ('unknown' in ix) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
+export function MetaplexTokenMetadataDetailsCard({ node, parsed }: MetaplexTokenMetadataDetailsCardProps) {
+    if (!parsed) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} />;
     }
 
-    const { info, type } = ix.parsed as MetaplexTokenMetadataParsed;
+    const { info, type } = parsed as MetaplexTokenMetadataParsed;
 
     return (
         <InstructionCardView node={node} title={`${TITLE_PREFIX}: ${IX_TITLES[type]}`}>

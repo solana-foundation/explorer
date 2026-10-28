@@ -33,7 +33,7 @@ export const Default: Story = {
 export const WithExtendedInfo: Story = {
     args: {
         programId: SystemProgram.programId,
-        showExtendedInfo: true,
+        validateProgram: true,
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -61,7 +61,7 @@ export const TokenProgram: Story = {
 export const TokenProgramExtended: Story = {
     args: {
         programId: TOKEN_PROGRAM_ID,
-        showExtendedInfo: true,
+        validateProgram: true,
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

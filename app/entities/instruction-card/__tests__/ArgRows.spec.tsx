@@ -7,10 +7,12 @@ import { ArgRows } from '../ui/ArgRows';
 
 const STUB_SURFACE: InstructionSurface = {
     Card: () => undefined,
-    Shell: () => undefined,
+    collapsible: false,
     instructionData: () => undefined,
+    rawInstructions: undefined,
     result: { err: null },
     signature: undefined,
+    validateProgram: false,
 };
 
 describe('ArgRows', () => {

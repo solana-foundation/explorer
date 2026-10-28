@@ -136,7 +136,10 @@ describe('instruction::SystemDetailsCard', () => {
         if (!isParsedInstruction(parsedIx)) throw new Error('System slice did not recognise fixture');
 
         renderTxCard(
-            <SystemDetailsCard node={toInstructionNode({ index: 0, ix: parsedIx, raw: instruction })} ix={parsedIx} />,
+            <SystemDetailsCard
+                node={toInstructionNode({ index: 0, ix: parsedIx, raw: instruction })}
+                parsed={parsedIx.parsed}
+            />,
         );
 
         await waitFor(() => {

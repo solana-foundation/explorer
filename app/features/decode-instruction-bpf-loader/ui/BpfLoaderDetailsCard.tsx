@@ -6,7 +6,6 @@ import {
     preformatted,
     text,
 } from '@entities/instruction-card';
-import type { ParsedInstruction } from '@solana/web3.js';
 import { wrap } from '@utils/index';
 import React from 'react';
 import { is } from 'superstruct';
@@ -33,15 +32,14 @@ export const BpfLoaderFinalizeDetailsCard = defineInstructionCard<FinalizeInfo>(
 type BpfLoaderDetailsCardProps = {
     node: InstructionNode;
     /** Already normalised by the dispatcher — this card does not decode. */
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function BpfLoaderDetailsCard({ node, ix }: BpfLoaderDetailsCardProps) {
-    if (!isBpfLoaderParsed(ix.parsed)) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
+export function BpfLoaderDetailsCard({ node, parsed }: BpfLoaderDetailsCardProps) {
+    if (!isBpfLoaderParsed(parsed)) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} />;
     }
 
-    const parsed = ix.parsed;
     switch (parsed.type) {
         case 'write':
             return <BpfLoaderWriteDetailsCard info={parsed.info} node={node} />;

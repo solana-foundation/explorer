@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { inspectorSurface } from '@components/inspector/inspector-surface';
-import { InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import { inspectorSurface, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -96,11 +96,15 @@ describe('BpfUpgradeableLoaderDetailsCard', () => {
 
 function card(type: string, info: Record<string, unknown>) {
     const ix: ParsedInstruction = { parsed: { info, type }, program: 'bpf-upgradeable-loader', programId: PROGRAM_ID };
-    return <BpfUpgradeableLoaderDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} />;
+    return <BpfUpgradeableLoaderDetailsCard node={toInstructionNode({ index: 0, ix })} parsed={ix.parsed} />;
 }
 
 function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
-        <InstructionSurfaceProvider surface={inspectorSurface(() => undefined)}>{ui}</InstructionSurfaceProvider>,
+        <InstructionSurfaceProvider
+            surface={inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined })}
+        >
+            {ui}
+        </InstructionSurfaceProvider>,
     );
 }

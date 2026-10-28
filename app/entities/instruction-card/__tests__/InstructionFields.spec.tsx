@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/app/__tests__/card-harness';
 
-import { account, epoch, string } from '../model/fields';
+import { account, epoch, slot, string } from '../model/fields';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { InstructionFields } from '../ui/InstructionFields';
 
@@ -14,10 +14,12 @@ vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const STUB_SURFACE: InstructionSurface = {
     Card: () => undefined,
-    Shell: () => undefined,
+    collapsible: false,
     instructionData: () => undefined,
+    rawInstructions: undefined,
     result: { err: null },
     signature: undefined,
+    validateProgram: false,
 };
 
 describe('InstructionFields', () => {
@@ -83,6 +85,23 @@ describe('InstructionFields', () => {
         expect(screen.getByRole('link', { name: '300' })).toHaveAttribute(
             'href',
             expect.stringContaining('/epoch/300'),
+        );
+    });
+
+    it('should link a slot field to the page of its block', () => {
+        renderWithProviders(
+            <InstructionSurfaceProvider surface={STUB_SURFACE}>
+                <table>
+                    <tbody>
+                        <InstructionFields fields={[slot('Recent Slot', 170640000n)]} programId={PublicKey.default} />
+                    </tbody>
+                </table>
+            </InstructionSurfaceProvider>,
+        );
+
+        expect(screen.getByRole('link', { name: '170,640,000' })).toHaveAttribute(
+            'href',
+            expect.stringContaining('/block/170640000'),
         );
     });
 });

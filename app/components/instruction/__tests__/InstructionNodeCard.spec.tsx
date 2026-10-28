@@ -1,7 +1,12 @@
 import { gen } from '@__fixtures__/gen';
-import { inspectorSurface } from '@components/inspector/inspector-surface';
-import { type InstructionNode, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
+import {
+    inspectorSurface,
+    type InstructionNode,
+    InstructionSurfaceProvider,
+    toInstructionNode,
+} from '@entities/instruction-card';
 import { InstructionParserProvider } from '@entities/instruction-parser';
+import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import {
@@ -233,6 +238,20 @@ describe('InstructionNodeCard', () => {
         },
     );
 
+    it('should draw the frame of a PMP instruction while its card loads', async () => {
+        // A 4-byte header-only setData, which the PMP card decodes without an IDL.
+        const setData = new TransactionInstruction({
+            data: Buffer.from([3, 1, 0, 1]),
+            keys: [],
+            programId: new PublicKey(PMP_ADDRESS),
+        });
+
+        renderCard(toInstructionNode({ index: 0, ix: setData }));
+
+        expect(screen.getByText('Program Metadata Program: Loading')).toBeInTheDocument();
+        expect(await screen.findByText('ProgramMetadata: SetData')).toBeInTheDocument();
+    });
+
     it('should resolve ed25519 offsets against the instruction data of the surface', () => {
         const signatureInInstruction1 = new Uint8Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]);
         const ed25519 = new TransactionInstruction({
@@ -244,7 +263,7 @@ describe('InstructionNodeCard', () => {
 
         renderWithProviders(
             <InstructionParserProvider dispatcher={instructionParserDispatcher}>
-                <InstructionSurfaceProvider surface={inspectorSurface(instructionData)}>
+                <InstructionSurfaceProvider surface={inspectorSurface({ Card: InstructionNodeCard, instructionData })}>
                     <InstructionNodeCard node={toInstructionNode({ index: 0, ix: ed25519 })} />
                 </InstructionSurfaceProvider>
             </InstructionParserProvider>,

@@ -1,5 +1,9 @@
 import { type InstructionNode, toInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
+import {
+    createInstructionParserDispatcher,
+    isParsedInstruction,
+    type ParsedInstructionInfo,
+} from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
     getCreateMetadataAccountV3InstructionDataSerializer,
@@ -35,15 +39,18 @@ function makeIx(
     index: number,
     data: Uint8Array | Buffer,
     keys: PublicKey[] = [],
-): { ix: DispatchResult; node: InstructionNode } {
+): { node: InstructionNode; parsed: ParsedInstructionInfo | undefined } {
     const raw = new TransactionInstruction({
         data: Buffer.from(data),
         keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
         programId: PROGRAM_ID,
     });
-    const ix = dispatcher.fromTransactionInstruction(raw);
-    invariant(ix, 'the token metadata program is registered');
-    return { ix, node: toInstructionNode({ index, ix: raw }) };
+    const dispatched = dispatcher.fromTransactionInstruction(raw);
+    invariant(dispatched, 'the token metadata program is registered');
+    return {
+        node: toInstructionNode({ index, ix: raw }),
+        parsed: isParsedInstruction(dispatched) ? dispatched.parsed : undefined,
+    };
 }
 
 const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
@@ -52,7 +59,7 @@ const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataS
 
 const meta = {
     component: MetaplexTokenMetadataDetailsCard,
-    decorators: [withTransactions, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
     },

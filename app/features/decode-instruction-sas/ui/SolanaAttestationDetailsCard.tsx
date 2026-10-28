@@ -4,7 +4,7 @@ import {
     parseCodamaArgs,
     type RawInstructionNode,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 import { camelToTitleCase } from '@utils/index';
 
 import type { SolanaAttestationParsed } from '../lib/sas-parser';
@@ -14,16 +14,16 @@ const TITLE_PREFIX = 'Solana Attestation';
 type SolanaAttestationDetailsCardProps = {
     /** The account rows come from `raw`. */
     node: RawInstructionNode;
-    /** The dispatcher's verdict for a SAS instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function SolanaAttestationDetailsCard({ node, ix }: SolanaAttestationDetailsCardProps) {
-    if ('unknown' in ix) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
+export function SolanaAttestationDetailsCard({ node, parsed }: SolanaAttestationDetailsCardProps) {
+    if (!parsed) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} />;
     }
 
-    const { info, type } = ix.parsed as SolanaAttestationParsed;
+    const { info, type } = parsed as SolanaAttestationParsed;
 
     return (
         <DecodedInstructionCard

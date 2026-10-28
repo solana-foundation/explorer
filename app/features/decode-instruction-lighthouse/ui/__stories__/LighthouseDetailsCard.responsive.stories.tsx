@@ -1,5 +1,4 @@
 import { toRawInstructionNode } from '@entities/instruction-card';
-import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -14,7 +13,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
+import { LIGHTHOUSE_ADDRESS } from '../../lib/constants';
 import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
@@ -34,8 +33,8 @@ const parsed = parseLighthouseInstruction(toKitInstruction(raw));
 if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
 
 const args = {
-    ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
     node: toRawInstructionNode({ index: 0, ix: raw }),
+    parsed,
 };
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
@@ -44,8 +43,8 @@ const meta: Meta<typeof LighthouseDetailsCard> = {
         withCluster,
         withScrollAnchor,
         withTokenInfoBatch,
-        withMockTransactions,
         withTxInstructionSurface,
+        withMockTransactions,
         withViewportFromGlobal,
     ],
     parameters: {

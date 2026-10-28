@@ -74,5 +74,7 @@ function memoInstruction(memo: string): ParsedInstruction {
 
 function renderCard(ix: ParsedInstruction) {
     const dispatched = dispatcher.fromParsedInstruction(ix);
-    return renderTxCard(<MemoDetailsCard node={toInstructionNode({ index: 0, ix: dispatched })} ix={dispatched} />);
+    return renderTxCard(
+        <MemoDetailsCard node={toInstructionNode({ index: 0, ix: dispatched })} parsed={dispatched.parsed} />,
+    );
 }

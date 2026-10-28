@@ -170,6 +170,9 @@ function renderCard(info: object, type: string) {
 
     const dispatched = dispatcher.fromParsedInstruction(ix);
     return renderTxCard(
-        <AddressLookupTableDetailsCard node={toInstructionNode({ index: 0, ix: dispatched })} ix={dispatched} />,
+        <AddressLookupTableDetailsCard
+            node={toInstructionNode({ index: 0, ix: dispatched })}
+            parsed={dispatched.parsed}
+        />,
     );
 }

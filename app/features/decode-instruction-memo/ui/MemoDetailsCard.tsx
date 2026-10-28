@@ -4,7 +4,6 @@ import {
     type InstructionNode,
     preformatted,
 } from '@entities/instruction-card';
-import type { ParsedInstruction } from '@solana/web3.js';
 import { wrap } from '@utils/index';
 
 import { isMemoParsed } from '../lib/memo-parser';
@@ -17,13 +16,13 @@ const MemoCard = defineInstructionCard<string>({
 type MemoDetailsCardProps = {
     node: InstructionNode;
     /** Already normalised by the dispatcher — this card does not decode. */
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function MemoDetailsCard({ node, ix }: MemoDetailsCardProps) {
-    if (!isMemoParsed(ix.parsed)) {
-        return <InstructionCardView node={node} title="Memo Program: Unknown Instruction" defaultRaw />;
+export function MemoDetailsCard({ node, parsed }: MemoDetailsCardProps) {
+    if (!isMemoParsed(parsed)) {
+        return <InstructionCardView node={node} title="Memo Program: Unknown Instruction" />;
     }
 
-    return <MemoCard node={node} info={ix.parsed.info} />;
+    return <MemoCard node={node} info={parsed.info} />;
 }

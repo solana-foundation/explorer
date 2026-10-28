@@ -1,5 +1,4 @@
 import { type InstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
-import type { ParsedInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
@@ -38,75 +37,75 @@ import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 
 type DetailsProps = {
     node: InstructionNode;
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function StakeDetailsCard({ node, ix }: DetailsProps) {
-    const parsed = create(ix.parsed, ParsedInfo);
+export function StakeDetailsCard({ node, parsed }: DetailsProps) {
+    const parsedInfo = create(parsed, ParsedInfo);
 
-    switch (parsed.type) {
+    switch (parsedInfo.type) {
         case 'initialize': {
-            const info = create(parsed.info, InitializeInfo);
+            const info = create(parsedInfo.info, InitializeInfo);
             return <InitializeDetailsCard info={info} node={node} />;
         }
         case 'delegate': {
-            const info = create(parsed.info, DelegateInfo);
+            const info = create(parsedInfo.info, DelegateInfo);
             return <DelegateDetailsCard info={info} node={node} />;
         }
         case 'authorize': {
-            const info = create(parsed.info, AuthorizeInfo);
+            const info = create(parsedInfo.info, AuthorizeInfo);
             return <AuthorizeDetailsCard info={info} node={node} />;
         }
         case 'split': {
-            const info = create(parsed.info, SplitInfo);
+            const info = create(parsedInfo.info, SplitInfo);
             return <SplitDetailsCard info={info} node={node} />;
         }
         case 'withdraw': {
-            const info = create(parsed.info, WithdrawInfo);
+            const info = create(parsedInfo.info, WithdrawInfo);
             return <WithdrawDetailsCard info={info} node={node} />;
         }
         case 'deactivate': {
-            const info = create(parsed.info, DeactivateInfo);
+            const info = create(parsedInfo.info, DeactivateInfo);
             return <DeactivateDetailsCard info={info} node={node} />;
         }
         case 'merge': {
-            const info = create(parsed.info, MergeInfo);
+            const info = create(parsedInfo.info, MergeInfo);
             return <MergeDetailsCard info={info} node={node} />;
         }
         case 'setLockup': {
-            const info = create(parsed.info, SetLockupInfo);
+            const info = create(parsedInfo.info, SetLockupInfo);
             return <SetLockupDetailsCard info={info} node={node} />;
         }
         case 'setLockupChecked': {
-            const info = create(parsed.info, SetLockupCheckedInfo);
+            const info = create(parsedInfo.info, SetLockupCheckedInfo);
             return <SetLockupCheckedDetailsCard info={info} node={node} />;
         }
         case 'authorizeWithSeed': {
-            const info = create(parsed.info, AuthorizeWithSeedInfo);
+            const info = create(parsedInfo.info, AuthorizeWithSeedInfo);
             return <AuthorizeWithSeedDetailsCard info={info} node={node} />;
         }
         case 'authorizeCheckedWithSeed': {
-            const info = create(parsed.info, AuthorizeCheckedWithSeedInfo);
+            const info = create(parsedInfo.info, AuthorizeCheckedWithSeedInfo);
             return <AuthorizeCheckedWithSeedDetailsCard info={info} node={node} />;
         }
         case 'initializeChecked': {
-            const info = create(parsed.info, InitializeCheckedInfo);
+            const info = create(parsedInfo.info, InitializeCheckedInfo);
             return <InitializeCheckedDetailsCard info={info} node={node} />;
         }
         case 'authorizeChecked': {
-            const info = create(parsed.info, AuthorizeCheckedInfo);
+            const info = create(parsedInfo.info, AuthorizeCheckedInfo);
             return <AuthorizeCheckedDetailsCard info={info} node={node} />;
         }
         case 'moveStake': {
-            const info = create(parsed.info, MoveStakeInfo);
+            const info = create(parsedInfo.info, MoveStakeInfo);
             return <MoveStakeDetailsCard info={info} node={node} />;
         }
         case 'moveLamports': {
-            const info = create(parsed.info, MoveLamportsInfo);
+            const info = create(parsedInfo.info, MoveLamportsInfo);
             return <MoveLamportsDetailsCard info={info} node={node} />;
         }
         case 'deactivateDelinquent': {
-            const info = create(parsed.info, DeactivateDelinquentInfo);
+            const info = create(parsedInfo.info, DeactivateDelinquentInfo);
             return <DeactivateDelinquentDetailsCard info={info} node={node} />;
         }
         case 'getMinimumDelegation': {

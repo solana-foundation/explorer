@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { toRawInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -28,9 +28,9 @@ const raw = new TransactionInstruction({
     ],
     programId: new PublicKey('22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG'),
 });
-const ix = createInstructionParserDispatcher([solanaAttestationInstructionParser]).fromTransactionInstruction(
+const dispatched = createInstructionParserDispatcher([solanaAttestationInstructionParser]).fromTransactionInstruction(
     raw,
-) as DispatchResult;
+);
 
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
@@ -38,8 +38,8 @@ const meta: Meta<typeof SolanaAttestationDetailsCard> = {
         withCluster,
         withScrollAnchor,
         withTokenInfoBatch,
-        withMockTransactions,
         withTxInstructionSurface,
+        withMockTransactions,
         withViewportFromGlobal,
     ],
     parameters: {
@@ -53,7 +53,10 @@ const meta: Meta<typeof SolanaAttestationDetailsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { ix, node: toRawInstructionNode({ index: 0, ix: raw }) };
+const args = {
+    node: toRawInstructionNode({ index: 0, ix: raw }),
+    parsed: isParsedInstruction(dispatched) ? dispatched.parsed : undefined,
+};
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

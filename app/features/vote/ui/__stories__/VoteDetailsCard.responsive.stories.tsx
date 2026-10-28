@@ -25,10 +25,10 @@ const meta = {
     component: VoteDetailsCard,
     decorators: [
         withViewportFromGlobal,
+        withTxInstructionSurface,
         withMockTransactions,
         withScrollAnchor,
         withTokenInfoBatch,
-        withTxInstructionSurface,
     ],
     parameters: {
         ...nextjsParameters,
@@ -76,9 +76,9 @@ const blsAuthorityIx = voteParsedInstruction({
     type: 'authorizeChecked',
 });
 
-const args = { ix: towerSyncIx, node: toInstructionNode({ index: 0, ix: towerSyncIx }) };
+const args = { node: toInstructionNode({ index: 0, ix: towerSyncIx }), parsed: towerSyncIx.parsed };
 
-const blsArgs = { ix: blsAuthorityIx, node: toInstructionNode({ index: 0, ix: blsAuthorityIx }) };
+const blsArgs = { node: toInstructionNode({ index: 0, ix: blsAuthorityIx }), parsed: blsAuthorityIx.parsed };
 
 export const Mobile: Story = {
     args,

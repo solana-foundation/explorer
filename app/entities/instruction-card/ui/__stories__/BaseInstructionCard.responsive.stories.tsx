@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
+import { toInstructionNode } from '../../model/node';
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 const sampleIx = new TransactionInstruction({
@@ -21,7 +22,7 @@ const meta: Meta<typeof BaseInstructionCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/BaseInstructionCard@Media',
+    title: 'Entities/Instruction Card/BaseInstructionCard@Media',
 };
 
 export default meta;
@@ -33,11 +34,13 @@ const args = {
             <BaseTable.Cell>Instruction details go here</BaseTable.Cell>
         </BaseTable.Row>
     ),
-    index: 0,
-    ix: sampleIx,
+    collapsible: false,
+    node: toInstructionNode({ index: 0, ix: sampleIx }),
+    rawSource: { kind: 'none' },
     result: { err: null },
     title: 'Token Transfer',
-};
+    validateProgram: false,
+} as const;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

@@ -15,14 +15,14 @@ const UNKNOWN: InstructionEvent = { data: new Uint8Array([0x09, 0x09]), kind: 'u
 
 describe('EventRows', () => {
     it('should number each event by the position of its instruction', () => {
-        renderRows({ childIndex: 2, events: [DECODED, UNKNOWN], index: 1, raw: false });
+        renderRows({ events: [DECODED, UNKNOWN], position: { childIndex: 2, index: 1 }, showRaw: false });
 
         expect(screen.getByText('#2.3 · event 1')).toBeInTheDocument();
         expect(screen.getByText('#2.3 · event 2')).toBeInTheDocument();
     });
 
     it('should show the fields of a decoded event', () => {
-        renderRows({ events: [DECODED], index: 0, raw: false });
+        renderRows({ events: [DECODED], position: { index: 0 }, showRaw: false });
 
         expect(screen.getByText('Sample Event')).toBeInTheDocument();
         expect(screen.getByText('Field Name')).toBeInTheDocument();
@@ -31,7 +31,7 @@ describe('EventRows', () => {
     });
 
     it('should show the bytes of a decoded event in the Raw view', () => {
-        renderRows({ events: [DECODED], index: 0, raw: true });
+        renderRows({ events: [DECODED], position: { index: 0 }, showRaw: true });
 
         expect(screen.getByText('Sample Event')).toBeInTheDocument();
         expect(screen.getByText('Event Data')).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe('EventRows', () => {
     });
 
     it('should show the bytes of an event the IDL cannot decode', () => {
-        renderRows({ events: [UNKNOWN], index: 0, raw: false });
+        renderRows({ events: [UNKNOWN], position: { index: 0 }, showRaw: false });
 
         expect(screen.getByText('Unknown Event')).toBeInTheDocument();
         expect(renderedHex()).toContain('0909');

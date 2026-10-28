@@ -145,7 +145,7 @@ describe('Inspector InstructionsSection with a Program Metadata instruction', ()
         renderSection(buildPmpMessage(data));
 
         expect(await screen.findAllByText(/Program Metadata Program/i)).not.toHaveLength(0);
-        expect(screen.queryByTestId('pmp-payload-section')).not.toBeInTheDocument();
+        expect(screen.queryByRole('tab', { name: 'Decoded' })).not.toBeInTheDocument();
     });
 });
 

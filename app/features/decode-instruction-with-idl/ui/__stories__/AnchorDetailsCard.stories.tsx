@@ -43,7 +43,7 @@ const buildInstruction = (data: Uint8Array, keys: PublicKey[]) =>
 
 const meta = {
     component: AnchorDetailsCard,
-    decorators: [withMockTransactions, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withMockTransactions, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off

@@ -1,26 +1,23 @@
-import { HexDataRow } from '@components/common/BaseRawDetails';
 import { Badge } from '@components/shared/ui/badge';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { InstructionEvent } from '../model/events';
+import { type InstructionPosition, positionLabel } from '../model/node';
 import { ArgTable } from './ArgRows';
+import { HexDataRow } from './BaseRawDetails';
 import { DECODED_TABLE_COLUMNS } from './DecodedInstructionCard';
 
 export function EventRows({
     events,
-    index,
-    childIndex,
-    raw,
+    position,
+    showRaw,
 }: {
     events: readonly InstructionEvent[];
-    index: number;
-    childIndex?: number;
-    raw: boolean;
+    position: InstructionPosition;
+    showRaw: boolean;
 }) {
-    const position = childIndex === undefined ? `${index + 1}` : `${index + 1}.${childIndex + 1}`;
-
     return (
         <>
             <BaseTable.SectionRow>
@@ -32,12 +29,12 @@ export function EventRows({
                     <BaseTable.Row>
                         <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
                             <Badge ui="dashkit" variant="info" className="mr-1.5">
-                                {`#${position} · event ${eventIndex + 1}`}
+                                {`#${positionLabel(position)} · event ${eventIndex + 1}`}
                             </Badge>
                             {event.kind === 'decoded' ? event.name : 'Unknown Event'}
                         </BaseTable.Cell>
                     </BaseTable.Row>
-                    {event.kind === 'decoded' && !raw ? (
+                    {event.kind === 'decoded' && !showRaw ? (
                         <ArgTable label="Field Name" args={event.args} />
                     ) : (
                         <HexDataRow label="Event Data" data={event.data} />

@@ -1,9 +1,9 @@
-import { LoadingCard } from '@components/common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import {
     type InstructionNode,
+    LoadingDetailsCard,
     NameOnlyDetailsCard,
     type RawInstructionNode,
     toInstructionNode,
@@ -14,6 +14,7 @@ import {
 import {
     type DispatchResult,
     isParsedInstruction,
+    type ParsedInstructionInfo,
     type ParserProgramLabel,
     useInstructionParser,
 } from '@entities/instruction-parser';
@@ -40,18 +41,16 @@ import {
     TokenBatchCard,
 } from '@features/token-batch';
 import { VoteDetailsCard } from '@features/vote';
-import type { ParsedInstruction } from '@solana/web3.js';
-import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
-// the branch below can stay static.
-const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').then(mod => mod.PmpDetailsCard), {
-    loading: () => <LoadingCard />,
-    ssr: false,
-});
+// the branch below can stay static. `React.lazy` rather than `next/dynamic`, because the fallback needs the node
+// to draw the card's frame, and the `loading` option of `next/dynamic` receives no props.
+const PmpDetailsCard = React.lazy(() =>
+    import('@features/decode-instruction-pmp').then(mod => ({ default: mod.PmpDetailsCard })),
+);
 
 export function InstructionNodeCard({ node }: { node: InstructionNode }) {
     return (
@@ -83,7 +82,11 @@ function ProgramCard({ node }: { node: InstructionNode }) {
 
     // PMP content instructions decode without an IDL, so the PMP card must come before the IDL card.
     if (rawNode && isProgramMetadataInstruction(rawNode.raw)) {
-        return <PmpDetailsCard node={rawNode} fallback={fallback} />;
+        return (
+            <React.Suspense fallback={<LoadingDetailsCard node={rawNode} />}>
+                <PmpDetailsCard node={rawNode} fallback={fallback} />
+            </React.Suspense>
+        );
     }
     if (rawNode && isStakeInstruction(rawNode.raw)) {
         return <RawStakeDetailsCard node={rawNode} fallback={fallback} />;
@@ -107,19 +110,21 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
     'address-lookup-table': decoded(AddressLookupTableDetailsCard),
     'bpf-loader': decoded(BpfLoaderDetailsCard),
     'bpf-upgradeable-loader': decoded(BpfUpgradeableLoaderDetailsCard),
-    'compute-budget': ({ node, dispatched }) => <ComputeBudgetDetailsCard node={node} ix={dispatched} />,
+    'compute-budget': ({ node, dispatched }) => <ComputeBudgetDetailsCard node={node} parsed={parsedOf(dispatched)} />,
     ed25519: ({ dispatched, rawNode, instructionData }) =>
-        rawNode && <Ed25519DetailsCard node={rawNode} ix={dispatched} siblingData={instructionData} />,
+        rawNode && <Ed25519DetailsCard node={rawNode} parsed={parsedOf(dispatched)} siblingData={instructionData} />,
     lighthouse: ({ dispatched, rawNode }) =>
         rawNode && isParsedInstruction(dispatched) ? (
-            <LighthouseDetailsCard node={rawNode} ix={dispatched} />
+            <LighthouseDetailsCard node={rawNode} parsed={dispatched.parsed} />
         ) : undefined,
     mango: nameOnly(),
-    'mpl-token-metadata': ({ node, dispatched }) => <MetaplexTokenMetadataDetailsCard node={node} ix={dispatched} />,
-    pyth: ({ node, dispatched }) => <PythDetailsCard node={node} ix={dispatched} />,
-    serum: ({ node, dispatched }) => <SerumDetailsCard node={node} ix={dispatched} />,
+    'mpl-token-metadata': ({ node, dispatched }) => (
+        <MetaplexTokenMetadataDetailsCard node={node} parsed={parsedOf(dispatched)} />
+    ),
+    pyth: ({ node, dispatched }) => <PythDetailsCard node={node} parsed={parsedOf(dispatched)} />,
+    serum: ({ node, dispatched }) => <SerumDetailsCard node={node} parsed={parsedOf(dispatched)} />,
     'solana-attestation-service': ({ dispatched, rawNode }) =>
-        rawNode && <SolanaAttestationDetailsCard node={rawNode} ix={dispatched} />,
+        rawNode && <SolanaAttestationDetailsCard node={rawNode} parsed={parsedOf(dispatched)} />,
     'spl-associated-token-account': decoded(AssociatedTokenDetailsCard),
     'spl-memo': decoded(MemoDetailsCard),
     'spl-token': tokenCard,
@@ -129,20 +134,26 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
     'token-swap': nameOnly('Token Swap'),
     vote: decoded(VoteDetailsCard),
     wormhole: nameOnly('Wormhole'),
-    'zk-elgamal-proof': ({ node, dispatched }) => <ZkElGamalProofDetailsCard node={node} ix={dispatched} />,
+    'zk-elgamal-proof': ({ node, dispatched }) => (
+        <ZkElGamalProofDetailsCard node={node} parsed={parsedOf(dispatched)} />
+    ),
 } satisfies Partial<Record<CardProgramLabel, ProgramRoute>>;
 
 function programLabel(dispatched: DispatchResult): string {
     return 'unknown' in dispatched ? dispatched.programLabel : dispatched.program;
 }
 
+function parsedOf(dispatched: DispatchResult): ParsedInstructionInfo | undefined {
+    return isParsedInstruction(dispatched) ? dispatched.parsed : undefined;
+}
+
 /** The card node holds the dispatch result to show its parsed payload in the Raw view. */
-function decoded(Card: React.ComponentType<{ node: InstructionNode; ix: ParsedInstruction }>): ProgramRoute {
+function decoded(Card: React.ComponentType<{ node: InstructionNode; parsed: unknown }>): ProgramRoute {
     return function decodedRoute({ node, dispatched, rawNode }) {
         return isParsedInstruction(dispatched) ? (
             <Card
                 node={toInstructionNode({ ...node, ix: dispatched, raw: rawNode?.raw ?? node.raw })}
-                ix={dispatched}
+                parsed={dispatched.parsed}
             />
         ) : undefined;
     };
@@ -163,7 +174,7 @@ function nameOnly(programName?: string): ProgramRoute {
 function tokenCard(route: Parameters<ProgramRoute>[0]): React.ReactElement | undefined {
     const { node, dispatched, rawNode } = route;
     if (isParsedInstruction(dispatched) && isRpcParsedBatchInstruction(dispatched.parsed)) {
-        return <RpcParsedTokenBatchCard node={node} ix={dispatched} />;
+        return <RpcParsedTokenBatchCard node={node} parsed={dispatched.parsed} />;
     }
     if (rawNode && isTokenBatchInstruction(rawNode.raw)) {
         return <TokenBatchCard node={rawNode} />;

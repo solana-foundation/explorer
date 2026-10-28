@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { AccountName } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
+import { type InstructionFieldList, note, text } from '../model/fields';
 import { toRawInstructionNode } from '../model/node';
 import { type InstructionSurface, InstructionSurfaceProvider } from '../model/surface';
 import { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from '../ui/DecodedInstructionCard';
@@ -18,14 +19,12 @@ vi.mock('@/app/components/common/Address', () => ({
 
 const STUB_SURFACE: InstructionSurface = {
     Card: () => undefined,
-    Shell: ({ children }) => (
-        <table>
-            <tbody>{children}</tbody>
-        </table>
-    ),
+    collapsible: false,
     instructionData: () => undefined,
+    rawInstructions: undefined,
     result: { err: null },
     signature: undefined,
+    validateProgram: false,
 };
 
 const AMOUNT: InstructionArg = { kind: 'leaf', name: 'amount', type: 'number', value: { kind: 'text', value: '42' } };
@@ -40,18 +39,17 @@ describe('DecodedInstructionCard', () => {
         expect(value).toHaveTextContent('Counter');
     });
 
-    it('should render extra rows below the argument rows', () => {
-        renderCard({
-            children: (
-                <tr data-testid="extra-row">
-                    <td colSpan={DECODED_TABLE_COLUMNS} />
-                </tr>
-            ),
-        });
+    it('should render fields below the argument rows, spanning the decoded table', () => {
+        renderCard({ fields: [text('Data Hash', 'abc'), note('This instruction carries no payload bytes.')] });
 
         const rows = screen.getAllByRole('row');
-        expect(rows.at(-2)).toHaveTextContent('amount');
-        expect(rows.at(-1)).toHaveAttribute('data-testid', 'extra-row');
+        expect(rows.at(-3)).toHaveTextContent('amount');
+        const [label, value] = within(rows.at(-2) as HTMLElement).getAllByRole('cell');
+        expect(label).toHaveTextContent('Data Hash');
+        expect(value).toHaveAttribute('colspan', String(DECODED_TABLE_COLUMNS - 1));
+        const [block] = within(rows.at(-1) as HTMLElement).getAllByRole('cell');
+        expect(block).toHaveTextContent('This instruction carries no payload bytes.');
+        expect(block).toHaveAttribute('colspan', String(DECODED_TABLE_COLUMNS));
     });
 
     it('should show the accounts of a group only after the group expands', () => {
@@ -77,12 +75,12 @@ function renderCard({
     programName,
     accountNames = ['authority'],
     accountCount = 1,
-    children,
+    fields,
 }: {
     programName?: string;
     accountNames?: AccountName[];
     accountCount?: number;
-    children?: React.ReactNode;
+    fields?: InstructionFieldList;
 }) {
     const ix = new TransactionInstruction({
         data: Buffer.from([1]),
@@ -102,9 +100,8 @@ function renderCard({
                 programName={programName}
                 accountNames={accountNames}
                 args={[AMOUNT]}
-            >
-                {children}
-            </DecodedInstructionCard>
+                fields={fields}
+            />
         </InstructionSurfaceProvider>,
     );
 }

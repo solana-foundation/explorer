@@ -1,22 +1,11 @@
 import { Address } from '@components/common/Address';
+import { HexData } from '@components/shared/HexData';
 import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
-import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { HexData } from './HexData';
-
-function RawDetailsLoader() {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell colSpan={2} className="text-center">
-                <span className="spinner-grow spinner-grow-sm mr-1.5"></span>
-                Loading instruction data...
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
+import { AccountRoleBadges } from './AccountRoleBadges';
 
 /**
  *  Stands in for the account and hex data rows when the transaction's instructions cannot be
@@ -33,19 +22,8 @@ export function RawDetailsUnavailable() {
     );
 }
 
-/**
- *  Component that displays accounts from any Instruction.
- *
- *  VersionedMessage is optional as it will be present at inspector page only.
- */
-export function BaseRawDetails({ ix }: { ix?: TransactionInstruction }) {
-    if (!ix) {
-        return <RawDetailsLoader />;
-    }
-    return <BaseTransactionInstructionRawDetails ix={ix} />;
-}
-
-function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstruction }) {
+/** Component that displays accounts from any Instruction. */
+export function BaseRawDetails({ ix }: { ix: TransactionInstruction }) {
     return (
         <>
             {ix.keys.map(({ pubkey, isSigner, isWritable }, keyIndex) => (

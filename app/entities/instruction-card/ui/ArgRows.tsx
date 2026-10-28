@@ -1,11 +1,11 @@
 'use client';
 
-import { ExpandableRow, FieldNameCell } from '@shared/ui/expandable-row';
 import { cva } from 'class-variance-authority';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { InstructionArg } from '../model/args';
+import { ExpandableRow, FieldNameCell } from './ExpandableRow';
 import { ValueCell } from './ValueCell';
 
 /** The header row and the rows of an argument table. An empty list draws nothing. */

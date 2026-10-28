@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { AccountRoleBadges } from '../AccountRoleBadges';
+import { AccountRoleBadges } from '../ui/AccountRoleBadges';
 
 const ROLE_BADGES = ['Writable', 'Signer'];
 

@@ -496,5 +496,5 @@ describe('stake::instruction cards', () => {
 function renderCard(parsed: { info: object; type: string }, programId = PROGRAM_ID) {
     const ix = { parsed, program: 'stake', programId } as unknown as ParsedInstruction;
 
-    return renderTxCard(<StakeDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} />);
+    return renderTxCard(<StakeDetailsCard node={toInstructionNode({ index: 0, ix })} parsed={ix.parsed} />);
 }

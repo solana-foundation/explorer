@@ -6,7 +6,7 @@ import {
     toRawInstructionNode,
     TxInstructionSurface,
 } from '@entities/instruction-card';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -57,7 +57,7 @@ const withFailedInstructionSurface: Decorator = Story => (
 
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard',
@@ -67,11 +67,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const dispatched = createInstructionParserDispatcher([ed25519InstructionParser]).fromTransactionInstruction(ix);
-invariant(dispatched, 'the fixture program id is registered');
+invariant(isParsedInstruction(dispatched), 'the fixture decodes as an ed25519 instruction');
 
 const args = {
-    ix: dispatched,
     node: toRawInstructionNode({ index: 0, ix }),
+    parsed: dispatched.parsed,
     siblingData,
 };
 

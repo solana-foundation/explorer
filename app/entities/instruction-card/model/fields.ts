@@ -1,24 +1,25 @@
 import type { Address } from '@solana/kit';
 import type { PublicKey } from '@solana/web3.js';
-import type { ReactElement } from 'react';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
-export type InstructionField = InstructionValueField | InstructionHeadingField | InstructionAccountField;
+export type InstructionField =
+    InstructionValueField | InstructionHeadingField | InstructionAccountField | InstructionBlockField;
 
-/** A label paired with a value, which is every row except a group's heading. */
+/** A label paired with a value. */
 export type InstructionValueField = FieldValue & { label: string };
 
 export type FieldValue =
-    | { kind: 'address'; address: Address }
+    | { kind: 'address'; address: Address; tokenLabel?: boolean }
     | { kind: 'sol'; lamports: number | bigint }
     | { kind: 'bytes'; size: number }
     | { kind: 'epoch'; epoch: number | bigint }
+    | { kind: 'slot'; slot: number | bigint }
     | { kind: 'string'; value: string }
     | { kind: 'text'; value: string | number }
     | { kind: 'timestamp'; unixSeconds: number }
     | { kind: 'preformatted'; value: string | ReadonlyArray<string | number> }
-    | { kind: 'custom'; value: ReactElement };
+    | { kind: 'json'; value: object };
 
 /** Names the rows that follow it, so it fills the row instead of pairing a label with a value. */
 export type InstructionHeadingField = { kind: 'heading'; label: string };
@@ -32,6 +33,33 @@ export type InstructionAccountField = {
     isWritable: boolean;
 };
 
+/** Content too wide for a value cell, so it fills the row without a label column. */
+export type InstructionBlockField = PayloadContentBlock | PayloadBlock;
+
+/** The blocks that the decoded tab of a payload can hold. */
+export type PayloadContentBlock = NoteBlock | RawDataBlock | DocumentTextBlock;
+
+type NoteBlock = { kind: 'note'; text: string; tone: 'default' | 'warning' };
+
+type RawDataBlock = {
+    kind: 'rawData';
+    data: Uint8Array;
+    filename: string;
+    label?: string;
+    badge?: { text: string; tone: 'info' | 'warning' };
+};
+
+type DocumentTextBlock = { kind: 'documentText'; text: string };
+
+type PayloadBlock = {
+    kind: 'payload';
+    raw: RawDataBlock;
+    decoded: readonly PayloadContentBlock[];
+    onTabChange?: (tab: PayloadTab) => void;
+};
+
+export type PayloadTab = 'raw' | 'decoded';
+
 /**
  * Falsy entries are dropped, so optional fields read as `cond && address(...)`.
  *
@@ -41,8 +69,13 @@ export type InstructionAccountField = {
  */
 export type InstructionFieldList = ReadonlyArray<InstructionField | false | undefined>;
 
-export function address(label: string, value: PublicKey | Address): InstructionField {
-    return { address: typeof value === 'string' ? value : toKitAddress(value), kind: 'address', label };
+/** `tokenLabel` shows the token name of a mint in place of its address. */
+export function address(
+    label: string,
+    value: PublicKey | Address,
+    { tokenLabel }: { tokenLabel?: boolean } = {},
+): InstructionField {
+    return { address: typeof value === 'string' ? value : toKitAddress(value), kind: 'address', label, tokenLabel };
 }
 
 export function account(
@@ -69,6 +102,11 @@ export function epoch(label: string, value: number | bigint): InstructionField {
     return { epoch: value, kind: 'epoch', label };
 }
 
+/** A slot, rendered as a link to its block. */
+export function slot(label: string, value: number | bigint): InstructionField {
+    return { kind: 'slot', label, slot: value };
+}
+
 /** An account data size, rendered as `N byte(s)`. */
 export function bytes(label: string, size: number): InstructionField {
     return { kind: 'bytes', label, size };
@@ -78,7 +116,7 @@ export function string(label: string, value: string): InstructionField {
     return { kind: 'string', label, value };
 }
 
-/** Plain text or a number. Deliberately not `ReactElement` — use `custom` for markup. */
+/** Plain text or a number. */
 export function text(label: string, value: string | number): InstructionField {
     return { kind: 'text', label, value };
 }
@@ -104,18 +142,42 @@ export function heading(label: string): InstructionField {
     return { kind: 'heading', label };
 }
 
-/**
- * Escape hatch for fields the vocabulary above does not cover — token amounts
- * needing mint decimals, nested structs, bespoke widgets. Prefer a new `kind`
- * once a shape repeats across programs.
- *
- * Takes a `ReactElement` rather than a `ReactNode` so a row always has
- * something to draw. `ReactNode` admits `undefined`, `false`, and `''`, which
- * would make a labelled blank row representable — use `text` for plain values
- * and omit the field entirely when there is nothing to show.
- */
-export function custom(label: string, value: ReactElement): InstructionField {
-    return { kind: 'custom', label, value };
+/** A message about the instruction, such as a state that has no value to show. */
+export function note(text: string, tone: NoteBlock['tone'] = 'default'): NoteBlock {
+    return { kind: 'note', text, tone };
+}
+
+/** Bytes with hex and base64 views, a copy button and a download. `badge` names the form of the bytes. */
+export function rawData({
+    data,
+    filename,
+    label,
+    badge,
+}: {
+    data: Uint8Array;
+    filename: string;
+    label?: string;
+    badge?: RawDataBlock['badge'];
+}): RawDataBlock {
+    return { badge, data, filename, kind: 'rawData', label };
+}
+
+/** Display-ready text of a decoded document, shown whole with a copy button. */
+export function documentText(text: string): DocumentTextBlock {
+    return { kind: 'documentText', text };
+}
+
+/** Stored bytes beside what they decode to. The raw tab opens first. */
+export function payload({
+    raw,
+    decoded,
+    onTabChange,
+}: {
+    raw: RawDataBlock;
+    decoded: readonly PayloadContentBlock[];
+    onTabChange?: (tab: PayloadTab) => void;
+}): PayloadBlock {
+    return { decoded, kind: 'payload', onTabChange, raw };
 }
 
 export function compactFields(fields: InstructionFieldList): InstructionField[] {

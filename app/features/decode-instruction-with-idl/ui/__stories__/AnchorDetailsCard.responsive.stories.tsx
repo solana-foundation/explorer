@@ -38,7 +38,7 @@ const ix = new TransactionInstruction({
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: AnchorDetailsCard,
-    decorators: [withMockTransactions, withTokenInfoBatch, withTxInstructionSurface, withViewportFromGlobal],
+    decorators: [withTxInstructionSurface, withMockTransactions, withTokenInfoBatch, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

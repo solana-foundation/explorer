@@ -1,6 +1,11 @@
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import {
+    inspectorSurface,
+    type InstructionSurface,
+    InstructionSurfaceProvider,
+    toInstructionNode,
+} from '@entities/instruction-card';
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import { type InstructionSurface, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
 import { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -12,7 +17,6 @@ import { vi } from 'vitest';
 import { renderWithProviders } from '@/app/__tests__/card-harness';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import { decompileStubInstruction } from '@/app/__tests__/mocks';
-import { inspectorSurface } from '@/app/components/inspector/inspector-surface';
 
 import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
@@ -20,8 +24,9 @@ vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
 const BASE_SURFACE: InstructionSurface = {
-    ...inspectorSurface(() => undefined),
-    Shell: BaseInstructionCard,
+    ...inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined }),
+    collapsible: false,
+    validateProgram: false,
 };
 
 const CASES = [
@@ -51,14 +56,14 @@ const CASES = [
     },
 ];
 
-const SHELLS = [
-    { render: renderBaseCard, shell: 'BaseInstructionCard' },
-    { render: renderInspectorCard, shell: 'the inspector shell' },
+const SURFACES = [
+    { render: renderBaseCard, surface: 'a plain surface' },
+    { render: renderInspectorCard, surface: 'the inspector surface' },
 ];
 
 describe('AssociatedTokenDetailsCard', () => {
-    it.each(CASES.flatMap(c => SHELLS.map(s => ({ ...c, ...s }))))(
-        'should render the $name card in $shell',
+    it.each(CASES.flatMap(c => SURFACES.map(s => ({ ...c, ...s }))))(
+        'should render the $name card in $surface',
         async ({ index, labels, programs, render, stub, title }) => {
             render(
                 decompileStubInstruction(stub, index, { programId: ASSOCIATED_TOKEN_PROGRAM_ADDRESS }).instruction,
@@ -113,7 +118,10 @@ describe('AssociatedTokenDetailsCard', () => {
 
             renderOnSurface(
                 BASE_SURFACE,
-                <AssociatedTokenDetailsCard node={toInstructionNode({ index: 0, ix: rawInfoIx })} ix={rawInfoIx} />,
+                <AssociatedTokenDetailsCard
+                    node={toInstructionNode({ index: 0, ix: rawInfoIx })}
+                    parsed={rawInfoIx.parsed}
+                />,
             );
 
             await waitFor(() => {
@@ -127,16 +135,16 @@ function renderBaseCard(instruction: TransactionInstruction, index: number) {
     const ix = dispatch(instruction);
     return renderOnSurface(
         BASE_SURFACE,
-        <AssociatedTokenDetailsCard node={toInstructionNode({ index, ix })} ix={ix} />,
+        <AssociatedTokenDetailsCard node={toInstructionNode({ index, ix })} parsed={ix.parsed} />,
     );
 }
 
 function renderInspectorCard(instruction: TransactionInstruction, index: number) {
     return renderOnSurface(
-        inspectorSurface(() => undefined),
+        inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined }),
         <AssociatedTokenDetailsCard
             node={toInstructionNode({ index, ix: dispatch(instruction), raw: instruction })}
-            ix={dispatch(instruction)}
+            parsed={dispatch(instruction).parsed}
         />,
     );
 }

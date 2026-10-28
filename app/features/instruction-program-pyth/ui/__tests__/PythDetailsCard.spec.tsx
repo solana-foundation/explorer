@@ -1,5 +1,5 @@
 import { toInstructionNode } from '@entities/instruction-card';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import {
     PYTH_INSTRUCTION_TYPES,
     PYTH_INSTRUCTIONS,
@@ -129,5 +129,10 @@ function renderCard(raw: TransactionInstruction) {
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     if (!dispatched) throw new Error('no Pyth parser registered for the mainnet deployment');
 
-    return renderTxCard(<PythDetailsCard node={toInstructionNode({ index: 0, ix: raw })} ix={dispatched} />);
+    return renderTxCard(
+        <PythDetailsCard
+            node={toInstructionNode({ index: 0, ix: raw })}
+            parsed={isParsedInstruction(dispatched) ? dispatched.parsed : undefined}
+        />,
+    );
 }

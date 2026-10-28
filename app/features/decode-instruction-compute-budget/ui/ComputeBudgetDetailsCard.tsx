@@ -5,7 +5,7 @@ import {
     sol,
     text,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 import { microLamportsToLamportsString } from '@utils/index';
 
 import type {
@@ -53,26 +53,26 @@ const SetLoadedAccountsDataSizeLimitCard = defineInstructionCard<SetLoadedAccoun
 
 type ComputeBudgetDetailsCardProps = {
     node: InstructionNode;
-    /** The dispatcher's verdict for a Compute Budget instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function ComputeBudgetDetailsCard({ node, ix }: ComputeBudgetDetailsCardProps) {
-    if ('unknown' in ix) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
+export function ComputeBudgetDetailsCard({ node, parsed }: ComputeBudgetDetailsCardProps) {
+    if (!parsed) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} />;
     }
 
-    const parsed = ix.parsed as ComputeBudgetParsed;
-    switch (parsed.type) {
+    const parsedInfo = parsed as ComputeBudgetParsed;
+    switch (parsedInfo.type) {
         case 'requestUnits':
-            return <RequestUnitsCard info={parsed.info} node={node} />;
+            return <RequestUnitsCard info={parsedInfo.info} node={node} />;
         case 'requestHeapFrame':
-            return <RequestHeapFrameCard info={parsed.info} node={node} />;
+            return <RequestHeapFrameCard info={parsedInfo.info} node={node} />;
         case 'setComputeUnitLimit':
-            return <SetComputeUnitLimitCard info={parsed.info} node={node} />;
+            return <SetComputeUnitLimitCard info={parsedInfo.info} node={node} />;
         case 'setComputeUnitPrice':
-            return <SetComputeUnitPriceCard info={parsed.info} node={node} />;
+            return <SetComputeUnitPriceCard info={parsedInfo.info} node={node} />;
         case 'setLoadedAccountsDataSizeLimit':
-            return <SetLoadedAccountsDataSizeLimitCard info={parsed.info} node={node} />;
+            return <SetLoadedAccountsDataSizeLimitCard info={parsedInfo.info} node={node} />;
     }
 }

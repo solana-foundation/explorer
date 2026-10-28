@@ -1,12 +1,11 @@
-import { decodePmpAccount, type PmpAccountDecodeResult, type PmpDecodeConfig } from '@entities/pmp-account';
+import { decodePmpAccount, type PmpDecodeConfig } from '@entities/pmp-account';
 import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import type { Address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
-export type PmpAccountPayloadResult =
-    { status: 'loading' } | { status: 'failed' } | { status: 'ready'; result: PmpAccountDecodeResult };
+import type { PmpAccountPayloadResult } from '../lib/types';
 
 /**
  * Reads the payload a PMP account currently holds.

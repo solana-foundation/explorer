@@ -11,6 +11,13 @@ export type InstructionNode = {
     children?: ReadonlyArray<InstructionNode | undefined>;
 };
 
+export type InstructionPosition = Pick<InstructionNode, 'index' | 'childIndex'>;
+
+/** Numbers the position from 1, as `3` or `3.2`. */
+export function positionLabel({ index, childIndex }: InstructionPosition): string {
+    return childIndex === undefined ? `${index + 1}` : `${index + 1}.${childIndex + 1}`;
+}
+
 /** Takes `programId` from `ix`, so the two cannot disagree. */
 export function toInstructionNode(fields: Omit<InstructionNode, 'programId'>): InstructionNode {
     return { ...fields, programId: fields.ix.programId };

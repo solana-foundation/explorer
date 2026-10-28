@@ -5,7 +5,7 @@ import {
     type InstructionNode,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
-import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 
 import type { AssociatedTokenParsed } from '../lib/associated-token-parser';
 import type { CreateAccountsInfo, RecoverNestedInfo } from '../lib/types';
@@ -42,16 +42,15 @@ const VARIANTS = {
 type Props = {
     node: InstructionNode;
     /** Already decoded by the dispatcher — this card does not decode. */
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function AssociatedTokenDetailsCard({ node, ix }: Props) {
-    const parsed = ix.parsed as { info?: Record<string, unknown>; type?: string };
-    const variant = VARIANTS[parsed.type as AssociatedTokenParsed['type']];
-    const info = parsed.info;
+export function AssociatedTokenDetailsCard({ node, parsed }: Props) {
+    const { info, type } = parsed as { info?: Record<string, unknown>; type?: string };
+    const variant = VARIANTS[type as AssociatedTokenParsed['type']];
 
     // Every field this variant renders must already be a coerced PublicKey. If any
-    // is not, `ix` is RPC's raw fallback rather than this slice's output. Only the
+    // is not, `parsed` is RPC's raw fallback rather than this slice's output. Only the
     // tx page can reach this: `fromTransactionInstruction` reports
     // failures as `{ unknown: true }`, which the router handles before this card.
     const isCanonical = Boolean(variant && info && variant.fields.every(([, f]) => info[f] instanceof PublicKey));

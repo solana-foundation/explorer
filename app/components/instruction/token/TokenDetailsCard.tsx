@@ -1,7 +1,5 @@
-import { Address } from '@components/common/Address';
 import {
     address,
-    custom,
     InstructionCardView,
     type InstructionField,
     InstructionFields,
@@ -10,7 +8,7 @@ import {
     text,
 } from '@entities/instruction-card';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
-import { ParsedInstruction, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
@@ -28,13 +26,13 @@ type TokenInfo = object;
 
 type TokenDetailsCardProps = {
     node: InstructionNode;
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function TokenDetailsCard({ node, ix }: TokenDetailsCardProps) {
-    const { type: rawType, info } = create(ix.parsed, ParsedInfo);
+export function TokenDetailsCard({ node, parsed }: TokenDetailsCardProps) {
+    const { type: rawType, info } = create(parsed, ParsedInfo);
     const type = create(rawType, TokenInstructionType);
-    const title = `${TOKEN_IDS[ix.programId.toString()]}: ${IX_TITLES[type]}`;
+    const title = `${TOKEN_IDS[node.programId.toString()]}: ${IX_TITLES[type]}`;
     const struct = IX_STRUCTS[type] as Struct<TokenInfo>;
 
     return <TokenInstructionCard node={node} title={title} info={create(info, struct)} />;
@@ -74,11 +72,7 @@ function TokenInstructionCard({ node, title, info }: { node: InstructionNode; ti
             <InstructionFields
                 programId={node.programId}
                 fields={[
-                    mintAddress !== undefined &&
-                        custom(
-                            'Token',
-                            <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />,
-                        ),
+                    mintAddress !== undefined && address('Token', new PublicKey(mintAddress), { tokenLabel: true }),
                     ...infoFields(info, { decimals, tokenSymbol }),
                 ]}
             />

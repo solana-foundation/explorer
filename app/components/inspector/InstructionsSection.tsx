@@ -1,5 +1,7 @@
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import {
+    inspectorSurface,
     instructionDataOf,
     InstructionNodeCards,
     InstructionSurfaceProvider,
@@ -19,7 +21,6 @@ import { FetchStatus } from '@/app/providers/cache';
 
 import { ErrorCard } from '../common/ErrorCard';
 import { LoadingCard } from '../common/LoadingCard';
-import { inspectorSurface } from './inspector-surface';
 
 export function InstructionsSection({
     message,
@@ -66,7 +67,10 @@ export function InstructionsSection({
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps -- `lookupTablesKey` replaces `lookupTables`, which is a new array every render
     }, [allLookupsResolved, compiledInnerInstructions, lookupTablesKey, message]);
-    const surface = useMemo(() => inspectorSurface(instructionDataOf(nodes ?? [])), [nodes]);
+    const surface = useMemo(
+        () => inspectorSurface({ Card: InstructionNodeCard, instructionData: instructionDataOf(nodes ?? []) }),
+        [nodes],
+    );
 
     if (failedLookupIndex >= 0) {
         return (

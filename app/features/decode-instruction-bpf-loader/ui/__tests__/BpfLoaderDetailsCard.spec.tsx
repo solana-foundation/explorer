@@ -106,5 +106,5 @@ function dispatch(type: string, info: Record<string, unknown>): ParsedInstructio
 }
 
 function renderCard(ix: ParsedInstruction) {
-    return renderTxCard(<BpfLoaderDetailsCard node={toInstructionNode({ index: 0, ix })} ix={ix} />);
+    return renderTxCard(<BpfLoaderDetailsCard node={toInstructionNode({ index: 0, ix })} parsed={ix.parsed} />);
 }

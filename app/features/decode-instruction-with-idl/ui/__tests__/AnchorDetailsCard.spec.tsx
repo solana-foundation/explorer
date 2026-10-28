@@ -1,7 +1,12 @@
 import { gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import { InstructionSurfaceProvider, toRawInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import {
+    inspectorSurface,
+    InstructionSurfaceProvider,
+    toRawInstructionNode,
+    TxInstructionSurface,
+} from '@entities/instruction-card';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { FetchStatus } from '@providers/cache';
 import { useTransactionDetails } from '@providers/transactions';
@@ -12,7 +17,6 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { readCell } from '@/app/__tests__/card-harness';
-import { inspectorSurface } from '@/app/components/inspector/inspector-surface';
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { TransactionsProvider } from '@/app/providers/transactions';
@@ -234,7 +238,11 @@ function mockTransactionLogs(logMessages: string[], programIds: PublicKey[]) {
 
 const SURFACES = {
     inspector: ({ children }: { children: React.ReactNode }) => (
-        <InstructionSurfaceProvider surface={inspectorSurface(() => undefined)}>{children}</InstructionSurfaceProvider>
+        <InstructionSurfaceProvider
+            surface={inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined })}
+        >
+            {children}
+        </InstructionSurfaceProvider>
     ),
     'tx page': ({ children }: { children: React.ReactNode }) => (
         <TxInstructionSurface

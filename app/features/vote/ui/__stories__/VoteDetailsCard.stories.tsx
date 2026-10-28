@@ -24,7 +24,7 @@ import {
 
 const meta = {
     component: VoteDetailsCard,
-    decorators: [withMockTransactions, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withMockTransactions, withScrollAnchor, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard',
@@ -284,7 +284,7 @@ export const UnknownInstructionFallback: Story = {
 
 function cardArgs(parsed: { info: object; type: string }) {
     const ix = voteParsedInstruction(parsed);
-    return { ix, node: toInstructionNode({ index: 0, ix }) };
+    return { node: toInstructionNode({ index: 0, ix }), parsed: ix.parsed };
 }
 
 function expectTitle(title: string) {

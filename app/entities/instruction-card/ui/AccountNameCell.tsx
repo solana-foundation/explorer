@@ -1,8 +1,9 @@
 import React from 'react';
 import { CornerDownRight } from 'react-feather';
 
-import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
+
+import { AccountRoleBadges } from './AccountRoleBadges';
 
 export function AccountNameCell({
     label,

@@ -8,7 +8,7 @@ import {
     text,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
-import { ParsedInstruction, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { camelToTitleCase, wrap } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import { create, is } from 'superstruct';
@@ -27,18 +27,18 @@ import {
 
 type DetailsProps = {
     node: InstructionNode;
-    ix: ParsedInstruction;
+    parsed: unknown;
 };
 
-export function BpfUpgradeableLoaderDetailsCard({ node, ix }: DetailsProps) {
-    const parsed = create(ix.parsed, ParsedInfo);
-    if (!is(parsed.type, UpgradeableBpfLoaderInstructionType)) {
+export function BpfUpgradeableLoaderDetailsCard({ node, parsed }: DetailsProps) {
+    const parsedInfo = create(parsed, ParsedInfo);
+    if (!is(parsedInfo.type, UpgradeableBpfLoaderInstructionType)) {
         return <UnknownDetailsCard node={node} />;
     }
-    const info = decodeInfo(parsed.type, parsed.info);
+    const info = decodeInfo(parsedInfo.type, parsedInfo.info);
 
     return (
-        <InstructionCardView node={node} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsed.type)}`}>
+        <InstructionCardView node={node} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsedInfo.type)}`}>
             <InstructionFields programId={node.programId} fields={infoFields(info)} />
         </InstructionCardView>
     );
