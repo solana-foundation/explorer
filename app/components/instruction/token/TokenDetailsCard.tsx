@@ -36,12 +36,29 @@ export function TokenDetailsCard({ node, parsed }: TokenDetailsCardProps) {
     const { type: rawType, info } = create(parsed, ParsedInfo);
     const type = create(rawType, TokenInstructionType);
     const title = `${TOKEN_IDS[node.programId.toString()]}: ${IX_TITLES[type]}`;
-    const struct = IX_STRUCTS[type] as Struct<TokenInfo>;
+    const struct = IX_STRUCTS[type] as Struct<TokenInfo, Record<string, Struct<unknown>>>;
 
-    return <TokenInstructionCard node={node} title={title} info={create(info, struct)} />;
+    return (
+        <TokenInstructionCard
+            node={node}
+            title={title}
+            info={create(info, struct)}
+            stringFields={declaredStringFields(struct)}
+        />
+    );
 }
 
-function TokenInstructionCard({ node, title, info }: { node: InstructionNode; title: string; info: TokenInfo }) {
+function TokenInstructionCard({
+    node,
+    title,
+    info,
+    stringFields,
+}: {
+    node: InstructionNode;
+    title: string;
+    info: TokenInfo;
+    stringFields: ReadonlySet<string>;
+}) {
     const { mintAddress: infoMintAddress, tokenAddress } = amountAccount(info);
     const tokenInfo = useTokenAccountInfo(tokenAddress);
 
@@ -69,7 +86,7 @@ function TokenInstructionCard({ node, title, info }: { node: InstructionNode; ti
     const decimals =
         'tokenAmount' in info && is(info.tokenAmount, TokenAmountUi) ? info.tokenAmount.decimals : mintInfo?.decimals;
     const tokenSymbol = mintAddress && tokenDetails ? tokenDetails.symbol : '';
-    const rows = infoRows(info, { decimals, tokenSymbol });
+    const rows = infoRows({ format: { decimals, tokenSymbol }, info, stringFields });
     const token = mintAddress !== undefined && address('Token', new PublicKey(mintAddress), { tokenLabel: true });
 
     // The RPC lists no accounts of an instruction it parses, so only a raw instruction has account rows.
@@ -91,10 +108,15 @@ function TokenInstructionCard({ node, title, info }: { node: InstructionNode; ti
         <InstructionCardView node={node} title={title}>
             <InstructionFields
                 programId={node.programId}
-                fields={[token, ...rows.map(({ name, value }) => ({ ...value, label: name }))]}
+                fields={[token, ...rows.map(({ name, value }) => ({ ...value, label: capitalizeFirstLetter(name) }))]}
             />
         </InstructionCardView>
     );
+}
+
+/** A numeric field also holds a string, so only the declared type marks a field as text. */
+function declaredStringFields(struct: Struct<TokenInfo, Record<string, Struct<unknown>>>): ReadonlySet<string> {
+    return new Set(Object.keys(struct.schema).filter(key => struct.schema[key].type === 'string'));
 }
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
@@ -137,19 +159,27 @@ type InfoRow = Extract<InstructionArg, { kind: 'leaf' }>;
 
 type AmountFormat = { decimals: number | undefined; tokenSymbol: string };
 
-function infoRows(info: TokenInfo, format: AmountFormat): InfoRow[] {
+function infoRows({
+    info,
+    format,
+    stringFields,
+}: {
+    info: TokenInfo;
+    format: AmountFormat;
+    stringFields: ReadonlySet<string>;
+}): InfoRow[] {
     return Object.entries(info).flatMap(([key, value]): InfoRow[] => {
-        const name = capitalizeFirstLetter(key);
         if (value === undefined) return [];
-        if (value === null) return [infoRow(name, value, { kind: 'text', value: '(none)' })];
-        if (isPublicKeyList(value)) return value.map((pubkey, i) => addressRow(`${name} - #${i + 1}`, pubkey));
+        if (value === null) return [infoRow(key, value, { kind: 'text', value: '(none)' })];
+        if (isPublicKeyList(value)) return value.map((pubkey, i) => addressRow(`${key} - #${i + 1}`, pubkey));
         if (key === 'tokenAmount' && is(value, TokenAmountUi)) return [amountRow(value.amount, format)];
-        if (value instanceof PublicKey) return [addressRow(name, value)];
+        if (value instanceof PublicKey) return [addressRow(key, value)];
         if (key === 'amount' && isNumeric(value)) return [amountRow(value, format)];
-        if (isNumeric(value)) return [infoRow(name, value, { kind: 'text', value })];
-        if (typeof value === 'boolean') return [infoRow(name, value, { kind: 'text', value: String(value) })];
+        if (stringFields.has(key) && typeof value === 'string') return [infoRow(key, value, { kind: 'string', value })];
+        if (isNumeric(value)) return [infoRow(key, value, { kind: 'text', value })];
+        if (typeof value === 'boolean') return [infoRow(key, value, { kind: 'text', value: String(value) })];
         if (Array.isArray(value) && value.every(isNumeric)) {
-            return [infoRow(name, value, { kind: 'preformatted', value })];
+            return [infoRow(key, value, { kind: 'preformatted', value })];
         }
         throw new Error(`Token instruction field ${key} of type ${typeof value} has no row format`);
     });
@@ -174,7 +204,7 @@ function amountRow(value: string | number, { decimals, tokenSymbol }: AmountForm
                   minimumFractionDigits: decimals,
               }).format(normalizeTokenAmount(value, decimals));
 
-    return infoRow(decimals === undefined ? 'Amount (raw)' : 'Amount', value, {
+    return infoRow(decimals === undefined ? 'amount (raw)' : 'amount', value, {
         kind: 'text',
         value: tokenSymbol ? `${amount} ${tokenSymbol}` : amount,
     });

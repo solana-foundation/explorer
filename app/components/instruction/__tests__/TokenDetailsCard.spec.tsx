@@ -315,7 +315,7 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
                 ['Mint', MINT.toBase58()],
                 ['MintAuthority', AUTHORITY.toBase58()],
                 ARGUMENT_HEADER,
-                ['MaxSize', 'string', '100'],
+                ['maxSize', 'string', '100'],
             ],
             title: 'Initialize Token Group',
         },
@@ -328,7 +328,7 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
                 ['Group', SOURCE.toBase58()],
                 ['UpdateAuthority', AUTHORITY.toBase58()],
                 ARGUMENT_HEADER,
-                ['MaxSize', 'string', '7'],
+                ['maxSize', 'string', '7'],
             ],
             title: 'Update Token Group Max Size',
         },
@@ -352,8 +352,8 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
                 ['Metadata', SOURCE.toBase58()],
                 ['UpdateAuthority', AUTHORITY.toBase58()],
                 ARGUMENT_HEADER,
-                ['Idempotent', 'boolean', 'false'],
-                ['Key', 'string', 'color'],
+                ['idempotent', 'boolean', 'false'],
+                ['key', 'string', 'color'],
             ],
             title: 'Remove Token Metadata Key',
         },
@@ -401,6 +401,20 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
         expect(screen.getByText(`Token-2022 Program: ${title}`)).toBeInTheDocument();
     });
 
+    it('should show a string argument as copyable code', async () => {
+        const data = getRemoveTokenMetadataKeyInstructionDataEncoder().encode({ idempotent: false, key: 'color' });
+        renderTxCard(byteFormCard(data, [SOURCE, AUTHORITY].map(readonlyKey)));
+
+        expect((await screen.findByText('color')).tagName).toBe('CODE');
+    });
+
+    it('should show a numeric argument as plain text', async () => {
+        const data = getUpdateTokenGroupMaxSizeInstructionDataEncoder().encode({ maxSize: 7n });
+        renderTxCard(byteFormCard(data, [SOURCE, AUTHORITY].map(readonlyKey)));
+
+        expect((await screen.findByText('7')).tagName).not.toBe('CODE');
+    });
+
     it('should show the role badges of each account', async () => {
         const data = getTransferCheckedInstructionDataEncoder().encode({ amount: 1_500_000n, decimals: 6 });
         renderTxCard(
@@ -425,7 +439,7 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
                 ['DestinationWritable', DESTINATION.toBase58()],
                 ['AuthoritySigner', AUTHORITY.toBase58()],
                 ARGUMENT_HEADER,
-                ['Amount', 'string', '1.500000'],
+                ['amount', 'string', '1.500000'],
             ]);
         });
         expect(within(screen.getByTestId('account-row-3')).getByText('Signer')).toBeInTheDocument();
