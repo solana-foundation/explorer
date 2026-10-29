@@ -58,7 +58,7 @@ type PayloadBlock = {
     onTabChange?: (tab: PayloadTab) => void;
 };
 
-export type PayloadTab = 'raw' | 'decoded';
+type PayloadTab = 'raw' | 'decoded';
 
 /**
  * Falsy entries are dropped, so optional fields read as `cond && address(...)`.

@@ -4,7 +4,6 @@ import { Copyable } from '@components/common/Copyable';
 import { RawDataField } from '@components/shared/RawDataField';
 import { Badge } from '@components/shared/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
-import React from 'react';
 
 import { Alert } from '@/app/shared/ui/Alert';
 

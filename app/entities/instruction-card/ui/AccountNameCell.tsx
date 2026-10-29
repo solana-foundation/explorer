@@ -1,4 +1,3 @@
-import React from 'react';
 import { CornerDownRight } from 'react-feather';
 
 import { BaseTable } from '@/app/shared/ui/Table';

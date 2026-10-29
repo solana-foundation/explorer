@@ -59,7 +59,7 @@ function accountLabel(names: readonly AccountName[], position: number): string {
     return text ? capitalizeFirstLetter(text) : `Account #${position + 1}`;
 }
 
-export function remainingAccountLabel(position: number, namedCount: number): string {
+function remainingAccountLabel(position: number, namedCount: number): string {
     return `Remaining Account #${position + 1 - namedCount}`;
 }
 

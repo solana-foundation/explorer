@@ -794,11 +794,8 @@ export default tseslint.config(
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
             'app/components/block/BlockHistoryCard.tsx',
             'app/components/block/BlockRewardsCard.tsx',
-            'app/components/common/BaseInstructionCard.tsx',
-            'app/components/common/BaseRawParsedDetails.tsx',
             'app/components/common/Copyable.tsx',
             'app/components/common/InfoTooltip.tsx',
-            'app/components/common/InspectorInstructionCard.tsx',
             'app/components/common/NFTArt.tsx',
             'app/components/common/TableCardBody.tsx',
             'app/components/common/TimestampToggle.tsx',
@@ -958,8 +955,6 @@ export default tseslint.config(
             'app/components/account/AnchorAccountCard.tsx',
             'app/components/account/MetaplexNFTAttributesCard.tsx',
             'app/components/account/sas/AttestationDataCard.tsx',
-            'app/components/common/BaseInstructionCard.tsx',
-            'app/components/common/InspectorInstructionCard.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/index.tsx',

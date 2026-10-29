@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-
 import { note } from '../model/fields';
 import { type InstructionNode, type InstructionPosition, positionLabel } from '../model/node';
 import { useInstructionSurface } from '../model/surface';
