@@ -42,10 +42,16 @@ export function InstructionCardFrame({
             }
             headerButtons={headerButtons}
         >
-            <BaseTable ui="dashkit" variant="card" nowrap className={TABLE_CLASS}>
-                <BaseTable.Body>{children}</BaseTable.Body>
-            </BaseTable>
+            <CardTable>{children}</CardTable>
         </CollapsibleCard>
+    );
+}
+
+export function CardTable({ children }: { children: React.ReactNode }) {
+    return (
+        <BaseTable ui="dashkit" variant="card" nowrap className={TABLE_CLASS}>
+            <BaseTable.Body>{children}</BaseTable.Body>
+        </BaseTable>
     );
 }
 

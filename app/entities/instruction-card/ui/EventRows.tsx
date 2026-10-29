@@ -1,4 +1,5 @@
 import { Badge } from '@components/shared/ui/badge';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -8,6 +9,7 @@ import { type InstructionPosition, positionLabel } from '../model/node';
 import { ArgTable } from './ArgRows';
 import { HexDataRow } from './BaseRawDetails';
 import { DECODED_TABLE_COLUMNS } from './DecodedInstructionCard';
+import { CardTable } from './InstructionCardFrame';
 
 export function EventRows({
     events,
@@ -23,24 +25,33 @@ export function EventRows({
             <BaseTable.SectionRow>
                 <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>Events</BaseTable.Cell>
             </BaseTable.SectionRow>
-            {events.map((event, eventIndex) => (
-                // Events never reorder, so the row key is the position.
-                <React.Fragment key={eventIndex}>
-                    <BaseTable.Row>
-                        <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
-                            <Badge ui="dashkit" variant="info" className="mr-1.5">
-                                {`#${positionLabel(position)} · event ${eventIndex + 1}`}
-                            </Badge>
-                            {event.kind === 'decoded' ? event.name : 'Unknown Event'}
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                    {event.kind === 'decoded' && !showRaw ? (
-                        <ArgTable label="Field Name" args={event.args} />
-                    ) : (
-                        <HexDataRow label="Event Data" data={event.data} />
-                    )}
-                </React.Fragment>
-            ))}
+            <BaseTable.Row>
+                <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
+                    {events.map((event, eventIndex) => (
+                        // Events never reorder, so the card key is the position.
+                        <CollapsibleCard
+                            key={eventIndex}
+                            collapsible={false}
+                            title={
+                                <>
+                                    <Badge ui="dashkit" variant="info" className="mr-1.5 flex-none">
+                                        {`#${positionLabel(position)} · event ${eventIndex + 1}`}
+                                    </Badge>
+                                    {event.kind === 'decoded' ? event.name : 'Unknown Event'}
+                                </>
+                            }
+                        >
+                            <CardTable>
+                                {event.kind === 'decoded' && !showRaw ? (
+                                    <ArgTable label="Field Name" args={event.args} />
+                                ) : (
+                                    <HexDataRow label="Event Data" data={event.data} />
+                                )}
+                            </CardTable>
+                        </CollapsibleCard>
+                    ))}
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </>
     );
 }

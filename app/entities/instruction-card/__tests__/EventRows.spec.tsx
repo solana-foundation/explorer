@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test normalizes rendered hex whitespace via RegExp */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import type { InstructionEvent } from '../model/events';
@@ -19,6 +19,15 @@ describe('EventRows', () => {
 
         expect(screen.getByText('#2.3 · event 1')).toBeInTheDocument();
         expect(screen.getByText('#2.3 · event 2')).toBeInTheDocument();
+    });
+
+    it('should draw each event in its own card', () => {
+        renderRows({ events: [DECODED, UNKNOWN], position: { index: 0 }, showRaw: false });
+
+        const [, decodedTable, unknownTable] = screen.getAllByRole('table');
+        expect(within(decodedTable).getByText('42')).toBeInTheDocument();
+        expect(within(decodedTable).queryByText('Event Data')).not.toBeInTheDocument();
+        expect(within(unknownTable).getByText('Event Data')).toBeInTheDocument();
     });
 
     it('should show the fields of a decoded event', () => {
