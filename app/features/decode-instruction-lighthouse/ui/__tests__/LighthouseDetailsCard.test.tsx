@@ -18,8 +18,8 @@ import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
 vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
+    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
+        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
     ),
 }));
 

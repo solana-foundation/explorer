@@ -92,7 +92,7 @@ describe('Inspector InstructionsSection with a Lighthouse instruction', () => {
         expect(await screen.findByText(/Lighthouse: Assert Sysvar Clock/i)).toBeInTheDocument();
 
         await waitFor(() => {
-            expect(readCell('Program')).toBe('Lighthouse');
+            expect(readCell('Program')).toBe('Lighthouse Program');
         });
         expect(screen.getAllByText('Program')).toHaveLength(1);
     });

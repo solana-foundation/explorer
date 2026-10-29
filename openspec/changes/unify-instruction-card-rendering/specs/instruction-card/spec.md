@@ -48,8 +48,13 @@ The cards SHALL read the signature from `InstructionSurface`, and no other React
 
 #### Scenario: Program row shows the card's program name
 
-- **WHEN** a card has a program name of its own
+- **WHEN** a card has a program name of its own, and the explorer has no label for the program
 - **THEN** the body MUST render that name in the `Program` row of the decoded view, on both surfaces
+
+#### Scenario: Program row shows the explorer label of a known program
+
+- **WHEN** a card has a program name of its own, and the explorer has a label for the program
+- **THEN** the `Program` row MUST show the explorer label, as it does for a card without a program name
 
 #### Scenario: Card body wider than two columns
 

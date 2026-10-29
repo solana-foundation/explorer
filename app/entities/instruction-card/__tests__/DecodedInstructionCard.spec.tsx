@@ -12,8 +12,8 @@ import { type InstructionSurface, InstructionSurfaceProvider } from '../model/su
 import { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from '../ui/DecodedInstructionCard';
 
 vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div>{overrideText ?? pubkey.toBase58()}</div>
+    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
+        <div>{fallbackText ?? pubkey.toBase58()}</div>
     ),
 }));
 
