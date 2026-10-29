@@ -32,6 +32,7 @@ import {
     renderTxCard,
     renderWithProviders,
 } from '@/app/__tests__/card-harness';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 import { getTokenInfo } from '@/app/utils/token-info';
 
@@ -430,18 +431,47 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
         expect(within(screen.getByTestId('account-row-3')).getByText('Signer')).toBeInTheDocument();
     });
 
-    it('should give two accounts with one address the names of two fields', async () => {
-        const data = getCloseAccountInstructionDataEncoder().encode({});
-        renderTxCard(byteFormCard(data, [SOURCE, AUTHORITY, AUTHORITY].map(readonlyKey), TOKEN_PROGRAM_ID));
-
-        await waitFor(() => {
-            expect(readRowCells()).toEqual([
+    it.each([
+        {
+            accounts: [MINT],
+            data: getInitializeMetadataPointerInstructionDataEncoder().encode({
+                authority: null,
+                metadataAddress: toKitAddress(MINT),
+            }),
+            name: 'a metadata pointer to its own mint',
+            programId: TOKEN_2022_PROGRAM_ID,
+            rows: [PROGRAM_2022_ROW, ['MetadataAddress', MINT.toBase58()], ['Mint', MINT.toBase58()]],
+        },
+        {
+            accounts: [SOURCE, AUTHORITY, AUTHORITY],
+            data: getCloseAccountInstructionDataEncoder().encode({}),
+            name: 'a close to the owner',
+            programId: TOKEN_PROGRAM_ID,
+            rows: [
                 PROGRAM_ROW,
-                ACCOUNT_HEADER,
                 ['Account', SOURCE.toBase58()],
                 ['Destination', AUTHORITY.toBase58()],
                 ['Owner', AUTHORITY.toBase58()],
-            ]);
+            ],
+        },
+        {
+            accounts: [SOURCE, SOURCE, AUTHORITY],
+            data: getTransferInstructionDataEncoder().encode({ amount: 1000n }),
+            name: 'a transfer to its own source',
+            programId: TOKEN_PROGRAM_ID,
+            rows: [
+                PROGRAM_ROW,
+                ['Amount (raw)', '1,000'],
+                ['Authority', AUTHORITY.toBase58()],
+                ['Destination', SOURCE.toBase58()],
+                ['Source', SOURCE.toBase58()],
+            ],
+        },
+    ])('should show one row for each field of $name', async ({ accounts, data, programId, rows }) => {
+        renderTxCard(byteFormCard(data, accounts.map(readonlyKey), programId));
+
+        await waitFor(() => {
+            expect(readRowCells()).toEqual(rows);
         });
     });
 

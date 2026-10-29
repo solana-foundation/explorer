@@ -123,8 +123,13 @@ A Codama decoder returns only the accounts that its IDL declares, so `DecodedIns
 
 #### Scenario: Token instruction in raw form
 
-- **WHEN** the Token card has the raw instruction
+- **WHEN** the Token card has the raw instruction, and each address is in one parsed field at most
 - **THEN** it MUST render `DecodedInstructionCard`, and MUST name each account after the parsed field that holds its address
+
+#### Scenario: Token instruction in raw form with two parsed fields that hold one address
+
+- **WHEN** the Token card has the raw instruction, and two parsed fields hold one address
+- **THEN** it MUST render one row for each parsed field
 
 #### Scenario: Token instruction that the RPC parsed
 

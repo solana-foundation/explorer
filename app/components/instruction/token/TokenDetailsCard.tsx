@@ -74,16 +74,18 @@ function TokenInstructionCard({ node, title, info }: { node: InstructionNode; ti
 
     // The RPC lists no accounts of an instruction it parses, so only a raw instruction has account rows.
     if (hasRaw(node)) {
-        const { accountNames, args } = splitAccounts(node.raw.keys, rows);
-        return (
-            <DecodedInstructionCard
-                node={node}
-                title={title}
-                accountNames={accountNames}
-                args={args}
-                fields={[token]}
-            />
-        );
+        const split = splitAccounts(node.raw.keys, rows);
+        if (split) {
+            return (
+                <DecodedInstructionCard
+                    node={node}
+                    title={title}
+                    accountNames={split.accountNames}
+                    args={split.args}
+                    fields={[token]}
+                />
+            );
+        }
     }
     return (
         <InstructionCardView node={node} title={title}>
@@ -112,11 +114,17 @@ function hasRaw(node: InstructionNode): node is RawInstructionNode {
     return node.raw !== undefined;
 }
 
-/** Names each account of the raw instruction after the row that holds its address. The other rows are arguments. */
+/**
+ * Names each account of the raw instruction after the row that holds its address. The other rows are arguments.
+ * Returns `undefined` when two rows hold one address, because the rows do not follow the account order.
+ */
 function splitAccounts(
     keys: readonly AccountMeta[],
     rows: readonly InfoRow[],
-): { accountNames: string[]; args: InfoRow[] } {
+): { accountNames: string[]; args: InfoRow[] } | undefined {
+    const addresses = rows.flatMap(({ value }) => (value.kind === 'address' ? [value.address] : []));
+    if (new Set(addresses).size < addresses.length) return undefined;
+
     const args = [...rows];
     const accountNames = keys.map(({ pubkey }) => {
         const index = args.findIndex(({ value }) => value.kind === 'address' && value.address === pubkey.toBase58());
