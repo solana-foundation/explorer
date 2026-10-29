@@ -8,6 +8,6 @@
  */
 // Server and client code both import this module, so it must export only what every build of
 // @sentry/nextjs has.
-export { addBreadcrumb, captureFeedback, startSpan, setTag, setExtra, setContext, withScope } from '@sentry/nextjs';
+export { addBreadcrumb, startSpan, setTag, setExtra, setContext, withScope } from '@sentry/nextjs';
 export { withTraceData } from './trace-data';
 export { SentryErrorBoundary } from './SentryErrorBoundary';

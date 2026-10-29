@@ -10,7 +10,7 @@ with a redeploy.
 | ------------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SENTRY_DSN` | Browser reporting off | Browser reports here; server/edge fall back to it |
 | `SENTRY_DSN` | Server/edge fall back to the public var, else off | Server/edge report here |
-| `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` | Browser error events off; feedback still works | `true` lets browser error events send, still sampled at `ERROR_SAMPLE_RATES.client`; any other value turns them off |
+| `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` | Browser error events off | `true` lets browser error events send, still sampled at `ERROR_SAMPLE_RATES.client`; any other value turns them off |
 | `NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE` | Vitals off: the browser sends no traces | Pageload/navigation sampled at `VITALS_TRACE_SAMPLE_RATE × v`, `v` in (0, 1] |
 | `TELEMETRY_TRACE_SAMPLE_RATE_SERVER` | Server and edge traces sample at `TRACE_SAMPLE_RATES` | Server, and edge unless the EDGE var is set, at `TRACE_SAMPLE_RATES × v`; `0` mutes |
 | `TELEMETRY_TRACE_SAMPLE_RATE_EDGE` | Edge follows the SERVER var | Edge-only override; `0` mutes edge alone |
@@ -29,7 +29,7 @@ variable in Vercel and redeploy. To roll back, restore the previous value and re
 | Server spans, still high | `TELEMETRY_TRACE_SAMPLE_RATE_SERVER=0` | Server and edge traces stop entirely |
 | Edge spans alone | `TELEMETRY_TRACE_SAMPLE_RATE_EDGE=0` | Edge traces stop; server keeps its rate |
 | Vitals transactions | `NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE=0.1` | Pageload rate cut 10×; unset the var to switch vitals off |
-| Browser errors | `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS=false` | Browser error events stop; feedback and server/edge reporting continue |
+| Browser errors | `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS=false` | Browser error events stop; server/edge reporting continues |
 | Server/edge errors | Unset `SENTRY_DSN` **and** `NEXT_PUBLIC_SENTRY_DSN` | All reporting stops; the server falls back to the public var, so both must go |
 
 ## Where the rates live
