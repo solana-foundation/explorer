@@ -1,5 +1,6 @@
 import {
     address,
+    addresses,
     InstructionCardView,
     type InstructionField,
     InstructionFields,
@@ -49,7 +50,7 @@ function accountFields(accounts: Record<string, Address | Address[] | undefined>
     return Object.entries(accounts).flatMap(([field, value]) => {
         if (value === undefined) return [];
         if (!Array.isArray(value)) return [address(fieldLabel(field), value)];
-        return value.map((account, i) => address(`${fieldLabel(field)} #${i + 1}`, account));
+        return value.length > 0 ? [addresses(fieldLabel(field), value)] : [];
     });
 }
 

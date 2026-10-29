@@ -24,6 +24,7 @@ export function ValueCell({ value, colSpan }: { value: FieldValue; colSpan?: num
 
 const CELL_CLASS: Record<FieldValue['kind'], string | undefined> = {
     address: undefined,
+    addresses: undefined,
     bytes: undefined,
     epoch: undefined,
     json: undefined,
@@ -39,6 +40,15 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
     switch (value.kind) {
         case 'address':
             return <InstructionAddress address={value.address} tokenLabel={value.tokenLabel} />;
+        case 'addresses':
+            return (
+                <>
+                    {/* The key is the position because a list may hold the same address twice. */}
+                    {value.addresses.map((address, i) => (
+                        <InstructionAddress key={i} address={address} />
+                    ))}
+                </>
+            );
         case 'sol':
             return <SolBalance lamports={value.lamports} />;
         case 'bytes':

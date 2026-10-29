@@ -11,6 +11,7 @@ export type InstructionValueField = FieldValue & { label: string };
 
 export type FieldValue =
     | { kind: 'address'; address: Address; tokenLabel?: boolean }
+    | { kind: 'addresses'; addresses: readonly Address[] }
     | { kind: 'sol'; lamports: number | bigint }
     | { kind: 'bytes'; size: number }
     | { kind: 'epoch'; epoch: number | bigint }
@@ -75,7 +76,11 @@ export function address(
     value: PublicKey | Address,
     { tokenLabel }: { tokenLabel?: boolean } = {},
 ): InstructionField {
-    return { address: typeof value === 'string' ? value : toKitAddress(value), kind: 'address', label, tokenLabel };
+    return { address: toAddress(value), kind: 'address', label, tokenLabel };
+}
+
+export function addresses(label: string, values: ReadonlyArray<PublicKey | Address>): InstructionField {
+    return { addresses: values.map(toAddress), kind: 'addresses', label };
 }
 
 export function account(
@@ -84,7 +89,7 @@ export function account(
     { isSigner, isWritable }: { isSigner: boolean; isWritable: boolean },
 ): InstructionField {
     return {
-        address: typeof value === 'string' ? value : toKitAddress(value),
+        address: toAddress(value),
         isSigner,
         isWritable,
         kind: 'account',
@@ -182,4 +187,8 @@ export function payload({
 
 export function compactFields(fields: InstructionFieldList): InstructionField[] {
     return fields.filter((field): field is InstructionField => Boolean(field));
+}
+
+function toAddress(value: PublicKey | Address): Address {
+    return typeof value === 'string' ? value : toKitAddress(value);
 }

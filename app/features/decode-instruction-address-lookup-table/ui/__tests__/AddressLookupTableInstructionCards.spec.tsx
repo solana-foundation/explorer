@@ -96,7 +96,7 @@ const CASES: Array<{ info: object; rows: CardRow[]; title: string; type: string 
     },
     {
         info: EXTEND,
-        rows: [...LOOKUP_TABLE_ROWS, ['New Address #1', A.entryOne], ['New Address #2', A.entryTwo]],
+        rows: [...LOOKUP_TABLE_ROWS, ['New Addresses', [A.entryOne, A.entryTwo].join(',')]],
         title: 'Address Lookup Table: Extend Lookup Table',
         type: 'extendLookupTable',
     },
@@ -118,6 +118,14 @@ describe('address-lookup-table cards', () => {
 
         expect(screen.getByText(title)).toBeInTheDocument();
         expect(Logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should omit the New Addresses row for an empty list', async () => {
+        renderCard({ ...TABLE, newAddresses: [] }, 'extendLookupTable');
+
+        await waitFor(() => {
+            expect(readCardRows()).toEqual(LOOKUP_TABLE_ROWS);
+        });
     });
 
     it('should link the recent slot to its block', async () => {

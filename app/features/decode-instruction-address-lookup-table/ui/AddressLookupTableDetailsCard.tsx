@@ -1,5 +1,6 @@
 import {
     address,
+    addresses,
     defineInstructionCard,
     InstructionCardView,
     type InstructionNode,
@@ -34,7 +35,7 @@ export const ExtendLookupTableDetailsCard = defineInstructionCard<ExtendLookupTa
     fields: info => [
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
-        ...info.newAddresses.map((pubkey, i) => address(`New Address #${i + 1}`, pubkey)),
+        info.newAddresses.length > 0 && addresses('New Addresses', info.newAddresses),
     ],
     title: `${TITLE_PREFIX}: Extend Lookup Table`,
 });

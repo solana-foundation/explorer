@@ -43,7 +43,7 @@ describe('@features/instruction-program-serum', () => {
             expect(screen.queryByText('Fee Discount Pubkey')).not.toBeInTheDocument();
         });
 
-        test('should give every open-orders account its own row for a Consume Events instruction', async () => {
+        test('should stack every open-orders account into one row for a Consume Events instruction', async () => {
             // 6 keys: openOrders = keys[0..1], market = keys[2], eventQueue = keys[3]
             renderCard(makeInstruction(CONSUME_EVENTS_DATA, 6));
 
@@ -51,11 +51,22 @@ describe('@features/instruction-program-serum', () => {
             await waitFor(() => {
                 expect(screen.getByText(/OpenBook Dex Program: Consume Events/)).toBeInTheDocument();
             });
-            expect(readAddress(findCell('Open Orders #1'))).toBe(gen.publicKey(0).toBase58());
-            expect(readAddress(findCell('Open Orders #2'))).toBe(gen.publicKey(1).toBase58());
+            expect(readAddress(findCell('Open Orders'))).toBe(
+                [gen.publicKey(0).toBase58(), gen.publicKey(1).toBase58()].join(','),
+            );
             expect(screen.getByText('Event Queue')).toBeInTheDocument();
             expect(screen.getByText('Limit')).toBeInTheDocument();
             expect(screen.getByText('32')).toBeInTheDocument();
+        });
+
+        test('should omit the Open Orders row for a Consume Events instruction with no open-orders account', async () => {
+            renderCard(makeInstruction(CONSUME_EVENTS_DATA, 4));
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText('Event Queue')).toBeInTheDocument();
+            });
+            expect(screen.queryByText('Open Orders')).not.toBeInTheDocument();
         });
 
         test('should fall back to the raw card with an "Unknown" title for undecodable data', async () => {

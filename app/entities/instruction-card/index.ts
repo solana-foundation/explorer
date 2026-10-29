@@ -3,6 +3,7 @@ export type { InstructionCardProps, InstructionCardSpec } from './model/define-i
 export {
     account,
     address,
+    addresses,
     bytes,
     compactFields,
     documentText,

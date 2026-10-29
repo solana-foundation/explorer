@@ -61,7 +61,7 @@ describe('Inspector InstructionsSection with vendored decoder instructions', () 
     test.each([
         {
             data: CONSUME_EVENTS_DATA,
-            fields: ['Open Orders #1', 'Open Orders #2', 'Event Queue', 'Limit', '32'],
+            fields: ['Open Orders', 'Event Queue', 'Limit', '32'],
             keyCount: 6,
             title: 'OpenBook Dex Program: Consume Events',
         },
