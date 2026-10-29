@@ -2330,5 +2330,109 @@
     ],
     "testnet_activation_epoch": 1042,
     "title": "SIMD-0326: Alpenglow: new consensus algorithm"
+  },
+  {
+    "comms_required": null,
+    "description": "The partitioned epoch rewards process currently requires all stake accounts, including inactive stakes, to be considered when computing the lattice hash and rewards partition count. But inactive stakes do not contribute to stake weight or rewards, so they shouldn't be required.",
+    "devnet_activation_epoch": null,
+    "key": "RMsTKfD6hZnBhhNvgGBeKNrqCNkeoP3DYYxNtcuWtRg",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.4.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "2501babe"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0599-rm-inactive-stakes-from-per.md"
+    ],
+    "simds": [
+      "0599"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0599: Remove inactive stakes from stake delegations"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
+    "devnet_activation_epoch": null,
+    "key": "rntCigrTppP5JdZz7K8TyN9sMzLdAcXp8SejYpVpX6D",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.3.0-rc.1"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "brooksprumo"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0437-incremental-rent-reduction.md"
+    ],
+    "simds": [
+      "0437"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0437-3: Set lamports per byte to 2575"
+  },
+  {
+    "comms_required": null,
+    "description": "All clients currently send 32 data + 32 coding shreds, however Turbine still allows to send and receive a variable number of shreds. With this change we will enforce sending and receiving only 32 data + 32 coding shreds.",
+    "devnet_activation_epoch": null,
+    "key": "turbzzBJLGMJJikLvgCCJu9e1hTmfxwarrbLndYAsK5",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.4.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "alexpyattaev"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0317-enforce-32-data-shreds.md"
+    ],
+    "simds": [
+      "0317"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0317: Enforce the Merkle proof size of a fixed 32:32 FEC set"
+  },
+  {
+    "comms_required": null,
+    "description": "This SIMD proposes changing the default behavior of program upgrades to automatically resize the program data account so that its ELF region matches the length of the ELF being deployed. The total account size remains the program data metadata header plus the ELF length. If the\u2026",
+    "devnet_activation_epoch": null,
+    "key": "EhisBfVtGvEA8bVCVN5VMaYEaX6iTfoUrmcDi8LY7Kxy",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.4.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "buffalojoec"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0433-loader-v3-set-program-data-to-elf-length.md"
+    ],
+    "simds": [
+      "0433"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0433: Loader V3 Set Program Data to ELF Length"
   }
 ]
