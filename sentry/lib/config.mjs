@@ -48,9 +48,7 @@ export function createSentryConfig(context) {
     return {
         dsn: context === 'client' ? clientSentryDsn() : serverSentryDsn(),
 
-        // The flag allows the feedback form to run without browser error reporting.
         // The tag drops SDK auto-captures and direct captureException calls, which bot traffic triggers.
-        // beforeSend receives error events only, so feedback events skip this check.
         ...(context === 'client' && {
             beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
                 clientErrorsEnabled() && event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED
