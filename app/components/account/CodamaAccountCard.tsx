@@ -44,13 +44,13 @@ export function CodamaAccountCard({ account, idls }: { account: Account; idls: r
 
     const decoded = useMemo(() => {
         if (!rawData) return undefined;
-        let lastFailed: DecodeResult | undefined;
+        const errors: unknown[] = [];
         for (const idl of idls) {
             const result = decodeCodamaAccount(idl, rawData);
             if (result.kind === 'ok') return result;
-            lastFailed = result;
+            errors.push(...result.errors);
         }
-        return lastFailed ?? { errors: [], kind: 'failed' as const };
+        return { errors, kind: 'failed' as const };
     }, [idls, rawData]);
 
     useEffect(() => {
