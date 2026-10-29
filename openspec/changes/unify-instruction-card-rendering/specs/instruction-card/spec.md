@@ -121,6 +121,16 @@ A Codama decoder returns only the accounts that its IDL declares, so `DecodedIns
 - **THEN** the card MUST show a row for the group before its accounts
 - **AND** the group MUST start collapsed, and MUST show its accounts only after the reader expands it
 
+#### Scenario: Token instruction in raw form
+
+- **WHEN** the Token card has the raw instruction
+- **THEN** it MUST render `DecodedInstructionCard`, and MUST name each account after the parsed field that holds its address
+
+#### Scenario: Token instruction that the RPC parsed
+
+- **WHEN** the Token card has only the instruction that the RPC parsed
+- **THEN** it MUST render one row for each parsed field
+
 ### Requirement: Single node prop
 
 A card SHALL receive the instruction it renders as one `InstructionNode`, not as a spread of `ix`, `index`, `childIndex`, and `raw`. Nested cards MUST NOT travel through cards as props.

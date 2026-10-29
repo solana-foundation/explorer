@@ -27,7 +27,7 @@ function parseFields(struct: Record<string, unknown>): InstructionArg[] {
 
 function parseArg(name: string, value: unknown): InstructionArg {
     if (Array.isArray(value) || value instanceof Uint8Array) {
-        return parseItems({ items: Array.from(value), name, type: `Array[${value.length}]` });
+        return parseItems({ items: Array.from(value), name, type: argType(value) });
     }
     if (value instanceof Map) {
         const entries = Array.from(value, ([key, item]) => ({ key, value: item }));
@@ -43,10 +43,10 @@ function parseArg(name: string, value: unknown): InstructionArg {
     }
     if (typeof value === 'string') {
         return isAddress(value)
-            ? { kind: 'leaf', name, type: 'pubkey', value: { address: value, kind: 'address' } }
-            : { kind: 'leaf', name, type: 'string', value: { kind: 'string', value } };
+            ? { kind: 'leaf', name, type: argType(value), value: { address: value, kind: 'address' } }
+            : { kind: 'leaf', name, type: argType(value), value: { kind: 'string', value } };
     }
-    return { kind: 'leaf', name, type: scalarType(value), value: { kind: 'text', value: String(value) } };
+    return { kind: 'leaf', name, type: argType(value), value: { kind: 'text', value: String(value) } };
 }
 
 function parseItems({ name, type, items }: { name: string; type: string; items: unknown[] }): InstructionArg {
@@ -69,7 +69,14 @@ function groupType(value: Record<string, unknown>): string {
     return 'object';
 }
 
-function scalarType(value: unknown): string {
+/** The Type column of a list or a scalar. */
+export function argType(value: unknown): string {
+    if (Array.isArray(value) || value instanceof Uint8Array) {
+        return `Array[${value.length}]`;
+    }
+    if (typeof value === 'string') {
+        return isAddress(value) ? 'pubkey' : 'string';
+    }
     if (value === null) {
         return 'null';
     }

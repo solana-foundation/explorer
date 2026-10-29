@@ -5,21 +5,33 @@ import { isParsedInstruction } from '@entities/instruction-parser';
 import { useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import type { ReadonlyUint8Array } from '@solana/kit';
-import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { type AccountMeta, type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+    getCloseAccountInstructionDataEncoder,
+    getTransferCheckedInstructionDataEncoder,
+    getTransferInstructionDataEncoder,
+} from '@solana-program/token';
 import {
     getInitializeGroupMemberPointerInstructionDataEncoder,
     getInitializeGroupPointerInstructionDataEncoder,
     getInitializeMetadataPointerInstructionDataEncoder,
     getInitializeTokenGroupInstructionDataEncoder,
+    getRemoveTokenMetadataKeyInstructionDataEncoder,
     getUpdateTokenGroupMaxSizeInstructionDataEncoder,
     getUpdateTokenGroupUpdateAuthorityInstructionDataEncoder,
     getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type CardRow, readCardRows, renderTxCard, renderWithProviders } from '@/app/__tests__/card-harness';
+import {
+    type CardRow,
+    readAddress,
+    readCardRows,
+    renderTxCard,
+    renderWithProviders,
+} from '@/app/__tests__/card-harness';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 import { getTokenInfo } from '@/app/utils/token-info';
 
@@ -44,6 +56,8 @@ const [SOURCE, DESTINATION, AUTHORITY, MINT, SIGNER_1, SIGNER_2] = Array.from({ 
 );
 const PROGRAM_ROW: CardRow = ['Program', TOKEN_PROGRAM_ID.toBase58()];
 const PROGRAM_2022_ROW: CardRow = ['Program', TOKEN_2022_PROGRAM_ID.toBase58()];
+const ACCOUNT_HEADER = ['Account Name', 'Address'];
+const ARGUMENT_HEADER = ['Argument Name', 'Type', 'Value'];
 
 describe('TokenDetailsCard', () => {
     beforeEach(() => {
@@ -283,7 +297,7 @@ describe('TokenDetailsCard', () => {
     });
 });
 
-describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {
+describe('TokenDetailsCard with an instruction in byte form', () => {
     beforeEach(() => {
         vi.mocked(useTokenAccountInfo).mockReturnValue(undefined);
         vi.mocked(useMintAccountInfo).mockReturnValue(undefined);
@@ -295,10 +309,12 @@ describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {
             data: getInitializeTokenGroupInstructionDataEncoder().encode({ maxSize: 100n, updateAuthority: null }),
             rows: [
                 PROGRAM_2022_ROW,
+                ACCOUNT_HEADER,
                 ['Group', SOURCE.toBase58()],
-                ['MaxSize', '100'],
                 ['Mint', MINT.toBase58()],
                 ['MintAuthority', AUTHORITY.toBase58()],
+                ARGUMENT_HEADER,
+                ['MaxSize', 'string', '100'],
             ],
             title: 'Initialize Token Group',
         },
@@ -307,22 +323,48 @@ describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {
             data: getUpdateTokenGroupMaxSizeInstructionDataEncoder().encode({ maxSize: 7n }),
             rows: [
                 PROGRAM_2022_ROW,
+                ACCOUNT_HEADER,
                 ['Group', SOURCE.toBase58()],
-                ['MaxSize', '7'],
                 ['UpdateAuthority', AUTHORITY.toBase58()],
+                ARGUMENT_HEADER,
+                ['MaxSize', 'string', '7'],
             ],
             title: 'Update Token Group Max Size',
         },
         {
             accounts: [SOURCE, AUTHORITY],
             data: getUpdateTokenGroupUpdateAuthorityInstructionDataEncoder().encode({ newUpdateAuthority: null }),
-            rows: [PROGRAM_2022_ROW, ['Group', SOURCE.toBase58()], ['UpdateAuthority', AUTHORITY.toBase58()]],
+            rows: [
+                PROGRAM_2022_ROW,
+                ACCOUNT_HEADER,
+                ['Group', SOURCE.toBase58()],
+                ['UpdateAuthority', AUTHORITY.toBase58()],
+            ],
             title: 'Update Token Group Update Authority',
         },
         {
             accounts: [SOURCE, AUTHORITY],
+            data: getRemoveTokenMetadataKeyInstructionDataEncoder().encode({ idempotent: false, key: 'color' }),
+            rows: [
+                PROGRAM_2022_ROW,
+                ACCOUNT_HEADER,
+                ['Metadata', SOURCE.toBase58()],
+                ['UpdateAuthority', AUTHORITY.toBase58()],
+                ARGUMENT_HEADER,
+                ['Idempotent', 'boolean', 'false'],
+                ['Key', 'string', 'color'],
+            ],
+            title: 'Remove Token Metadata Key',
+        },
+        {
+            accounts: [SOURCE, AUTHORITY],
             data: getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder().encode({ newUpdateAuthority: null }),
-            rows: [PROGRAM_2022_ROW, ['Metadata', SOURCE.toBase58()], ['UpdateAuthority', AUTHORITY.toBase58()]],
+            rows: [
+                PROGRAM_2022_ROW,
+                ACCOUNT_HEADER,
+                ['Metadata', SOURCE.toBase58()],
+                ['UpdateAuthority', AUTHORITY.toBase58()],
+            ],
             title: 'Update Token Metadata Update Authority',
         },
         {
@@ -331,13 +373,13 @@ describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {
                 authority: null,
                 metadataAddress: null,
             }),
-            rows: [PROGRAM_2022_ROW, ['Mint', MINT.toBase58()]],
+            rows: [PROGRAM_2022_ROW, ACCOUNT_HEADER, ['Mint', MINT.toBase58()]],
             title: 'Initialize Metadata Pointer',
         },
         {
             accounts: [MINT],
             data: getInitializeGroupPointerInstructionDataEncoder().encode({ authority: null, groupAddress: null }),
-            rows: [PROGRAM_2022_ROW, ['Mint', MINT.toBase58()]],
+            rows: [PROGRAM_2022_ROW, ACCOUNT_HEADER, ['Mint', MINT.toBase58()]],
             title: 'Initialize Group Pointer',
         },
         {
@@ -346,16 +388,70 @@ describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {
                 authority: null,
                 memberAddress: null,
             }),
-            rows: [PROGRAM_2022_ROW, ['Mint', MINT.toBase58()]],
+            rows: [PROGRAM_2022_ROW, ACCOUNT_HEADER, ['Mint', MINT.toBase58()]],
             title: 'Initialize Group Member Pointer',
         },
     ])('should render $title as the parser slice decodes it', async ({ accounts, data, rows, title }) => {
-        renderTxCard(byteFormCard(data, accounts));
+        renderTxCard(byteFormCard(data, accounts.map(readonlyKey)));
 
         await waitFor(() => {
-            expect(readCardRows()).toEqual(rows);
+            expect(readRowCells()).toEqual(rows);
         });
         expect(screen.getByText(`Token-2022 Program: ${title}`)).toBeInTheDocument();
+    });
+
+    it('should show the role badges of each account', async () => {
+        const data = getTransferCheckedInstructionDataEncoder().encode({ amount: 1_500_000n, decimals: 6 });
+        renderTxCard(
+            byteFormCard(
+                data,
+                [
+                    { isSigner: false, isWritable: true, pubkey: SOURCE },
+                    readonlyKey(MINT),
+                    { isSigner: false, isWritable: true, pubkey: DESTINATION },
+                    { isSigner: true, isWritable: false, pubkey: AUTHORITY },
+                ],
+                TOKEN_PROGRAM_ID,
+            ),
+        );
+
+        await waitFor(() => {
+            expect(readRowCells()).toEqual([
+                PROGRAM_ROW,
+                ACCOUNT_HEADER,
+                ['SourceWritable', SOURCE.toBase58()],
+                ['Mint', MINT.toBase58()],
+                ['DestinationWritable', DESTINATION.toBase58()],
+                ['AuthoritySigner', AUTHORITY.toBase58()],
+                ARGUMENT_HEADER,
+                ['Amount', 'string', '1.500000'],
+            ]);
+        });
+        expect(within(screen.getByTestId('account-row-3')).getByText('Signer')).toBeInTheDocument();
+    });
+
+    it('should give two accounts with one address the names of two fields', async () => {
+        const data = getCloseAccountInstructionDataEncoder().encode({});
+        renderTxCard(byteFormCard(data, [SOURCE, AUTHORITY, AUTHORITY].map(readonlyKey), TOKEN_PROGRAM_ID));
+
+        await waitFor(() => {
+            expect(readRowCells()).toEqual([
+                PROGRAM_ROW,
+                ACCOUNT_HEADER,
+                ['Account', SOURCE.toBase58()],
+                ['Destination', AUTHORITY.toBase58()],
+                ['Owner', AUTHORITY.toBase58()],
+            ]);
+        });
+    });
+
+    it('should label a multisig signer that no field names by its position', async () => {
+        const data = getTransferInstructionDataEncoder().encode({ amount: 1000n });
+        renderTxCard(byteFormCard(data, [SOURCE, DESTINATION, AUTHORITY, SIGNER_1].map(readonlyKey), TOKEN_PROGRAM_ID));
+
+        await waitFor(() => {
+            expect(readRowCells()).toContainEqual(['Account #4', SIGNER_1.toBase58()]);
+        });
     });
 
     it('should show the accounts of the raw instruction in the inspector Raw view', async () => {
@@ -363,7 +459,7 @@ describe('TokenDetailsCard with a Token-2022 instruction in byte form', () => {
             authority: null,
             metadataAddress: null,
         });
-        renderInspectorCard(byteFormCard(data, [MINT]));
+        renderInspectorCard(byteFormCard(data, [readonlyKey(MINT)]));
 
         await userEvent.click(await screen.findByRole('button', { name: 'Raw' }));
 
@@ -389,15 +485,24 @@ function card(type: string, info: Record<string, unknown>, programId: PublicKey 
     return <TokenDetailsCard node={toInstructionNode({ index: 0, ix })} parsed={ix.parsed} />;
 }
 
-function byteFormCard(data: ReadonlyUint8Array, accounts: PublicKey[]) {
-    const raw = new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: accounts.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId: TOKEN_2022_PROGRAM_ID,
-    });
+function byteFormCard(data: ReadonlyUint8Array, keys: AccountMeta[], programId: PublicKey = TOKEN_2022_PROGRAM_ID) {
+    const raw = new TransactionInstruction({ data: Buffer.from(data), keys, programId });
     const ix = instructionParserDispatcher.fromTransactionInstruction(raw);
-    if (!isParsedInstruction(ix)) throw new Error('The Token-2022 slice did not decode the fixture');
+    if (!isParsedInstruction(ix)) throw new Error('The Token slice did not decode the fixture');
     return <TokenDetailsCard node={toInstructionNode({ index: 0, ix, raw })} parsed={ix.parsed} />;
+}
+
+function readonlyKey(pubkey: PublicKey): AccountMeta {
+    return { isSigner: false, isWritable: false, pubkey };
+}
+
+/** Every cell of each row, so an argument row reads as its name, type and value. */
+function readRowCells(): string[][] {
+    return screen.getAllByRole('row').map(row =>
+        within(row)
+            .getAllByRole('cell')
+            .map(cell => readAddress(cell) ?? cell.textContent ?? ''),
+    );
 }
 
 function renderInspectorCard(ui: JSX.Element) {
