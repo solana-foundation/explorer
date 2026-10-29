@@ -439,10 +439,27 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
                 ['DestinationWritable', DESTINATION.toBase58()],
                 ['AuthoritySigner', AUTHORITY.toBase58()],
                 ARGUMENT_HEADER,
-                ['amount', 'string', '1.500000'],
+                ['amount', 'string', '1,500,000'],
+                ['decimals', 'number', '6'],
             ]);
         });
         expect(within(screen.getByTestId('account-row-3')).getByText('Signer')).toBeInTheDocument();
+    });
+
+    it.each([
+        { amount: 1000n, shown: '1,000' },
+        { amount: 18446744073709551615n, shown: '18,446,744,073,709,551,615' },
+    ])('should show the amount argument $amount as the instruction holds it', async ({ amount, shown }) => {
+        vi.mocked(useTokenAccountInfo).mockReturnValue({ mint: MINT } as ReturnType<typeof useTokenAccountInfo>);
+        vi.mocked(useMintAccountInfo).mockReturnValue({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>);
+        vi.mocked(getTokenInfo).mockResolvedValue({ symbol: 'USDC' } as Awaited<ReturnType<typeof getTokenInfo>>);
+        const data = getTransferInstructionDataEncoder().encode({ amount });
+        renderTxCard(byteFormCard(data, [SOURCE, DESTINATION, AUTHORITY].map(readonlyKey), TOKEN_PROGRAM_ID));
+
+        await waitFor(() => {
+            expect(readRowCells()).toContainEqual(['Token', MINT.toBase58()]);
+        });
+        expect(readRowCells()).toContainEqual(['amount', 'string', shown]);
     });
 
     it.each([

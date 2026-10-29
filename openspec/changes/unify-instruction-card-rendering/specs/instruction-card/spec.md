@@ -130,6 +130,7 @@ A Codama decoder returns only the accounts that its IDL declares, so `DecodedIns
 
 - **WHEN** the Token card has the raw instruction, and each address is in one parsed field at most
 - **THEN** it MUST render `DecodedInstructionCard`, and MUST name each account after the parsed field that holds its address
+- **AND** each argument MUST show the value that the instruction holds, not the amount in the units of the mint
 
 #### Scenario: Token instruction in raw form with two parsed fields that hold one address
 

@@ -86,12 +86,11 @@ function TokenInstructionCard({
     const decimals =
         'tokenAmount' in info && is(info.tokenAmount, TokenAmountUi) ? info.tokenAmount.decimals : mintInfo?.decimals;
     const tokenSymbol = mintAddress && tokenDetails ? tokenDetails.symbol : '';
-    const rows = infoRows({ format: { decimals, tokenSymbol }, info, stringFields });
     const token = mintAddress !== undefined && address('Token', new PublicKey(mintAddress), { tokenLabel: true });
 
     // The RPC lists no accounts of an instruction it parses, so only a raw instruction has account rows.
     if (hasRaw(node)) {
-        const split = splitAccounts(node.raw.keys, rows);
+        const split = splitAccounts(node.raw.keys, infoRows({ format: { kind: 'raw' }, info, stringFields }));
         if (split) {
             return (
                 <DecodedInstructionCard
@@ -104,6 +103,7 @@ function TokenInstructionCard({
             );
         }
     }
+    const rows = infoRows({ format: { decimals, kind: 'ui', tokenSymbol }, info, stringFields });
     return (
         <InstructionCardView node={node} title={title}>
             <InstructionFields
@@ -157,7 +157,7 @@ function splitAccounts(
 
 type InfoRow = Extract<InstructionArg, { kind: 'leaf' }>;
 
-type AmountFormat = { decimals: number | undefined; tokenSymbol: string };
+type AmountFormat = { kind: 'raw' } | { kind: 'ui'; decimals: number | undefined; tokenSymbol: string };
 
 function infoRows({
     info,
@@ -172,7 +172,7 @@ function infoRows({
         if (value === undefined) return [];
         if (value === null) return [infoRow(key, value, { kind: 'text', value: '(none)' })];
         if (isPublicKeyList(value)) return value.map((pubkey, i) => addressRow(`${key} - #${i + 1}`, pubkey));
-        if (key === 'tokenAmount' && is(value, TokenAmountUi)) return [amountRow(value.amount, format)];
+        if (key === 'tokenAmount' && is(value, TokenAmountUi)) return tokenAmountRows(value, format);
         if (value instanceof PublicKey) return [addressRow(key, value)];
         if (key === 'amount' && isNumeric(value)) return [amountRow(value, format)];
         if (stringFields.has(key) && typeof value === 'string') return [infoRow(key, value, { kind: 'string', value })];
@@ -194,8 +194,18 @@ function addressRow(name: string, pubkey: PublicKey): InfoRow {
     return infoRow(name, address, { address, kind: 'address' });
 }
 
-function amountRow(value: string | number, { decimals, tokenSymbol }: AmountFormat): InfoRow {
+// The parser joins the `amount` and `decimals` arguments in `tokenAmount`.
+function tokenAmountRows({ amount, decimals }: TokenAmountUi, format: AmountFormat): InfoRow[] {
+    if (format.kind === 'ui') return [amountRow(amount, format)];
+    return [amountRow(amount, format), infoRow('decimals', decimals, { kind: 'text', value: decimals })];
+}
+
+function amountRow(value: string | number, format: AmountFormat): InfoRow {
     const raw = value as number | Intl.StringNumericLiteral;
+    if (format.kind === 'raw') {
+        return infoRow('amount', value, { kind: 'text', value: new Intl.NumberFormat('en-US').format(raw) });
+    }
+    const { decimals, tokenSymbol } = format;
     const amount =
         decimals === undefined
             ? new Intl.NumberFormat('en-US').format(raw)
