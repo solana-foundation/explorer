@@ -1,6 +1,11 @@
-import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
-import { TxInstructionSurface } from '@entities/instruction-card';
-import { toParsedInstruction } from '@entities/instruction-parser';
+import { gen } from '@__fixtures__/gen';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import {
+    inspectorSurface,
+    type InstructionSurface,
+    InstructionSurfaceProvider,
+    toRawInstructionNode,
+} from '@entities/instruction-card';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -8,28 +13,13 @@ import { vi } from 'vitest';
 import { invariant } from '@/app/shared/lib/invariant';
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
+import { LIGHTHOUSE_ADDRESS } from '../../lib/constants';
 import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
-vi.mock('@/app/components/instruction/InstructionCard', () => ({
-    InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
-        <div data-testid="instruction-card" className="card">
-            <div className="card-header">
-                <div>{title}</div>
-            </div>
-            <div className="table-responsive mb-0">
-                <table className="table-sm table-nowrap card-table table">
-                    <tbody>{children}</tbody>
-                </table>
-            </div>
-        </div>
-    ),
-}));
-
 vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
+    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
+        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
     ),
 }));
 
@@ -314,16 +304,22 @@ function instruction(data: number[], keys: Array<{ isSigner: boolean; isWritable
     };
 }
 
-// Decode the fixture through the real parser + dispatcher wrapper so the card is
-// exercised exactly as in production (canonical `{ type, info }` + raw ix).
-function renderLighthouse(raw: { data: Buffer; keys: unknown[]; programId: PublicKey }) {
-    const parsed = parseLighthouseInstruction(toKitInstruction(raw as unknown as TransactionInstruction));
+const SURFACE: InstructionSurface = {
+    ...inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined }),
+    collapsible: false,
+    validateProgram: false,
+};
+
+// Decode the fixture through the real parser so the card gets the canonical
+// `{ type, info }` payload and the raw ix, as in production.
+function renderLighthouse(fixture: { data: Buffer; keys: unknown[]; programId: PublicKey }) {
+    const raw = fixture as unknown as TransactionInstruction;
+    const parsed = parseLighthouseInstruction(toKitInstruction(raw));
     invariant(parsed, 'expected fixture to parse as a Lighthouse instruction');
-    const ix = toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId);
     const view = render(
-        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
-            <LighthouseDetailsCard ix={ix} raw={raw as unknown as TransactionInstruction} index={0} />
-        </TxInstructionSurface>,
+        <InstructionSurfaceProvider surface={SURFACE}>
+            <LighthouseDetailsCard node={toRawInstructionNode({ index: 0, ix: raw })} parsed={parsed} />
+        </InstructionSurfaceProvider>,
     );
     expandAllGroups();
     return view;

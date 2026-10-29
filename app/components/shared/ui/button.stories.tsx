@@ -323,7 +323,7 @@ export const DashkitWithIcons: Story = {
 };
 
 // Mirrors the legacy `btn-group-toggle` pattern used for view-mode toggles in card headers
-// (e.g. ProgramLogSection / ProgramEventsCard "Raw"). `active` toggles the pressed state on `btn-black`.
+// (e.g. the ProgramLogSection "Raw"). `active` toggles the pressed state on `btn-black`.
 function DashkitToggleDemo() {
     const [showRaw, setShowRaw] = useState(false);
     return (

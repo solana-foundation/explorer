@@ -1,19 +1,15 @@
-import { Address } from '@components/common/Address';
-import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer';
-import { cn } from '@components/shared/utils';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { getAnchorIdls, useAnchorProgram } from '@entities/idl';
-import { ExpandableRow, FieldNameCell } from '@shared/ui/expandable-row';
+import type { InstructionArg } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
-import React, { Fragment, ReactNode } from 'react';
 
 import { equals, fromBase64, fromHex, toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
 const ANCHOR_SELF_CPI_TAG = fromHex('1d9acb512ea545e4').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
@@ -301,27 +297,48 @@ export function getAnchorAccountsFromInstruction(
     return null;
 }
 
-export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
-    return Object.entries(ixArgs).map(([key, value]) => {
-        try {
+export function anchorInstructionArgs(
+    ixArgs: object,
+    ixType: Pick<IdlInstruction, 'name' | 'args'>,
+    idl: Idl,
+): InstructionArg[] {
+    return Object.entries(ixArgs).map(([key, value]) =>
+        argOrFallback({ data: ixArgs, key, typeName: ixType.name }, () => {
             const fieldDef = ixType.args.find(ixDefArg => ixDefArg.name === key);
             if (!fieldDef) {
                 throw Error(`Could not find expected ${key} field on account type definition for ${ixType.name}`);
             }
-            return mapField(key, value, fieldDef.type, idl);
-        } catch (error: any) {
-            Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
-            return (
-                <BaseTable.Row key={key}>
-                    <BaseTable.Cell>{key}</BaseTable.Cell>
-                    <BaseTable.Cell>{ixType.name}</BaseTable.Cell>
-                    <BaseTable.Cell className="m-6 [&_.string-value]:break-all">
-                        <ReactJson src={ixArgs} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            );
-        }
-    });
+            return anchorArg(key, value, fieldDef.type, idl);
+        }),
+    );
+}
+
+export function anchorAccountArgs(accountData: object, accountType: IdlTypeDef, idl: Idl): InstructionArg[] {
+    return Object.entries(accountData).map(([key, value], index) =>
+        argOrFallback({ data: accountData, key, typeName: accountType.name }, () => {
+            if (accountType.type.kind !== 'struct') {
+                throw Error(`Account ${accountType.name} is of type ${accountType.type.kind} (expected: 'struct')`);
+            }
+            const fieldDef = getFieldDef(accountType.type.fields, key, index);
+            if (!fieldDef) {
+                throw Error(`Could not find expected ${key} field on account type definition for ${accountType.name}`);
+            }
+            return anchorArg(key, value, fieldDef, idl);
+        }),
+    );
+}
+
+// A field that does not match the IDL shows the whole decoded object, so no data is lost.
+function argOrFallback(
+    { data, key, typeName }: { data: object; key: string; typeName: string },
+    toArg: () => InstructionArg,
+): InstructionArg {
+    try {
+        return toArg();
+    } catch (error) {
+        Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
+        return { kind: 'leaf', name: key, type: typeName, value: { kind: 'json', value: { ...data } } };
+    }
 }
 
 function getFieldDef(fields: IdlDefinedFields | undefined, key: string, index: number): IdlType | undefined {
@@ -335,291 +352,131 @@ function getFieldDef(fields: IdlDefinedFields | undefined, key: string, index: n
     }
 }
 
-export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl: Idl) {
-    return Object.entries(accountData).map(([key, value], index) => {
-        try {
-            if (accountType.type.kind !== 'struct') {
-                throw Error(`Account ${accountType.name} is of type ${accountType.type.kind} (expected: 'struct')`);
-            }
+const NUMBER_TYPES: ReadonlySet<IdlType> = new Set([
+    'u8',
+    'i8',
+    'u16',
+    'i16',
+    'u32',
+    'i32',
+    'f32',
+    'u64',
+    'i64',
+    'f64',
+    'u128',
+    'i128',
+    'u256',
+    'i256',
+]);
 
-            const fieldDef: IdlType | undefined = getFieldDef(accountType.type.fields, key, index);
-            if (!fieldDef) {
-                throw Error(`Could not find expected ${key} field on account type definition for ${accountType.name}`);
-            }
-            return mapField(key, value as any, fieldDef, idl);
-        } catch (error: any) {
-            Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
-            return (
-                <BaseTable.Row key={key}>
-                    <BaseTable.Cell>{key}</BaseTable.Cell>
-                    <BaseTable.Cell>{accountType.name}</BaseTable.Cell>
-                    <BaseTable.Cell className="m-6 [&_.string-value]:break-all">
-                        <ReactJson src={accountData} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            );
-        }
-    });
-}
-
-function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: any, nestingLevel = 0): ReactNode {
-    let itemKey = key;
-    // eslint-disable-next-line no-restricted-syntax -- check if keySuffix is numeric index
-    if (/^-?\d+$/.test(keySuffix)) {
-        itemKey = `#${keySuffix}`;
-    }
-    itemKey = camelToTitleCase(itemKey);
+function anchorArg(key: string, value: any, type: IdlType, idl: Idl): InstructionArg {
+    const name = camelToTitleCase(key);
 
     if (value === undefined) {
-        return (
-            <SimpleRow
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-                rawKey={key}
-                type={type}
-                keySuffix={keySuffix}
-                nestingLevel={nestingLevel}
-            >
-                <div>null</div>
-            </SimpleRow>
-        );
+        return leaf(name, type, { kind: 'text', value: 'null' });
     }
-
-    if (
-        type === 'u8' ||
-        type === 'i8' ||
-        type === 'u16' ||
-        type === 'i16' ||
-        type === 'u32' ||
-        type === 'i32' ||
-        type === 'f32' ||
-        type === 'u64' ||
-        type === 'i64' ||
-        type === 'f64' ||
-        type === 'u128' ||
-        type === 'i128' ||
-        type === 'u256' ||
-        type === 'i256'
-    ) {
-        // Convert to string to handle both regular numbers and BN (BigNumber) objects
-        // Using toString() avoids 53-bit precision loss that occurs with toNumber() on large values
-        const displayValue = value.toString();
-
-        return (
-            <SimpleRow
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-                rawKey={key}
-                type={type}
-                keySuffix={keySuffix}
-                nestingLevel={nestingLevel}
-            >
-                <div>{numberWithSeparator(displayValue)}</div>
-            </SimpleRow>
-        );
-    } else if (type === 'bool' || type === 'string') {
-        return (
-            <SimpleRow
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-                rawKey={key}
-                type={type}
-                keySuffix={keySuffix}
-                nestingLevel={nestingLevel}
-            >
-                <div>{value.toString()}</div>
-            </SimpleRow>
-        );
-    } else if (type === 'bytes') {
-        return (
-            <SimpleRow
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-                rawKey={key}
-                type={type}
-                keySuffix={keySuffix}
-                nestingLevel={nestingLevel}
-            >
-                <div
-                    className="lg:text-left"
-                    style={{
-                        fontSize: '0.85rem',
-                        lineHeight: '1.2',
-                        maxWidth: '100%',
-                        overflowWrap: 'break-word',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-all',
-                    }}
-                >
-                    {toBase64(value as Uint8Array)}
-                </div>
-            </SimpleRow>
-        );
-    } else if (type === 'pubkey') {
-        return (
-            <SimpleRow
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-                rawKey={key}
-                type={type}
-                keySuffix={keySuffix}
-                nestingLevel={nestingLevel}
-            >
-                <Address pubkey={value} link alignRight />
-            </SimpleRow>
-        );
-    } else if ('defined' in type) {
-        const fieldType = idl.types?.find(t => t.name === type.defined.name);
-        if (!fieldType) {
-            throw Error(`Could not type definition for ${type.defined} field in IDL`);
-        }
-        if (fieldType.type.kind === 'struct') {
-            const structFields = fieldType.type.fields;
-            return (
-                <ExpandableRow
-                    fieldName={itemKey}
-                    fieldType={typeDisplayName(type)}
-                    nestingLevel={nestingLevel}
-                    key={keySuffix ? `${key}-${keySuffix}` : key}
-                >
-                    <Fragment key={keySuffix ? `${key}-${keySuffix}` : key}>
-                        {Object.entries(value).map(([innerKey, innerValue]: [string, any]) => {
-                            const innerFieldType = getFieldDef(structFields, innerKey, 0);
-                            if (!innerFieldType) {
-                                throw Error(
-                                    `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`,
-                                );
-                            }
-                            return mapField(innerKey, innerValue, innerFieldType, idl, key, nestingLevel + 1);
-                        })}
-                    </Fragment>
-                </ExpandableRow>
-            );
-        } else if (fieldType.type.kind === 'enum') {
-            const enumVariantName = Object.keys(value)[0];
-            const variant = fieldType.type.variants.find(
-                val => val.name.toLocaleLowerCase() === enumVariantName.toLocaleLowerCase(),
-            );
-
-            const variantFields = variant?.fields;
-            return variant && variantFields ? (
-                <ExpandableRow
-                    fieldName={itemKey}
-                    fieldType={typeDisplayName({ enum: enumVariantName })}
-                    nestingLevel={nestingLevel}
-                    key={keySuffix ? `${key}-${keySuffix}` : key}
-                >
-                    <Fragment key={keySuffix ? `${key}-${keySuffix}` : key}>
-                        {Object.entries(value[enumVariantName]).map(([innerKey, innerValue]: [string, any], index) => {
-                            const innerFieldType = variantFields[index];
-                            if (!innerFieldType) {
-                                throw Error(
-                                    `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`,
-                                );
-                            }
-                            return mapField(
-                                innerKey,
-                                innerValue,
-                                (innerFieldType as any).name
-                                    ? (innerFieldType as IdlField).type
-                                    : (innerFieldType as IdlType),
-                                idl,
-                                key,
-                                nestingLevel + 1,
-                            );
-                        })}
-                    </Fragment>
-                </ExpandableRow>
-            ) : (
-                <SimpleRow
-                    key={keySuffix ? `${key}-${keySuffix}` : key}
-                    rawKey={key}
-                    type={{ enum: type.defined.name }}
-                    keySuffix={keySuffix}
-                    nestingLevel={nestingLevel}
-                >
-                    {camelToTitleCase(enumVariantName)}
-                </SimpleRow>
-            );
-        } else {
-            throw Error(`Unsupported type kind: ${fieldType.type.kind}`);
-        }
-    } else if ('option' in type) {
-        if (value === null) {
-            return (
-                <SimpleRow
-                    key={keySuffix ? `${key}-${keySuffix}` : key}
-                    rawKey={key}
-                    type={type}
-                    keySuffix={keySuffix}
-                    nestingLevel={nestingLevel}
-                >
-                    Not provided
-                </SimpleRow>
-            );
-        }
-        return mapField(key, value, type.option, idl, key, nestingLevel);
-    } else if ('vec' in type) {
-        const itemType = type.vec;
-        return (
-            <ExpandableRow
-                fieldName={itemKey}
-                fieldType={typeDisplayName(type)}
-                nestingLevel={nestingLevel}
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-            >
-                <Fragment key={keySuffix ? `${key}-${keySuffix}` : key}>
-                    {(value as any[]).map((item, i) => mapField(key, item, itemType, idl, i, nestingLevel + 1))}
-                </Fragment>
-            </ExpandableRow>
-        );
-    } else if ('array' in type) {
-        const [itemType] = type.array;
-        return (
-            <ExpandableRow
-                fieldName={itemKey}
-                fieldType={typeDisplayName(type)}
-                nestingLevel={nestingLevel}
-                key={keySuffix ? `${key}-${keySuffix}` : key}
-            >
-                <Fragment key={keySuffix ? `${key}-${keySuffix}` : key}>
-                    {(value as any[]).map((item, i) => mapField(key, item, itemType, idl, i, nestingLevel + 1))}
-                </Fragment>
-            </ExpandableRow>
-        );
-    } else {
-        Logger.debug('[utils:anchor] Impossible type', { type: type as unknown as string });
-        return (
-            <BaseTable.Row key={keySuffix ? `${key}-${keySuffix}` : key}>
-                <BaseTable.Cell>{camelToTitleCase(key)}</BaseTable.Cell>
-                <BaseTable.Cell></BaseTable.Cell>
-                <BaseTable.Cell className="text-right">???</BaseTable.Cell>
-            </BaseTable.Row>
-        );
+    if (NUMBER_TYPES.has(type)) {
+        // `toString` keeps every digit of a BN, which `toNumber` would round.
+        return leaf(name, type, { kind: 'text', value: numberWithSeparator(value.toString()) });
     }
+    if (type === 'bool') {
+        return leaf(name, type, { kind: 'text', value: String(value) });
+    }
+    if (type === 'string') {
+        return leaf(name, type, { kind: 'string', value: String(value) });
+    }
+    if (type === 'bytes') {
+        return leaf(name, type, { kind: 'string', value: toBase64(value as Uint8Array) });
+    }
+    if (type === 'pubkey') {
+        return leaf(name, type, { address: toKitAddress(value), kind: 'address' });
+    }
+    if (typeof type === 'string') {
+        Logger.debug('[utils:anchor] Impossible type', { type });
+        return { kind: 'leaf', name, type: '', value: { kind: 'text', value: '???' } };
+    }
+    if ('defined' in type) {
+        return definedArg({ idl, name, type, value });
+    }
+    if ('option' in type) {
+        return value === null
+            ? leaf(name, type, { kind: 'text', value: 'Not provided' })
+            : anchorArg(key, value, type.option, idl);
+    }
+    if ('vec' in type) {
+        return group(name, typeDisplayName(type), itemArgs(value, type.vec, idl));
+    }
+    if ('array' in type) {
+        return group(name, typeDisplayName(type), itemArgs(value, type.array[0], idl));
+    }
+    Logger.debug('[utils:anchor] Impossible type', { type: type as unknown as string });
+    return { kind: 'leaf', name, type: '', value: { kind: 'text', value: '???' } };
 }
 
-function SimpleRow({
-    rawKey,
+function definedArg({
+    idl,
+    name,
     type,
-    keySuffix,
-    nestingLevel = 0,
-    children,
+    value,
 }: {
-    rawKey: string;
-    type: IdlType | { enum: string };
-    keySuffix?: any;
-    nestingLevel: number;
-    children?: ReactNode;
-}) {
-    let itemKey = rawKey;
-    // eslint-disable-next-line no-restricted-syntax -- check if keySuffix is numeric index
-    if (/^-?\d+$/.test(keySuffix)) {
-        itemKey = `#${keySuffix}`;
+    idl: Idl;
+    name: string;
+    type: Extract<IdlType, { defined: unknown }>;
+    value: any;
+}): InstructionArg {
+    const fieldType = idl.types?.find(t => t.name === type.defined.name);
+    if (!fieldType) {
+        throw Error(`Could not type definition for ${type.defined} field in IDL`);
     }
-    itemKey = camelToTitleCase(itemKey);
-    return (
-        <BaseTable.Row className={cn(nestingLevel > 0 && 'bg-black/20')}>
-            <FieldNameCell name={itemKey} nestingLevel={nestingLevel} />
-            <BaseTable.Cell>{typeDisplayName(type)}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">{children}</BaseTable.Cell>
-        </BaseTable.Row>
-    );
+    if (fieldType.type.kind === 'struct') {
+        const structFields = fieldType.type.fields;
+        const children = Object.entries(value).map(([innerKey, innerValue]) => {
+            const innerFieldType = getFieldDef(structFields, innerKey, 0);
+            if (!innerFieldType) {
+                throw Error(`Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`);
+            }
+            return anchorArg(innerKey, innerValue, innerFieldType, idl);
+        });
+        return group(name, typeDisplayName(type), children);
+    }
+    if (fieldType.type.kind === 'enum') {
+        const enumVariantName = Object.keys(value)[0];
+        const variant = fieldType.type.variants.find(
+            val => val.name.toLocaleLowerCase() === enumVariantName.toLocaleLowerCase(),
+        );
+        const variantFields = variant?.fields;
+        if (!variantFields) {
+            return leaf(name, { enum: type.defined.name }, { kind: 'text', value: camelToTitleCase(enumVariantName) });
+        }
+        const children = Object.entries(value[enumVariantName]).map(([innerKey, innerValue], index) => {
+            const innerFieldType = variantFields[index];
+            if (!innerFieldType) {
+                throw Error(`Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`);
+            }
+            const innerType =
+                typeof innerFieldType === 'object' && 'name' in innerFieldType ? innerFieldType.type : innerFieldType;
+            return anchorArg(innerKey, innerValue, innerType, idl);
+        });
+        return group(name, typeDisplayName({ enum: enumVariantName }), children);
+    }
+    throw Error(`Unsupported type kind: ${fieldType.type.kind}`);
+}
+
+function itemArgs(items: unknown[], itemType: IdlType, idl: Idl): InstructionArg[] {
+    return items.map((item, i) => anchorArg(`#${i}`, item, itemType, idl));
+}
+
+function leaf(
+    name: string,
+    type: IdlType | { enum: string },
+    value: Extract<InstructionArg, { kind: 'leaf' }>['value'],
+): InstructionArg {
+    return { kind: 'leaf', name, type: typeDisplayName(type), value };
+}
+
+function group(name: string, type: string, children: InstructionArg[]): InstructionArg {
+    const [first, ...rest] = children;
+    return first ? { children: [first, ...rest], kind: 'group', name, type } : { kind: 'empty', name, type };
 }
 
 function typeDisplayName(

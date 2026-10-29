@@ -13,6 +13,4 @@ export {
     type Ed25519VerifyInfo,
     parseEd25519Instruction,
 } from './lib/ed25519-parser';
-export { isEd25519Instruction } from './lib/is-ed25519-instruction';
-export { siblingDataFromParsedTransaction } from './lib/sibling-data';
 export { Ed25519DetailsCard } from './ui/Ed25519DetailsCard';

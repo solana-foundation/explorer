@@ -1,4 +1,4 @@
-import { address, defineInstructionCard, type InstructionFieldList, text } from '@entities/instruction-card';
+import { address, defineInstructionCard, type InstructionFieldList, slot, text } from '@entities/instruction-card';
 import { PYTH_INSTRUCTIONS, TradingStatus, type UpdatePriceParams } from '@explorer/decoder-pyth';
 
 // Two distinct instructions carrying the same payload; only the title tells them apart.
@@ -8,7 +8,7 @@ const priceUpdateFields = (info: UpdatePriceParams): InstructionFieldList => [
     text('Status', TradingStatus[info.status]),
     text('Price', info.price),
     text('Conf', info.conf),
-    text('Publish Slot', info.publishSlot),
+    slot('Publish Slot', info.publishSlot),
 ];
 
 export const UpdatePriceDetailsCard = defineInstructionCard<UpdatePriceParams>({

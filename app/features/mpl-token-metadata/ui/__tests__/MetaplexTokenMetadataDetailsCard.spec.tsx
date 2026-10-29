@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
-import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
-import { InstructionSurfaceProvider } from '@entities/instruction-card';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import { inspectorSurface, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
     getCreateMetadataAccountV3InstructionDataSerializer,
@@ -236,12 +236,21 @@ function card(data: Uint8Array | number[], keys: PublicKey[]) {
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     invariant(dispatched, 'the token metadata program is registered');
 
-    return <MetaplexTokenMetadataDetailsCard ix={dispatched} raw={raw} index={0} />;
+    return (
+        <MetaplexTokenMetadataDetailsCard
+            node={toInstructionNode({ index: 0, ix: raw })}
+            parsed={isParsedInstruction(dispatched) ? dispatched.parsed : undefined}
+        />
+    );
 }
 
 function renderInspectorCard(ui: JSX.Element) {
     return renderWithProviders(
-        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{ui}</InstructionSurfaceProvider>,
+        <InstructionSurfaceProvider
+            surface={inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined })}
+        >
+            {ui}
+        </InstructionSurfaceProvider>,
     );
 }
 

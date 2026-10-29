@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import {
     type ParsedInstruction,
-    type ParsedTransaction,
     PublicKey,
     SYSVAR_CLOCK_PUBKEY,
     SYSVAR_RENT_PUBKEY,
@@ -534,7 +534,7 @@ describe('vote::instruction cards', () => {
 function renderCard(parsed: { info: object; type: string }, programId: PublicKey = VOTE_PROGRAM_ID) {
     const ix = { parsed, program: 'vote', programId } as unknown as ParsedInstruction;
 
-    return renderTxCard(<VoteDetailsCard index={0} ix={ix} tx={{ signatures: ['sig'] } as ParsedTransaction} />);
+    return renderTxCard(<VoteDetailsCard node={toInstructionNode({ index: 0, ix })} parsed={ix.parsed} />);
 }
 
 function findPre(label: string): Element | undefined {

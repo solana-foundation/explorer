@@ -1,4 +1,4 @@
-import { UnknownDetailsCard } from '@entities/instruction-card';
+import { toRawInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -19,9 +19,8 @@ vi.mock('@entities/instruction-card', async importOriginal => ({
 }));
 
 const ix = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PublicKey.unique() });
-const innerCards = [<div key="inner" />];
-const props = { childIndex: 1, index: 2, innerCards, ix };
-const node = { ...props, programId: ix.programId };
+const node = toRawInstructionNode({ childIndex: 1, index: 2, ix });
+const props = { node };
 
 describe('IdlInstructionCard', () => {
     afterEach(() => {
@@ -39,7 +38,7 @@ describe('IdlInstructionCard', () => {
             />,
         );
         expect(screen.getByTestId('codama-card')).toBeInTheDocument();
-        expect(vi.mocked(CodamaInstructionCard).mock.calls[0][0]).toEqual({ ix, node, parsedIx: expect.anything() });
+        expect(vi.mocked(CodamaInstructionCard).mock.calls[0][0]).toEqual({ node, parsedIx: expect.anything() });
     });
 
     it('should render the Anchor card with the node of the instruction for an anchor decode', () => {
@@ -49,7 +48,6 @@ describe('IdlInstructionCard', () => {
         expect(screen.getByTestId('anchor-card')).toBeInTheDocument();
         expect(vi.mocked(AnchorDetailsCard).mock.calls[0][0]).toEqual({
             decoded: expect.anything(),
-            ix,
             node,
             program: expect.anything(),
         });

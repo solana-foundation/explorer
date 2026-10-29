@@ -1,4 +1,5 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { toConnectableUrl } from '@entities/cluster';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
@@ -87,10 +88,15 @@ export const withScrollAnchor: Decorator = Story => (
     </ScrollAnchorProvider>
 );
 
-/** Declares the tx-page instruction surface every migrated card reads. Usage: `decorators: [withTxInstructionSurface]` */
+/** Declares the tx-page instruction surface every card reads. Usage: `decorators: [withTxInstructionSurface]` */
 export const withTxInstructionSurface: Decorator = Story => (
-    // eslint-disable-next-line unicorn/no-null -- SignatureResult.err is `TransactionError | null`
-    <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
+    <TxInstructionSurface
+        // eslint-disable-next-line unicorn/no-null -- SignatureResult.err is `TransactionError | null`
+        result={{ err: null }}
+        signature={DEFAULT_SIGNATURE}
+        Card={InstructionNodeCard}
+        instructionData={() => undefined}
+    >
         <Story />
     </TxInstructionSurface>
 );

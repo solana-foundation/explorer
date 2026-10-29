@@ -1,5 +1,6 @@
 // Repo's stored PMP Codama IDL mock (not kept in sync with the published IDL) — drives the real decode path.
 import pmpIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { address } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -40,7 +41,7 @@ function makeIx(data: Buffer, accountCount: number): TransactionInstruction {
 
 const meta = {
     component: IdlInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
@@ -57,8 +58,7 @@ const allocateIx = makeIx(Buffer.from(getAllocateInstructionDataEncoder().encode
 export const Allocate: Story = {
     args: {
         decoded: decodeInstructionWithIdl(allocateIx, pmpIdl, url),
-        index: 0,
-        ix: allocateIx,
+        node: toRawInstructionNode({ index: 0, ix: allocateIx }),
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -73,7 +73,6 @@ const setAuthorityIx = makeIx(
 export const SetAuthority: Story = {
     args: {
         decoded: decodeInstructionWithIdl(setAuthorityIx, pmpIdl, url),
-        index: 0,
-        ix: setAuthorityIx,
+        node: toRawInstructionNode({ index: 0, ix: setAuthorityIx }),
     },
 };

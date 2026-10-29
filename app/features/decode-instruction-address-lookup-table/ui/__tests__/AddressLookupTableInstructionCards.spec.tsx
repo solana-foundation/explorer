@@ -1,11 +1,11 @@
 import { gen } from '@__fixtures__/gen';
-import { type InstructionNode } from '@entities/instruction-card';
+import { type InstructionNode, toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { AddressLookupTableProgram, type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { type CardRow, readAddress, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
+import { type CardRow, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { addressLookupTableInstructionParser } from '../../lib/address-lookup-table-client';
@@ -120,14 +120,11 @@ describe('address-lookup-table cards', () => {
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
-    it('should number the new addresses in extend order', async () => {
-        renderCard(EXTEND, 'extendLookupTable');
+    it('should omit the New Addresses row for an empty list', async () => {
+        renderCard({ ...TABLE, newAddresses: [] }, 'extendLookupTable');
 
         await waitFor(() => {
-            expect(readNewAddresses()).toEqual([
-                ['0', A.entryOne],
-                ['1', A.entryTwo],
-            ]);
+            expect(readCardRows()).toEqual(LOOKUP_TABLE_ROWS);
         });
     });
 
@@ -179,16 +176,11 @@ function renderCard(info: object, type: string) {
         programId: PROGRAM_ID,
     } as unknown as ParsedInstruction;
 
-    return renderTxCard(<AddressLookupTableDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />);
-}
-
-/** The nested table Extend draws, as `[index, address]` pairs. */
-function readNewAddresses(): CardRow[] {
-    const [, nested] = screen.getAllByRole('table');
-    return within(nested)
-        .getAllByRole('row')
-        .map(row => {
-            const cells = within(row).getAllByRole('cell');
-            return [cells[0].textContent ?? '', readAddress(cells[1]) ?? ''];
-        });
+    const dispatched = dispatcher.fromParsedInstruction(ix);
+    return renderTxCard(
+        <AddressLookupTableDetailsCard
+            node={toInstructionNode({ index: 0, ix: dispatched })}
+            parsed={dispatched.parsed}
+        />,
+    );
 }

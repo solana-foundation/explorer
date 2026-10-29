@@ -3,38 +3,20 @@
 // a ParsedInstruction (type "batch") instead of a PartiallyDecodedInstruction
 // with raw bytes. All parsing lives in lib/rpc-parsed-batch; this stays presentational.
 
-import { toInstructionNode } from '@entities/instruction-card';
-import type { ParsedInstruction } from '@solana/web3.js';
+import type { InstructionNode } from '@entities/instruction-card';
 
 import { decodeRpcBatchInstructions } from '../lib/rpc-parsed-batch';
 import { BatchInstructionCard } from './BatchInstructionCard';
 import { SubInstructionRowView } from './SubInstructionRow';
 
-export function RpcParsedTokenBatchCard({
-    ix,
-    index,
-    innerCards,
-    childIndex,
-}: {
-    ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-}) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
-    const instructions = decodeRpcBatchInstructions(ix);
+export function RpcParsedTokenBatchCard({ node, parsed }: { node: InstructionNode; parsed: unknown }) {
+    const instructions = decodeRpcBatchInstructions(parsed);
 
     return (
         <BatchInstructionCard node={node} count={instructions.length}>
-            {instructions.length === 0 ? (
-                <div className="text-sm text-neutral-500" data-testid="batch-empty">
-                    No sub-instructions found
-                </div>
-            ) : (
-                instructions.map((sub, i) => (
-                    <SubInstructionRowView key={i} index={i} typeName={sub.typeName} decoded={sub.decoded} />
-                ))
-            )}
+            {instructions.map((sub, i) => (
+                <SubInstructionRowView key={i} index={i} typeName={sub.typeName} decoded={sub.decoded} />
+            ))}
         </BatchInstructionCard>
     );
 }

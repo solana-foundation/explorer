@@ -1,0 +1,57 @@
+import { Address } from '@components/common/Address';
+import { HexData } from '@components/shared/HexData';
+import { TransactionInstruction } from '@solana/web3.js';
+import React from 'react';
+
+import { BaseTable } from '@/app/shared/ui/Table';
+
+import { AccountRoleBadges } from './AccountRoleBadges';
+
+/**
+ *  Stands in for the account and hex data rows when the transaction's instructions cannot be
+ *  reconstructed from its wire bytes — web3.js builds them from a `VersionedMessage`, which tops
+ *  out at v0.
+ */
+export function RawDetailsUnavailable() {
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell colSpan={2} className="text-center text-dark-muted-foreground">
+                Account list and hex data are not available for this transaction version
+            </BaseTable.Cell>
+        </BaseTable.Row>
+    );
+}
+
+/** Component that displays accounts from any Instruction. */
+export function BaseRawDetails({ ix }: { ix: TransactionInstruction }) {
+    return (
+        <>
+            {ix.keys.map(({ pubkey, isSigner, isWritable }, keyIndex) => (
+                <BaseTable.Row key={keyIndex}>
+                    <BaseTable.Cell>
+                        <div className="mr-1.5 md:inline">Account #{keyIndex + 1}</div>
+                        <AccountRoleBadges isWritable={isWritable} isSigner={isSigner} />
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
+                        <Address pubkey={pubkey} alignRight link />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            ))}
+
+            <HexDataRow label="Instruction Data" data={ix.data} />
+        </>
+    );
+}
+
+export function HexDataRow({ label, data }: { label: string; data: Uint8Array }) {
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell>
+                {label} <span className="text-dk-gray-700">(Hex)</span>
+            </BaseTable.Cell>
+            <BaseTable.Cell className="text-right">
+                <HexData raw={data} />
+            </BaseTable.Cell>
+        </BaseTable.Row>
+    );
+}

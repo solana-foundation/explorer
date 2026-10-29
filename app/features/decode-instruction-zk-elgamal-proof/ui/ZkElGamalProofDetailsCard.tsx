@@ -2,11 +2,10 @@ import {
     address,
     defineInstructionCard,
     InstructionCardView,
+    type InstructionNode,
     text,
-    toInstructionNode,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
-import type { TransactionInstruction } from '@solana/web3.js';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 
 import type { CloseContextStateInfo, VerifyProofInfo, ZkElGamalProofParsed } from '../lib/zk-elgamal-proof-parser';
 
@@ -33,27 +32,21 @@ const VerifyProofCard = defineInstructionCard<VerifyProofInfo>({
 });
 
 type ZkElGamalProofDetailsCardProps = {
-    /** The dispatcher's verdict for a ZK ElGamal Proof instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    node: InstructionNode;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function ZkElGamalProofDetailsCard({ ix, raw, index, innerCards, childIndex }: ZkElGamalProofDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
-    if ('unknown' in ix) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;
+export function ZkElGamalProofDetailsCard({ node, parsed }: ZkElGamalProofDetailsCardProps) {
+    if (!parsed) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} />;
     }
 
-    const parsed = ix.parsed as ZkElGamalProofParsed;
-    switch (parsed.type) {
+    const parsedInfo = parsed as ZkElGamalProofParsed;
+    switch (parsedInfo.type) {
         case 'CloseContextState':
-            return <CloseContextStateCard info={parsed.info} node={node} />;
+            return <CloseContextStateCard info={parsedInfo.info} node={node} />;
         case 'VerifyProof':
-            return <VerifyProofCard info={parsed.info} node={node} />;
+            return <VerifyProofCard info={parsedInfo.info} node={node} />;
     }
 }

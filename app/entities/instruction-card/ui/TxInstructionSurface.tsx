@@ -1,9 +1,11 @@
 'use client';
 
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import type { SignatureResult, TransactionSignature } from '@solana/web3.js';
+import { FetchStatus } from '@providers/cache';
+import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
+import type { TransactionSignature } from '@solana/web3.js';
 import React from 'react';
 
+import type { RawInstructions } from '../model/raw-source';
 import type { InstructionSurface } from '../model/surface';
 import { InstructionSurfaceProvider } from '../model/surface';
 
@@ -11,27 +13,38 @@ import { InstructionSurfaceProvider } from '../model/surface';
  * Declares how instruction cards render on the transaction page.
  *
  * Lives here rather than in the transaction feature so tests that render a card
- * in isolation can pick a surface without reaching across layers. The inspector
- * declares its own surface next to its `InstructionsSection`, because
- * `InspectorInstructionCard` imports this entity's barrel and moving it here
- * would close an import cycle.
+ * in isolation can pick a surface without reaching across layers.
  */
 export function TxInstructionSurface({
     result,
     signature,
+    Card,
+    instructionData,
     children,
-}: {
-    result: SignatureResult;
+}: Pick<InstructionSurface, 'Card' | 'instructionData' | 'result'> & {
     signature: TransactionSignature;
     children: React.ReactNode;
 }) {
+    const rawDetails = useRawTransactionDetails(signature);
+    const fetchRaw = useFetchRawTransaction();
+    const rawInstructions = React.useMemo<RawInstructions>(
+        () =>
+            rawDetails?.status === FetchStatus.Fetched
+                ? { instructions: rawDetails.data?.raw?.transaction?.instructions, status: 'fetched' }
+                : { fetch: () => fetchRaw(signature), status: 'fetchable' },
+        [fetchRaw, rawDetails, signature],
+    );
     const surface = React.useMemo<InstructionSurface>(
         () => ({
-            Shell: InstructionCard,
+            Card,
+            collapsible: false,
+            instructionData,
+            rawInstructions,
             result,
             signature,
+            validateProgram: false,
         }),
-        [result, signature],
+        [Card, instructionData, rawInstructions, result, signature],
     );
 
     return <InstructionSurfaceProvider surface={surface}>{children}</InstructionSurfaceProvider>;

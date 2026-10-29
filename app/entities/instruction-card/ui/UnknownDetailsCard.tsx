@@ -8,5 +8,5 @@ export function UnknownDetailsCard({ node }: { node: InstructionNode }) {
     const { cluster } = useCluster();
     const programName = getProgramName(node.programId.toBase58(), cluster);
 
-    return <InstructionCardView node={node} title={`${programName}: Unknown Instruction`} defaultRaw />;
+    return <InstructionCardView node={node} title={`${programName}: Unknown Instruction`} />;
 }

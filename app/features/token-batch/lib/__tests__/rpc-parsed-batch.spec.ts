@@ -1,4 +1,4 @@
-import { Keypair, type ParsedInstruction } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -13,11 +13,6 @@ import {
 } from '../rpc-parsed-batch';
 
 const ADDRESS = Keypair.generate().publicKey.toBase58();
-
-// Only `parsed` is read; the rest satisfies the ParsedInstruction shape.
-function makeParsedIx(parsed: unknown): ParsedInstruction {
-    return { parsed, program: 'spl-token', programId: Keypair.generate().publicKey } as unknown as ParsedInstruction;
-}
 
 beforeEach(() => {
     // Silence Logger and give every test a fresh call history to assert against.
@@ -117,25 +112,25 @@ describe('extractSubInstructions', () => {
             { info: {}, type: 'transfer' },
             { info: {}, type: 'mintTo' },
         ];
-        expect(extractSubInstructions(makeParsedIx({ info: { instructions: subs }, type: 'batch' }))).toEqual(subs);
+        expect(extractSubInstructions({ info: { instructions: subs }, type: 'batch' })).toEqual(subs);
     });
 
     it('should return [] when parsed is a string', () => {
-        expect(extractSubInstructions(makeParsedIx('batch'))).toEqual([]);
+        expect(extractSubInstructions('batch')).toEqual([]);
     });
 
     it('should return [] when info.instructions is missing', () => {
-        expect(extractSubInstructions(makeParsedIx({ info: {}, type: 'batch' }))).toEqual([]);
+        expect(extractSubInstructions({ info: {}, type: 'batch' })).toEqual([]);
     });
 
     it('should log and return [] when info.instructions is not an array', () => {
-        expect(extractSubInstructions(makeParsedIx({ info: { instructions: 'oops' }, type: 'batch' }))).toEqual([]);
+        expect(extractSubInstructions({ info: { instructions: 'oops' }, type: 'batch' })).toEqual([]);
         expect(Logger.error).toHaveBeenCalledOnce();
     });
 
     it('should filter out non-object sub-instructions without logging', () => {
         const subs = [{ info: {}, type: 'transfer' }, null, 'bad', 42];
-        expect(extractSubInstructions(makeParsedIx({ info: { instructions: subs }, type: 'batch' }))).toEqual([
+        expect(extractSubInstructions({ info: { instructions: subs }, type: 'batch' })).toEqual([
             { info: {}, type: 'transfer' },
         ]);
         expect(Logger.error).not.toHaveBeenCalled();
@@ -144,7 +139,7 @@ describe('extractSubInstructions', () => {
 
 describe('decodeRpcBatchInstructions', () => {
     it('should map each sub-instruction to a typeName and decoded fields', () => {
-        const ix = makeParsedIx({
+        const parsed = {
             info: {
                 instructions: [
                     { info: { amount: '1000', authority: ADDRESS }, type: 'transfer' },
@@ -152,8 +147,8 @@ describe('decodeRpcBatchInstructions', () => {
                 ],
             },
             type: 'batch',
-        });
-        expect(decodeRpcBatchInstructions(ix)).toEqual([
+        };
+        expect(decodeRpcBatchInstructions(parsed)).toEqual([
             {
                 decoded: {
                     accounts: [],
@@ -169,8 +164,8 @@ describe('decodeRpcBatchInstructions', () => {
     });
 
     it('should not throw and should label a sub-instruction with a missing type as "Unknown"', () => {
-        const ix = makeParsedIx({ info: { instructions: [{ info: { amount: '5' } }] }, type: 'batch' });
-        expect(decodeRpcBatchInstructions(ix)).toEqual([
+        const parsed = { info: { instructions: [{ info: { amount: '5' } }] }, type: 'batch' };
+        expect(decodeRpcBatchInstructions(parsed)).toEqual([
             {
                 decoded: { accounts: [], fields: [{ isAddress: false, label: 'Amount', value: '5' }] },
                 typeName: 'Unknown',
@@ -179,7 +174,9 @@ describe('decodeRpcBatchInstructions', () => {
     });
 
     it('should coerce a non-object sub-instruction info to empty fields', () => {
-        const ix = makeParsedIx({ info: { instructions: [{ info: 'not-an-object', type: 'foo' }] }, type: 'batch' });
-        expect(decodeRpcBatchInstructions(ix)).toEqual([{ decoded: { accounts: [], fields: [] }, typeName: 'Foo' }]);
+        const parsed = { info: { instructions: [{ info: 'not-an-object', type: 'foo' }] }, type: 'batch' };
+        expect(decodeRpcBatchInstructions(parsed)).toEqual([
+            { decoded: { accounts: [], fields: [] }, typeName: 'Foo' },
+        ]);
     });
 });

@@ -1,12 +1,12 @@
 import { Idl, Program } from '@coral-xyz/anchor';
-import { type InstructionNode, useInstructionSurface } from '@entities/instruction-card';
+import { type InstructionEvent, type InstructionNode, useInstructionSurface } from '@entities/instruction-card';
 import { extractEventsFromLogs } from '@entities/program-logs';
 import { useTransactionDetails } from '@providers/transactions';
 import { useMemo } from 'react';
 
-import { decodeProgramEvents, type EventEntry } from '../lib/decode-program-events';
+import { decodeProgramEvents } from '../lib/decode-program-events';
 
-export function useAnchorEvents(node: InstructionNode, program: Program<Idl>): EventEntry[] {
+export function useAnchorEvents(node: InstructionNode, program: Program<Idl>): InstructionEvent[] {
     const { signature } = useInstructionSurface();
     const details = useTransactionDetails(signature);
     return useMemo(() => {

@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
@@ -105,5 +106,5 @@ function dispatch(type: string, info: Record<string, unknown>): ParsedInstructio
 }
 
 function renderCard(ix: ParsedInstruction) {
-    return renderTxCard(<BpfLoaderDetailsCard ix={ix} index={0} />);
+    return renderTxCard(<BpfLoaderDetailsCard node={toInstructionNode({ index: 0, ix })} parsed={ix.parsed} />);
 }

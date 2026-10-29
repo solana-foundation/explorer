@@ -61,8 +61,6 @@ const PRICE_UPDATE_INFO = {
 
 const PROGRAM_ROW: CardRow = ['Program', PROGRAM];
 
-const ATTRIBUTES_JSON = '{\n  "asset_type": "Crypto",\n  "symbol": "BTC/USD"\n}';
-
 /** Publisher and price-update rows repeat across the pairs of cards that share a payload. */
 const PUBLISHER_ROWS: CardRow[] = [PROGRAM_ROW, ['Price Account', A.price], ['Publisher', A.publisher]];
 
@@ -73,7 +71,7 @@ const PRICE_UPDATE_ROWS: CardRow[] = [
     ['Status', 'Trading'],
     ['Price', '-12345'],
     ['Conf', '678'],
-    ['Publish Slot', '170640000'],
+    ['Publish Slot', '170,640,000'],
 ];
 
 const CASES: Array<{ card: React.ReactElement; rows: CardRow[]; title: string }> = [
@@ -225,8 +223,10 @@ const CASES: Array<{ card: React.ReactElement; rows: CardRow[]; title: string }>
             PROGRAM_ROW,
             ['Funding Account', A.funding],
             ['Product Account', A.product],
-            // Attributes keep decode order, and the cell draws them twice — once per responsive alignment.
-            ['Attributes (JSON)', ATTRIBUTES_JSON + ATTRIBUTES_JSON],
+            // Attributes keep decode order.
+            ['Attributes', ''],
+            ['asset_type', 'Crypto'],
+            ['symbol', 'BTC/USD'],
         ],
         title: `Pyth: ${PYTH_INSTRUCTIONS.UpdateProduct.name}`,
     },
@@ -249,6 +249,21 @@ describe('instruction-program-pyth cards', () => {
     it('should title Aggregate Price and the two price updates apart', () => {
         const titles = CASES.map(({ title }) => title);
         expect(new Set(titles).size).toBe(titles.length);
+    });
+
+    it('should show a product attribute as copyable code', async () => {
+        renderTxCard(
+            <UpdateProductDetailsCard
+                node={node}
+                info={{
+                    attributes: { symbol: 'BTC/USD' },
+                    fundingPubkey: key(A.funding),
+                    productPubkey: key(A.product),
+                }}
+            />,
+        );
+
+        expect((await screen.findByText('BTC/USD')).tagName).toBe('CODE');
     });
 
     // A foreign program id proves the row reads the node rather than a Pyth constant.

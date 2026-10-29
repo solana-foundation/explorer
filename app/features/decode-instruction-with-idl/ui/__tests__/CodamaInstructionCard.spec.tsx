@@ -1,7 +1,13 @@
-import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
+import { gen } from '@__fixtures__/gen';
 import { createProgramClient, type ProgramMethodBuilder } from '@codama/dynamic-client';
 import { parseInstruction } from '@codama/dynamic-parsers';
-import { toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import {
+    inspectorSurface,
+    type InstructionSurface,
+    InstructionSurfaceProvider,
+    toRawInstructionNode,
+} from '@entities/instruction-card';
 import { AccountRole, isSignerRole, isWritableRole } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -29,25 +35,14 @@ import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 import { CodamaInstructionCard } from '../CodamaInstructionCard';
 
-vi.mock('@/app/components/instruction/InstructionCard', () => ({
-    InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
-        <div data-testid="instruction-card">
-            <div data-testid="instruction-card-title">{title}</div>
-            <table>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
-    ),
-}));
-
 vi.mock('@entities/instruction-card', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/instruction-card')>()),
     UnknownDetailsCard: () => <div data-testid="unknown-card" />,
 }));
 
 vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
+    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
+        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
     ),
 }));
 
@@ -116,7 +111,7 @@ describe('CodamaInstructionCard', () => {
             client.methods.increment({ amount: 42 }).accounts({ authority: AUTHORITY, vaultAccount: VAULT }),
         );
 
-        expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('Counter: Increment');
+        expect(screen.getByText('Counter: Increment')).toBeInTheDocument();
         expect(screen.getByText('Counter')).toBeInTheDocument();
 
         const authorityRow = screen.getByTestId('account-row-0');
@@ -241,13 +236,12 @@ async function renderBuilt(builder: ProgramMethodBuilder) {
 
 function renderInstruction(ix: TransactionInstruction) {
     return render(
-        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
+        <InstructionSurfaceProvider surface={SURFACE}>
             <CodamaInstructionCard
-                node={toInstructionNode({ index: 0, ix })}
-                ix={ix}
+                node={toRawInstructionNode({ index: 0, ix })}
                 parsedIx={parseInstruction(COUNTER_IDL, toKitInstruction(ix))}
             />
-        </TxInstructionSurface>,
+        </InstructionSurfaceProvider>,
     );
 }
 
@@ -267,12 +261,18 @@ function toTransactionInstruction({
     });
 }
 
+const SURFACE: InstructionSurface = {
+    ...inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined }),
+    collapsible: false,
+    validateProgram: false,
+};
+
 function renderCard(parsedIx: ReturnType<typeof makeParsedIx>) {
     const ix = makeIx(parsedIx.accounts);
     return render(
-        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
-            <CodamaInstructionCard node={toInstructionNode({ index: 0, ix })} ix={ix} parsedIx={parsedIx as never} />
-        </TxInstructionSurface>,
+        <InstructionSurfaceProvider surface={SURFACE}>
+            <CodamaInstructionCard node={toRawInstructionNode({ index: 0, ix })} parsedIx={parsedIx as never} />
+        </InstructionSurfaceProvider>,
     );
 }
 

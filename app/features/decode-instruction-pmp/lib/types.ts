@@ -1,4 +1,4 @@
-import type { PmpDecodeConfig } from '@entities/pmp-account';
+import type { PmpAccountDecodeResult, PmpDecodeConfig } from '@entities/pmp-account';
 import type { Address } from '@solana/kit';
 import type { DataSource } from '@solana-program/program-metadata';
 
@@ -23,3 +23,7 @@ export type PmpPayload = { dataSource: DataSource; source: PmpBytesSource };
 
 export type PmpBytesSource =
     { kind: 'inline'; bytes: Uint8Array } | { kind: 'account'; account: Address } | { kind: 'absent' };
+
+/** The state of the on-demand read of the account that holds a payload. */
+export type PmpAccountPayloadResult =
+    { status: 'loading' } | { status: 'failed' } | { status: 'ready'; result: PmpAccountDecodeResult };

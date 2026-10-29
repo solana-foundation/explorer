@@ -1,7 +1,8 @@
 import { Idl } from '@coral-xyz/anchor';
 import { IdlInstruction, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
+import { ArgRows } from '@entities/instruction-card';
 import { render, screen } from '@testing-library/react';
-import { instructionIsSelfCPI, mapAccountToRows, mapIxArgsToRows } from '@utils/anchor';
+import { anchorAccountArgs, anchorInstructionArgs, instructionIsSelfCPI } from '@utils/anchor';
 import BN from 'bn.js';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -10,10 +11,6 @@ import { Logger } from '@/app/shared/lib/logger';
 
 vi.mock('@components/common/JsonViewer', () => ({
     SolarizedJsonViewer: ({ src }: { src: any }) => <div data-testid="json-viewer">{JSON.stringify(src)}</div>,
-}));
-
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: any }) => <span data-testid="address">{pubkey.toString()}</span>,
 }));
 
 describe('anchor utilities - number overflow handling', () => {
@@ -28,7 +25,7 @@ describe('anchor utilities - number overflow handling', () => {
         types: [],
     };
 
-    describe('mapIxArgsToRows with large numbers', () => {
+    describe('anchorInstructionArgs with large numbers', () => {
         it.each<{ type: 'u32' | 'u64' | 'u128' | 'u256'; value: BN | number; formatted: string }>([
             // Max u64 is larger than Number.MAX_SAFE_INTEGER
             { formatted: '18,446,744,073,709,551,615', type: 'u64', value: new BN('18446744073709551615') },
@@ -52,13 +49,36 @@ describe('anchor utilities - number overflow handling', () => {
                 name: 'testInstruction',
             };
 
-            const { container } = renderRows(mapIxArgsToRows({ amount: value }, ixType, mockIdl));
+            const { container } = renderRows(
+                <ArgRows args={anchorInstructionArgs({ amount: value }, ixType, mockIdl)} />,
+            );
 
             expect(container.textContent).toContain(formatted);
         });
     });
 
-    describe('mapAccountToRows with large numbers', () => {
+    describe('anchorInstructionArgs with strings and bytes', () => {
+        it('should give a string and base64 bytes the string kind', () => {
+            const ixType: IdlInstruction = {
+                accounts: [],
+                args: [
+                    { name: 'symbol', type: 'string' },
+                    { name: 'payload', type: 'bytes' },
+                ],
+                discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
+                name: 'testInstruction',
+            };
+
+            const args = anchorInstructionArgs({ payload: new Uint8Array([1, 2, 3]), symbol: 'USDC' }, ixType, mockIdl);
+
+            expect(args).toEqual([
+                expect.objectContaining({ name: 'Payload', value: { kind: 'string', value: 'AQID' } }),
+                expect.objectContaining({ name: 'Symbol', value: { kind: 'string', value: 'USDC' } }),
+            ]);
+        });
+    });
+
+    describe('anchorAccountArgs with large numbers', () => {
         it('should handle u64 in account data without overflow', () => {
             const largeBalance = new BN('9999999999999999999'); // Larger than MAX_SAFE_INTEGER
 
@@ -70,7 +90,9 @@ describe('anchor utilities - number overflow handling', () => {
                 },
             };
 
-            const { container } = renderRows(mapAccountToRows({ balance: largeBalance }, accountType, mockIdl));
+            const { container } = renderRows(
+                <ArgRows args={anchorAccountArgs({ balance: largeBalance }, accountType, mockIdl)} />,
+            );
 
             expect(container.textContent).toContain('9,999,999,999,999,999,999');
         });
@@ -81,7 +103,7 @@ describe('anchor utilities - number overflow handling', () => {
             vi.clearAllMocks();
         });
 
-        it('should render proper table structure on error in mapIxArgsToRows', () => {
+        it('should render proper table structure on error in anchorInstructionArgs', () => {
             const ixType: IdlInstruction = {
                 accounts: [],
                 args: [],
@@ -89,7 +111,7 @@ describe('anchor utilities - number overflow handling', () => {
                 name: 'testInstruction',
             };
 
-            renderRows(mapIxArgsToRows({ unknownField: 'value' }, ixType, mockIdl));
+            renderRows(<ArgRows args={anchorInstructionArgs({ unknownField: 'value' }, ixType, mockIdl)} />);
 
             expect(Logger.debug).toHaveBeenCalledTimes(1);
             expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
@@ -122,8 +144,8 @@ describe('anchor utilities - number overflow handling', () => {
                 },
                 description: 'a type alias',
             },
-        ])('should render JSON viewer in mapAccountToRows when account type is $description', ({ accountType }) => {
-            renderRows(mapAccountToRows({ unknownField: 'value' }, accountType, mockIdl));
+        ])('should render JSON viewer in anchorAccountArgs when account type is $description', ({ accountType }) => {
+            renderRows(<ArgRows args={anchorAccountArgs({ unknownField: 'value' }, accountType, mockIdl)} />);
 
             expect(Logger.debug).toHaveBeenCalledTimes(1);
             expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {

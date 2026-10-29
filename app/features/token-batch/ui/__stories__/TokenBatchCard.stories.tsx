@@ -1,3 +1,4 @@
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -17,7 +18,7 @@ import { TokenBatchCard } from '../TokenBatchCard';
 
 const meta = {
     component: TokenBatchCard,
-    decorators: [withTransactions, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
     },
@@ -33,23 +34,21 @@ const transferData = concatBytes(new Uint8Array([3]), writeU64LE(1_000_000n));
 const burnData = concatBytes(new Uint8Array([8]), writeU64LE(500n));
 
 export const TwoSubInstructions: Story = {
-    args: {
-        index: 0,
-        ix: makeBatchIx(
+    args: batchArgs(
+        makeBatchIx(
             [
                 { data: transferData, numAccounts: 3 },
                 { data: burnData, numAccounts: 3 },
             ],
             6,
         ),
-    },
+        0,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (2 instructions)', { exact: false })).toBeInTheDocument();
-        await expect(canvas.getByText('Transfer')).toBeInTheDocument();
-        await expect(canvas.getByText('Burn')).toBeInTheDocument();
-        await expect(canvas.getByTestId('sub-ix-0')).toBeInTheDocument();
-        await expect(canvas.getByTestId('sub-ix-1')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 Transfer')).toBeInTheDocument();
+        await expect(canvas.getByText('#2 Burn')).toBeInTheDocument();
     },
 };
 
@@ -57,75 +56,69 @@ export const TwoSubInstructions: Story = {
 const transferCheckedData = concatBytes(new Uint8Array([12]), writeU64LE(5_000_000n), new Uint8Array([6]));
 
 export const SingleSubInstruction: Story = {
-    args: {
-        index: 1,
-        ix: makeBatchIx([{ data: transferCheckedData, numAccounts: 4 }], 4),
-    },
+    args: batchArgs(makeBatchIx([{ data: transferCheckedData, numAccounts: 4 }], 4), 1),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (1 instruction)', { exact: false })).toBeInTheDocument();
-        await expect(canvas.getByText('TransferChecked')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 TransferChecked')).toBeInTheDocument();
         await expect(canvas.getByText('5')).toBeInTheDocument();
-        await expect(canvas.getByText('Decimals:')).toBeInTheDocument();
+        await expect(canvas.getByText('Decimals')).toBeInTheDocument();
         await expect(canvas.getByText('6')).toBeInTheDocument();
     },
 };
 
 // Transfer with a specific amount — verifies decoded Amount field
 export const DecodedTransferAmount: Story = {
-    args: {
-        index: 5,
-        ix: makeBatchIx([{ data: concatBytes(new Uint8Array([3]), writeU64LE(42000n)), numAccounts: 3 }], 3),
-    },
+    args: batchArgs(
+        makeBatchIx([{ data: concatBytes(new Uint8Array([3]), writeU64LE(42000n)), numAccounts: 3 }], 3),
+        5,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('42000')).toBeInTheDocument();
-        await expect(canvas.getByText('Amount:')).toBeInTheDocument();
+        await expect(canvas.getByText('Amount')).toBeInTheDocument();
     },
 };
 
 // Unknown discriminator — SDK cannot parse it, shows as parse error
 export const UnknownDiscriminator: Story = {
-    args: {
-        index: 2,
-        ix: makeBatchIx([{ data: new Uint8Array([0xfe, 0xab, 0xcd]), numAccounts: 2 }], 2),
-    },
+    args: batchArgs(makeBatchIx([{ data: new Uint8Array([0xfe, 0xab, 0xcd]), numAccounts: 2 }], 2), 2),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByTestId('batch-error')).toBeInTheDocument();
+        await expect(canvas.getByText('Parse Error')).toBeInTheDocument();
     },
 };
 
 // Truncated data triggers parse error
 export const ParseError: Story = {
-    args: {
-        index: 3,
-        ix: new TransactionInstruction({
+    args: batchArgs(
+        new TransactionInstruction({
             data: toBuffer(new Uint8Array([BATCH_DISCRIMINATOR, 5])),
             keys: [],
             programId: TOKEN_2022_PROGRAM_ID,
         }),
-    },
+        3,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByTestId('batch-error')).toBeInTheDocument();
+        await expect(canvas.getByText('Parse Error')).toBeInTheDocument();
     },
 };
 
 // Empty batch (just the discriminator, no sub-instructions)
 export const EmptyBatch: Story = {
-    args: {
-        index: 4,
-        ix: new TransactionInstruction({
+    args: batchArgs(
+        new TransactionInstruction({
             data: toBuffer(new Uint8Array([BATCH_DISCRIMINATOR])),
             keys: [],
             programId: TOKEN_2022_PROGRAM_ID,
         }),
-    },
+        4,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Batch (0 instructions)', { exact: false })).toBeInTheDocument();
-        await expect(canvas.getByTestId('batch-empty')).toBeInTheDocument();
+        await expect(canvas.queryByText('#1 ', { exact: false })).not.toBeInTheDocument();
     },
 };
 
@@ -133,35 +126,32 @@ export const EmptyBatch: Story = {
 const newAuthority = new PublicKey('UM1jjYaM2Y4BDSdCw3AiELrP6HDpz62VjUHcHVJosix');
 
 export const SetAuthorityWithNewAuthority: Story = {
-    args: {
-        index: 7,
-        ix: makeBatchIxWithKeys(
+    args: batchArgs(
+        makeBatchIxWithKeys(
             [{ data: makeSetAuthorityData(0, newAuthority), numAccounts: 2 }],
             [makeAccount(true, false), makeAccount(false, true)],
         ),
-    },
+        7,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('SetAuthority')).toBeInTheDocument();
-        await expect(canvas.getByText('Authority Type:')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 SetAuthority')).toBeInTheDocument();
+        await expect(canvas.getByText('Authority Type')).toBeInTheDocument();
         await expect(canvas.getByText('MintTokens')).toBeInTheDocument();
-        await expect(canvas.getByText('New Authority:')).toBeInTheDocument();
-        await expect(canvasElement.querySelector(`[aria-label="${newAuthority.toBase58()}"]`)).toBeTruthy();
+        await expect(canvas.getByText('New Authority')).toBeInTheDocument();
+        await expect(canvasElement.querySelector(`[data-address="${newAuthority.toBase58()}"]`)).toBeTruthy();
     },
 };
 
 // SetAuthority revoking authority (no new authority)
 export const SetAuthorityRevoke: Story = {
-    args: {
-        index: 8,
-        ix: makeBatchIx([{ data: makeSetAuthorityData(3), numAccounts: 2 }], 2),
-    },
+    args: batchArgs(makeBatchIx([{ data: makeSetAuthorityData(3), numAccounts: 2 }], 2), 8),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('SetAuthority')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 SetAuthority')).toBeInTheDocument();
         // Scope to the Authority Type field row to avoid false positives if a
-        // CloseAccount sub-instruction badge is ever added to this story.
-        const authorityTypeRow = canvas.getByText('Authority Type:').closest('div');
+        // CloseAccount sub-instruction heading is ever added to this story.
+        const authorityTypeRow = canvas.getByText('Authority Type').closest('tr');
         if (!authorityTypeRow) throw new Error('Expected Authority Type row');
         await expect(within(authorityTypeRow).getByText('CloseAccount')).toBeInTheDocument();
         await expect(canvas.getByText('(none)')).toBeInTheDocument();
@@ -170,9 +160,8 @@ export const SetAuthorityRevoke: Story = {
 
 // Multisig Transfer — authority is a multisig address followed by 2 co-signers
 export const MultisigCoSigners: Story = {
-    args: {
-        index: 9,
-        ix: makeBatchIxWithKeys(
+    args: batchArgs(
+        makeBatchIxWithKeys(
             [{ data: concatBytes(new Uint8Array([3]), writeU64LE(7500n)), numAccounts: 5 }],
             [
                 makeAccount(true, false), // Source (writable)
@@ -182,37 +171,37 @@ export const MultisigCoSigners: Story = {
                 makeAccount(false, true), // Co-signer 2
             ],
         ),
-    },
+        9,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('Transfer')).toBeInTheDocument();
-        await expect(canvas.getByText('Amount:')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 Transfer')).toBeInTheDocument();
+        await expect(canvas.getByText('Amount')).toBeInTheDocument();
         await expect(canvas.getByText('7500')).toBeInTheDocument();
-        await expect(canvas.getByText('Signer 1:')).toBeInTheDocument();
-        await expect(canvas.getByText('Signer 2:')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 1')).toBeInTheDocument();
+        await expect(canvas.getByText('Signer 2')).toBeInTheDocument();
     },
 };
 
 // SyncNative (disc 17) — not in formatByType, exercises the generic fallback
 // that extracts accounts from the parsed instruction.
 export const UnhandledInstructionType: Story = {
-    args: {
-        index: 10,
-        ix: makeBatchIxWithKeys([{ data: new Uint8Array([17]), numAccounts: 1 }], [makeAccount(true, false)]),
-    },
+    args: batchArgs(
+        makeBatchIxWithKeys([{ data: new Uint8Array([17]), numAccounts: 1 }], [makeAccount(true, false)]),
+        10,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('SyncNative')).toBeInTheDocument();
+        await expect(canvas.getByText('#1 SyncNative')).toBeInTheDocument();
         // Generic fallback should render the account address
-        await expect(canvas.getByText('Account:')).toBeInTheDocument();
+        await expect(canvas.getByText('Account')).toBeInTheDocument();
     },
 };
 
 // Writable and signer badges rendered on accounts
 export const WritableAndSignerBadges: Story = {
-    args: {
-        index: 6,
-        ix: makeBatchIxWithKeys(
+    args: batchArgs(
+        makeBatchIxWithKeys(
             [{ data: concatBytes(new Uint8Array([3]), writeU64LE(100n)), numAccounts: 3 }],
             [
                 makeAccount(true, false), // writable, not signer
@@ -220,7 +209,8 @@ export const WritableAndSignerBadges: Story = {
                 makeAccount(false, true), // not writable, signer
             ],
         ),
-    },
+        6,
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         const writableBadges = canvas.getAllByText('Writable');
@@ -228,3 +218,7 @@ export const WritableAndSignerBadges: Story = {
         await expect(canvas.getByText('Signer')).toBeInTheDocument();
     },
 };
+
+function batchArgs(ix: TransactionInstruction, index: number) {
+    return { node: toRawInstructionNode({ index, ix }) };
+}

@@ -1,7 +1,7 @@
 import { type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { toInstructionNode } from '../model/node';
+import { instructionDataOf, positionNumbers, toInstructionNode, toRawInstructionNode } from '../model/node';
 
 const PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
@@ -12,6 +12,16 @@ const PARSED: ParsedInstruction = {
     programId: PROGRAM_ID,
 };
 const SYSTEM_RAW = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: SystemProgram.programId });
+
+describe('positionNumbers', () => {
+    it.each([
+        { numbers: [1], position: { index: 0 } },
+        { numbers: [1, 1], position: { childIndex: 0, index: 0 } },
+        { numbers: [3, 2], position: { childIndex: 1, index: 2 } },
+    ])('should number $position from 1 as $numbers', ({ position, numbers }) => {
+        expect(positionNumbers(position)).toEqual(numbers);
+    });
+});
 
 describe('toInstructionNode', () => {
     it.each([
@@ -31,15 +41,55 @@ describe('toInstructionNode', () => {
     });
 
     it('should keep the fields it is given', () => {
-        const innerCards = [<div key="inner" />];
+        const children = [toInstructionNode({ childIndex: 0, index: 1, ix: RAW }), undefined];
 
-        expect(toInstructionNode({ childIndex: 2, index: 1, innerCards, ix: PARSED, raw: RAW })).toEqual({
+        expect(toInstructionNode({ childIndex: 2, children, index: 1, ix: PARSED, raw: RAW })).toEqual({
             childIndex: 2,
+            children,
             index: 1,
-            innerCards,
             ix: PARSED,
             programId: PROGRAM_ID,
             raw: RAW,
         });
+    });
+});
+
+describe('toRawInstructionNode', () => {
+    it.each([
+        ['raw', { raw: SYSTEM_RAW }],
+        ['a passed programId', { programId: SystemProgram.programId }],
+    ])('should take the program id and the raw instruction from ix, not from %s', (_, other) => {
+        const fields = { index: 0, ix: RAW, ...other };
+
+        const node = toRawInstructionNode(fields);
+
+        expect(node.programId).toBe(PROGRAM_ID);
+        expect(node.raw).toBe(RAW);
+    });
+
+    it('should keep the fields it is given', () => {
+        const children = [toInstructionNode({ childIndex: 0, index: 1, ix: RAW }), undefined];
+
+        expect(toRawInstructionNode({ childIndex: 2, children, index: 1, ix: RAW })).toEqual({
+            childIndex: 2,
+            children,
+            index: 1,
+            ix: RAW,
+            programId: PROGRAM_ID,
+            raw: RAW,
+        });
+    });
+});
+
+describe('instructionDataOf', () => {
+    const nodes = [toInstructionNode({ index: 0, ix: RAW }), toInstructionNode({ index: 1, ix: PARSED }), undefined];
+
+    it.each([
+        ['an instruction in byte form', 0, RAW.data],
+        ['an RPC-parsed instruction', 1, undefined],
+        ['an instruction the page cannot resolve', 2, undefined],
+        ['an index past the last instruction', 3, undefined],
+    ])('should read the data of %s', (_, index, data) => {
+        expect(instructionDataOf(nodes)(index)).toEqual(data);
     });
 });

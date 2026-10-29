@@ -1,7 +1,6 @@
 import {
     address,
-    custom,
-    InstructionAddress,
+    addresses,
     InstructionCardView,
     type InstructionField,
     InstructionFields,
@@ -9,40 +8,34 @@ import {
     NameOnlyDetailsCard,
     text,
 } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 import { isDeprecatedSerumProgram, OPENBOOK_DEX_PROGRAM_LABEL, SERUM_INSTRUCTION_NAMES } from '@explorer/decoder-serum';
 import type { Address } from '@solana/kit';
-import type { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
 import type { SerumParsed } from '../lib/serum-parser';
 
 type SerumDetailsCardProps = {
-    /** The dispatcher's verdict for a DEX instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    node: InstructionNode;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function SerumDetailsCard({ ix, raw, index, innerCards, childIndex }: SerumDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
-    const parsed = 'unknown' in ix ? undefined : (ix.parsed as SerumParsed);
-    const name = parsed ? SERUM_INSTRUCTION_NAMES[parsed.type] : 'Unknown';
+export function SerumDetailsCard({ node, parsed }: SerumDetailsCardProps) {
+    const parsedInfo = parsed as SerumParsed | undefined;
+    const name = parsedInfo ? SERUM_INSTRUCTION_NAMES[parsedInfo.type] : 'Unknown';
 
     // Dead Serum DEX deployments get a name-only card; the active OpenBook fork keeps full decoding.
-    if (isDeprecatedSerumProgram(ix.programId.toBase58())) {
+    if (isDeprecatedSerumProgram(node.programId.toBase58())) {
         return <NameOnlyDetailsCard node={node} name={name} />;
     }
 
     const title = `${OPENBOOK_DEX_PROGRAM_LABEL} Program: ${name}`;
-    if (!parsed || !('accounts' in parsed.info)) {
-        return <InstructionCardView node={node} title={title} defaultRaw />;
+    if (!parsedInfo || !('accounts' in parsedInfo.info)) {
+        return <InstructionCardView node={node} title={title} />;
     }
 
-    const { info } = parsed;
+    const { info } = parsedInfo;
     return (
         <InstructionCardView node={node} title={title}>
             <InstructionFields
@@ -57,16 +50,7 @@ function accountFields(accounts: Record<string, Address | Address[] | undefined>
     return Object.entries(accounts).flatMap(([field, value]) => {
         if (value === undefined) return [];
         if (!Array.isArray(value)) return [address(fieldLabel(field), value)];
-        return [
-            custom(
-                fieldLabel(field),
-                <>
-                    {value.map((account, i) => (
-                        <InstructionAddress key={i} address={account} />
-                    ))}
-                </>,
-            ),
-        ];
+        return value.length > 0 ? [addresses(fieldLabel(field), value)] : [];
     });
 }
 

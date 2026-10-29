@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import {
     nextjsParameters,
     withMockTransactions,
@@ -19,12 +20,11 @@ import {
     VOTE_ACCOUNT_ADDRESS,
     VOTE_AUTHORITY_ADDRESS,
     voteParsedInstruction,
-    voteParsedTransaction,
 } from './fixtures';
 
 const meta = {
     component: VoteDetailsCard,
-    decorators: [withMockTransactions, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withMockTransactions, withScrollAnchor, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard',
@@ -284,7 +284,7 @@ export const UnknownInstructionFallback: Story = {
 
 function cardArgs(parsed: { info: object; type: string }) {
     const ix = voteParsedInstruction(parsed);
-    return { index: 0, ix, tx: voteParsedTransaction(ix) };
+    return { node: toInstructionNode({ index: 0, ix }), parsed: ix.parsed };
 }
 
 function expectTitle(title: string) {

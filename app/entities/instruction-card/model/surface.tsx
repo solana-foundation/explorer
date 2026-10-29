@@ -1,39 +1,25 @@
 'use client';
 
-import type { ParsedInstruction, SignatureResult, TransactionInstruction, TransactionSignature } from '@solana/web3.js';
+import type { SignatureResult, TransactionSignature } from '@solana/web3.js';
 import React, { createContext, useContext } from 'react';
 
-/** The subset of shell props every instruction shell accepts. */
-export type InstructionShellProps = {
-    title: string;
-    children?: React.ReactNode;
-    result: SignatureResult;
-    index: number;
-    ix: TransactionInstruction | ParsedInstruction;
-    defaultRaw?: boolean;
-    collapsible?: boolean;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-    raw?: TransactionInstruction;
-    /**
-     * Program events, e.g. Anchor's `ProgramEventsCard`. Unlike `innerCards`,
-     * these are *derived by the card* from transaction logs rather than passed
-     * down, so they arrive as a prop on `InstructionCardView`, not on the node.
-     * The inspector's shell drops them.
-     */
-    eventCards?: React.ReactNode[];
-};
+import type { InstructionNode } from './node';
+import type { RawInstructions } from './raw-source';
 
 export type InstructionSurface = {
-    /** Card frame: index badge, Raw toggle, scroll anchor, nesting slot. */
-    Shell: React.ComponentType<InstructionShellProps>;
+    /** The page passes `Card`, because the entity must not import the card of every program. */
+    Card: React.ComponentType<{ node: InstructionNode }>;
     /** Per-transaction, so it belongs here rather than on every card. */
     result: SignatureResult;
-    /**
-     * The key is required, because a missing signature throws no error. The
-     * frame then fetches no raw transaction, and a card shows no program events.
-     */
+    /** The key is required, because a missing signature throws no error. A card then shows no program events. */
     signature: TransactionSignature | undefined;
+    /** Returns the data of the top-level instruction at `index`, which an ed25519 instruction can reference. */
+    instructionData: (index: number) => Uint8Array | undefined;
+    /** The key is required for the same reason as `signature`. `undefined` means the page has nothing to fetch. */
+    rawInstructions: RawInstructions | undefined;
+    collapsible: boolean;
+    /** Checks in the Raw view that the program exists and is executable. */
+    validateProgram: boolean;
 };
 
 const InstructionSurfaceContext = createContext<InstructionSurface | undefined>(undefined);

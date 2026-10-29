@@ -1,20 +1,17 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
 import {
     DecodedInstructionCard,
-    type InstructionNode,
     parseCodamaArgs,
+    type RawInstructionNode,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
-import { TransactionInstruction } from '@solana/web3.js';
 import { capitalizeFirstLetter } from '@utils/index';
 
 export function CodamaInstructionCard({
     node,
-    ix,
     parsedIx,
 }: {
-    node: InstructionNode;
-    ix: TransactionInstruction;
+    node: RawInstructionNode;
     parsedIx: ReturnType<typeof parseInstruction>;
 }) {
     if (parsedIx?.path[0].kind !== 'rootNode') {
@@ -30,7 +27,6 @@ export function CodamaInstructionCard({
     return (
         <DecodedInstructionCard
             node={node}
-            ix={ix}
             title={`${programName}: ${capitalizeFirstLetter(lastNode.name)}`}
             programName={programName}
             accountNames={parsedIx.accounts.map(account => account.name)}

@@ -1,18 +1,13 @@
-import { Slot } from '@components/common/Slot';
 import {
     address,
-    custom,
+    addresses,
     defineInstructionCard,
-    InstructionAddress,
     InstructionCardView,
+    type InstructionNode,
+    slot,
     text,
-    toInstructionNode,
 } from '@entities/instruction-card';
-import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { is } from 'superstruct';
-
-import { toKitAddress } from '@/app/shared/lib/web3js-compat';
-import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { AddressLookupTableParsed } from '../lib/address-lookup-table-parser';
 import {
@@ -30,7 +25,7 @@ export const CreateLookupTableDetailsCard = defineInstructionCard<CreateLookupTa
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
         address('Payer Account', info.payerAccount),
-        custom('Recent Slot', <Slot slot={info.recentSlot} link />),
+        slot('Recent Slot', info.recentSlot),
         text('Bump Seed', info.bumpSeed),
     ],
     title: `${TITLE_PREFIX}: Create Lookup Table`,
@@ -40,7 +35,7 @@ export const ExtendLookupTableDetailsCard = defineInstructionCard<ExtendLookupTa
     fields: info => [
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
-        custom('New Addresses', <NewAddresses addresses={info.newAddresses} />),
+        info.newAddresses.length > 0 && addresses('New Addresses', info.newAddresses),
     ],
     title: `${TITLE_PREFIX}: Extend Lookup Table`,
 });
@@ -61,29 +56,16 @@ export const CloseLookupTableDetailsCard = defineInstructionCard<CloseLookupTabl
 });
 
 type AddressLookupTableDetailsCardProps = {
+    node: InstructionNode;
     /** Already normalised by the dispatcher — this card does not decode. */
-    ix: ParsedInstruction;
-    /** Byte form, when the caller has one, so the shell's Raw view can show accounts and data. */
-    raw?: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    parsed: unknown;
 };
 
-export function AddressLookupTableDetailsCard({
-    ix,
-    index,
-    raw,
-    innerCards,
-    childIndex,
-}: AddressLookupTableDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
-
-    if (!isAddressLookupTableParsed(ix.parsed)) {
-        return <InstructionCardView node={node} title={`${TITLE_PREFIX} Program: Unknown Instruction`} defaultRaw />;
+export function AddressLookupTableDetailsCard({ node, parsed }: AddressLookupTableDetailsCardProps) {
+    if (!isAddressLookupTableParsed(parsed)) {
+        return <InstructionCardView node={node} title={`${TITLE_PREFIX} Program: Unknown Instruction`} />;
     }
 
-    const parsed = ix.parsed;
     switch (parsed.type) {
         case 'createLookupTable':
             return <CreateLookupTableDetailsCard info={parsed.info} node={node} />;
@@ -125,24 +107,4 @@ function tableFields(info: FreezeLookupTableInfo) {
         address('Lookup Table', info.lookupTableAccount),
         address('Lookup Table Authority', info.lookupTableAuthority),
     ];
-}
-
-function NewAddresses({ addresses }: { addresses: PublicKey[] }) {
-    return (
-        // The card table's edge padding reaches these nested cells and insets every
-        // entry from the rows above; only `tbody tr td` outweighs that selector.
-        <BaseTable className="[&_tbody_tr_td:first-child]:pl-0 [&_tbody_tr_td:last-child]:pr-0">
-            <BaseTable.Body>
-                {/* Keyed by position: an extend may list the same address twice, and the list never reorders. */}
-                {addresses.map((pubkey, index) => (
-                    <BaseTable.Row key={index}>
-                        <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">
-                            <InstructionAddress address={toKitAddress(pubkey)} />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                ))}
-            </BaseTable.Body>
-        </BaseTable>
-    );
 }

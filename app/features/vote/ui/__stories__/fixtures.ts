@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
-import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import type { ParsedInstruction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
@@ -69,27 +69,6 @@ export function voteParsedInstruction(parsed: { info: object; type: string }): P
         parsed,
         program: 'vote',
         programId: toLegacyPublicKey(VOTE_PROGRAM_ADDRESS),
-    };
-}
-
-export function voteParsedTransaction(ix: ParsedInstruction): ParsedTransaction {
-    return {
-        message: {
-            accountKeys: [
-                { pubkey: new PublicKey(VOTE_AUTHORITY_ADDRESS), signer: true, source: 'transaction', writable: true },
-                { pubkey: new PublicKey(VOTE_ACCOUNT_ADDRESS), signer: false, source: 'transaction', writable: true },
-                { pubkey: new PublicKey(CLOCK_SYSVAR_ADDRESS), signer: false, source: 'transaction', writable: false },
-                {
-                    pubkey: toLegacyPublicKey(VOTE_PROGRAM_ADDRESS),
-                    signer: false,
-                    source: 'transaction',
-                    writable: false,
-                },
-            ],
-            instructions: [ix],
-            recentBlockhash: HASH,
-        },
-        signatures: ['3fEi7sku5kEgeZmLw9evxY5if9TsFyxpUNsi84J3s1bAeQmKSAhBypuxgprSs15MYBmvvTCnVwoN36rCaoqq6oHd'],
     };
 }
 

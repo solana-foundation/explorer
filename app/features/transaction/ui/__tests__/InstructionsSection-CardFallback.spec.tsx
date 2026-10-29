@@ -1,5 +1,5 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
-import { useInstructionSurface } from '@entities/instruction-card';
+import { type InstructionNode, useInstructionSurface } from '@entities/instruction-card';
 import { WORMHOLE_PROGRAM_IDS } from '@explorer/decoder-wormhole/detection';
 import { LIGHTHOUSE_ADDRESS } from '@features/decode-instruction-lighthouse';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
@@ -18,6 +18,7 @@ import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { readCell } from '@/app/__tests__/card-harness';
 import { InstructionParserProvider } from '@/app/entities/instruction-parser';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
@@ -34,8 +35,6 @@ const LIGHTHOUSE_IX = instruction(new PublicKey(LIGHTHOUSE_ADDRESS), [15, 0, 0, 
 
 const UNKNOWN_SAS_IX = instruction(new PublicKey(SAS_PROGRAM_ID), [200]);
 
-const CREATE_CREDENTIAL_IX = instruction(new PublicKey(SAS_PROGRAM_ID), [0]);
-
 const COMPUTE_BUDGET_IX = instruction(ComputeBudgetProgram.programId, [2]);
 
 const WORMHOLE_IX = instruction(new PublicKey(WORMHOLE_PROGRAM_IDS[0]), [0]);
@@ -45,6 +44,13 @@ const IDL_PROGRAM_ID = gen.publicKey(2);
 const IDL_IX = instruction(IDL_PROGRAM_ID, [1]);
 
 const SIGN_METADATA_IX = instruction(new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID), [7]);
+
+const ED25519_IX_POINTING_AT_INSTRUCTION_1 = instruction(
+    new PublicKey('Ed25519SigVerify111111111111111111111111111'),
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+);
+
+const REFERENCED_IX = instruction(gen.publicKey(3), Array(96).fill(7));
 
 const PARSED_TRANSFER_IX: ParsedInstruction = {
     parsed: {
@@ -64,7 +70,8 @@ vi.mock('@features/decode-instruction-lighthouse', async importOriginal => ({
     },
 }));
 
-vi.mock('@components/instruction/ComputeBudgetDetailsCard', () => ({
+vi.mock('@features/decode-instruction-compute-budget', async importOriginal => ({
+    ...(await importOriginal<typeof import('@features/decode-instruction-compute-budget')>()),
     ComputeBudgetDetailsCard: () => {
         throw new Error('compute budget card failed');
     },
@@ -77,8 +84,8 @@ vi.mock('@entities/instruction-card', async importOriginal => ({
 
 vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@features/decode-instruction-with-idl')>()),
-    IdlInstructionCard: ({ childIndex, index }: { childIndex?: number; index: number }) => (
-        <div>{`IDL card ${index}/${childIndex}`}</div>
+    IdlInstructionCard: ({ node }: { node: InstructionNode }) => (
+        <div>{`IDL card ${node.index}/${node.childIndex}`}</div>
     ),
     useIdlInstructionDecode: ({ programId }: { programId: string }) =>
         programId === IDL_PROGRAM_ID.toBase58() ? { kind: 'anchor' } : undefined,
@@ -87,13 +94,6 @@ vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
 vi.mock('@components/instruction/system/SystemDetailsCard', () => ({
     SystemDetailsCard: () => {
         throw new Error('system card failed');
-    },
-}));
-
-vi.mock('@solana/attestation', async importOriginal => ({
-    ...(await importOriginal<typeof import('@solana/attestation')>()),
-    parseCreateCredentialInstruction: () => {
-        throw new Error('sas parser defect');
     },
 }));
 
@@ -146,17 +146,17 @@ describe('Transaction page InstructionsSection with a card that throws', () => {
         expect(await screen.findAllByText('Unknown Instruction', { exact: false })).toHaveLength(1);
     });
 
-    test('should replace a SAS card that throws with the Unknown card', async () => {
-        renderSection([CREATE_CREDENTIAL_IX]);
-
-        expect(await screen.findAllByText('Unknown Instruction', { exact: false })).toHaveLength(1);
-    });
-
     test('should replace an inner card that throws with the Unknown card', async () => {
         renderSection([UNKNOWN_SAS_IX], [COMPUTE_BUDGET_IX]);
 
         expect(await screen.findAllByText('Unknown Instruction', { exact: false })).toHaveLength(2);
         expect(screen.getByText('#1.1')).toBeInTheDocument();
+    });
+
+    test('should render the Unknown card for a parsed top-level instruction whose card throws', async () => {
+        renderSection([PARSED_TRANSFER_IX]);
+
+        expect(await screen.findByText('System Program: Unknown Instruction')).toBeInTheDocument();
     });
 
     test('should render the Unknown card for a parsed inner instruction whose card throws', async () => {
@@ -178,6 +178,13 @@ describe('Transaction page InstructionsSection', () => {
         renderSection([UNKNOWN_SAS_IX], [COMPUTE_BUDGET_IX, IDL_IX]);
 
         expect(await screen.findByText('IDL card 0/1')).toBeInTheDocument();
+    });
+
+    test('should resolve ed25519 offsets against the data of another instruction', async () => {
+        renderSection([ED25519_IX_POINTING_AT_INSTRUCTION_1, REFERENCED_IX]);
+
+        expect(await screen.findByText('Ed25519: Verify Signature')).toBeInTheDocument();
+        expect(readCell('Signature')).toBe(Buffer.alloc(64, 7).toString('base64'));
     });
 });
 
@@ -202,7 +209,7 @@ function instruction(programId: PublicKey, data: number[]): PartiallyDecodedInst
 }
 
 function renderSection(
-    instructions: PartiallyDecodedInstruction[],
+    instructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
     inner: (ParsedInstruction | PartiallyDecodedInstruction)[] = [],
 ) {
     transactionWithMeta = {

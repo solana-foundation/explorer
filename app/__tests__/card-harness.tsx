@@ -1,4 +1,5 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { type InstructionParserDispatcher, InstructionParserProvider } from '@entities/instruction-parser';
 import { render, screen, within } from '@testing-library/react';
@@ -30,7 +31,12 @@ function providers({ transactions = true, dispatcher, txSurface = false }: Provi
         let tree = children;
         if (txSurface)
             tree = (
-                <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
+                <TxInstructionSurface
+                    result={{ err: null }}
+                    signature={DEFAULT_SIGNATURE}
+                    Card={InstructionNodeCard}
+                    instructionData={() => undefined}
+                >
                     {tree}
                 </TxInstructionSurface>
             );

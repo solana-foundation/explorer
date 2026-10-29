@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PmpDetailsCard } from '@features/decode-instruction-pmp';
 import type { Account, State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
@@ -74,7 +75,7 @@ function setDataIx({
 
 const meta = {
     component: PmpDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionPmp/PmpDetailsCard',
@@ -85,23 +86,21 @@ type Story = StoryObj<typeof meta>;
 
 // `fallback` is never exercised by these stories - every fixture below is a content instruction, so the card
 // always takes its custom-render path. `null` is fine here: stories are exempt from `unicorn/no-null`.
-const baseArgs = {
-    fallback: null,
-    index: 0,
-};
+function pmpArgs(ix: TransactionInstruction) {
+    return { fallback: null, node: toRawInstructionNode({ index: 0, ix }) };
+}
 
 export const SetDataInlineJson: Story = {
-    args: { ...baseArgs, ix: setDataIx({ compression: Compression.None, content: IDL_DOC, format: Format.Json }) },
+    args: pmpArgs(setDataIx({ compression: Compression.None, content: IDL_DOC, format: Format.Json })),
 };
 
 export const SetDataZlibCompressedJson: Story = {
-    args: { ...baseArgs, ix: setDataIx({ compression: Compression.Zlib, content: IDL_DOC, format: Format.Json }) },
+    args: pmpArgs(setDataIx({ compression: Compression.Zlib, content: IDL_DOC, format: Format.Json })),
 };
 
 export const SetDataOversizedGzip: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(
+    args: pmpArgs(
+        makeIx(
             getSetDataInstructionDataEncoder().encode({
                 compression: Compression.Gzip,
                 data: gzip(new Uint8Array(20480)),
@@ -111,24 +110,22 @@ export const SetDataOversizedGzip: Story = {
             }) as Uint8Array,
             5,
         ),
-    },
+    ),
 };
 
 export const SetDataYamlVerbatim: Story = {
-    args: {
-        ...baseArgs,
-        ix: setDataIx({
+    args: pmpArgs(
+        setDataIx({
             compression: Compression.None,
             content: 'name: company\nversion: 1.0.0\n',
             format: Format.Yaml,
         }),
-    },
+    ),
 };
 
 export const SetDataEncodingNoneAsHex: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(
+    args: pmpArgs(
+        makeIx(
             getSetDataInstructionDataEncoder().encode({
                 compression: Compression.None,
                 data: new Uint8Array([0xde, 0xad, 0xbe, 0xef, 0x00, 0x11, 0x22, 0x33]),
@@ -138,7 +135,7 @@ export const SetDataEncodingNoneAsHex: Story = {
             }) as Uint8Array,
             5,
         ),
-    },
+    ),
 };
 
 /**
@@ -150,9 +147,8 @@ export const SetDataEncodingNoneAsHex: Story = {
  * the card, with no horizontal scrollbar.
  */
 export const SetDataBase64Binary: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(
+    args: pmpArgs(
+        makeIx(
             getSetDataInstructionDataEncoder().encode({
                 compression: Compression.None,
                 data: Uint8Array.from({ length: 512 }, (_, index) => 128 + ((index * 37) % 128)),
@@ -162,20 +158,19 @@ export const SetDataBase64Binary: Story = {
             }) as Uint8Array,
             5,
         ),
-    },
+    ),
 };
 
 // The 4-byte header-only shape. The generated encoder cannot build it, so the bytes are a literal:
 // discriminator 3, encoding Utf8, compression None, format Json.
 export const SetDataHeaderOnly: Story = {
-    args: { ...baseArgs, ix: makeIx(new Uint8Array([3, 1, 0, 1]), 5) },
+    args: pmpArgs(makeIx(new Uint8Array([3, 1, 0, 1]), 5)),
 };
 
 // A Zlib stream that is not a Zlib stream, so the local decode fallback renders instead of the document.
 export const SetDataDecodeFailure: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(
+    args: pmpArgs(
+        makeIx(
             getSetDataInstructionDataEncoder().encode({
                 compression: Compression.Zlib,
                 data: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
@@ -185,25 +180,23 @@ export const SetDataDecodeFailure: Story = {
             }) as Uint8Array,
             5,
         ),
-    },
+    ),
 };
 
 export const SetDataUrlSource: Story = {
-    args: {
-        ...baseArgs,
-        ix: setDataIx({
+    args: pmpArgs(
+        setDataIx({
             compression: Compression.None,
             content: 'https://example.com/company-idl.json',
             dataSource: DataSource.Url,
             format: Format.Json,
         }),
-    },
+    ),
 };
 
 export const InitializeInlineJson: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(
+    args: pmpArgs(
+        makeIx(
             getInitializeInstructionDataEncoder().encode({
                 compression: Compression.None,
                 data: new TextEncoder().encode(IDL_DOC),
@@ -214,27 +207,23 @@ export const InitializeInlineJson: Story = {
             }) as Uint8Array,
             5,
         ),
-    },
+    ),
 };
 
 export const WriteChunk: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(
+    args: pmpArgs(
+        makeIx(
             getWriteInstructionDataEncoder().encode({
                 data: new TextEncoder().encode('{"instructions":['),
                 offset: 0,
             }) as Uint8Array,
             3,
         ),
-    },
+    ),
 };
 
 export const WriteFromBuffer: Story = {
-    args: {
-        ...baseArgs,
-        ix: makeIx(getWriteInstructionDataEncoder().encode({ offset: 0 }) as Uint8Array, 3),
-    },
+    args: pmpArgs(makeIx(getWriteInstructionDataEncoder().encode({ offset: 0 }) as Uint8Array, 3)),
 };
 
 // ===== setData sourced from a buffer account =====
@@ -285,20 +274,20 @@ function bufferAccountEntry(content: string, compression: Compression): State['e
 }
 
 export const SetDataFromBufferDecoded: Story = {
-    args: { ...baseArgs, ix: setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json }) },
+    args: pmpArgs(setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json })),
     parameters: { accounts: bufferAccountEntry(IDL_DOC, Compression.Zlib) },
 };
 
 // The buffer is still live, but holds bytes that are not the Zlib stream its instruction hints promise.
 export const SetDataFromBufferDecodeFailure: Story = {
-    args: { ...baseArgs, ix: setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json }) },
+    args: pmpArgs(setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json })),
     parameters: { accounts: bufferAccountEntry(IDL_DOC, Compression.None) },
 };
 
 // The common outcome on a historical transaction: the client closes the source buffer in the same flow to
 // reclaim its rent, so there is nothing left to read. The provider models that as zero lamports and no bytes.
 export const SetDataFromBufferClosed: Story = {
-    args: { ...baseArgs, ix: setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json }) },
+    args: pmpArgs(setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json })),
     parameters: {
         accounts: {
             [BUFFER_ADDRESS]: {
@@ -318,5 +307,5 @@ export const SetDataFromBufferClosed: Story = {
 
 // No cache entry at all, and the mock fetcher is a no-op, so the card stays in its reading state.
 export const SetDataFromBufferLoading: Story = {
-    args: { ...baseArgs, ix: setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json }) },
+    args: pmpArgs(setDataFromBufferIx({ compression: Compression.Zlib, format: Format.Json })),
 };

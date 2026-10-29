@@ -1,9 +1,6 @@
-import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
-import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import { type InstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
-
-import { Logger } from '@/app/shared/lib/logger';
 
 import {
     AuthorizeInfo,
@@ -40,109 +37,95 @@ import {
 import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 
 type DetailsProps = {
-    tx: ParsedTransaction;
-    ix: ParsedInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    node: InstructionNode;
+    parsed: unknown;
 };
 
-export function VoteDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
+export function VoteDetailsCard({ node, parsed }: DetailsProps) {
+    const parsedInfo = create(parsed, ParsedInfo);
 
-    // TODO: Replace this try/catch + Logger with a React error boundary one level up
-    // (see the matching note in StakeDetailsCard).
-    try {
-        const parsed = create(ix.parsed, ParsedInfo);
-
-        switch (parsed.type) {
-            case 'initialize': {
-                const info = create(parsed.info, InitializeInfo);
-                return <InitializeDetailsCard info={info} node={node} />;
-            }
-            case 'initializeV2': {
-                const info = create(parsed.info, InitializeV2Info);
-                return <InitializeV2DetailsCard info={info} node={node} />;
-            }
-            case 'authorize': {
-                const info = create(parsed.info, AuthorizeInfo);
-                return <AuthorizeDetailsCard info={info} node={node} />;
-            }
-            case 'authorizeChecked': {
-                const info = create(parsed.info, AuthorizeInfo);
-                return <AuthorizeCheckedDetailsCard info={info} node={node} />;
-            }
-            case 'authorizeWithSeed': {
-                const info = create(parsed.info, AuthorizeWithSeedInfo);
-                return <AuthorizeWithSeedDetailsCard info={info} node={node} />;
-            }
-            case 'authorizeCheckedWithSeed': {
-                const info = create(parsed.info, AuthorizeWithSeedInfo);
-                return <AuthorizeCheckedWithSeedDetailsCard info={info} node={node} />;
-            }
-            case 'vote': {
-                const info = create(parsed.info, VoteInfo);
-                return <LegacyVoteDetailsCard info={info} node={node} />;
-            }
-            case 'voteSwitch': {
-                const info = create(parsed.info, VoteInfo);
-                return <LegacyVoteSwitchDetailsCard info={info} node={node} />;
-            }
-            case 'updatevotestate': {
-                const info = create(parsed.info, UpdateVoteStateInfo);
-                return <UpdateVoteStateDetailsCard info={info} node={node} />;
-            }
-            case 'updatevotestateswitch': {
-                const info = create(parsed.info, UpdateVoteStateInfo);
-                return <UpdateVoteStateSwitchDetailsCard info={info} node={node} />;
-            }
-            case 'compactupdatevotestate': {
-                const info = create(parsed.info, UpdateVoteStateInfo);
-                return <CompactUpdateVoteStateDetailsCard info={info} node={node} />;
-            }
-            case 'compactupdatevotestateswitch': {
-                const info = create(parsed.info, UpdateVoteStateInfo);
-                return <CompactUpdateVoteStateSwitchDetailsCard info={info} node={node} />;
-            }
-            case 'towersync': {
-                const info = create(parsed.info, TowerSyncInfo);
-                return <TowerSyncDetailsCard info={info} node={node} />;
-            }
-            case 'towersyncswitch': {
-                const info = create(parsed.info, TowerSyncInfo);
-                return <TowerSyncSwitchDetailsCard info={info} node={node} />;
-            }
-            case 'withdraw': {
-                const info = create(parsed.info, WithdrawInfo);
-                return <WithdrawDetailsCard info={info} node={node} />;
-            }
-            case 'updateValidatorIdentity': {
-                const info = create(parsed.info, UpdateValidatorIdentityInfo);
-                return <UpdateValidatorIdentityDetailsCard info={info} node={node} />;
-            }
-            case 'updateCommission': {
-                const info = create(parsed.info, UpdateCommissionInfo);
-                return <UpdateCommissionDetailsCard info={info} node={node} />;
-            }
-            case 'updateCommissionBps': {
-                const info = create(parsed.info, UpdateCommissionBpsInfo);
-                return <UpdateCommissionBpsDetailsCard info={info} node={node} />;
-            }
-            case 'updateCommissionCollector': {
-                const info = create(parsed.info, UpdateCommissionCollectorInfo);
-                return <UpdateCommissionCollectorDetailsCard info={info} node={node} />;
-            }
-            case 'depositDelegatorRewards': {
-                const info = create(parsed.info, DepositDelegatorRewardsInfo);
-                return <DepositDelegatorRewardsDetailsCard info={info} node={node} />;
-            }
-            default:
-                return <UnknownDetailsCard node={node} />;
+    switch (parsedInfo.type) {
+        case 'initialize': {
+            const info = create(parsedInfo.info, InitializeInfo);
+            return <InitializeDetailsCard info={info} node={node} />;
         }
-    } catch (error) {
-        Logger.error(error, {
-            signature: tx.signatures[0],
-        });
-        return <UnknownDetailsCard node={node} />;
+        case 'initializeV2': {
+            const info = create(parsedInfo.info, InitializeV2Info);
+            return <InitializeV2DetailsCard info={info} node={node} />;
+        }
+        case 'authorize': {
+            const info = create(parsedInfo.info, AuthorizeInfo);
+            return <AuthorizeDetailsCard info={info} node={node} />;
+        }
+        case 'authorizeChecked': {
+            const info = create(parsedInfo.info, AuthorizeInfo);
+            return <AuthorizeCheckedDetailsCard info={info} node={node} />;
+        }
+        case 'authorizeWithSeed': {
+            const info = create(parsedInfo.info, AuthorizeWithSeedInfo);
+            return <AuthorizeWithSeedDetailsCard info={info} node={node} />;
+        }
+        case 'authorizeCheckedWithSeed': {
+            const info = create(parsedInfo.info, AuthorizeWithSeedInfo);
+            return <AuthorizeCheckedWithSeedDetailsCard info={info} node={node} />;
+        }
+        case 'vote': {
+            const info = create(parsedInfo.info, VoteInfo);
+            return <LegacyVoteDetailsCard info={info} node={node} />;
+        }
+        case 'voteSwitch': {
+            const info = create(parsedInfo.info, VoteInfo);
+            return <LegacyVoteSwitchDetailsCard info={info} node={node} />;
+        }
+        case 'updatevotestate': {
+            const info = create(parsedInfo.info, UpdateVoteStateInfo);
+            return <UpdateVoteStateDetailsCard info={info} node={node} />;
+        }
+        case 'updatevotestateswitch': {
+            const info = create(parsedInfo.info, UpdateVoteStateInfo);
+            return <UpdateVoteStateSwitchDetailsCard info={info} node={node} />;
+        }
+        case 'compactupdatevotestate': {
+            const info = create(parsedInfo.info, UpdateVoteStateInfo);
+            return <CompactUpdateVoteStateDetailsCard info={info} node={node} />;
+        }
+        case 'compactupdatevotestateswitch': {
+            const info = create(parsedInfo.info, UpdateVoteStateInfo);
+            return <CompactUpdateVoteStateSwitchDetailsCard info={info} node={node} />;
+        }
+        case 'towersync': {
+            const info = create(parsedInfo.info, TowerSyncInfo);
+            return <TowerSyncDetailsCard info={info} node={node} />;
+        }
+        case 'towersyncswitch': {
+            const info = create(parsedInfo.info, TowerSyncInfo);
+            return <TowerSyncSwitchDetailsCard info={info} node={node} />;
+        }
+        case 'withdraw': {
+            const info = create(parsedInfo.info, WithdrawInfo);
+            return <WithdrawDetailsCard info={info} node={node} />;
+        }
+        case 'updateValidatorIdentity': {
+            const info = create(parsedInfo.info, UpdateValidatorIdentityInfo);
+            return <UpdateValidatorIdentityDetailsCard info={info} node={node} />;
+        }
+        case 'updateCommission': {
+            const info = create(parsedInfo.info, UpdateCommissionInfo);
+            return <UpdateCommissionDetailsCard info={info} node={node} />;
+        }
+        case 'updateCommissionBps': {
+            const info = create(parsedInfo.info, UpdateCommissionBpsInfo);
+            return <UpdateCommissionBpsDetailsCard info={info} node={node} />;
+        }
+        case 'updateCommissionCollector': {
+            const info = create(parsedInfo.info, UpdateCommissionCollectorInfo);
+            return <UpdateCommissionCollectorDetailsCard info={info} node={node} />;
+        }
+        case 'depositDelegatorRewards': {
+            const info = create(parsedInfo.info, DepositDelegatorRewardsInfo);
+            return <DepositDelegatorRewardsDetailsCard info={info} node={node} />;
+        }
+        default:
+            return <UnknownDetailsCard node={node} />;
     }
 }

@@ -29,13 +29,8 @@ export const NotTruncated: Story = {
     args: { noTruncate: true, pubkey },
 };
 
-// useNickname is dead-coded in the Storybook bundle; overrideText simulates the visual.
-export const WithNicknameSimulated: Story = {
-    args: { overrideText: '"My Wallet" (Token Program)', pubkey },
-};
-
-export const WithOverrideText: Story = {
-    args: { overrideText: 'Custom Label', pubkey },
+export const WithFallbackText: Story = {
+    args: { fallbackText: 'Custom Label', pubkey: new PublicKey('4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T') },
 };
 
 export const AlignedRight: Story = {

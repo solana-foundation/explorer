@@ -30,7 +30,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { findCell, readCell, renderWithProviders } from '@/app/__tests__/card-harness';
-import { useAddressLookupTables } from '@/app/providers/accounts';
+import { useAccountInfo, useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
@@ -64,14 +64,15 @@ vi.mock('@components/instruction/system/SystemDetailsCard', async importOriginal
     return { ...actual, SystemDetailsCard: vi.fn(actual.SystemDetailsCard) };
 });
 
-vi.mock('@/app/providers/accounts', async importOriginal => ({
-    ...(await importOriginal<typeof import('@/app/providers/accounts')>()),
-    useAddressLookupTables: vi.fn(() => []),
-}));
+vi.mock('@/app/providers/accounts', async importOriginal => {
+    const actual = await importOriginal<typeof import('@/app/providers/accounts')>();
+    return { ...actual, useAccountInfo: vi.fn(actual.useAccountInfo), useAddressLookupTables: vi.fn(() => []) };
+});
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 beforeEach(() => {
+    vi.mocked(useAccountInfo).mockReset();
     vi.mocked(useAddressLookupTables).mockReturnValue([]);
     vi.mocked(useIdlInstructionDecode).mockReturnValue(undefined);
 });
@@ -87,11 +88,11 @@ describe('Inspector InstructionsSection with a Lighthouse instruction', () => {
 
         // Title proves the whole path: the dispatcher decoded the raw bytes into
         // `{ program: 'lighthouse', type: 'Assert Sysvar Clock' }` and the
-        // `case 'lighthouse'` arm rendered the card.
+        // router rendered the card.
         expect(await screen.findByText(/Lighthouse: Assert Sysvar Clock/i)).toBeInTheDocument();
 
         await waitFor(() => {
-            expect(readCell('Program')).toBe('Lighthouse');
+            expect(readCell('Program')).toBe('Lighthouse Program');
         });
         expect(screen.getAllByText('Program')).toHaveLength(1);
     });
@@ -144,7 +145,7 @@ describe('Inspector InstructionsSection with a Program Metadata instruction', ()
         renderSection(buildPmpMessage(data));
 
         expect(await screen.findAllByText(/Program Metadata Program/i)).not.toHaveLength(0);
-        expect(screen.queryByTestId('pmp-payload-section')).not.toBeInTheDocument();
+        expect(screen.queryByRole('tab', { name: 'Decoded' })).not.toBeInTheDocument();
     });
 });
 
@@ -158,6 +159,27 @@ describe('Inspector InstructionsSection with a Token Metadata instruction', () =
         expect(await screen.findByText(title)).toBeInTheDocument();
         expect(screen.getAllByRole('button', { name: 'Collapse' })).toHaveLength(2);
         expect(screen.getAllByText('Program')).toHaveLength(1);
+    });
+
+    test('should check the program of the instruction in the Raw view', async () => {
+        vi.mocked(useAccountInfo).mockReturnValue({
+            data: { data: {}, executable: false, lamports: 1, owner: PublicKey.default, pubkey: PublicKey.default },
+            status: FetchStatus.Fetched,
+        });
+        renderSection(buildTokenMetadataMessage([7]));
+
+        await userEvent.click(await screen.findByRole('button', { name: /Raw/ }));
+
+        expect(screen.getByText('Only executable accounts can be invoked')).toBeInTheDocument();
+    });
+});
+
+describe('Inspector InstructionsSection with an ed25519 instruction', () => {
+    test('should resolve ed25519 offsets against the data of another instruction', async () => {
+        renderSection(buildEd25519Message());
+
+        expect(await screen.findByText('Ed25519: Verify Signature')).toBeInTheDocument();
+        expect(readCell('Signature')).toBe(Buffer.alloc(64, 7).toString('base64'));
     });
 });
 
@@ -267,6 +289,14 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         /* eslint-enable testing-library/no-node-access */
     });
 
+    test('should render the curated card when an IDL also decodes the instruction', async () => {
+        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'anchor' } as never);
+
+        renderSection(buildMessage());
+
+        expect(await screen.findByText(/Create Idempotent/i)).toBeInTheDocument();
+    });
+
     test('should render the curated card when the IDL declares nothing for the instruction', async () => {
         vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
 
@@ -359,6 +389,20 @@ function buildTokenMetadataMessage(data: number[]): MessageV0 {
     });
     return new TransactionMessage({
         instructions: [ix],
+        payerKey: gen.publicKey(0),
+        recentBlockhash: PublicKey.default.toBase58(),
+    }).compileToV0Message();
+}
+
+function buildEd25519Message(): MessageV0 {
+    const pointingAtInstruction1 = new TransactionInstruction({
+        data: Buffer.from([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]),
+        keys: [],
+        programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
+    });
+    const referenced = new TransactionInstruction({ data: Buffer.alloc(96, 7), keys: [], programId: gen.publicKey(3) });
+    return new TransactionMessage({
+        instructions: [pointingAtInstruction1, referenced],
         payerKey: gen.publicKey(0),
         recentBlockhash: PublicKey.default.toBase58(),
     }).compileToV0Message();

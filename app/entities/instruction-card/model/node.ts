@@ -6,24 +6,42 @@ export type InstructionNode = {
     ix: ParsedInstruction | TransactionInstruction;
     index: number;
     childIndex?: number;
-    /** Raw form, when the card was reached through the RPC-parsed path. */
+    /** Raw form of the instruction. Only the router sets it, so a node that the page builds has none. */
     raw?: TransactionInstruction;
-    /**
-     * CPI children. Not yet populated — `InstructionsSection` still builds
-     * inner cards eagerly and hands them over as `innerCards` below. Once tree
-     * construction moves out of the render pass, the view walks this and
-     * `innerCards` goes away.
-     */
-    children?: InstructionNode[];
-    /**
-     * @deprecated Transitional. Pre-rendered inner cards from the legacy
-     * pipeline. The card never reads this — only the view passes it to the
-     * shell. Delete together with the eager building in `InstructionsSection`.
-     */
-    innerCards?: JSX.Element[];
+    children?: ReadonlyArray<InstructionNode | undefined>;
 };
+
+export type InstructionPosition = Pick<InstructionNode, 'index' | 'childIndex'>;
+
+/** Numbers the position from 1, as `3` or `3.2`. */
+export function positionLabel(position: InstructionPosition): string {
+    return positionNumbers(position).join('.');
+}
+
+export function positionNumbers({ index, childIndex }: InstructionPosition): number[] {
+    return childIndex === undefined ? [index + 1] : [index + 1, childIndex + 1];
+}
 
 /** Takes `programId` from `ix`, so the two cannot disagree. */
 export function toInstructionNode(fields: Omit<InstructionNode, 'programId'>): InstructionNode {
     return { ...fields, programId: fields.ix.programId };
+}
+
+/**
+ * Callers must build this type with {@link toRawInstructionNode},
+ * because a spread can set `raw` to another instruction.
+ */
+export type RawInstructionNode = InstructionNode & { raw: TransactionInstruction };
+
+export function toRawInstructionNode(
+    fields: Omit<InstructionNode, 'programId' | 'raw' | 'ix'> & { ix: TransactionInstruction },
+): RawInstructionNode {
+    return { ...fields, programId: fields.ix.programId, raw: fields.ix };
+}
+
+export function instructionDataOf(nodes: ReadonlyArray<InstructionNode | undefined>) {
+    return (index: number): Uint8Array | undefined => {
+        const ix = nodes[index]?.ix;
+        return ix && !('parsed' in ix) ? ix.data : undefined;
+    };
 }

@@ -1,4 +1,3 @@
-export { isZkElGamalProofInstruction } from './lib/is-zk-elgamal-proof-instruction';
 export { zkElGamalProofInstructionParser } from './lib/zk-elgamal-proof-client';
 export {
     type CloseContextStateInfo,

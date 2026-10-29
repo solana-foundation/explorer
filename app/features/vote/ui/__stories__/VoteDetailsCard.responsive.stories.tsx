@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import {
     nextjsParameters,
     withMockTransactions,
@@ -17,7 +18,6 @@ import {
     VOTE_ACCOUNT_ADDRESS,
     VOTE_AUTHORITY_ADDRESS,
     voteParsedInstruction,
-    voteParsedTransaction,
 } from './fixtures';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
@@ -25,10 +25,10 @@ const meta = {
     component: VoteDetailsCard,
     decorators: [
         withViewportFromGlobal,
+        withTxInstructionSurface,
         withMockTransactions,
         withScrollAnchor,
         withTokenInfoBatch,
-        withTxInstructionSurface,
     ],
     parameters: {
         ...nextjsParameters,
@@ -76,17 +76,9 @@ const blsAuthorityIx = voteParsedInstruction({
     type: 'authorizeChecked',
 });
 
-const args = {
-    index: 0,
-    ix: towerSyncIx,
-    tx: voteParsedTransaction(towerSyncIx),
-};
+const args = { node: toInstructionNode({ index: 0, ix: towerSyncIx }), parsed: towerSyncIx.parsed };
 
-const blsArgs = {
-    index: 0,
-    ix: blsAuthorityIx,
-    tx: voteParsedTransaction(blsAuthorityIx),
-};
+const blsArgs = { node: toInstructionNode({ index: 0, ix: blsAuthorityIx }), parsed: blsAuthorityIx.parsed };
 
 export const Mobile: Story = {
     args,

@@ -1,4 +1,5 @@
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { toInstructionNode } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import {
     PYTH_INSTRUCTION_TYPES,
     PYTH_INSTRUCTIONS,
@@ -96,21 +97,6 @@ describe('PythDetailsCard dispatch', () => {
             expect(screen.getByText(UNKNOWN_TITLE)).toBeInTheDocument();
         });
     });
-
-    // The node is assembled here, so a dropped field silently loses the CPI children or misnumbers the card.
-    it('should carry inner cards and the nested position onto the shell', async () => {
-        renderCard(pythInstruction('InitMapping'), {
-            childIndex: 2,
-            index: 3,
-            innerCards: [<div key="inner">an inner instruction</div>],
-        });
-
-        await waitFor(() => {
-            expect(screen.getByText('Inner Instructions')).toBeInTheDocument();
-        });
-        expect(screen.getByText('an inner instruction')).toBeInTheDocument();
-        expect(screen.getByText('#4.3')).toBeInTheDocument();
-    });
 });
 
 function u32(value: number): number[] {
@@ -139,12 +125,14 @@ function rawInstruction(data: number[]): TransactionInstruction {
     return new TransactionInstruction({ data: Buffer.from(data), keys: KEYS, programId: PROGRAM_ID });
 }
 
-function renderCard(
-    raw: TransactionInstruction,
-    props: { childIndex?: number; index?: number; innerCards?: JSX.Element[] } = {},
-) {
+function renderCard(raw: TransactionInstruction) {
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     if (!dispatched) throw new Error('no Pyth parser registered for the mainnet deployment');
 
-    return renderTxCard(<PythDetailsCard ix={dispatched} raw={raw} index={0} {...props} />);
+    return renderTxCard(
+        <PythDetailsCard
+            node={toInstructionNode({ index: 0, ix: raw })}
+            parsed={isParsedInstruction(dispatched) ? dispatched.parsed : undefined}
+        />,
+    );
 }

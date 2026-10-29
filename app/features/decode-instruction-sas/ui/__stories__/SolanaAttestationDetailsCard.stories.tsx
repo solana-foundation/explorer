@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
+import { toRawInstructionNode } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -27,13 +28,13 @@ const raw = new TransactionInstruction({
     ],
     programId: new PublicKey('22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG'),
 });
-const ix = createInstructionParserDispatcher([solanaAttestationInstructionParser]).fromTransactionInstruction(
+const dispatched = createInstructionParserDispatcher([solanaAttestationInstructionParser]).fromTransactionInstruction(
     raw,
-) as DispatchResult;
+);
 
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionSas/SolanaAttestationDetailsCard',
@@ -43,5 +44,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    args: { childIndex: undefined, index: 0, innerCards: undefined, ix, raw },
+    args: {
+        node: toRawInstructionNode({ index: 0, ix: raw }),
+        parsed: isParsedInstruction(dispatched) ? dispatched.parsed : undefined,
+    },
 };

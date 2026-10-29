@@ -3,7 +3,6 @@
 // "batch" — as opposed to the raw-bytes form handled by batch-parser.ts.
 
 import { isAddress } from '@solana/kit';
-import type { ParsedInstruction } from '@solana/web3.js';
 import { capitalCase } from 'change-case';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -24,17 +23,16 @@ export function isRpcParsedBatchInstruction(parsed: unknown): boolean {
 
 // Turns an RPC-parsed batch instruction into per-sub-instruction view models.
 // Every value is derived defensively — the shape is RPC-provided and untyped.
-export function decodeRpcBatchInstructions(ix: ParsedInstruction): RpcSubInstructionView[] {
-    return extractSubInstructions(ix).map(sub => ({
+export function decodeRpcBatchInstructions(parsed: unknown): RpcSubInstructionView[] {
+    return extractSubInstructions(parsed).map(sub => ({
         decoded: rpcInfoToDecodedParams(isRecord(sub.info) ? sub.info : {}),
         typeName: safeLabel(sub.type, 'Unknown'),
     }));
 }
 
-// ix.parsed is `string | ParsedInfo`; for a batch it carries the sub-instructions
+// `parsed` is `string | ParsedInfo`; for a batch it carries the sub-instructions
 // under info.instructions.
-export function extractSubInstructions(ix: ParsedInstruction): RpcSubInstruction[] {
-    const parsed = ix.parsed as unknown;
+export function extractSubInstructions(parsed: unknown): RpcSubInstruction[] {
     const info = typeof parsed !== 'string' && isRecord(parsed) ? parsed.info : undefined;
     const instructions = isRecord(info) ? info.instructions : undefined;
     if (instructions === undefined) return [];

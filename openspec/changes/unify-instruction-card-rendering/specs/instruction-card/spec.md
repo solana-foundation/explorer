@@ -4,19 +4,27 @@
 
 One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/(inspector)/inspector`. A card declares what an instruction means; the surface it renders on owns the chrome. Adding a field is one descriptor; adding a surface is one Context value.
 
-**Scope.** These requirements bind every card that has migrated to the surface, and every card that migrates from here on. These requirements do not describe the current tree. Programs migrate one at a time. An unmigrated card renders its own frame. Each requirement below therefore reads as the rule a migration must satisfy, not as an invariant that already holds repo-wide.
+**Scope.** These requirements bind every instruction card on both surfaces.
 
 ## ADDED Requirements
 
 ### Requirement: Surface-owned chrome
 
-Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the card frame, plus the transaction's `SignatureResult` and signature.
+Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the component that picks the card of a node (`Card`), the transaction's `SignatureResult`, its signature, the data of its top-level instructions (`instructionData`), the raw instructions that the page can fetch (`rawInstructions`), and the flags `collapsible` and `validateProgram`.
 
 The card body MUST draw the `Program` row in the decoded view, on both surfaces. The frame MUST draw its own `Program` row only in the raw view, where the body does not render. The frame therefore needs neither the width of the body nor the program name.
 
 An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
 
-For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent` prop and the inspector's `INSPECTOR_RESULT` constant. Unmigrated cards keep `INSPECTOR_RESULT`. Each program migration removes that program's props. `INSPECTOR_SURFACE` sets `result` to `INSPECTOR_RESULT`. The last inspector-reachable migration deletes the `result` prop. The frame and the cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `INSPECTOR_SURFACE` sets `signature` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` MUST fail to compile, because a missing signature throws no error. The frame then fetches no raw transaction.
+Both surfaces SHALL draw the frame of an instruction with `BaseInstructionCard`. The inspector surface makes every card collapsible, and checks in the raw view that the program exists and is executable, because an inspected message has not run.
+
+The cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `inspectorSurface` builds the inspector surface for one message. It sets `signature` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` MUST fail to compile, because a missing signature throws no error. A card then shows no program events.
+
+#### Scenario: One frame on both surfaces
+
+- **WHEN** a card renders an instruction on the tx page or in the inspector
+- **THEN** its frame MUST be `BaseInstructionCard`
+- **AND** in the inspector the raw view MUST check the program of the instruction
 
 #### Scenario: One source for the signature
 
@@ -29,17 +37,24 @@ For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent`
 - **WHEN** the same instruction renders on the tx page and in the inspector
 - **THEN** the card component MUST be the same component in both cases
 - **AND** only the surface value MUST differ
+- **AND** a token batch instruction is the exception: the tx page renders its RPC-parsed form with `RpcParsedTokenBatchCard`, and the inspector renders its bytes with `TokenBatchCard`
+- **AND** both batch cards MUST draw `BatchInstructionCard` with the same sub-instruction rows
 
 #### Scenario: Program row is drawn exactly once
 
-- **WHEN** a card renders on either surface, in the decoded view or in the raw view
+- **WHEN** a card renders an instruction on either surface, in the decoded view or in the raw view
 - **THEN** exactly one `Program` row MUST appear in the rendered card
 - **AND** the body MUST draw it in the decoded view, and the frame MUST draw it in the raw view
 
 #### Scenario: Program row shows the card's program name
 
-- **WHEN** a card has a program name of its own
+- **WHEN** a card has a program name of its own, and the explorer has no label for the program
 - **THEN** the body MUST render that name in the `Program` row of the decoded view, on both surfaces
+
+#### Scenario: Program row shows the explorer label of a known program
+
+- **WHEN** a card has a program name of its own, and the explorer has a label for the program
+- **THEN** the `Program` row MUST show the explorer label, as it does for a card without a program name
 
 #### Scenario: Card body wider than two columns
 
@@ -53,11 +68,11 @@ For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent`
 
 ### Requirement: Fields declared as data
 
-A card SHALL declare its rows as data, not as table markup. Label and value rows are `InstructionField` descriptors. The argument rows of a decoded instruction are `InstructionArg` values. Among migrated cards, `ValueCell` MUST be the only component that formats a value. Field rows and argument rows both render `ValueCell`, to give each kind one format. `InstructionFields` renders the field rows. `DecodedInstructionCard` renders the account and argument rows. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
+A card SHALL declare its rows as data, not as table markup. Label and value rows are `InstructionField` descriptors. The argument rows of a decoded instruction are `InstructionArg` values. `ValueCell` MUST be the only component that formats a value. Field rows and argument rows both render `ValueCell`, to give each kind one format. `InstructionFields` renders the field rows. `InstructionFieldRows` renders them without the `Program` row, for a card that repeats groups of rows below one program. `DecodedInstructionCard` renders the account and argument rows. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
 
-The union is closed: `address`, `sol`, `bytes`, `string`, `text`, `timestamp`, `preformatted`, `custom`, `heading`. Every kind but `heading` pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. A `string` value is text that the reader copies exactly, such as a seed or a string argument. `string` MUST render its value inside `Copyable`. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. The `address` constructor MUST accept a web3.js `PublicKey` or a kit `Address`. The constructor MUST store a kit `Address`, to give every row one address type. A kit-native slice passes its `Address` without a conversion. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
+The union is closed: `address`, `addresses`, `account`, `sol`, `bytes`, `epoch`, `slot`, `string`, `text`, `timestamp`, `preformatted`, `json`, `heading`, and the blocks `note`, `rawData`, `documentText` and `payload`. A block fills the row without a label column. Every kind but `heading` and the blocks pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `account` MUST show the role badges of the account beside its label, as the account rows of `DecodedInstructionCard` do. `epoch` MUST link to the page of the epoch. `text` MUST accept only `string | number`, and a kind MUST NOT accept markup. A `string` value is text that the reader copies exactly, such as a seed or a string argument. `string` MUST render its value inside `Copyable`. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. `addresses` MUST show every address of its list in one value cell, in list order. The `address` and `addresses` constructors MUST accept a web3.js `PublicKey` or a kit `Address`. The constructors MUST store a kit `Address`, to give every row one address type. A kit-native slice passes its `Address` without a conversion. A field with no value to show MUST be omitted from the list.
 
-`InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids in card sources under `app/**` (the rule is off for tests and stories, and for a per-file legacy list that a migrated card MUST NOT join).
+`InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids in card sources under `app/**` (the rule is off for tests and stories, and for a per-file legacy list that a card MUST NOT join).
 
 #### Scenario: Field kind with no renderer
 
@@ -68,7 +83,6 @@ The union is closed: `address`, `sol`, `bytes`, `string`, `text`, `timestamp`, `
 
 - **WHEN** the same value rendering repeats across cards
 - **THEN** it MUST be added as an `InstructionField` kind
-- **AND** those cards MUST NOT each re-implement it through `custom`
 
 #### Scenario: Kind that renders like an existing one
 
@@ -87,11 +101,11 @@ The union is closed: `address`, `sol`, `bytes`, `string`, `text`, `timestamp`, `
 - **WHEN** a card needs a hook to produce a value or its title (async mint decimals, cluster-derived URLs, program events)
 - **THEN** it MUST NOT use `defineInstructionCard`, whose `title` and `fields` are plain functions
 - **AND** it MUST write its own component and render `InstructionCardView`
-- **AND** it SHOULD still use `InstructionFields` for the rows it can express, with `custom()` for the rest
+- **AND** it SHOULD still use `InstructionFields` for the rows it can express
 
 ### Requirement: Decoded instruction card
 
-A card that decodes its instruction with a Codama client SHALL render `DecodedInstructionCard`. Every decoded card has the same account rows, role badges and argument table. The body has a Type column, so its `Program` row MUST span all `DECODED_TABLE_COLUMNS` columns.
+A card that decodes its instruction with an IDL, through a Codama client or the Anchor coder, SHALL render `DecodedInstructionCard`. `TokenBatchCard` is the exception, because one batch holds several sub-instructions. Every decoded card has the same account rows, role badges and argument table. The body has a Type column, so its `Program` row MUST span all `DECODED_TABLE_COLUMNS` columns.
 
 A Codama decoder returns only the accounts that its IDL declares, so `DecodedInstructionCard` MUST read its accounts from the instruction. `DecodedInstructionCard` MUST label each account with the IDL account name at the same position.
 
@@ -106,23 +120,50 @@ A Codama decoder returns only the accounts that its IDL declares, so `DecodedIns
 - **WHEN** two accounts of an instruction have the same address
 - **THEN** each account MUST have its own row, with its own name and role badges
 
+#### Scenario: IDL that nests accounts in a group
+
+- **WHEN** an IDL nests accounts in a group
+- **THEN** the card MUST show a row for the group before its accounts
+- **AND** the group MUST start collapsed, and MUST show its accounts only after the reader expands it
+
+#### Scenario: Token instruction in raw form
+
+- **WHEN** the Token card has the raw instruction, and each address is in one parsed field at most
+- **THEN** it MUST render `DecodedInstructionCard`, and MUST name each account after the parsed field that holds its address
+- **AND** each argument MUST show the value that the instruction holds, not the amount in the units of the mint
+
+#### Scenario: Token instruction in raw form with two parsed fields that hold one address
+
+- **WHEN** the Token card has the raw instruction, and two parsed fields hold one address
+- **THEN** it MUST render one row for each parsed field
+
+#### Scenario: Token instruction that the RPC parsed
+
+- **WHEN** the Token card has only the instruction that the RPC parsed
+- **THEN** it MUST render one row for each parsed field
+
 ### Requirement: Single node prop
 
-A card SHALL receive the instruction it renders as one `InstructionNode`, not as a spread of `ix`, `index`, `childIndex`, `raw`, and `innerCards`. Nested cards MUST NOT travel through cards as props — only the view hands `InstructionNode.innerCards` to the frame, and no card reads it.
+A card SHALL receive the instruction it renders as one `InstructionNode`, not as a spread of `ix`, `index`, `childIndex`, and `raw`. Nested cards MUST NOT travel through cards as props.
 
-`InstructionNode.children` is the target representation for CPI children and stays unpopulated until tree construction moves out of the render pass. `innerCards` is marked deprecated and is deleted in that same follow-up.
+`InstructionNode.children` SHALL hold the CPIs of the instruction. The page builds the node tree from the transaction before it renders a card. `InstructionCardView` renders each child through `InstructionSurface.Card`, so no card renders another card. An `undefined` child marks a CPI that the page cannot resolve.
 
-`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
+`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view, for the router, which dispatches on it, and for `instructionDataOf`. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
 
 `InstructionNode.programId` SHALL carry the program id separately from `ix`. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
 
-Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs *inside* the card and exist only on the tx page, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail.
+Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs _inside_ the card and exist only on the tx page, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail. The frame draws each event as a card nested in the instruction card, as it draws an inner instruction. In the raw view it MUST show the bytes of each event.
 
 #### Scenario: Program events reach the frame
 
 - **WHEN** a card derives program events from transaction logs
 - **THEN** it MUST pass them to `InstructionCardView` as `events`, not through the node
 - **AND** on a surface with no logs the frame MUST render the card without them
+
+#### Scenario: Program event in the raw view
+
+- **WHEN** a card with program events opens its raw view
+- **THEN** each event MUST show its bytes instead of its fields
 
 #### Scenario: Program event logged by a CPI
 
@@ -136,19 +177,44 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 - **THEN** the card MUST NOT declare or read any nested-card prop
 - **AND** the nested cards MUST reach the frame through the view
 
+#### Scenario: CPI that the page cannot resolve
+
+- **WHEN** an instruction has a CPI that the page cannot resolve
+- **THEN** the view MUST render a card with a note that names the position of the CPI
+- **AND** the other CPIs MUST keep their positions
+
 #### Scenario: Card reads only its decoded payload
 
 - **WHEN** a card needs the instruction's raw bytes or its RPC-parsed payload
-- **THEN** it MUST NOT read them from `node.ix` — the frame obtains them from the node instead
-- **AND** the values the card renders MUST come only from its decoded `info`
-- **AND** the card MUST read only `node.programId` from the node, plus `node.index` and `node.childIndex` when the card reads program events
+- **THEN** it MUST NOT read them from `node.ix`, and it MUST read the raw bytes from `node.raw`
+- **AND** the values the card renders MUST come only from its decoded `info` and from `node.raw`
+- **AND** the card MUST read only `node.programId` and `node.raw` from the node, plus `node.index` and `node.childIndex` when the card reads program events
 
-### Requirement: Whole-program migration
+#### Scenario: Card reads the raw instruction
 
-A program's cards SHALL migrate to the surface together in one change, never partially. A partially migrated program renders two different frames side by side in the inspector, because unmigrated cards hardcode the tx-page frame regardless of surface. `UnknownDetailsCard` renders through the surface for every program, migrated or not.
+- **WHEN** a card reads the account list or the data bytes of the instruction, not its decoded `info`
+- **THEN** it MUST read them from `node.raw`
+- **AND** it MUST NOT take a `TransactionInstruction` prop beside `node`
+- **AND** the caller MUST build the node with `toRawInstructionNode`, which takes `programId` and `raw` from one instruction
 
-#### Scenario: Program with a hardcoded frame reaches the inspector
+### Requirement: One instruction router
 
-- **WHEN** a program's cards hardcode `InstructionCard` and the inspector routes to that program
-- **THEN** all of that program's cards MUST migrate in the same change
-- **AND** the resulting inspector chrome deltas MUST be reviewed before merge
+Both surfaces SHALL pick the card of an instruction with `InstructionNodeCard`. The router dispatches the instruction through the instruction parser, then renders the first of: the PMP card, the card of a raw stake instruction, the card of the program label, the IDL card, and `UnknownDetailsCard`. A program whose card takes only decoded instructions hands an instruction that its parser slice rejects to the IDL card. A program whose card takes only an instruction in byte form hands an RPC-parsed instruction to `UnknownDetailsCard`. The PMP card and the card of a raw stake instruction hand an instruction that they cannot decode to the IDL card in the same way. The router renders every card inside an ErrorBoundary whose fallback is `UnknownDetailsCard`.
+
+#### Scenario: Curated card and a resolved IDL
+
+- **WHEN** a program has a card of its own, the parser slice of the program decodes the instruction, and a fetched IDL also decodes it
+- **THEN** both surfaces MUST render the card of the program
+- **AND** MUST NOT replace the card when the IDL resolves after the first render
+
+#### Scenario: Parser slice rejects the instruction
+
+- **WHEN** the parser slice of a program cannot decode an instruction and the card of the program takes only decoded instructions
+- **THEN** the router MUST render the IDL card when an IDL decodes the instruction
+- **AND** MUST render `UnknownDetailsCard` otherwise
+
+#### Scenario: Card throws
+
+- **WHEN** a card throws while it renders, at the top level or as a CPI
+- **THEN** the router MUST render `UnknownDetailsCard` in its place
+- **AND** a PMP card that throws MUST render the IDL card instead when an IDL decodes the instruction

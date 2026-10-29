@@ -3,41 +3,45 @@ import type { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
-import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { labelAccounts } from '../model/accounts';
+import { type AccountName, type AccountRow, labelAccounts, visibleAccountRows } from '../model/accounts';
 import type { InstructionArg } from '../model/args';
-import type { InstructionNode } from '../model/node';
-import { ArgRows } from './ArgRows';
+import type { InstructionEvent } from '../model/events';
+import type { InstructionFieldList } from '../model/fields';
+import type { RawInstructionNode } from '../model/node';
+import { AccountNameCell } from './AccountNameCell';
+import { ArgTable, nestedRowVariants } from './ArgRows';
+import { ExpandToggleCell } from './ExpandableRow';
 import { InstructionAddress } from './InstructionAddress';
 import { InstructionCardView } from './InstructionCardView';
+import { InstructionFieldRows } from './InstructionFields';
 import { ProgramField } from './ProgramField';
 
 export const DECODED_TABLE_COLUMNS = 3;
 
 export function DecodedInstructionCard({
     node,
-    ix,
     title,
     programName,
     accountNames,
     args,
-    children,
+    events,
+    fields,
 }: {
-    node: InstructionNode;
-    ix: TransactionInstruction;
+    node: RawInstructionNode;
     title: string;
     programName?: string;
-    accountNames: readonly string[];
+    accountNames: readonly AccountName[];
     args: readonly InstructionArg[];
-    /** Rows below the arguments. A row must span `DECODED_TABLE_COLUMNS`. */
-    children?: React.ReactNode;
+    events?: readonly InstructionEvent[];
+    /** Rows below the arguments. */
+    fields?: InstructionFieldList;
 }) {
     return (
-        <InstructionCardView node={node} title={title}>
-            <DecodedInstructionBody ix={ix} programName={programName} accountNames={accountNames} args={args} />
-            {children}
+        <InstructionCardView node={node} title={title} events={events}>
+            <DecodedInstructionBody ix={node.raw} programName={programName} accountNames={accountNames} args={args} />
+            {fields && <InstructionFieldRows fields={fields} columns={DECODED_TABLE_COLUMNS} />}
         </InstructionCardView>
     );
 }
@@ -50,7 +54,7 @@ function DecodedInstructionBody({
 }: {
     ix: TransactionInstruction;
     programName?: string;
-    accountNames: readonly string[];
+    accountNames: readonly AccountName[];
     args: readonly InstructionArg[];
 }) {
     const accounts = labelAccounts(toKitInstruction(ix).accounts, accountNames);
@@ -66,30 +70,56 @@ function DecodedInstructionBody({
                     </BaseTable.Cell>
                 </BaseTable.SectionRow>
             )}
-            {accounts.map(({ address, role, label }, position) => (
-                // Two accounts can share one address, so the row key is the position.
-                <BaseTable.Row key={position} data-testid={`account-row-${position}`}>
-                    <BaseTable.Cell>
-                        <div className="mr-1.5 md:inline">{label}</div>
-                        <AccountRoleBadges isWritable={isWritableRole(role)} isSigner={isSignerRole(role)} />
-                    </BaseTable.Cell>
-                    <BaseTable.Cell className="text-right" colSpan={VALUE_COLUMNS}>
-                        <InstructionAddress address={address} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            ))}
-            {args.length > 0 && (
-                <>
-                    <BaseTable.SectionRow>
-                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
-                        <BaseTable.Cell>Type</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
-                    </BaseTable.SectionRow>
-                    <ArgRows args={args} />
-                </>
+            <AccountRows rows={accounts} />
+            <ArgTable label="Argument Name" args={args} />
+        </>
+    );
+}
+
+function AccountRows({ rows }: { rows: readonly AccountRow[] }) {
+    // Groups start collapsed. The set holds group ids, so it survives a new decode.
+    const [expanded, setExpanded] = React.useState<ReadonlySet<string>>(() => new Set());
+
+    return (
+        <>
+            {visibleAccountRows(rows, expanded).map(row =>
+                row.kind === 'group' ? (
+                    <BaseTable.Row key={row.id}>
+                        <BaseTable.Cell colSpan={VALUE_COLUMNS}>{row.label}</BaseTable.Cell>
+                        <ExpandToggleCell
+                            expanded={expanded.has(row.id)}
+                            onToggle={() => setExpanded(current => toggle(current, row.id))}
+                        />
+                    </BaseTable.Row>
+                ) : (
+                    // Two accounts can share one address, so the row key is the position.
+                    <BaseTable.Row
+                        key={row.position}
+                        data-testid={`account-row-${row.position}`}
+                        className={nestedRowVariants({ nested: row.depth > 0 })}
+                    >
+                        <AccountNameCell
+                            label={row.label}
+                            isSigner={isSignerRole(row.role)}
+                            isWritable={isWritableRole(row.role)}
+                            nested={row.depth > 0}
+                        />
+                        <BaseTable.Cell className="text-right" colSpan={VALUE_COLUMNS}>
+                            <InstructionAddress address={row.address} />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                ),
             )}
         </>
     );
+}
+
+function toggle(ids: ReadonlySet<string>, id: string): ReadonlySet<string> {
+    const next = new Set(ids);
+    if (!next.delete(id)) {
+        next.add(id);
+    }
+    return next;
 }
 
 const VALUE_COLUMNS = DECODED_TABLE_COLUMNS - 1;

@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import { toInstructionNode } from '@entities/instruction-card';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -38,7 +38,7 @@ const ix = new TransactionInstruction({
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: AnchorDetailsCard,
-    decorators: [withMockTransactions, withTokenInfoBatch, withTxInstructionSurface, withViewportFromGlobal],
+    decorators: [withTxInstructionSurface, withMockTransactions, withTokenInfoBatch, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
@@ -54,8 +54,7 @@ type Story = StoryObj<typeof meta>;
 
 const args = {
     decoded: decodeAnchorInstruction(anchorProgram, ix),
-    ix,
-    node: toInstructionNode({ index: 0, ix }),
+    node: toRawInstructionNode({ index: 0, ix }),
     program: anchorProgram,
 };
 

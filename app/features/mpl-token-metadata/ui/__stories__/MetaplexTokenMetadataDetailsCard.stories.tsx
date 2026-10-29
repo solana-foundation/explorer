@@ -1,4 +1,9 @@
-import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
+import { type InstructionNode, toInstructionNode } from '@entities/instruction-card';
+import {
+    createInstructionParserDispatcher,
+    isParsedInstruction,
+    type ParsedInstructionInfo,
+} from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
     getCreateMetadataAccountV3InstructionDataSerializer,
@@ -31,17 +36,21 @@ const KEY_E = PublicKey.default;
 const dispatcher = createInstructionParserDispatcher([metaplexTokenMetadataInstructionParser]);
 
 function makeIx(
+    index: number,
     data: Uint8Array | Buffer,
     keys: PublicKey[] = [],
-): { ix: DispatchResult; raw: TransactionInstruction } {
+): { node: InstructionNode; parsed: ParsedInstructionInfo | undefined } {
     const raw = new TransactionInstruction({
         data: Buffer.from(data),
         keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
         programId: PROGRAM_ID,
     });
-    const ix = dispatcher.fromTransactionInstruction(raw);
-    invariant(ix, 'the token metadata program is registered');
-    return { ix, raw };
+    const dispatched = dispatcher.fromTransactionInstruction(raw);
+    invariant(dispatched, 'the token metadata program is registered');
+    return {
+        node: toInstructionNode({ index, ix: raw }),
+        parsed: isParsedInstruction(dispatched) ? dispatched.parsed : undefined,
+    };
 }
 
 const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
@@ -50,7 +59,7 @@ const createMasterEditionV3Serializer = getCreateMasterEditionV3InstructionDataS
 
 const meta = {
     component: MetaplexTokenMetadataDetailsCard,
-    decorators: [withTransactions, withTokenInfoBatch, withTxInstructionSurface],
+    decorators: [withTxInstructionSurface, withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
     },
@@ -62,27 +71,25 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const CreateMetadataAccountV3: Story = {
-    args: {
-        index: 0,
-        ...makeIx(
-            Buffer.from(
-                createMetadataV3Serializer.serialize({
-                    collectionDetails: none(),
-                    data: {
-                        collection: none(),
-                        creators: none(),
-                        name: 'My NFT',
-                        sellerFeeBasisPoints: 500,
-                        symbol: 'MNFT',
-                        uri: 'https://example.com/nft.json',
-                        uses: none(),
-                    },
-                    isMutable: true,
-                }),
-            ),
-            [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E],
+    args: makeIx(
+        0,
+        Buffer.from(
+            createMetadataV3Serializer.serialize({
+                collectionDetails: none(),
+                data: {
+                    collection: none(),
+                    creators: none(),
+                    name: 'My NFT',
+                    sellerFeeBasisPoints: 500,
+                    symbol: 'MNFT',
+                    uri: 'https://example.com/nft.json',
+                    uses: none(),
+                },
+                isMutable: true,
+            }),
         ),
-    },
+        [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E],
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Create Metadata Account V3')).toBeInTheDocument();
@@ -93,28 +100,26 @@ export const CreateMetadataAccountV3: Story = {
 };
 
 export const UpdateMetadataAccountV2: Story = {
-    args: {
-        index: 1,
-        ...makeIx(
-            Buffer.from(
-                updateMetadataV2Serializer.serialize({
-                    data: some({
-                        collection: none(),
-                        creators: none(),
-                        name: 'Updated NFT',
-                        sellerFeeBasisPoints: 0,
-                        symbol: 'UNFT',
-                        uri: 'https://example.com/updated.json',
-                        uses: none(),
-                    }),
-                    isMutable: some(true),
-                    newUpdateAuthority: none(),
-                    primarySaleHappened: some(false),
+    args: makeIx(
+        1,
+        Buffer.from(
+            updateMetadataV2Serializer.serialize({
+                data: some({
+                    collection: none(),
+                    creators: none(),
+                    name: 'Updated NFT',
+                    sellerFeeBasisPoints: 0,
+                    symbol: 'UNFT',
+                    uri: 'https://example.com/updated.json',
+                    uses: none(),
                 }),
-            ),
-            [KEY_A, KEY_B],
+                isMutable: some(true),
+                newUpdateAuthority: none(),
+                primarySaleHappened: some(false),
+            }),
         ),
-    },
+        [KEY_A, KEY_B],
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Update Metadata Account V2')).toBeInTheDocument();
@@ -123,17 +128,15 @@ export const UpdateMetadataAccountV2: Story = {
 };
 
 export const CreateMasterEditionV3: Story = {
-    args: {
-        index: 2,
-        ...makeIx(
-            Buffer.from(
-                createMasterEditionV3Serializer.serialize({
-                    maxSupply: some(100n),
-                }),
-            ),
-            [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A],
+    args: makeIx(
+        2,
+        Buffer.from(
+            createMasterEditionV3Serializer.serialize({
+                maxSupply: some(100n),
+            }),
         ),
-    },
+        [KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_A],
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Create Master Edition V3')).toBeInTheDocument();
@@ -142,11 +145,12 @@ export const CreateMasterEditionV3: Story = {
 };
 
 export const SignMetadata: Story = {
-    args: {
-        index: 3,
+    args: makeIx(
+        3,
         // discriminator byte 7 = signMetadata
-        ...makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
-    },
+        new Uint8Array([7]),
+        [KEY_A, KEY_B],
+    ),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Sign Metadata')).toBeInTheDocument();
@@ -154,10 +158,7 @@ export const SignMetadata: Story = {
 };
 
 export const UnknownInstruction: Story = {
-    args: {
-        index: 4,
-        ...makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
-    },
+    args: makeIx(4, new Uint8Array([0xff]), [KEY_A, KEY_B]),
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('Token Metadata Program: Unknown Instruction')).toBeInTheDocument();

@@ -1,12 +1,13 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
-import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { toInstructionNode } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS, SERUM_DEX_V3_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderTxCard } from '@/app/__tests__/card-harness';
+import { findCell, readAddress, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { serumInstructionParsers } from '../../lib/serum-client';
 import { SerumDetailsCard } from '../SerumDetailsCard';
@@ -50,12 +51,22 @@ describe('@features/instruction-program-serum', () => {
             await waitFor(() => {
                 expect(screen.getByText(/OpenBook Dex Program: Consume Events/)).toBeInTheDocument();
             });
-            expect(screen.getByText('Open Orders')).toBeInTheDocument();
-            expect(screen.getByText(gen.publicKey(0).toBase58())).toBeInTheDocument();
-            expect(screen.getByText(gen.publicKey(1).toBase58())).toBeInTheDocument();
+            expect(readAddress(findCell('Open Orders'))).toBe(
+                [gen.publicKey(0).toBase58(), gen.publicKey(1).toBase58()].join(','),
+            );
             expect(screen.getByText('Event Queue')).toBeInTheDocument();
             expect(screen.getByText('Limit')).toBeInTheDocument();
             expect(screen.getByText('32')).toBeInTheDocument();
+        });
+
+        test('should omit the Open Orders row for a Consume Events instruction with no open-orders account', async () => {
+            renderCard(makeInstruction(CONSUME_EVENTS_DATA, 4));
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText('Event Queue')).toBeInTheDocument();
+            });
+            expect(screen.queryByText('Open Orders')).not.toBeInTheDocument();
         });
 
         test('should fall back to the raw card with an "Unknown" title for undecodable data', async () => {
@@ -128,5 +139,10 @@ function renderCard(raw: TransactionInstruction) {
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     if (!dispatched) throw new Error('no Serum parser registered for the fixture program id');
 
-    return renderTxCard(<SerumDetailsCard ix={dispatched} raw={raw} index={0} />);
+    return renderTxCard(
+        <SerumDetailsCard
+            node={toInstructionNode({ index: 0, ix: raw })}
+            parsed={isParsedInstruction(dispatched) ? dispatched.parsed : undefined}
+        />,
+    );
 }

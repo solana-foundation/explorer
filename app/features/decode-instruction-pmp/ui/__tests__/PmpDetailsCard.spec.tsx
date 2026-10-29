@@ -1,5 +1,11 @@
-import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { gen } from '@__fixtures__/gen';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
+import {
+    inspectorSurface,
+    type InstructionSurface,
+    InstructionSurfaceProvider,
+    toRawInstructionNode,
+} from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     Compression,
@@ -16,6 +22,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { findCell } from '@/app/__tests__/card-harness';
+
 import { PMP_ADDRESS } from '../../lib/constants';
 import { decodePmpContentInstruction } from '../../lib/decode-pmp-instruction';
 import { PmpDetailsCard } from '../PmpDetailsCard';
@@ -27,20 +35,9 @@ vi.mock('../../lib/decode-pmp-instruction', async importOriginal => {
     return { decodePmpContentInstruction: vi.fn(actual.decodePmpContentInstruction) };
 });
 
-vi.mock('@/app/components/instruction/InstructionCard', () => ({
-    InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
-        <div data-testid="instruction-card">
-            <div data-testid="instruction-card-title">{title}</div>
-            <table>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
-    ),
-}));
-
 vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
-        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
+    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
+        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
     ),
 }));
 
@@ -62,15 +59,24 @@ function makeIx(data: Uint8Array, accounts: PublicKey[]): TransactionInstruction
     });
 }
 
+const SURFACE: InstructionSurface = {
+    ...inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined }),
+    collapsible: false,
+    validateProgram: false,
+};
+
 function renderCard(ix: TransactionInstruction) {
     return render(
-        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
-            <PmpDetailsCard ix={ix} index={0} fallback={<div data-testid="injected-fallback" />} />
-        </TxInstructionSurface>,
+        <InstructionSurfaceProvider surface={SURFACE}>
+            <PmpDetailsCard
+                node={toRawInstructionNode({ index: 0, ix })}
+                fallback={<div data-testid="injected-fallback" />}
+            />
+        </InstructionSurfaceProvider>,
     );
 }
 
-/** The payload section opens on the Raw tab and Radix unmounts the inactive panel. See DataPayloadSection.spec. */
+/** The payload opens on the Raw tab and Radix unmounts the inactive panel. See PmpDetailsCard.payload.spec. */
 async function openDecodedTab() {
     await userEvent.click(screen.getByRole('tab', { name: 'Decoded' }));
 }
@@ -97,7 +103,7 @@ describe('PmpDetailsCard', () => {
         renderCard(ix);
         await openDecodedTab();
 
-        expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: SetData');
+        expect(screen.getByText('ProgramMetadata: SetData')).toBeInTheDocument();
         expect(screen.getByTestId('account-row-0')).toHaveTextContent('Metadata');
         expect(screen.getByTestId('account-row-1')).toHaveTextContent('Authority');
         expect(screen.getByTestId('account-row-4')).toHaveTextContent('ProgramData');
@@ -107,8 +113,8 @@ describe('PmpDetailsCard', () => {
             ['format', 'enum', 'JSON'],
             ['dataSource', 'enum', 'Direct'],
         ]);
-        expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('company');
-        expect(screen.getByTestId('pmp-payload-data-hash')).toBeInTheDocument();
+        expect(screen.getByRole('tabpanel', { name: 'Decoded' })).toHaveTextContent('company');
+        expect(findCell('Data Hash')).toBeInTheDocument();
     });
 
     it('should name the program in the Program row', () => {
@@ -127,13 +133,13 @@ describe('PmpDetailsCard', () => {
     it('should render the updated hints and the header-only note for a 4-byte setData', () => {
         renderCard(makeIx(new Uint8Array([3, 1, 0, 1]), [METADATA_PDA, AUTHORITY, PMP]));
 
-        expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: SetData');
+        expect(screen.getByText('ProgramMetadata: SetData')).toBeInTheDocument();
         expect(readArgs()).toEqual([
             ['encoding', 'enum', 'UTF-8'],
             ['compression', 'enum', 'None'],
             ['format', 'enum', 'JSON'],
         ]);
-        expect(screen.getByTestId('pmp-no-payload')).toBeInTheDocument();
+        expect(screen.getByText('This instruction carries no payload bytes.')).toBeInTheDocument();
     });
 
     it('should render an Initialize card with its seed and decoded document', async () => {
@@ -152,7 +158,7 @@ describe('PmpDetailsCard', () => {
         renderCard(ix);
         await openDecodedTab();
 
-        expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: Initialize');
+        expect(screen.getByText('ProgramMetadata: Initialize')).toBeInTheDocument();
         expect(readArgs()).toEqual([
             ['seed', 'string', 'idl'],
             ['encoding', 'enum', 'UTF-8'],
@@ -161,7 +167,7 @@ describe('PmpDetailsCard', () => {
             ['dataSource', 'enum', 'Direct'],
         ]);
         expect(screen.getByTestId('account-row-4')).toHaveTextContent('System');
-        expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('1.0.0');
+        expect(screen.getByRole('tabpanel', { name: 'Decoded' })).toHaveTextContent('1.0.0');
     });
 
     it('should show a Write card with its offset and raw chunk and no decoded document', () => {
@@ -175,15 +181,14 @@ describe('PmpDetailsCard', () => {
 
         renderCard(ix);
 
-        expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: Write');
+        expect(screen.getByText('ProgramMetadata: Write')).toBeInTheDocument();
         expect(screen.getByTestId('account-row-0')).toHaveTextContent('Buffer');
         expect(screen.getByTestId('account-row-2')).toHaveTextContent('SourceBuffer');
         expect(readArgs()).toEqual([['offset', 'number', '96']]);
-        // RawDataField owns the hex grid and the byte count inside the Chunk row.
-        expect(screen.getByTestId('pmp-write-chunk')).toHaveTextContent('de ad');
-        expect(screen.getByTestId('pmp-write-chunk')).toHaveTextContent('2 bytes');
-        expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('pmp-payload-section')).not.toBeInTheDocument();
+        // RawDataField owns the hex grid and the byte count inside the chunk row.
+        expect(chunkRow()).toHaveTextContent('de ad');
+        expect(chunkRow()).toHaveTextContent('2 bytes');
+        expect(screen.queryByRole('tab', { name: 'Decoded' })).not.toBeInTheDocument();
     });
 
     it('should show the source buffer note for a Write that copies from another buffer', () => {
@@ -195,13 +200,13 @@ describe('PmpDetailsCard', () => {
 
         renderCard(ix);
 
-        expect(screen.getByTestId('pmp-write-source-buffer')).toHaveTextContent(
-            'The chunk was copied from the SourceBuffer account',
-        );
+        expect(
+            screen.getByText('The chunk was copied from the SourceBuffer account, so it is not in this instruction.'),
+        ).toBeInTheDocument();
         const sourceBufferRow = screen.getByTestId('account-row-2');
         expect(sourceBufferRow).toHaveTextContent('SourceBuffer');
         expect(sourceBufferRow).toHaveTextContent(FOREIGN_BUFFER.toBase58());
-        expect(screen.queryByTestId('pmp-write-chunk')).not.toBeInTheDocument();
+        expect(chunkRow()).toBeUndefined();
     });
 
     it('should state that a Write with no chunk bytes and no source buffer carries no payload', () => {
@@ -213,11 +218,9 @@ describe('PmpDetailsCard', () => {
 
         renderCard(ix);
 
-        expect(screen.getByTestId('pmp-write-absent-chunk')).toHaveTextContent(
-            'This instruction carries no payload bytes.',
-        );
-        expect(screen.queryByTestId('pmp-write-chunk')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('pmp-write-source-buffer')).not.toBeInTheDocument();
+        expect(screen.getByText('This instruction carries no payload bytes.')).toBeInTheDocument();
+        expect(chunkRow()).toBeUndefined();
+        expect(screen.queryByText('copied from the SourceBuffer account', { exact: false })).not.toBeInTheDocument();
     });
 
     it('should render the injected fallback for a housekeeping instruction', () => {
@@ -229,7 +232,7 @@ describe('PmpDetailsCard', () => {
         renderCard(ix);
 
         expect(screen.getByTestId('injected-fallback')).toBeInTheDocument();
-        expect(screen.queryByTestId('instruction-card')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Raw' })).not.toBeInTheDocument();
     });
 
     it('should render the injected fallback when the card throws', () => {
@@ -259,7 +262,7 @@ describe('PmpDetailsCard', () => {
         renderCard(ix);
         await openDecodedTab();
 
-        expect(screen.getByTestId('pmp-decode-error')).toBeInTheDocument();
+        expect(screen.getByText('Could not decode this payload', { exact: false })).toBeInTheDocument();
         expect(screen.getByTestId('account-row-0')).toHaveTextContent('Metadata');
         expect(readArgs().slice(0, 2)).toEqual([
             ['encoding', 'enum', 'UTF-8'],
@@ -268,6 +271,11 @@ describe('PmpDetailsCard', () => {
         expect(screen.queryByTestId('injected-fallback')).not.toBeInTheDocument();
     });
 });
+
+/** The full-width row that shows the bytes of a `write`, under its `chunk` label. */
+function chunkRow(): HTMLElement | undefined {
+    return screen.queryAllByRole('row').find(row => row.textContent?.startsWith('chunk'));
+}
 
 function readArgs(): string[][] {
     return screen

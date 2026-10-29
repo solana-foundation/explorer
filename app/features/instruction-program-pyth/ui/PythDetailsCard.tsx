@@ -1,7 +1,6 @@
-import { InstructionCardView, type InstructionNode, toInstructionNode } from '@entities/instruction-card';
-import type { DispatchResult } from '@entities/instruction-parser';
+import { InstructionCardView, type InstructionNode } from '@entities/instruction-card';
+import type { ParsedInstructionInfo } from '@entities/instruction-parser';
 import { PYTH_INSTRUCTIONS, type PythParsed } from '@explorer/decoder-pyth';
-import type { TransactionInstruction } from '@solana/web3.js';
 
 import { AddMappingDetailsCard } from './instructions/AddMappingDetailsCard';
 import { AddPriceDetailsCard } from './instructions/AddPriceDetailsCard';
@@ -15,61 +14,55 @@ import { UpdatePriceDetailsCard, UpdatePriceNoFailOnErrorDetailsCard } from './i
 import { UpdateProductDetailsCard } from './instructions/UpdateProductDetailsCard';
 
 type PythDetailsCardProps = {
-    /** The dispatcher's verdict for a Pyth instruction: decoded, or registered-but-unparsed. */
-    ix: DispatchResult;
-    /** Raw form, for the shell's account table and hex view. */
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    node: InstructionNode;
+    /** `undefined` when the parser of the program cannot decode the instruction. */
+    parsed: ParsedInstructionInfo | undefined;
 };
 
-export function PythDetailsCard({ ix, raw, index, innerCards, childIndex }: PythDetailsCardProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
-
-    if ('unknown' in ix) {
+export function PythDetailsCard({ node, parsed }: PythDetailsCardProps) {
+    if (!parsed) {
         return <RawOnlyPythCard node={node} title="Pyth: Unknown Instruction" />;
     }
 
-    const parsed = ix.parsed as PythParsed;
-    switch (parsed.type) {
+    const parsedInfo = parsed as PythParsed;
+    switch (parsedInfo.type) {
         case 'InitMapping':
-            return <InitMappingDetailsCard info={parsed.info} node={node} />;
+            return <InitMappingDetailsCard info={parsedInfo.info} node={node} />;
         case 'AddMapping':
-            return <AddMappingDetailsCard info={parsed.info} node={node} />;
+            return <AddMappingDetailsCard info={parsedInfo.info} node={node} />;
         case 'AddProduct':
-            return <AddProductDetailsCard info={parsed.info} node={node} />;
+            return <AddProductDetailsCard info={parsedInfo.info} node={node} />;
         case 'UpdateProduct':
-            return <UpdateProductDetailsCard info={parsed.info} node={node} />;
+            return <UpdateProductDetailsCard info={parsedInfo.info} node={node} />;
         case 'AddPrice':
-            return <AddPriceDetailsCard info={parsed.info} node={node} />;
+            return <AddPriceDetailsCard info={parsedInfo.info} node={node} />;
         case 'AddPublisher':
-            return <AddPublisherDetailsCard info={parsed.info} node={node} />;
+            return <AddPublisherDetailsCard info={parsedInfo.info} node={node} />;
         case 'DeletePublisher':
-            return <DeletePublisherDetailsCard info={parsed.info} node={node} />;
+            return <DeletePublisherDetailsCard info={parsedInfo.info} node={node} />;
         case 'UpdatePrice':
-            return <UpdatePriceDetailsCard info={parsed.info} node={node} />;
+            return <UpdatePriceDetailsCard info={parsedInfo.info} node={node} />;
         case 'UpdatePriceNoFailOnError':
-            return <UpdatePriceNoFailOnErrorDetailsCard info={parsed.info} node={node} />;
+            return <UpdatePriceNoFailOnErrorDetailsCard info={parsedInfo.info} node={node} />;
         case 'AggregatePrice':
-            return <AggregatePriceDetailsCard info={parsed.info} node={node} />;
+            return <AggregatePriceDetailsCard info={parsedInfo.info} node={node} />;
         case 'InitPrice':
-            return <InitPriceDetailsCard info={parsed.info} node={node} />;
+            return <InitPriceDetailsCard info={parsedInfo.info} node={node} />;
         case 'SetMinPublishers':
-            return <SetMinPublishersDetailsCard info={parsed.info} node={node} />;
+            return <SetMinPublishersDetailsCard info={parsedInfo.info} node={node} />;
         // The oracle's two test instructions carry no payload, so there is nothing to tabulate.
         case 'InitTest':
         case 'UpdateTest':
-            return <RawOnlyPythCard node={node} title={`Pyth: ${PYTH_INSTRUCTIONS[parsed.type].name}`} />;
+            return <RawOnlyPythCard node={node} title={`Pyth: ${PYTH_INSTRUCTIONS[parsedInfo.type].name}`} />;
         default: {
             // A new instruction type has to pick its card here rather than reach the raw fallback.
-            const _exhaustive: never = parsed;
+            const _exhaustive: never = parsedInfo;
             return _exhaustive;
         }
     }
 }
 
-/** Raw hex is the whole content, so the card opens on it and the shell draws its own Program row. */
+/** Raw hex is the whole content, so the card opens on it and the frame draws its own Program row. */
 function RawOnlyPythCard({ node, title }: { node: InstructionNode; title: string }) {
-    return <InstructionCardView node={node} title={title} defaultRaw />;
+    return <InstructionCardView node={node} title={title} />;
 }

@@ -1,15 +1,22 @@
 import { gen } from '@__fixtures__/gen';
+import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import { InstructionSurfaceProvider, toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import {
+    inspectorSurface,
+    InstructionSurfaceProvider,
+    toRawInstructionNode,
+    TxInstructionSurface,
+} from '@entities/instruction-card';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { FetchStatus } from '@providers/cache';
 import { useTransactionDetails } from '@providers/transactions';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { INSPECTOR_SURFACE } from '@/app/components/inspector/inspector-surface';
+import { readCell } from '@/app/__tests__/card-harness';
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { TransactionsProvider } from '@/app/providers/transactions';
@@ -76,27 +83,17 @@ describe('AnchorDetailsCard', () => {
         surface => {
             renderCard(makeIx([0, 0, 0, 0, 0, 0, 0, 0]), { surface });
 
-            expect(
-                screen.getByText('Failed to decode account data according to the public Anchor interface'),
-            ).toBeInTheDocument();
+            expect(readCell('Error')).toBe('Failed to decode account data according to the public Anchor interface');
             expect(screen.getAllByText('Program')).toHaveLength(1);
             expectProgramLink();
         },
     );
 
-    it.each(['tx page', 'inspector'] as const)(
-        'should pass the child index and the inner cards to the frame of the %s',
-        surface => {
-            renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), {
-                childIndex: 2,
-                innerCards: [<div key="inner">Inner card</div>],
-                surface,
-            });
+    it.each(['tx page', 'inspector'] as const)('should pass the child index to the frame of the %s', surface => {
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 2, surface });
 
-            expect(screen.getByText('#1.3')).toBeInTheDocument();
-            expect(screen.getByText('Inner card')).toBeInTheDocument();
-        },
-    );
+        expect(screen.getByText('#1.3')).toBeInTheDocument();
+    });
 
     it('should show the events that a top-level instruction logged on the card of that instruction', () => {
         const other = gen.publicKey(2);
@@ -136,6 +133,28 @@ describe('AnchorDetailsCard', () => {
 
         expect(screen.getByText('Config Change Event')).toBeInTheDocument();
         expect(screen.queryByText('Unknown Event')).not.toBeInTheDocument();
+    });
+
+    it('should show the bytes of an event when the Raw view opens', async () => {
+        const parent = gen.publicKey(2);
+        mockTransactionLogs(
+            [
+                `Program ${parent} invoke [1]`,
+                `Program ${program.programId} invoke [2]`,
+                `Program data: ${CONFIG_CHANGE_EVENT}`,
+                `Program ${program.programId} success`,
+                `Program ${parent} success`,
+            ],
+            [parent],
+        );
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
+        expect(screen.getByText('Field Name')).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
+
+        expect(screen.getByText('Config Change Event')).toBeInTheDocument();
+        expect(screen.getByText('Event Data')).toBeInTheDocument();
+        expect(screen.queryByText('Field Name')).not.toBeInTheDocument();
     });
 
     it('should number the event badge of a CPI child with its child index', () => {
@@ -219,10 +238,19 @@ function mockTransactionLogs(logMessages: string[], programIds: PublicKey[]) {
 
 const SURFACES = {
     inspector: ({ children }: { children: React.ReactNode }) => (
-        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{children}</InstructionSurfaceProvider>
+        <InstructionSurfaceProvider
+            surface={inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined })}
+        >
+            {children}
+        </InstructionSurfaceProvider>
     ),
     'tx page': ({ children }: { children: React.ReactNode }) => (
-        <TxInstructionSurface result={{ err: null }} signature={SIGNATURE}>
+        <TxInstructionSurface
+            result={{ err: null }}
+            signature={SIGNATURE}
+            Card={InstructionNodeCard}
+            instructionData={() => undefined}
+        >
             {children}
         </TxInstructionSurface>
     ),
@@ -230,12 +258,7 @@ const SURFACES = {
 
 function renderCard(
     ix: TransactionInstruction,
-    {
-        surface,
-        index = 0,
-        childIndex,
-        innerCards,
-    }: { surface: keyof typeof SURFACES; index?: number; childIndex?: number; innerCards?: JSX.Element[] },
+    { surface, index = 0, childIndex }: { surface: keyof typeof SURFACES; index?: number; childIndex?: number },
 ) {
     const Surface = SURFACES[surface];
 
@@ -244,8 +267,7 @@ function renderCard(
             <TransactionsProvider>
                 <Surface>
                     <AnchorDetailsCard
-                        node={toInstructionNode({ childIndex, index, innerCards, ix })}
-                        ix={ix}
+                        node={toRawInstructionNode({ childIndex, index, ix })}
                         program={program}
                         decoded={decodeAnchorInstruction(program, ix)}
                     />

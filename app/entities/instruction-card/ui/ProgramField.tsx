@@ -6,21 +6,22 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 type ProgramFieldProps = {
     programId: PublicKey;
-    showExtendedInfo?: boolean;
+    validateProgram?: boolean;
     /** For a card whose table is wider than two columns, so the row still reaches the right edge. */
     colSpan?: number;
+    /** Shows only for a program that has no explorer label, so every card names a known program the same way. */
     name?: string;
 };
 
-export function ProgramField({ programId, showExtendedInfo = false, colSpan, name }: ProgramFieldProps) {
+export function ProgramField({ programId, validateProgram = false, colSpan, name }: ProgramFieldProps) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Program</BaseTable.Cell>
             <BaseTable.Cell className="text-right" colSpan={colSpan}>
-                {showExtendedInfo ? (
+                {validateProgram ? (
                     <AddressWithContext pubkey={programId} validator={programValidator} />
                 ) : (
-                    <Address pubkey={programId} alignRight link overrideText={name} />
+                    <Address pubkey={programId} alignRight link fallbackText={name} />
                 )}
             </BaseTable.Cell>
         </BaseTable.Row>

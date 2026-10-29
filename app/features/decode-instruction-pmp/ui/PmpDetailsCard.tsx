@@ -1,27 +1,22 @@
-import { RawDataField } from '@components/shared/RawDataField';
-import { DECODED_TABLE_COLUMNS, DecodedInstructionCard, toInstructionNode } from '@entities/instruction-card';
-import { type TransactionInstruction } from '@solana/web3.js';
+import { DecodedInstructionCard, type InstructionFieldList, type RawInstructionNode } from '@entities/instruction-card';
+import type { Address } from '@solana/kit';
+import type { DataSource } from '@solana-program/program-metadata';
 import { capitalizeFirstLetter } from '@utils/index';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { Alert } from '@/app/shared/ui/Alert';
-import { BaseTable } from '@/app/shared/ui/Table';
-
-import { PMP_ACCOUNT_NAMES, PMP_IDL_PROGRAM_NAME, PMP_WRITE_CHUNK_DOWNLOAD_FILENAME } from '../lib/constants';
+import { PMP_ACCOUNT_NAMES, PMP_IDL_PROGRAM_NAME } from '../lib/constants';
 import { decodePmpContentInstruction } from '../lib/decode-pmp-instruction';
 import { pmpArgs } from '../lib/pmp-args';
-import type { PmpContentInstruction } from '../lib/types';
-import { DataPayloadSection } from './DataPayloadSection';
+import { accountPayloadFields, inlinePayloadFields, NO_PAYLOAD_FIELDS, writeFields } from '../lib/pmp-payload-fields';
+import type { PmpContentInstruction, PmpPayloadInstruction } from '../lib/types';
+import { usePmpAccountPayload } from '../model/use-pmp-account-payload';
 
 type PmpDetailsCardProps = {
-    ix: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
+    node: RawInstructionNode;
     /**
-     * What to render when this instruction carries no decodable content, and the ErrorBoundary fallback. Each
-     * surface builds it: the IDL card when an IDL resolved, its own Unknown card otherwise. Injected rather than
+     * What to render when this instruction carries no decodable content, and the ErrorBoundary fallback. The
+     * instruction router builds it: the IDL card when an IDL resolved, the Unknown card otherwise. Injected rather than
      * built here because `boundaries/dependencies` forbids this feature from importing
      * `@features/decode-instruction-with-idl`, and because it keeps the card free of IDL concepts entirely.
      */
@@ -35,7 +30,7 @@ type PmpDetailsCardProps = {
  * header-only `setData` never produces a Codama decode at all, and the whole Codama path is gated on runtime
  * PMP IDL resolution while the typed decoders this card uses ship with the installed library.
  *
- * `setData`, `initialize` and `write` get the custom render below. Everything else, including the six
+ * `setData`, `initialize` and `write` get payload rows below their arguments. Everything else, including the six
  * housekeeping instructions, renders `fallback`, which is what those instructions got before this card existed.
  */
 export function PmpDetailsCard(props: PmpDetailsCardProps) {
@@ -46,68 +41,95 @@ export function PmpDetailsCard(props: PmpDetailsCardProps) {
     );
 }
 
-function PmpDetailsCardBody({ ix, index, innerCards, childIndex, fallback }: PmpDetailsCardProps) {
-    const contentInstruction = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
+function PmpDetailsCardBody({ node, fallback }: PmpDetailsCardProps) {
+    const contentInstruction = React.useMemo(() => decodePmpContentInstruction(node.raw), [node.raw]);
 
     if (!contentInstruction) {
         return <>{fallback}</>;
     }
+    if (contentInstruction.kind === 'write') {
+        return <PmpCard node={node} pmpIx={contentInstruction} fields={writeFields(contentInstruction.chunk)} />;
+    }
 
+    const { payload } = contentInstruction;
+    switch (payload?.source.kind) {
+        case 'inline':
+            return (
+                <InlinePayloadCard
+                    node={node}
+                    pmpIx={contentInstruction}
+                    bytes={payload.source.bytes}
+                    dataSource={payload.dataSource}
+                />
+            );
+        case 'account':
+            return (
+                <AccountPayloadCard
+                    node={node}
+                    pmpIx={contentInstruction}
+                    account={payload.source.account}
+                    dataSource={payload.dataSource}
+                />
+            );
+        default:
+            return <PmpCard node={node} pmpIx={contentInstruction} fields={NO_PAYLOAD_FIELDS} />;
+    }
+}
+
+function InlinePayloadCard({
+    node,
+    pmpIx,
+    bytes,
+    dataSource,
+}: {
+    node: RawInstructionNode;
+    pmpIx: PmpPayloadInstruction;
+    bytes: Uint8Array;
+    dataSource: DataSource;
+}) {
+    const fields = React.useMemo(() => inlinePayloadFields({ bytes, dataSource, pmpIx }), [bytes, dataSource, pmpIx]);
+    return <PmpCard node={node} pmpIx={pmpIx} fields={fields} />;
+}
+
+/** Reads the account that holds the payload, so only an instruction that points at one reads it. */
+function AccountPayloadCard({
+    node,
+    pmpIx,
+    account,
+    dataSource,
+}: {
+    node: RawInstructionNode;
+    pmpIx: PmpPayloadInstruction;
+    account: Address;
+    dataSource: DataSource;
+}) {
+    const state = usePmpAccountPayload({ address: account, config: pmpIx.config });
+    const fields = React.useMemo(
+        () => accountPayloadFields({ account, dataSource, pmpIx, state }),
+        [account, dataSource, pmpIx, state],
+    );
+    return <PmpCard node={node} pmpIx={pmpIx} fields={fields} />;
+}
+
+function PmpCard({
+    node,
+    pmpIx,
+    fields,
+}: {
+    node: RawInstructionNode;
+    pmpIx: PmpContentInstruction;
+    fields: InstructionFieldList;
+}) {
     const programName = capitalizeFirstLetter(PMP_IDL_PROGRAM_NAME);
 
     return (
         <DecodedInstructionCard
-            node={toInstructionNode({ childIndex, index, innerCards, ix })}
-            ix={ix}
-            title={`${programName}: ${capitalizeFirstLetter(contentInstruction.kind)}`}
+            node={node}
+            title={`${programName}: ${capitalizeFirstLetter(pmpIx.kind)}`}
             programName={programName}
-            accountNames={PMP_ACCOUNT_NAMES[contentInstruction.kind]}
-            args={pmpArgs(contentInstruction)}
-        >
-            {contentInstruction.kind === 'write' ? (
-                <WriteRows pmpIx={contentInstruction} />
-            ) : (
-                <DataPayloadSection pmpIx={contentInstruction} />
-            )}
-        </DecodedInstructionCard>
+            accountNames={PMP_ACCOUNT_NAMES[pmpIx.kind]}
+            args={pmpArgs(pmpIx)}
+            fields={fields}
+        />
     );
-}
-
-/** `write` is a fragment with no hints, so it can never be decoded to a document on its own. */
-function WriteRows({ pmpIx }: { pmpIx: Extract<PmpContentInstruction, { kind: 'write' }> }): React.ReactElement {
-    const { chunk } = pmpIx;
-
-    switch (chunk.kind) {
-        case 'inline':
-            return (
-                <BaseTable.Row data-testid="pmp-write-chunk">
-                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
-                        <div className="mb-1.5">chunk</div>
-                        {/* A chunk runs to ~1 KB, so it gets the same field the raw payload does: hex/base64
-                            tabs, byte count, copy, download and show-more, rather than a bare HexData grid. */}
-                        <RawDataField data={chunk.bytes} filename={PMP_WRITE_CHUNK_DOWNLOAD_FILENAME} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            );
-        case 'account':
-            return (
-                <BaseTable.Row>
-                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
-                        <Alert variant="default" data-testid="pmp-write-source-buffer" className="!mb-0">
-                            The chunk was copied from the SourceBuffer account, so it is not in this instruction.
-                        </Alert>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            );
-        case 'absent':
-            return (
-                <BaseTable.Row>
-                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
-                        <Alert variant="default" data-testid="pmp-write-absent-chunk" className="!mb-0">
-                            This instruction carries no payload bytes.
-                        </Alert>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            );
-    }
 }

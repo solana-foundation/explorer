@@ -1,4 +1,4 @@
-import { toParsedInstruction } from '@entities/instruction-parser';
+import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -12,22 +12,19 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
+import { LIGHTHOUSE_ADDRESS } from '../../lib/constants';
 import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
 // Build the card's props the same way the unified dispatcher does: decode the
-// raw instruction into the canonical `{ type, info }` shape, then wrap it as a
-// ParsedInstruction. `raw` carries the full account list for the table.
+// raw instruction into the canonical `{ type, info }` shape. `node.raw` carries
+// the full account list for the table.
 function buildArgs(raw: TransactionInstruction) {
     const parsed = parseLighthouseInstruction(toKitInstruction(raw));
     if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
     return {
-        childIndex: undefined,
-        index: 0,
-        innerCards: undefined,
-        ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
-        raw,
+        node: toRawInstructionNode({ index: 0, ix: raw }),
+        parsed,
     };
 }
 
@@ -53,7 +50,7 @@ const assertAccountInfoIx = {
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',

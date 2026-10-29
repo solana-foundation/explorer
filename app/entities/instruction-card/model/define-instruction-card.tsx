@@ -11,8 +11,6 @@ export type InstructionCardSpec<I> = {
     /** A function when the title depends on the decoded payload. */
     title: string | ((info: I) => string);
     fields: (info: I) => InstructionFieldList;
-    /** Open the card in raw mode, as `UnknownDetailsCard` does. */
-    defaultRaw?: boolean;
 };
 
 /**
@@ -23,8 +21,7 @@ export type InstructionCardSpec<I> = {
  * depends on a **hook** cannot use it — that covers async values (token amounts
  * needing mint decimals) and program events (read from transaction logs).
  *
- * Such a card writes its own component and keeps the descriptors for the rows it
- * *can* express:
+ * Such a card writes its own component and still declares its rows as fields:
  *
  * ```tsx
  * type TokenTransferInfo = { source: PublicKey; mint: string; amount: string };
@@ -38,9 +35,7 @@ export type InstructionCardSpec<I> = {
  *                 fields={[
  *                     address('From', info.source),
  *                     // Decimals arrive asynchronously, so show the raw amount until they land.
- *                     mint
- *                         ? custom('Amount', <>{normalizeTokenAmount(info.amount, mint.decimals)}</>)
- *                         : text('Amount', info.amount),
+ *                     text('Amount', mint ? normalizeTokenAmount(info.amount, mint.decimals) : info.amount),
  *                 ]}
  *             />
  *         </InstructionCardView>
@@ -56,7 +51,7 @@ export function defineInstructionCard<I>(spec: InstructionCardSpec<I>): React.FC
         const title = typeof spec.title === 'function' ? spec.title(info) : spec.title;
 
         return (
-            <InstructionCardView node={node} title={title} defaultRaw={spec.defaultRaw}>
+            <InstructionCardView node={node} title={title}>
                 <InstructionFields fields={spec.fields(info)} programId={node.programId} />
             </InstructionCardView>
         );

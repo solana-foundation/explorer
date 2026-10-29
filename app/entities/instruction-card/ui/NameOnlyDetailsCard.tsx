@@ -17,5 +17,5 @@ export function NameOnlyDetailsCard({ node, name = 'Unknown', programName }: Nam
     const { cluster } = useCluster();
     const title = `${programName ?? getProgramName(node.programId.toBase58(), cluster)}: ${name}`;
 
-    return <InstructionCardView node={node} title={title} defaultRaw />;
+    return <InstructionCardView node={node} title={title} />;
 }
