@@ -26,7 +26,7 @@ export function InstructionCardFrame({
     headerButtons?: React.ReactNode;
     children: React.ReactNode;
 }) {
-    const [resultClass] = ixResult(result, position.index);
+    const badgeVariant = toBadgeVariant(result, position.index);
     const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId(positionNumbers(position)));
     return (
         <CollapsibleCard
@@ -34,11 +34,7 @@ export function InstructionCardFrame({
             collapsible={collapsible}
             title={
                 <span className="flex min-w-0 flex-1 items-center">
-                    <Badge
-                        ui="dashkit"
-                        variant={resultClass as 'success' | 'warning' | 'dark'}
-                        className="mr-1.5 flex-none"
-                    >
+                    <Badge ui="dashkit" variant={badgeVariant} className="mr-1.5 flex-none">
                         #{positionLabel(position)}
                     </Badge>
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{title}</span>
@@ -61,19 +57,19 @@ const TABLE_CLASS = cn(
     '[&_td:last-child:not(:first-child)]:whitespace-normal [&_td:last-child:not(:first-child)]:[overflow-wrap:anywhere]',
 );
 
-function ixResult(result: SignatureResult, index: number) {
+function toBadgeVariant(result: SignatureResult, index: number): 'success' | 'warning' | 'dark' {
     if (result.err) {
         const ixError =
             typeof result.err === 'object' && 'InstructionError' in result.err
                 ? result.err.InstructionError
                 : undefined;
         if (ixError && Array.isArray(ixError)) {
-            const [errorIndex, error] = ixError;
+            const [errorIndex] = ixError;
             if (Number.isInteger(errorIndex) && errorIndex === index) {
-                return ['warning', `Error: ${JSON.stringify(error)}`];
+                return 'warning';
             }
         }
-        return ['dark'];
+        return 'dark';
     }
-    return ['success'];
+    return 'success';
 }
