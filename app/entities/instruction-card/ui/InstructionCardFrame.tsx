@@ -37,7 +37,7 @@ export function InstructionCardFrame({
                     <Badge ui="dashkit" variant={badgeVariant} className="mr-1.5 flex-none">
                         #{positionLabel(position)}
                     </Badge>
-                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{title}</span>
+                    <span className="min-w-0 flex-1">{title}</span>
                 </span>
             }
             headerButtons={headerButtons}
