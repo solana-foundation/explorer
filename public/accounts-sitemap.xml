@@ -108,6 +108,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/GNS1S5J5AspKXgpjz6SvKL66kPaKWAhaGRhCqPRxii2B</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>

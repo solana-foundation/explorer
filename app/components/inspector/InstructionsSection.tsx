@@ -70,6 +70,7 @@ const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').
 
 // Programs decoded by name only. `programName` overrides the registry name in the card title.
 const NAME_ONLY_PROGRAMS: Partial<Record<ParserProgramLabel, { programName?: string }>> = {
+    genesis: {},
     mango: {},
     'token-swap': { programName: 'Token Swap' },
     wormhole: { programName: 'Wormhole' },
