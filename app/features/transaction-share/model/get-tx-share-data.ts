@@ -46,7 +46,7 @@ export type TxShareResult = { kind: 'ok'; data: TxShareData } | ErrorResult | No
  * Slack's recommendation for og image is to keep it within 3 seconds.
  * But here we intentionally allow more time only for fetching tx due to timeouts.
  */
-const TX_DATA_RPC_BUDGET_MS = 3_000;
+const TX_DATA_RPC_BUDGET_MS = 6_000;
 
 /**
  * The data behind `/og/tx/<signature>`, read from the cluster passed.
