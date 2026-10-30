@@ -32,7 +32,15 @@ describe('GET /robots.txt', () => {
 
     it('should keep defined bots off the OG image routes', async () => {
         const body = await GET(createRequest()).text();
-        const userAgents = ['AhrefsBot', 'Amazonbot', 'Amzn-SearchBot', 'GoogleOther', 'PetalBot']
+        const userAgents = [
+            'AhrefsBot',
+            'Amazonbot',
+            'Amzn-SearchBot',
+            'Applebot',
+            'GoogleOther',
+            'meta-webindexer',
+            'PetalBot',
+        ]
             .map(bot => `User-agent: ${bot}\n`)
             .join('');
 
