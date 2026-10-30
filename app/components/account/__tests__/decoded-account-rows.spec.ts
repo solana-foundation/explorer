@@ -2,7 +2,7 @@ import { BN } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { codamaAccountRows, toPlainValue } from '../decoded-account-rows';
+import { anchorAccountRows, codamaAccountRows, toPlainValue } from '../decoded-account-rows';
 
 describe('toPlainValue', () => {
     it('should convert a BN to a bigint', () => {
@@ -14,8 +14,8 @@ describe('toPlainValue', () => {
         expect(toPlainValue(key)).toBe(key.toBase58());
     });
 
-    it('should convert a Uint8Array to a plain number array', () => {
-        expect(toPlainValue(new Uint8Array([1, 2, 3]))).toEqual([1, 2, 3]);
+    it('should keep a Uint8Array compact as a base64 string instead of one row per byte', () => {
+        expect(toPlainValue(new Uint8Array([1, 2, 3]))).toBe('AQID');
     });
 
     it('should recurse into arrays and nested objects', () => {
@@ -36,6 +36,14 @@ describe('toPlainValue', () => {
     it('should pass null and undefined through unchanged', () => {
         expect(toPlainValue(null)).toBeNull();
         expect(toPlainValue(undefined)).toBeUndefined();
+    });
+});
+
+describe('anchorAccountRows', () => {
+    it('should render a large byte field as one compact row instead of one row per byte', () => {
+        const rows = anchorAccountRows({ blob: new Uint8Array(1024).fill(7) });
+
+        expect(rows.map(row => row.label)).toEqual(['blob']);
     });
 });
 

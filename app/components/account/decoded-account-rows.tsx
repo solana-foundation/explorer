@@ -3,6 +3,7 @@ import { BN } from '@coral-xyz/anchor';
 import { FieldValueView, type InstructionArg, parseCodamaArgs } from '@entities/instruction-card';
 import { PublicKey } from '@solana/web3.js';
 
+import { toBase64 } from '@/app/shared/lib/bytes';
 import type { KeyValueRow } from '@/app/shared/ui/key-value';
 
 export function argsToRows(args: readonly InstructionArg[], prefix = ''): KeyValueRow[] {
@@ -35,7 +36,8 @@ export function toPlainValue(value: unknown): unknown {
     if (value === null || value === undefined) return value;
     if (value instanceof PublicKey) return value.toBase58();
     if (BN.isBN(value)) return BigInt(value.toString());
-    if (value instanceof Uint8Array || Array.isArray(value)) return Array.from(value, toPlainValue);
+    if (value instanceof Uint8Array) return toBase64(value);
+    if (Array.isArray(value)) return value.map(toPlainValue);
     if (typeof value === 'object') {
         return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, toPlainValue(item)]));
     }
