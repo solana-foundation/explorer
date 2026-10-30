@@ -12,24 +12,14 @@ import { type AnchorInstructionDecoded, decodeAnchorInstruction } from './decode
 
 type CodamaParsedInstruction = NonNullable<ReturnType<typeof parseInstruction>>;
 
-// Which renderer a decoded instruction maps to, fully decoded — the caller only matches a result to a
-// card, it never finishes the decode. Routing is by IDL kind: Codama-native roots (PMP) decode through
-// Codama; Anchor IDLs decode through the Anchor Program (the `anchor` result carries it, for events +
-// nested account groups), with Codama-from-Anchor kept only as a last resort.
 export type IdlInstructionDecode =
     | { kind: 'codama'; parsedIx: CodamaParsedInstruction }
     | { kind: 'anchor'; program: Program<Idl>; details: AnchorInstructionDecoded }
     | { kind: 'unknown' };
 
-// Decode an instruction with the help of the program's IDL — in contrast to the program-specific
-// `decode-instruction-*` slices, which know one program statically, this decodes any program given its
-// (Codama or Anchor) IDL. Uses web3.js because the Anchor fallback (`Program`/`BorshInstructionCoder`)
-// is web3.js-native.
 export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknown, url: string): IdlInstructionDecode {
     const kitIx = toKitInstruction(ix);
 
-    // A resolved IDL whose declared program differs from the instruction's is a wiring bug (wrong IDL
-    // routed to this instruction) — fail loud rather than mis-decode against the wrong interface.
     const declared = getIdlDeclaredAddress(idl);
     const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
     if (declared.kind === 'malformed' || (declaredProgram && declaredProgram !== kitIx.programAddress)) {
@@ -51,19 +41,18 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
         }
     };
 
-    // Codama-native IDLs (PMP and any stored Codama root node) decode through Codama directly.
-    if ((idl as { kind?: string })?.kind === 'rootNode') {
+    const isRootNode = (idl as { kind?: string })?.kind === 'rootNode';
+    const legacyAnchorIdl = (idl as { legacyAnchorIdl?: unknown }).legacyAnchorIdl;
+
+    if (isRootNode && !legacyAnchorIdl) {
         const parsedIx = tryCodama(idl as RootNode);
         return parsedIx ? { kind: 'codama', parsedIx } : { kind: 'unknown' };
     }
 
-    // Anchor IDLs render through the rich Anchor card (events from the tx logs + collapsible nested account
-    // groups), so decode against the Anchor Program first. `@codama/nodes-from-anchor` can convert many
-    // Anchor IDLs, but the flat Codama card would drop those features — so keep it only as a last resort,
-    // for IDLs the Anchor Program constructor rejects.
+    const anchorIdl = legacyAnchorIdl ?? idl;
     try {
         const program = new Program(
-            getFormattedIdl(formatSerdeIdl, idl, kitIx.programAddress),
+            getFormattedIdl(formatSerdeIdl, anchorIdl, kitIx.programAddress),
             getProvider(url),
         ) as Program<Idl>;
         return { details: decodeAnchorInstruction(program, ix), kind: 'anchor', program };
@@ -71,11 +60,11 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
         Logger.debug('[decode-instruction-with-idl] Anchor Program build failed; trying codama', { error });
     }
 
-    // Last resort: convert the Anchor IDL to a Codama root node.
     try {
-        const parsedIx = tryCodama(
-            rootNodeFromAnchor(idl as Parameters<typeof rootNodeFromAnchor>[0]) as unknown as RootNode,
-        );
+        const root = isRootNode
+            ? (idl as RootNode)
+            : (rootNodeFromAnchor(idl as Parameters<typeof rootNodeFromAnchor>[0]) as unknown as RootNode);
+        const parsedIx = tryCodama(root);
         if (parsedIx) return { kind: 'codama', parsedIx };
     } catch {
         // ignore — nothing could decode it
@@ -84,9 +73,6 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
     return { kind: 'unknown' };
 }
 
-// `decodeInstructionWithIdl` fail-louds (pages Sentry, then throws) on an IDL/program-id mismatch. This
-// wrapper degrades that to an Unknown decode so a single mis-wired IDL can't throw the whole instruction
-// list out. Shared by both surfaces so the degrade behaviour can't drift.
 export function safeDecodeInstructionWithIdl(
     ix: TransactionInstruction,
     idl: unknown,

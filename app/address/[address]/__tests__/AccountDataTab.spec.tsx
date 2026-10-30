@@ -99,12 +99,24 @@ describe('AccountDataTab', () => {
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
-    it('should hide the tab when the only IDL is Codama', () => {
+    it('should hide the tab when the only IDL is Codama without account types', () => {
+        const codamaNoAccounts = {
+            ...codamaIdl,
+            program: { ...codamaIdl.program, accounts: [] },
+        } as unknown as CodamaIdl;
+        idlState.idls = [
+            { idl: codamaNoAccounts, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+        ];
+        renderTab();
+        expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
+    });
+
+    it('should show the Anchor Data tab when a Codama IDL (incl. converted legacy) declares account types', () => {
         idlState.idls = [
             { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
         ];
         renderTab();
-        expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
     });
 
     it('should hide the tab while the IDLs load', () => {

@@ -9,7 +9,6 @@ import {
     PdaNode,
     PdaValueNode,
     RegisteredPdaSeedNode,
-    RootNode,
     TypeNode,
     ValueNode,
 } from 'codama';
@@ -18,6 +17,9 @@ import { useMemo } from 'react';
 import { arrayOrEmpty } from '@/app/shared/lib/array';
 import { Logger } from '@/app/shared/lib/logger';
 
+import type { CodamaIdl } from '../lib/types';
+import { formatConstants } from './formatters/format-constants';
+import { formatEvents } from './formatters/format-events';
 import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
 
 function parseEnumNodeVariants(type: EnumTypeNode): string[] {
@@ -86,7 +88,7 @@ function parseValueNodeValue(valueNode: ValueNode): string {
     }
 }
 
-function parseTypeNodeFieldType(type: TypeNode): string {
+export function parseTypeNodeFieldType(type: TypeNode): string {
     switch (type.kind) {
         case 'amountTypeNode':
             return `amount(${type.number} ${type?.unit} decimals[${type?.decimals}])`;
@@ -145,9 +147,11 @@ function parseTypeNodeFieldType(type: TypeNode): string {
             return type.encoding === 'utf8' ? 'string' : `string:${type.encoding}`;
         case 'structTypeNode':
             Logger.warn('[idl] Handle each node separately', { kind: type.kind });
-            return arrayOrEmpty(type.fields)
-                .map(field => parseTypeNodeFieldType(field.type))
-                .join(', ');
+            // Keep field names for inline structs (e.g. named enum struct-variants) so they read
+            // `{ name: type, … }` rather than a bare positional type list.
+            return `{ ${arrayOrEmpty(type.fields)
+                .map(field => `${field.name}: ${parseTypeNodeFieldType(field.type)}`)
+                .join(', ')} }`;
         case 'tupleTypeNode':
             Logger.warn('[idl] Handle each node separately', { kind: type.kind });
             return arrayOrEmpty(type.items)
@@ -247,11 +251,11 @@ function getSeedsFromPda(pda: PdaNode): PdaData['seeds'] {
     }));
 }
 
-export function useFormatCodamaIdl(idl?: RootNode): FormattedIdl | null {
+export function useFormatCodamaIdl(idl?: CodamaIdl): FormattedIdl | null {
     return useMemo(() => (idl ? formatCodamaIdl(idl) : null), [idl]);
 }
 
-export function formatCodamaIdl(idl: RootNode): FormattedIdl {
+export function formatCodamaIdl(idl: CodamaIdl): FormattedIdl {
     const linkedPdas = new Map<string, PdaNode>(arrayOrEmpty(idl.program.pdas).map(item => [item.name, item]));
     const uniqPdaNodes = getUniqPdaNodesFromIxs(arrayOrEmpty(idl.program.instructions));
 
@@ -261,13 +265,15 @@ export function formatCodamaIdl(idl: RootNode): FormattedIdl {
             fieldType: parseTypeNode(acc.data),
             name: acc.name,
         })),
-        constants: undefined, // codama does not have constants
+        constants: formatConstants(idl.legacyConstants),
         errors: idl.program.errors?.map(err => ({
             code: err.code.toString(),
             message: err.message || '',
             name: err.name,
         })),
-        events: undefined, // anchor "events" are in types
+        // Pre-0.30 Anchor events don't survive the Codama conversion, so render them from the originals
+        // carried on the root. Native Codama IDLs have no legacy events and fall through to undefined.
+        events: formatEvents(idl.legacyEvents),
         instructions: idl.program.instructions?.map(ix => ({
             accounts: arrayOrEmpty(ix.accounts).map(acc => {
                 return {

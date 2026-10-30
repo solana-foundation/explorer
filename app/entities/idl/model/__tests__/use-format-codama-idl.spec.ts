@@ -12,6 +12,9 @@ import {
 
 import { invariant } from '@/app/shared/lib/invariant';
 
+import type { CodamaIdl } from '../../lib/types';
+import anchor029Devi from '../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import anchorLegacyShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 // simplified versions of codama IDLs
 import minimalMock from '../../mocks/codama/simplified/minimalMock';
 import programMock1 from '../../mocks/codama/simplified/programMock1';
@@ -19,6 +22,7 @@ import programMock2 from '../../mocks/codama/simplified/programMock2';
 import programMock3 from '../../mocks/codama/simplified/programMock3';
 import programMock4 from '../../mocks/codama/simplified/programMock4';
 import type { EnumFieldType, FieldType, StructFieldType, TypeFieldType } from '../formatters/formatted-idl';
+import { normalizeAnchorIdl } from '../normalize-anchor-idl';
 import { formatCodamaIdl, getUniqPdaNodesFromIxs, useFormatCodamaIdl } from '../use-format-codama-idl';
 
 describe('useFormatCodamaIdl', () => {
@@ -42,6 +46,62 @@ describe('formatCodamaIdl', () => {
         expect(ixs?.[0].name).toBe('initialize');
         expect(ixs?.[0].args).toHaveLength(1);
         expect(ixs?.[0].accounts).toHaveLength(2);
+    });
+
+    it('should leave constants undefined for a native Codama IDL', () => {
+        expect(formatCodamaIdl(minimalMock as any).constants).toBeUndefined();
+    });
+
+    it('should render legacyConstants carried from a converted legacy Anchor IDL', () => {
+        const withConstants = {
+            ...minimalMock,
+            legacyConstants: [{ name: 'SEED', type: 'bytes', value: '[1, 2, 3]' }],
+        };
+
+        const constants = formatCodamaIdl(withConstants as any).constants;
+        expect(constants).toHaveLength(1);
+        expect(constants?.[0]).toMatchObject({ name: 'SEED', type: 'bytes', value: [1, 2, 3] });
+    });
+
+    it('should leave events undefined for a native Codama IDL', () => {
+        expect(formatCodamaIdl(minimalMock as any).events).toBeUndefined();
+    });
+
+    // Regression: a legacy Anchor IDL (amm_v3 / devi51) loses its events through the Codama conversion.
+    // normalizeAnchorIdl carries them on `legacyEvents`; formatCodamaIdl must surface all of them so the
+    // Events tab matches production, which renders every event.
+    it('should render every event carried from a converted legacy Anchor IDL (amm_v3)', () => {
+        const root = normalizeAnchorIdl(anchor029Devi, 'devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH') as CodamaIdl;
+
+        const events = formatCodamaIdl(root).events;
+
+        expect(events).toHaveLength(anchor029Devi.events.length);
+        expect(events?.map(event => event.name)).toEqual(anchor029Devi.events.map(event => event.name));
+
+        const swap = events?.find(event => event.name === 'SwapEvent');
+        expect(swap?.fieldType?.kind).toBe('struct');
+        const fields = (swap?.fieldType as StructFieldType).fields;
+        // Fields render like accounts/types: camelCase names, `pubkey` (not `publicKey`), `u64`/`u128`.
+        expect(fields).toContainEqual({ name: 'poolState', type: 'pubkey' });
+        expect(fields).toContainEqual({ name: 'sqrtPriceX64', type: 'u128' });
+        expect(fields).toContainEqual({ name: 'amount0', type: 'u64' });
+    });
+
+    // A named enum struct-variant keeps its field names (`{ name: type, … }`) instead of collapsing to a
+    // bare positional type list, matching how production renders the variant.
+    it('should keep field names on enum struct-variants (graduationMethod)', () => {
+        const root = normalizeAnchorIdl(
+            anchorLegacyShankWave,
+            'waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF',
+        ) as CodamaIdl;
+
+        const graduationMethod = formatCodamaIdl(root).types?.find(type => type.name === 'graduationMethod');
+
+        const variants = (graduationMethod?.fieldType as EnumFieldType).variants;
+        expect(variants).toContain(
+            'whirlpool { splitBps: u16, feeTierIndex: u16, destination: pubkey, unlocked: bool }',
+        );
+        expect(variants).toContain('manual { splitBps: u16, destination: pubkey }');
     });
 
     it('should correctly format instruction accounts', () => {

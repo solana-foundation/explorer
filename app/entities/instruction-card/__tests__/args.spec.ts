@@ -22,6 +22,7 @@ describe('parseCodamaArgs', () => {
             kind: 'group',
             name: 'data',
             type: 'Lamports',
+            variant: 'Lamports',
         });
     });
 
@@ -98,7 +99,9 @@ describe('parseCodamaArgs', () => {
         const [bytes, list] = parseCodamaArgs({ bytes: new Uint8Array([7, 8]), list: [{ __kind: 'A', value: 1 }] });
 
         expect(list).toEqual({
-            children: [{ children: [textLeaf('value', 'number', '1')], kind: 'group', name: '#0', type: 'A' }],
+            children: [
+                { children: [textLeaf('value', 'number', '1')], kind: 'group', name: '#0', type: 'A', variant: 'A' },
+            ],
             kind: 'group',
             name: 'list',
             type: 'Array[1]',

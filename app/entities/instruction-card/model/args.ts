@@ -4,17 +4,30 @@ import type { FieldValue } from './fields';
 
 export type InstructionArg =
     | { kind: 'leaf'; name: string; type: string; value: FieldValue }
-    | { kind: 'group'; name: string; type: string; children: readonly [InstructionArg, ...InstructionArg[]] }
+    | {
+          kind: 'group';
+          name: string;
+          type: string;
+          variant?: string;
+          children: readonly [InstructionArg, ...InstructionArg[]];
+      }
     | { kind: 'empty'; name: string; type: string };
 
-export function parseCodamaArgs(data: unknown): readonly InstructionArg[] {
+export function parseCodamaArgs(data: unknown, declaredTypes?: ReadonlyMap<string, string>): readonly InstructionArg[] {
     if (data === undefined) {
         return [];
     }
     if (!isStruct(data)) {
-        return [parseArg('data', data)];
+        return [withDeclaredType(parseArg('data', data), declaredTypes)];
     }
-    return parseFields(data).filter(arg => arg.name !== 'discriminator');
+    return parseFields(data)
+        .filter(arg => arg.name !== 'discriminator')
+        .map(arg => withDeclaredType(arg, declaredTypes));
+}
+
+function withDeclaredType(arg: InstructionArg, declaredTypes?: ReadonlyMap<string, string>): InstructionArg {
+    const declared = declaredTypes?.get(arg.name);
+    return declared ? { ...arg, type: declared } : arg;
 }
 
 const TAG_KEYS = new Set(['__discriminator', '__kind', '__option']);
@@ -39,7 +52,8 @@ function parseArg(name: string, value: unknown): InstructionArg {
         if (typeof value.__kind === 'string' && children.length === 0) {
             return { kind: 'leaf', name, type: 'enum', value: { kind: 'text', value: value.__kind } };
         }
-        return group({ children, name, type: groupType(value) });
+        const variant = typeof value.__kind === 'string' ? value.__kind : undefined;
+        return group({ children, name, type: groupType(value), variant });
     }
     if (typeof value === 'string') {
         return isAddress(value)
@@ -54,9 +68,20 @@ function parseItems({ name, type, items }: { name: string; type: string; items: 
     return group({ children, name, type });
 }
 
-function group({ name, type, children }: { name: string; type: string; children: InstructionArg[] }): InstructionArg {
+function group({
+    name,
+    type,
+    children,
+    variant,
+}: {
+    name: string;
+    type: string;
+    children: InstructionArg[];
+    variant?: string;
+}): InstructionArg {
     const [first, ...rest] = children;
-    return first ? { children: [first, ...rest], kind: 'group', name, type } : { kind: 'empty', name, type };
+    if (!first) return { kind: 'empty', name, type };
+    return { children: [first, ...rest], kind: 'group', name, type, ...(variant ? { variant } : {}) };
 }
 
 function groupType(value: Record<string, unknown>): string {

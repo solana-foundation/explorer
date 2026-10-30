@@ -1,4 +1,4 @@
-import { getAnchorIdlsWithAccounts, useAnchorProgram } from '@entities/idl';
+import { getAnchorIdlsWithAccounts, getCodamaIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 
@@ -6,6 +6,7 @@ import { NavigationTabLink } from '@/app/shared/ui/navigation-tabs';
 
 export function AccountDataTab({ programId }: { programId: PublicKey }) {
     const { url, cluster } = useCluster();
+    const { idls } = useProgramIdls(programId.toString(), url, cluster);
     const { program } = useAnchorProgram({
         cluster,
         programAddress: programId.toString(),
@@ -13,7 +14,9 @@ export function AccountDataTab({ programId }: { programId: PublicKey }) {
         url,
     });
 
-    if (!program) {
+    // The tab renders for a decodable Anchor program or a Codama IDL (incl. converted legacy) with accounts.
+    const hasCodamaAccounts = !!idls && getCodamaIdlsWithAccounts(idls).length > 0;
+    if (!program && !hasCodamaAccounts) {
         // eslint-disable-next-line unicorn/no-null -- a React component returns null to render nothing
         return null;
     }

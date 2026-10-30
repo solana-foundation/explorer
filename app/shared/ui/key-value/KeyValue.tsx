@@ -26,7 +26,7 @@ const rowVariants = cva('flex flex-row border-0 border-solid border-outer-space-
     },
 });
 
-const LABEL_CLASS = 'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:normal]';
+const LABEL_CLASS = 'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:anywhere]';
 
 export function KeyValue({
     label,
