@@ -96,7 +96,7 @@ function getInstructionError(error: unknown): string {
         value = error['BorshIoError'];
     }
 
-    if (out && value) {
+    if (out && value !== undefined && value !== null) {
         return out.replace('{0}', String(value));
     }
 
