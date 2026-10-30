@@ -1,8 +1,9 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
-import { getAnchorIdls, useAnchorProgram } from '@entities/idl';
+import { getAnchorIdls, type ProgramIdls, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { safeDecodeInstructionWithIdl } from '@features/decode-instruction-with-idl';
 import { getBase58Encoder } from '@solana/kit';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
-import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
+import { getAnchorProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { camelToTitleCase } from '@utils/index';
@@ -13,7 +14,7 @@ import { useClusterPath } from '@utils/url';
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ChevronsUp } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
@@ -160,6 +161,61 @@ export function ProgramLogsCardBody({
 
 const BASE58_ENCODER = getBase58Encoder();
 
+function buildTxInstruction(
+    message: VersionedMessage | ParsedMessage,
+    instruction: any,
+    programId: PublicKey,
+): TransactionInstruction | undefined {
+    if ('compiledInstructions' in message) {
+        const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } = message.header;
+        const keys = instruction.accountKeyIndexes.map((accountIndex: number) => {
+            let isSigner = false;
+            let isWritable = true;
+            if (accountIndex < numRequiredSignatures) {
+                isSigner = true;
+                if (accountIndex >= numRequiredSignatures - numReadonlySignedAccounts) isWritable = false;
+            } else if (accountIndex >= message.staticAccountKeys.length - numReadonlyUnsignedAccounts) {
+                isWritable = false;
+            }
+            return { isSigner, isWritable, pubkey: message.staticAccountKeys[accountIndex] };
+        });
+        return new TransactionInstruction({ data: toBuffer(instruction.data), keys, programId });
+    }
+    if ('instructions' in message && !('parsed' in instruction)) {
+        const keys = instruction.accounts.map((account: PublicKey) => {
+            const accountKey = message.accountKeys.find(({ pubkey }) => pubkey.equals(account));
+            return {
+                isSigner: accountKey?.signer || false,
+                isWritable: accountKey?.writable || false,
+                pubkey: account,
+            };
+        });
+        return new TransactionInstruction({
+            data: toBuffer(new Uint8Array(BASE58_ENCODER.encode(instruction.data))),
+            keys,
+            programId,
+        });
+    }
+    return undefined;
+}
+
+function resolveInstructionName(
+    ix: TransactionInstruction,
+    idls: ProgramIdls['idls'],
+    url: string,
+): string | undefined {
+    for (const { idl } of idls ?? []) {
+        const decoded = safeDecodeInstructionWithIdl(ix, idl, url);
+        if (decoded.kind === 'codama') {
+            const last = decoded.parsedIx.path.at(-1);
+            if (last?.kind === 'instructionNode') return last.name;
+        } else if (decoded.kind === 'anchor' && decoded.details.ixDef) {
+            return decoded.details.ixName;
+        }
+    }
+    return undefined;
+}
+
 function ProgramLogRow({
     badgeColor,
     cluster,
@@ -187,77 +243,20 @@ function ProgramLogRow({
         select: getAnchorIdls,
         url,
     });
+    const { idls } = useProgramIdls(programId.toString(), url, cluster);
 
-    // Try to get instruction name from IDL if available
-    let instructionName = 'Instruction';
-
-    if (anchorProgram) {
+    // Resolve the name against every published IDL — PMP, the Anchor PDA, and legacy IDLs the resolver
+    // converted to Codama root nodes — not only a built Anchor Program, which legacy programs lack.
+    const instructionName = useMemo(() => {
         try {
-            let txInstruction: TransactionInstruction | undefined;
-
-            if ('compiledInstructions' in message) {
-                // VersionedMessage with compiledInstructions
-                const { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts } =
-                    message.header;
-
-                const accounts = instruction.accountKeyIndexes.map((accountIndex: number) => {
-                    const pubkey = message.staticAccountKeys[accountIndex];
-
-                    // Determine if account is signer and writable based on message header
-                    let isSigner = false;
-                    let isWritable = true;
-
-                    if (accountIndex < numRequiredSignatures) {
-                        isSigner = true;
-                        if (accountIndex >= numRequiredSignatures - numReadonlySignedAccounts) {
-                            isWritable = false;
-                        }
-                    } else if (accountIndex >= message.staticAccountKeys.length - numReadonlyUnsignedAccounts) {
-                        isWritable = false;
-                    }
-
-                    return {
-                        isSigner,
-                        isWritable,
-                        pubkey,
-                    };
-                });
-
-                txInstruction = new TransactionInstruction({
-                    data: toBuffer(instruction.data),
-                    keys: accounts,
-                    programId,
-                });
-            } else if ('instructions' in message && !('parsed' in instruction)) {
-                // ParsedMessage with PartiallyDecodedInstruction
-                const keys = instruction.accounts.map((account: PublicKey) => {
-                    const accountKey = message.accountKeys.find(({ pubkey }) => pubkey.equals(account));
-                    return {
-                        isSigner: accountKey?.signer || false,
-                        isWritable: accountKey?.writable || false,
-                        pubkey: account,
-                    };
-                });
-
-                txInstruction = new TransactionInstruction({
-                    data: toBuffer(new Uint8Array(BASE58_ENCODER.encode(instruction.data))),
-                    keys,
-                    programId,
-                });
-            }
-
-            // Anchor instruction-name decoding needs a built Anchor Program; legacy IDLs resolve as
-            // Codama root nodes (no Program), so they fall through to the default instruction label.
-            if (txInstruction && anchorProgram) {
-                const decodedName = getAnchorNameForInstruction(txInstruction, anchorProgram);
-                if (decodedName) {
-                    instructionName = camelToTitleCase(decodedName);
-                }
-            }
+            const txInstruction = buildTxInstruction(message, instruction, programId);
+            const name = txInstruction && resolveInstructionName(txInstruction, idls, url);
+            return name ? camelToTitleCase(name) : 'Instruction';
         } catch (error) {
             Logger.error(error);
+            return 'Instruction';
         }
-    }
+    }, [message, instruction, programId, idls, url]);
 
     return (
         <BaseTable.Row data-ix-index={index}>
