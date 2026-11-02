@@ -75,7 +75,10 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell className="w-px">Field</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="w-px">Type</BaseTable.HeaderCell>
+                            {/* Below md each row shows its type under the field name, so the Type column collapses. */}
+                            <BaseTable.HeaderCell className="w-px max-md:!p-0">
+                                <span className="max-md:hidden">Type</span>
+                            </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell className="w-px">Value</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
