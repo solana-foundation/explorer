@@ -16,7 +16,6 @@
 | Dynamic | `/address/[address]/entries` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/feature-gate` | 380 kB | 810 kB |
 | Dynamic | `/address/[address]/idl` | 500 kB | 930 kB |
-| Dynamic | `/address/[address]/instructions` | 400 kB | 820 kB |
 | Dynamic | `/address/[address]/metadata` | 380 kB | 810 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 380 kB | 810 kB |
 | Dynamic | `/address/[address]/program-multisig` | 400 kB | 810 kB |
