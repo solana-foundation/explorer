@@ -188,10 +188,7 @@ describe('CustomIdlUploadDialog', () => {
 
     it('should keep the text of the last picked file when an earlier read ends later', async () => {
         renderDialog(PROGRAM_ADDRESS);
-        let finishFirstRead: (text: string) => void = () => undefined;
-        const first = Object.assign(new File(['{}'], 'first.json'), {
-            text: () => new Promise<string>(resolve => (finishFirstRead = resolve)),
-        });
+        const { file: first, finishRead: finishFirstRead } = fileWithPendingRead('first.json');
         const last = Object.assign(new File([IDL_TEXT], 'last.json'), { text: async () => IDL_TEXT });
         const input = screen.getByLabelText('Anchor or Codama IDL file');
 
@@ -205,10 +202,7 @@ describe('CustomIdlUploadDialog', () => {
 
     it('should keep the pasted text when the read of a picked file ends later', async () => {
         const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
-        let finishRead: (text: string) => void = () => undefined;
-        const file = Object.assign(new File(['{}'], 'picked.json'), {
-            text: () => new Promise<string>(resolve => (finishRead = resolve)),
-        });
+        const { file, finishRead } = fileWithPendingRead('picked.json');
         fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), { target: { files: [file] } });
 
         fireEvent.change(screen.getByLabelText('Or paste the IDL JSON'), { target: { value: IDL_TEXT } });
@@ -222,10 +216,7 @@ describe('CustomIdlUploadDialog', () => {
 
     it('should ignore Add until the read of a picked file ends', async () => {
         const { onOpenChange, store } = renderDialog(PROGRAM_ADDRESS);
-        let finishRead: (text: string) => void = () => undefined;
-        const file = Object.assign(new File(['{}'], 'picked.json'), {
-            text: () => new Promise<string>(resolve => (finishRead = resolve)),
-        });
+        const { file, finishRead } = fileWithPendingRead('picked.json');
         fireEvent.change(screen.getByLabelText('Or paste the IDL JSON'), { target: { value: IDL_TEXT } });
         fireEvent.change(screen.getByLabelText('Anchor or Codama IDL file'), { target: { files: [file] } });
 
@@ -333,10 +324,7 @@ describe('CustomIdlUploadDialog', () => {
             target: { files: [readableFile('amm_v3.json')] },
         });
         await screen.findByText('amm_v3.json');
-        let finishRead: (text: string) => void = () => undefined;
-        const late = Object.assign(new File(['{}'], 'late.json'), {
-            text: () => new Promise<string>(resolve => (finishRead = resolve)),
-        });
+        const { file: late, finishRead } = fileWithPendingRead('late.json');
 
         fireEvent.drop(window, { dataTransfer: fileTransfer(late) });
         await userEvent.click(screen.getByRole('button', { name: 'Remove file' }));
@@ -411,6 +399,14 @@ describe('CustomIdlUploadDialog', () => {
 
 function readableFile(name: string) {
     return Object.assign(new File([IDL_TEXT], name), { text: async () => IDL_TEXT });
+}
+
+function fileWithPendingRead(name: string): { file: File; finishRead: (text: string) => void } {
+    let resolveRead: (text: string) => void = () => undefined;
+    const file = Object.assign(new File(['{}'], name), {
+        text: () => new Promise<string>(resolve => (resolveRead = resolve)),
+    });
+    return { file, finishRead: text => resolveRead(text) };
 }
 
 function fileTransfer(file: File) {
