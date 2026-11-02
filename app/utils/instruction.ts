@@ -1,10 +1,5 @@
 import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
 import { type TransactionWithMeta } from '@entities/transaction-data';
-import { isSerumProgramId, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
-import { isTokenSwapProgramId, parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
-import { isTokenProgram } from '@explorer/parsers';
-import { isTokenProgramId } from '@providers/accounts/tokens';
-import { getBase58Encoder } from '@solana/kit';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -62,66 +57,4 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
         Logger.error(err, { signature: signatureInfo.signature });
         return 'Unknown';
     }
-}
-
-function getTokenInstructionName(
-    ix: ParsedInstruction | PartiallyDecodedInstruction,
-    signatureInfo: ConfirmedSignatureInfo,
-) {
-    let name = 'Unknown';
-
-    if ('parsed' in ix) {
-        if (isTokenProgram(ix.program)) {
-            return getTokenProgramInstructionName(ix, signatureInfo);
-        } else {
-            return undefined;
-        }
-    }
-
-    const programId = ix.programId.toBase58();
-    try {
-        // Mango is intentionally absent: its resolver lives in the modern NAME_SOURCES chain; consolidating this legacy resolver is a follow-up.
-        if (isSerumProgramId(programId)) {
-            return parseSerumInstructionTitle(programId, getBase58Encoder().encode(ix.data));
-        } else if (isTokenSwapProgramId(programId)) {
-            return parseTokenSwapInstructionTitle(programId, getBase58Encoder().encode(ix.data));
-        }
-    } catch (error) {
-        Logger.error(error, { signature: signatureInfo.signature });
-        return undefined;
-    }
-
-    if (ix.accounts.findIndex(account => isTokenProgramId(account)) >= 0) {
-        name = 'Unknown (Inner)';
-    } else {
-        return undefined;
-    }
-
-    return name;
-}
-
-export function getTokenInstructionType(
-    transactionWithMeta: TransactionWithMeta,
-    ix: ParsedInstruction | PartiallyDecodedInstruction,
-    signatureInfo: ConfirmedSignatureInfo,
-    index: number,
-): InstructionType | undefined {
-    const innerInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[] = [];
-
-    if (transactionWithMeta.meta?.innerInstructions) {
-        transactionWithMeta.meta.innerInstructions.forEach(ix => {
-            if (ix.index === index) {
-                ix.instructions.forEach(inner => {
-                    innerInstructions.push(inner);
-                });
-            }
-        });
-    }
-
-    const name = getTokenInstructionName(ix, signatureInfo) || 'Unknown';
-
-    return {
-        innerInstructions,
-        name,
-    };
 }
