@@ -30,7 +30,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                     ui="dashkit"
                     className={cn('h-auto min-h-[60px] gap-2', collapsible && !expanded && 'border-b-0')}
                 >
-                    <BaseCardTitle ui="dashkit" className="flex min-w-0 items-center break-all">
+                    <BaseCardTitle ui="dashkit" className="flex min-w-0 items-center [overflow-wrap:anywhere]">
                         {title}
                     </BaseCardTitle>
                     {headerButtons}
