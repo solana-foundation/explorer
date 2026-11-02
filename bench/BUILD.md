@@ -14,21 +14,21 @@
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/domains` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/entries` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/feature-gate` | 380 kB | 810 kB |
+| Dynamic | `/address/[address]/feature-gate` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/idl` | 500 kB | 930 kB |
-| Dynamic | `/address/[address]/metadata` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 380 kB | 810 kB |
+| Dynamic | `/address/[address]/metadata` | 400 kB | 810 kB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/program-multisig` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/rewards` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/security` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/slot-hashes` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/stake-history` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/subscriptions` | 380 kB | 810 kB |
+| Dynamic | `/address/[address]/slot-hashes` | 400 kB | 810 kB |
+| Dynamic | `/address/[address]/stake-history` | 400 kB | 810 kB |
+| Dynamic | `/address/[address]/subscriptions` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/token-extensions` | 400 kB | 810 kB |
 | Dynamic | `/address/[address]/tokens` | 410 kB | 820 kB |
-| Dynamic | `/address/[address]/transfers` | 390 kB | 820 kB |
+| Dynamic | `/address/[address]/transfers` | 410 kB | 820 kB |
 | Dynamic | `/address/[address]/verified-build` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/vote-history` | 380 kB | 810 kB |
+| Dynamic | `/address/[address]/vote-history` | 400 kB | 810 kB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
 | Dynamic | `/api/domain-info/[domain]` | — | — |
 | Dynamic | `/api/geo-location` | — | — |
@@ -65,5 +65,5 @@
 | Dynamic | `/robots.txt` | — | — |
 | Static | `/tos` | 10 kB | 420 kB |
 | Dynamic | `/tx/[signature]` | 460 kB | 870 kB |
-| Dynamic | `/tx/[signature]/inspect` | 450 kB | 860 kB |
-| Static | `/tx/inspector` | 450 kB | 860 kB |
+| Dynamic | `/tx/[signature]/inspect` | 450 kB | 880 kB |
+| Static | `/tx/inspector` | 450 kB | 880 kB |
