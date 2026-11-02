@@ -125,9 +125,9 @@ overrides:
   ws@>=7.0.0 <7.5.11: 7.5.11
 
 patchedDependencies:
-  '@codama/nodes-from-anchor@1.3.8':
-    hash: 0998b86e7c34d80be23b8b33f9004bfbd53057bae5f6c8cfd6cd179e8f175199
-    path: packages/idl-decode/patches/@codama__nodes-from-anchor@1.3.8.patch
+  '@codama/nodes-from-anchor@1.5.6':
+    hash: 7bdd71c1166b91b6a4d67b2add81a8625f17e88e3422e2a6e00a64fe8712f038
+    path: packages/idl-decode/patches/@codama__nodes-from-anchor@1.5.6.patch
 
 importers:
 
@@ -141,7 +141,7 @@ importers:
         version: 1.4.2(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/nodes-from-anchor':
         specifier: 1.5.6
-        version: 1.5.6(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
+        version: 1.5.6(patch_hash=7bdd71c1166b91b6a4d67b2add81a8625f17e88e3422e2a6e00a64fe8712f038)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@coral-xyz/anchor':
         specifier: 0.30.1
         version: 0.30.1(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
@@ -766,11 +766,11 @@ importers:
   packages/idl-decode:
     dependencies:
       '@codama/dynamic-parsers':
-        specifier: 1.1.30
-        version: 1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
+        specifier: 1.4.2
+        version: 1.4.2(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/nodes-from-anchor':
-        specifier: 1.3.8
-        version: 1.3.8(patch_hash=0998b86e7c34d80be23b8b33f9004bfbd53057bae5f6c8cfd6cd179e8f175199)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
+        specifier: 1.5.6
+        version: 1.5.6(patch_hash=7bdd71c1166b91b6a4d67b2add81a8625f17e88e3422e2a6e00a64fe8712f038)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@explorer/utils':
         specifier: workspace:*
         version: link:../utils
@@ -781,8 +781,8 @@ importers:
         specifier: ^8.3.0
         version: 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
       codama:
-        specifier: ~1.5.0
-        version: 1.5.0
+        specifier: ~1.11.0
+        version: 1.11.0
     devDependencies:
       '@codama/dynamic-client':
         specifier: 0.1.0
@@ -1140,10 +1140,6 @@ packages:
   '@clack/prompts@0.8.2':
     resolution: {integrity: sha512-6b9Ab2UiZwJYA9iMyboYyW9yJvAO9V753ZhS+DHKEjZRKAxPPOb7MXXu84lsPFG+vZt6FRFniZ8rXi+zCIw4yQ==}
 
-  '@codama/cli@1.4.4':
-    resolution: {integrity: sha512-0uLecW/RZC2c1wx3j/eiRAYvilvNY+2DoyEYu/hV0OfM1/uIgIyuy5U+wolV+LY4wLFYdApjYdy+5D32lngCHg==}
-    hasBin: true
-
   '@codama/cli@1.5.1':
     resolution: {integrity: sha512-Cn9SokOi0IpixbdW1Aus61Qt0GCJhWE/+q1OdcvRBAQ4V0NacCpdf7N9aF9HR/H7AD+LWJa3JtK7pEs69ywM6Q==}
     hasBin: true
@@ -1176,9 +1172,6 @@ packages:
   '@codama/dynamic-instructions@1.0.0':
     resolution: {integrity: sha512-IZEaf1Hnqtk0xu25CuGgwug49576EuANYt+5TO6967HwDYIJ7X9c5ZolIExELM2dp6sr4BwVDDtp24ftdRBRKA==}
     hasBin: true
-
-  '@codama/dynamic-parsers@1.1.30':
-    resolution: {integrity: sha512-Jp8LLfUR+pEvPW1nDJ6tDIUJiQalTgYeataORZA3GkW8RmwTfWFWJMJvELXKFQ+nXRaGnUslUjRGHWowqVAmwQ==}
 
   '@codama/dynamic-parsers@1.4.2':
     resolution: {integrity: sha512-FKfOLl8WUZzk8Bk3j/yJjR6LwtrKgMDHYqeAJzLUVChSW3l/bDt9qPYVUrc34zKkWk9SOqVAxSVo3jIbMGeoBw==}
@@ -1214,9 +1207,6 @@ packages:
   '@codama/node-types@1.8.0':
     resolution: {integrity: sha512-KE9K9jjEdeFKtDKRrjjm5YwEkg7l+YwoWiH2w1UXJL/x6P5uul6+O5WnGsJn8IFtBVSLN4hbD7YSsZ0/lktJxQ==}
 
-  '@codama/nodes-from-anchor@1.3.8':
-    resolution: {integrity: sha512-+nGg7YcXbuqrKDFh/8KBRtR3PcR7bJr4w4jy9pNogHpM5CsDcTEa+fiPRHcYh3CgbaX86DgTfvkEw2dmgf+qzg==}
-
   '@codama/nodes-from-anchor@1.5.6':
     resolution: {integrity: sha512-Ldn8WYDNOG42yWc3Kl/mqeVdfQC84Hhf5d2cYMpw90sc51eHSZ4HFnnpAEnHEyf3s0FhId05JmkKJ+QtkKy3rg==}
 
@@ -1242,9 +1232,6 @@ packages:
   '@codama/validators@1.11.0':
     resolution: {integrity: sha512-aOv+DL01aUkg7lW4N1A37NZ6cpWdNvlYV0M6FSP7IhqX4h3wsdnoBWMp5pRbZKYlJp78uF1dG9+W5U7l9SKxOg==}
 
-  '@codama/validators@1.5.0':
-    resolution: {integrity: sha512-p3ufDxnCH1jiuHGzcBv4/d+ctzUcKD2K3gX/W8169tC41o9DggjlEpNy1Z6YAAhVb3wHnmXVGA2qmp32rWSfWw==}
-
   '@codama/validators@1.6.0':
     resolution: {integrity: sha512-QlLIQt6EpZ7sQvVOz8NFKtrzWLAwYzle0tet2Q0DDU8+4LO654lj+oAwjXzY3eAfTesqBqOgMCPtQe0EpGWk3g==}
 
@@ -1262,9 +1249,6 @@ packages:
 
   '@codama/visitors@1.11.0':
     resolution: {integrity: sha512-2Xfkqk3fxiPL69gi24HThCV8cflWq94pGf+4rmDx9SmPtvK5wfOVQ6J68d47T1/FuVTsFJ8R41ZVfaoGZ/CBRg==}
-
-  '@codama/visitors@1.5.0':
-    resolution: {integrity: sha512-SwtQaleXxAaFz6uHygxki621q4nPUDQlnwEhsg+QKOjHpKWXjLYdJof+R8gUiTV/n7/IeNnjvxJTTNfUsvETPQ==}
 
   '@codama/visitors@1.6.0':
     resolution: {integrity: sha512-11/adC2WiH3+iMWluXkb+ae46sjoDm2xztI+CBEeIcBQd6mm4iuJTTRS0yrGfDwAJE1XzI/nc2MrR0Pvn+Rvvw==}
@@ -2518,10 +2502,6 @@ packages:
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
-
-  '@noble/hashes@2.2.0':
-    resolution: {integrity: sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==}
-    engines: {node: '>= 20.19.0'}
 
   '@noble/hashes@2.4.0':
     resolution: {integrity: sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA==}
@@ -6648,10 +6628,6 @@ packages:
 
   codama@1.11.0:
     resolution: {integrity: sha512-h8IjY8s1yNAA87aeA7D63SbZd9Be1lwfjp7r4pO3b8qwlYL+OKrZxEcErUyeMaXkpH8vKJUotRNlRKFsV1YVTg==}
-    hasBin: true
-
-  codama@1.5.0:
-    resolution: {integrity: sha512-hhfSzrOiDX3bV7QmJneEBsBk3ln4gIcMJs6P8BlEJ3EFI+P0QZaTT5W61o8Tq0/79hTZeyj0gP65HZ/LYJil+w==}
     hasBin: true
 
   codama@1.6.0:
@@ -11183,15 +11159,6 @@ snapshots:
       picocolors: 1.1.1
       sisteransi: 1.0.5
 
-  '@codama/cli@1.4.4':
-    dependencies:
-      '@codama/nodes': 1.5.0
-      '@codama/visitors': 1.5.0
-      '@codama/visitors-core': 1.5.0
-      commander: 14.0.3
-      picocolors: 1.1.1
-      prompts: 2.4.2
-
   '@codama/cli@1.5.1':
     dependencies:
       '@codama/nodes': 1.6.0
@@ -11299,17 +11266,6 @@ snapshots:
       - fastestsmallesttextencoderdecoder
       - typescript
 
-  '@codama/dynamic-parsers@1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
-    dependencies:
-      '@codama/dynamic-codecs': 1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
-      '@codama/errors': 1.5.0
-      '@codama/nodes': 1.5.0
-      '@codama/visitors-core': 1.5.0
-      '@solana/instructions': 5.5.1(typescript@5.7.3)
-    transitivePeerDependencies:
-      - fastestsmallesttextencoderdecoder
-      - typescript
-
   '@codama/dynamic-parsers@1.4.2(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
     dependencies:
       '@codama/dynamic-codecs': 1.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
@@ -11357,18 +11313,7 @@ snapshots:
 
   '@codama/node-types@1.8.0': {}
 
-  '@codama/nodes-from-anchor@1.3.8(patch_hash=0998b86e7c34d80be23b8b33f9004bfbd53057bae5f6c8cfd6cd179e8f175199)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
-    dependencies:
-      '@codama/errors': 1.5.0
-      '@codama/nodes': 1.5.0
-      '@codama/visitors': 1.5.0
-      '@noble/hashes': 2.2.0
-      '@solana/codecs': 5.5.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
-    transitivePeerDependencies:
-      - fastestsmallesttextencoderdecoder
-      - typescript
-
-  '@codama/nodes-from-anchor@1.5.6(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
+  '@codama/nodes-from-anchor@1.5.6(patch_hash=7bdd71c1166b91b6a4d67b2add81a8625f17e88e3422e2a6e00a64fe8712f038)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
     dependencies:
       '@codama/errors': 1.11.0
       '@codama/nodes': 1.11.0
@@ -11425,12 +11370,6 @@ snapshots:
       '@codama/nodes': 1.11.0
       '@codama/visitors-core': 1.11.0
 
-  '@codama/validators@1.5.0':
-    dependencies:
-      '@codama/errors': 1.5.0
-      '@codama/nodes': 1.5.0
-      '@codama/visitors-core': 1.5.0
-
   '@codama/validators@1.6.0':
     dependencies:
       '@codama/errors': 1.6.0
@@ -11466,12 +11405,6 @@ snapshots:
       '@codama/errors': 1.11.0
       '@codama/nodes': 1.11.0
       '@codama/visitors-core': 1.11.0
-
-  '@codama/visitors@1.5.0':
-    dependencies:
-      '@codama/errors': 1.5.0
-      '@codama/nodes': 1.5.0
-      '@codama/visitors-core': 1.5.0
 
   '@codama/visitors@1.6.0':
     dependencies:
@@ -12521,8 +12454,6 @@ snapshots:
   '@noble/hashes@1.5.0': {}
 
   '@noble/hashes@1.8.0': {}
-
-  '@noble/hashes@2.2.0': {}
 
   '@noble/hashes@2.4.0': {}
 
@@ -16658,14 +16589,6 @@ snapshots:
       '@codama/nodes': 1.11.0
       '@codama/validators': 1.11.0
       '@codama/visitors': 1.11.0
-
-  codama@1.5.0:
-    dependencies:
-      '@codama/cli': 1.4.4
-      '@codama/errors': 1.5.0
-      '@codama/nodes': 1.5.0
-      '@codama/validators': 1.5.0
-      '@codama/visitors': 1.5.0
 
   codama@1.6.0:
     dependencies:

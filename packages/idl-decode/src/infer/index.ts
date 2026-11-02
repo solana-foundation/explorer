@@ -70,6 +70,14 @@ type CodamaNumber<F> = F extends 'i64' | 'i128' | 'i256' | 'u64' | 'u128' | 'u25
 // Flattens intersections so inferred enum variants hover as one object literal.
 type Flat<T> = { [K in keyof T]: T[K] };
 
+// Scalar enums (every variant empty) decode to a kit data-enum object carrying both the capitalized
+// variant name and its numeric discriminator (codama >= 1.11 — older versions returned the bare index).
+type ScalarEnumValue<V> = V extends { name: infer N }
+    ? IsLiteralName<N> extends true
+        ? { __discriminator: number; __kind: Capitalize<N & string> }
+        : unknown
+    : unknown;
+
 // Data enums decode as kit discriminated unions — `__kind` carries the capitalized variant name.
 type EnumVariantValue<TRoot, V> = V extends { kind: 'enumEmptyVariantTypeNode'; name: infer N }
     ? IsLiteralName<N> extends true
@@ -126,7 +134,7 @@ export type CodamaValue<TRoot, TNode> = TNode extends { format: infer F; kind: '
                           ? CodamaFieldsObject<TRoot, F>
                           : TNode extends { kind: 'enumTypeNode'; variants: infer V }
                             ? V extends readonly { kind: 'enumEmptyVariantTypeNode' }[]
-                                ? number // scalar enums decode to the variant index
+                                ? ScalarEnumValue<V[number]> // scalar enums decode to a {__kind, __discriminator} data-enum object
                                 : V extends readonly unknown[]
                                   ? EnumVariantValue<TRoot, V[number]>
                                   : unknown

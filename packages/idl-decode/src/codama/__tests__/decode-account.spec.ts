@@ -6,7 +6,10 @@ import { IDL_ERROR__ACCOUNT_DECODE_FAILED, IDL_ERROR__IDL_PARSE_FAILED } from '.
 import { type AnchorIdl, IdlStandard } from '../../types';
 import { loadSimpleIdl, loadTokenkegIdl } from '../../__tests__/fixtures';
 
+// identifyAccountData defaults to `undefined` (a plain miss) — the discriminator-match path is covered
+// end-to-end, without the module mock, in decode-account-discriminator.spec.ts.
 vi.mock('@codama/dynamic-parsers', () => ({
+    identifyAccountData: vi.fn(),
     parseAccountData: vi.fn(),
 }));
 

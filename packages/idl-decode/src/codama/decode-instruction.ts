@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions -- every cast sits behind a runtime IDL guard TS cannot relate to the unresolved conditional return type */
-import { parseInstruction } from '@codama/dynamic-parsers';
+import { identifyInstructionData, parseInstruction } from '@codama/dynamic-parsers';
 import type { Instruction } from '@solana/kit';
 
 import { convertToCodama } from '../anchor/convert.js';
+import { isDecodeFailureMiss } from './discriminator-miss.js';
 import { getIdlProgramAddress, getIdlStandard, isAnchorIdl, isCodamaIdl } from '../detect/index.js';
 import { IDL_ERROR__IDL_ADDRESS_MISMATCH, IDL_ERROR__INSTRUCTION_DECODE_FAILED, IdlError, ok } from '../errors.js';
 import {
@@ -52,13 +53,23 @@ export function decodeInstructionWithIdl(
     if (convertError) errors.push(convertError);
     if (root) {
         try {
+            const data = ix.data ?? new Uint8Array();
             const parsed = parseInstruction(root, {
                 accounts: ix.accounts ?? [],
-                data: ix.data ?? new Uint8Array(),
+                data,
                 programAddress: ix.programAddress,
             });
-            // a miss (no discriminator match) is a plain miss, not an error
             if (parsed) return codamaArm(parsed);
+            // A miss on a discriminator-bearing instruction is a decode failure, not a plain miss —
+            // surface it so the diagnostic reaches Sentry rather than vanishing (see isDecodeFailureMiss).
+            if (isDecodeFailureMiss(identifyInstructionData(root, data, { programAddress: ix.programAddress }))) {
+                errors.push(
+                    new IdlError(IDL_ERROR__INSTRUCTION_DECODE_FAILED, {
+                        programAddress: ix.programAddress,
+                        standard: getIdlStandard(idl),
+                    }),
+                );
+            }
         } catch (cause) {
             // the IDL already converted — this is a decode failure, not an IDL-parse failure
             errors.push(

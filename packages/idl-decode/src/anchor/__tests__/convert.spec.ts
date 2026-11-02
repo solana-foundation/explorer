@@ -22,8 +22,8 @@ describe('convertToCodama', () => {
 
         const [, converted] = convertToCodama(source);
         const argument = converted?.program.instructions
-            .find(ix => ix.name === 'addProduct')
-            ?.arguments.find(arg => arg.name === 'discriminator');
+            ?.find(ix => ix.name === 'addProduct')
+            ?.arguments?.find(arg => arg.name === 'discriminator');
 
         const declaredHex = declared.map(byte => byte.toString(16).padStart(2, '0')).join('');
         expect(argument?.defaultValue).toMatchObject({ data: declaredHex, encoding: 'base16' });

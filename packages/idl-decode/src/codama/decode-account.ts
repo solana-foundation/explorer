@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions -- the cast sits behind a runtime IDL guard TS cannot relate to the unresolved conditional return type */
-import { parseAccountData } from '@codama/dynamic-parsers';
+import { identifyAccountData, parseAccountData } from '@codama/dynamic-parsers';
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 import { convertToCodama } from '../anchor/convert.js';
+import { isDecodeFailureMiss } from './discriminator-miss.js';
 import { getIdlStandard, isAnchorIdl, isCodamaIdl } from '../detect/index.js';
 import { IDL_ERROR__ACCOUNT_DECODE_FAILED, IdlError, ok } from '../errors.js';
 import {
@@ -44,8 +45,18 @@ export function decodeAccountWithIdl(
     if (root) {
         try {
             const parsed = parseAccountData(root, data);
-            // a miss (no discriminator match) is a plain miss, not an error
             if (parsed) return codamaArm(parsed);
+            // A miss on a discriminator-bearing account is a decode failure, not a plain miss — surface it
+            // so the diagnostic reaches Sentry rather than vanishing (see isDecodeFailureMiss). A
+            // discriminator-less account (codama's single-candidate guess) stays a plain miss.
+            if (isDecodeFailureMiss(identifyAccountData(root, data))) {
+                errors.push(
+                    new IdlError(IDL_ERROR__ACCOUNT_DECODE_FAILED, {
+                        dataLength: data.length,
+                        standard: getIdlStandard(idl),
+                    }),
+                );
+            }
         } catch (cause) {
             errors.push(
                 new IdlError(IDL_ERROR__ACCOUNT_DECODE_FAILED, {

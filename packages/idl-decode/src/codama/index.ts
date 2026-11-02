@@ -6,6 +6,7 @@ import { decodeAccountWithIdl } from './decode-account.js';
 import { decodeInstructionWithIdl } from './decode-instruction.js';
 
 export { decodeAccountWithIdl } from './decode-account.js';
+export { decodeEventWithIdl } from './decode-event.js';
 export { decodeInstructionWithIdl } from './decode-instruction.js';
 
 /** The codama-engine decode provider — decodes both standards via the codama pipeline. */

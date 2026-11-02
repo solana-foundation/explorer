@@ -1,4 +1,4 @@
-import type { parseAccountData, parseInstruction } from '@codama/dynamic-parsers';
+import type { parseAccountData, parseEventData, parseInstruction } from '@codama/dynamic-parsers';
 import type { Idl } from '@coral-xyz/anchor';
 import type { GetAccountInfoApi, Instruction, ReadonlyUint8Array, Rpc } from '@solana/kit';
 import { type AccountNode, getLastNodeFromPath, type InstructionNode, type RootNode } from 'codama';
@@ -19,9 +19,10 @@ export type SupportedIdl = AnchorIdl | CodamaIdl;
 export type CodamaIdlInput = {
     kind: 'rootNode';
     program: {
-        accounts: readonly unknown[];
-        definedTypes: readonly unknown[];
-        instructions: readonly unknown[];
+        // Codama (>= 1.11) types these node lists as optional — an empty program omits them entirely.
+        accounts?: readonly unknown[] | undefined;
+        definedTypes?: readonly unknown[] | undefined;
+        instructions?: readonly unknown[] | undefined;
         name: string;
         publicKey: string;
         version: string;
@@ -51,6 +52,7 @@ export type IdlVersion = AnchorIdl['metadata']['spec'] | RootNode['version'];
 // parsing cannot decode, so the payload shape is the consumer's to declare, never the library's.
 export type CodamaDecodedInstruction = NonNullable<ReturnType<typeof parseInstruction>>;
 export type CodamaDecodedAccount = NonNullable<ReturnType<typeof parseAccountData>>;
+export type CodamaDecodedEvent = NonNullable<ReturnType<typeof parseEventData>>;
 export type AnchorDecodedInstruction = unknown;
 export type AnchorDecodedAccount = unknown;
 
@@ -71,6 +73,12 @@ export type InstructionDecode =
 export type AccountDecode =
     | { kind: IdlStandard.Anchor; decoded: AnchorDecodedAccount; recoveredFrom?: readonly IdlError[] }
     | { kind: IdlStandard.Codama; decoded: CodamaDecodedAccount }
+    | { kind: 'unknown'; errors: UnknownArmErrors };
+
+// Events only decode through the codama pipeline (nodes-from-anchor carries them into the root), so there
+// is no anchor arm — a miss or a conversion failure folds into the unknown arm.
+export type EventDecode =
+    | { kind: IdlStandard.Codama; decoded: CodamaDecodedEvent }
     | { kind: 'unknown'; errors: UnknownArmErrors };
 
 // Arm constructors — one place owns the `kind` literals and the rescue contract (empty `recoveredFrom` is omitted).

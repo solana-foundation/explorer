@@ -82,19 +82,10 @@ describe('functional: codama IDLs (dynamic-client fixtures)', () => {
     });
 
     // SPL Memo v4: ONE instruction, remainder utf8 arg, no discriminator — a real PMP snapshot, the
-    // fixtures tarball ships no such IDL. codama merged a single-candidate identification
-    // fallback (https://github.com/codama-idl/codama/pull/1010); it ships with dynamic-parsers 1.2.3.
+    // fixtures tarball ships no such IDL. codama's single-candidate identification fallback
+    // (https://github.com/codama-idl/codama/pull/1010) ships with dynamic-parsers >= 1.2.3 (now 1.4.2).
     describe('memo (single discriminator-less instruction)', () => {
-        // DELETE this case when unskipping the one below — it pins the pre-fallback behavior on purpose
-        it('should stay on the unknown arm until the dynamic-parsers fallback ships', () => {
-            const { decode } = decodeMemo();
-
-            if (decode.kind !== 'unknown') throw new Error('expected the unknown arm');
-            expect(decode.errors.every(error => error.code === IDL_ERROR__INSTRUCTION_DECODE_FAILED)).toBe(true);
-        });
-
-        // unskip after bumping @codama/dynamic-parsers to >= 1.2.3
-        it.skip('should decode the single discriminator-less instruction via the fallback', () => {
+        it('should decode the single discriminator-less instruction via the fallback', () => {
             const { client, decode } = decodeMemo();
 
             if (decode.kind !== IdlStandard.Codama) throw new Error('expected the codama arm');

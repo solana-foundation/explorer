@@ -64,8 +64,8 @@ export const incrementIx = (idl: AnchorIdl): Instruction & { accounts: []; data:
 export const depositIx = (idl: CodamaIdlInput): Instruction & { accounts: []; data: Uint8Array } => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- literal IDLs narrow structurally; the branded root is only needed to walk instructions
     const root = idl as unknown as CodamaIdl;
-    const deposit = root.program.instructions.find(item => item.name === 'deposit');
-    const discriminator = deposit?.arguments[0]?.defaultValue;
+    const deposit = (root.program.instructions ?? []).find(item => item.name === 'deposit');
+    const discriminator = deposit?.arguments?.[0]?.defaultValue;
     if (!discriminator || !('number' in discriminator)) {
         throw new Error('program must declare deposit with a constant discriminator');
     }
@@ -78,8 +78,8 @@ export const depositIx = (idl: CodamaIdlInput): Instruction & { accounts: []; da
 
 /** `transfer(amount: 42)` built from a Codama root's declared constant u8 field discriminator (SPL Token shape). */
 export const transferIx = (idl: CodamaIdl): Instruction & { accounts: []; data: Uint8Array } => {
-    const transfer = idl.program.instructions.find(item => item.name === 'transfer');
-    const discriminator = transfer?.arguments[0]?.defaultValue;
+    const transfer = (idl.program.instructions ?? []).find(item => item.name === 'transfer');
+    const discriminator = transfer?.arguments?.[0]?.defaultValue;
     if (!discriminator || !('number' in discriminator)) {
         throw new Error('program must declare transfer with a constant discriminator');
     }
@@ -121,9 +121,9 @@ export function fetchedJson(idl: CodamaIdlInput): unknown {
 export async function buildInstruction(idl: CodamaIdlInput, name: string): Promise<Instruction> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- the input is a known codama root; the branded type is only needed to walk instructions
     const root = idl as unknown as CodamaIdl;
-    const node = root.program.instructions.find(item => item.name === name);
+    const node = (root.program.instructions ?? []).find(item => item.name === name);
     if (!node) throw new Error(`${name} must be declared by the IDL`);
-    const accounts = Object.fromEntries(node.accounts.map(item => [item.name, DEFAULT_ADDRESS]));
+    const accounts = Object.fromEntries((node.accounts ?? []).map(item => [item.name, DEFAULT_ADDRESS]));
     const built = await createProgramClient<ProgramClient>(root).methods[name]().accounts(accounts).instruction();
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- bridges codama tooling's instruction shape with kit's
     return built as Instruction;
