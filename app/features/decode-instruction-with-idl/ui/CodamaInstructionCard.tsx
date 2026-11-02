@@ -7,6 +7,8 @@ import {
 } from '@entities/instruction-card';
 import { capitalizeFirstLetter } from '@utils/index';
 
+import { useCodamaEvents } from '../model/use-codama-events';
+
 export function CodamaInstructionCard({
     node,
     parsedIx,
@@ -14,7 +16,10 @@ export function CodamaInstructionCard({
     node: RawInstructionNode;
     parsedIx: ReturnType<typeof parseInstruction>;
 }) {
-    if (parsedIx?.path[0].kind !== 'rootNode') {
+    const root = parsedIx?.path[0].kind === 'rootNode' ? parsedIx.path[0] : undefined;
+    const events = useCodamaEvents(node, root);
+
+    if (!parsedIx || !root) {
         return <UnknownDetailsCard node={node} />;
     }
     const lastNode = parsedIx.path[parsedIx.path.length - 1];
@@ -22,7 +27,7 @@ export function CodamaInstructionCard({
         return <UnknownDetailsCard node={node} />;
     }
 
-    const programName = capitalizeFirstLetter(parsedIx.path[0].program.name);
+    const programName = capitalizeFirstLetter(root.program.name);
 
     return (
         <DecodedInstructionCard
@@ -31,6 +36,7 @@ export function CodamaInstructionCard({
             programName={programName}
             accountNames={parsedIx.accounts.map(account => account.name)}
             args={parseCodamaArgs(parsedIx.data)}
+            events={events}
         />
     );
 }
