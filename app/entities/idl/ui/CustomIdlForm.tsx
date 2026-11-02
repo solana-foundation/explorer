@@ -5,7 +5,7 @@ import { Label } from '@components/shared/ui/label';
 import { cn, cnPrefixed } from '@components/shared/utils';
 import { useWindowFileDrop } from '@shared/lib/use-window-file-drop';
 import { useSetAtom } from 'jotai';
-import { type ReactNode, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { FileText, Upload, X } from 'react-feather';
 
 import { type CustomIdlUploadError, uploadCustomIdlAtom } from '../model/custom-idl/custom-idl-store';
@@ -15,23 +15,17 @@ import { CUSTOM_IDL_SAVE_FAILED_MESSAGE, CUSTOM_IDL_STORAGE_UNAVAILABLE_MESSAGE 
 export function CustomIdlForm({
     id,
     programAddress,
-    initialText = '',
-    initialOrigin = { kind: 'pasted' },
     onSaved,
     onSavingChange,
-    children,
 }: {
     id: string;
     programAddress: string | undefined;
-    initialText?: string;
-    initialOrigin?: CustomIdlOrigin;
     onSaved: (programAddress: string) => void;
     onSavingChange?: (isSaving: boolean) => void;
-    children?: ReactNode;
 }) {
     const uploadCustomIdl = useSetAtom(uploadCustomIdlAtom);
-    const [text, setText] = useState(initialText);
-    const [origin, setOrigin] = useState(initialOrigin);
+    const [text, setText] = useState('');
+    const [origin, setOrigin] = useState<CustomIdlOrigin>({ kind: 'pasted' });
     const [error, setError] = useState<string>();
     const [isSaving, setIsSaving] = useState(false);
     const fileInputId = useId();
@@ -88,7 +82,6 @@ export function CustomIdlForm({
             }}
         >
             {isDraggingFile && <DropHint />}
-            {children}
             <div className="flex flex-col gap-2">
                 <Label htmlFor={fileInputId}>Anchor or Codama IDL file</Label>
                 <input
