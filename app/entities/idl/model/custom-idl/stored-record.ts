@@ -1,4 +1,4 @@
-import { enums, is, literal, string, type, union, unknown } from 'superstruct';
+import { enums, type Infer, is, literal, string, type, union, unknown } from 'superstruct';
 
 import { parseCustomIdl } from './parse-custom-idl';
 import { type CustomIdlRecord, type IdlSelection } from './types';
@@ -9,7 +9,8 @@ export type StoredRecordParse =
     | { kind: 'check-failed' };
 
 export function serializeRecord({ customIdl, origin, selected }: CustomIdlRecord): string {
-    return JSON.stringify({ idl: customIdl.idl, origin, selected });
+    const stored: StoredRecord = { idl: customIdl.idl, origin, selected };
+    return JSON.stringify(stored);
 }
 
 export async function parseStoredRecord(programAddress: string, value: unknown): Promise<StoredRecordParse> {
@@ -32,6 +33,8 @@ export function withSelection(value: unknown, selected: IdlSelection): string | 
         ? JSON.stringify({ ...stored, selected })
         : undefined;
 }
+
+type StoredRecord = Infer<typeof StoredRecord>;
 
 const StoredRecord = type({
     idl: unknown(),
