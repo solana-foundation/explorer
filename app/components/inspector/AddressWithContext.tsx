@@ -68,6 +68,7 @@ export function AddressWithContext({
     hideInfo = false,
     align = 'right',
     badges,
+    wrapLabel,
 }: {
     pubkey: PublicKey;
     validator?: AccountValidator;
@@ -75,10 +76,11 @@ export function AddressWithContext({
     align?: 'left' | 'right';
     // Optional content rendered directly under the address, before the account-info explanation.
     badges?: React.ReactNode;
+    wrapLabel?: boolean;
 }) {
     return (
-        <div className={cn('flex flex-col', align === 'left' ? 'items-start' : 'items-end')}>
-            <Address pubkey={pubkey} link alignRight={align === 'right'} />
+        <div className={cn('flex flex-col', align === 'left' ? 'items-start' : 'items-start md:items-end')}>
+            <Address pubkey={pubkey} link alignRight={align === 'right'} wrapLabel={wrapLabel} />
             {badges}
             {hideInfo ? null : <AccountInfo pubkey={pubkey} validator={validator} />}
         </div>

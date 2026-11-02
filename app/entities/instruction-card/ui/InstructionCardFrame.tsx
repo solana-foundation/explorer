@@ -56,11 +56,13 @@ export function CardTable({ children }: { children: React.ReactNode }) {
 }
 
 // Names and values wrap, so a long name or string does not widen the card past its frame.
-// A full-width cell holds nested cards, so the rules skip it and nested names do not inherit `overflow-wrap`.
+// A name breaks only a word wider than its mobile cap, so a short word never splits to make room for a value.
+// A full-width cell holds nested cards, so it only wraps and their titles keep whole words.
 const TABLE_CLASS = cn(
     '[&>tbody>tr:first-child>td]:!border-t-0',
-    '[&_td:first-child:not(:last-child)]:whitespace-normal',
+    '[&_td:first-child:not(:last-child)]:whitespace-normal [&_td:first-child:not(:last-child)]:break-words max-md:[&_td:first-child:not(:last-child)]:max-w-[40vw]',
     '[&_td:last-child:not(:first-child)]:whitespace-normal [&_td:last-child:not(:first-child)]:[overflow-wrap:anywhere]',
+    '[&_td:only-child]:whitespace-normal',
 );
 
 function toBadgeVariant(result: SignatureResult, index: number): 'success' | 'warning' | 'dark' {

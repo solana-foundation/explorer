@@ -36,6 +36,11 @@ type Props = {
     link?: boolean;
     raw?: boolean;
     noTruncate?: boolean;
+    /**
+     * Wraps the text instead of truncating it, because a table cell grows to fit its content and never truncates.
+     * A raw address still mid-truncates.
+     */
+    wrapLabel?: boolean;
     /** Shows in place of an address that has no explorer label. */
     fallbackText?: string;
     tokenLabelInfo?: TokenLabelInfo;
@@ -52,6 +57,7 @@ export function Address({
     link,
     raw,
     noTruncate,
+    wrapLabel,
     fallbackText,
     tokenLabelInfo,
     className,
@@ -113,7 +119,13 @@ export function Address({
 
     const visibleText = isMidTruncated ? midTruncatedText : displayText;
 
-    const innerTextClassName = cn('font-mono', !nickname && !noTruncate && 'truncate', nickname && 'block min-w-0');
+    const wraps = wrapLabel && !nickname;
+    const innerTextClassName = cn(
+        'font-mono',
+        !nickname && !noTruncate && !wraps && 'truncate',
+        wraps && 'whitespace-normal [overflow-wrap:anywhere]',
+        nickname && 'block min-w-0',
+    );
 
     // When a nickname is set, render it and the address label as two stacked lines
     // so neither overflows on narrow (mobile) viewports.

@@ -16,7 +16,7 @@ import { InstructionAddress } from './InstructionAddress';
 
 export function ValueCell({ value, colSpan }: { value: FieldValue; colSpan?: number }) {
     return (
-        <BaseTable.Cell className={cn('text-right', CELL_CLASS[value.kind])} colSpan={colSpan}>
+        <BaseTable.Cell className={cn('md:text-right', CELL_CLASS[value.kind])} colSpan={colSpan}>
             <Value value={value} />
         </BaseTable.Cell>
     );
@@ -68,7 +68,11 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
         case 'timestamp':
             return <>{displayTimestampUtc(unixTimestampToMs(value.unixSeconds))}</>;
         case 'preformatted':
-            return <pre className="mb-0 inline-block text-left">{joinLines(value.value)}</pre>;
+            return (
+                <pre className="mb-0 inline-block whitespace-pre-wrap text-left [overflow-wrap:anywhere]">
+                    {joinLines(value.value)}
+                </pre>
+            );
         case 'json':
             return (
                 <div className="[&_.string-value]:break-all">

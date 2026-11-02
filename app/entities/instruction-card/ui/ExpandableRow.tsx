@@ -43,7 +43,7 @@ export function FieldNameCell({ name, nestingLevel }: { name: string; nestingLev
 
 export function ExpandToggleCell({ expanded, onToggle }: { expanded: boolean; onToggle: () => void }) {
     return (
-        <BaseTable.Cell className="text-right" onClick={onToggle}>
+        <BaseTable.Cell className="md:text-right" onClick={onToggle}>
             <div className="cursor-pointer">
                 <span className="mr-1.5 text-dk-info">{expanded ? 'Collapse' : 'Expand'}</span>
                 {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
