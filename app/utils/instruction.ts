@@ -64,7 +64,7 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
     }
 }
 
-export function getTokenInstructionName(
+function getTokenInstructionName(
     ix: ParsedInstruction | PartiallyDecodedInstruction,
     signatureInfo: ConfirmedSignatureInfo,
 ) {

@@ -92,18 +92,12 @@ const TABS_LOOKUP: Record<string, AddressTab[]> = {
         { path: 'verified-build', title: 'Verified Build' },
     ],
     'spl-account-compression': [{ path: 'concurrent-merkle-tree', title: 'Concurrent Merkle Tree' }],
-    'spl-token-2022:mint': [
-        { path: 'transfers', title: 'Transfers' },
-        { path: 'instructions', title: 'Instructions' },
-    ],
+    'spl-token-2022:mint': [{ path: 'transfers', title: 'Transfers' }],
     'spl-token-2022:mint:metaplexNFT': [
         { path: 'metadata', title: 'Metadata' },
         { path: 'attributes', title: 'Attributes' },
     ],
-    'spl-token:mint': [
-        { path: 'transfers', title: 'Transfers' },
-        { path: 'instructions', title: 'Instructions' },
-    ],
+    'spl-token:mint': [{ path: 'transfers', title: 'Transfers' }],
     'spl-token:mint:metaplexNFT': [
         { path: 'metadata', title: 'Metadata' },
         { path: 'attributes', title: 'Attributes' },
@@ -130,7 +124,6 @@ export type AddressTabPath =
     | 'stake-history'
     | 'blockhashes'
     | 'transfers'
-    | 'instructions'
     | 'rewards'
     | 'metadata'
     | 'attributes'

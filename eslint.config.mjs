@@ -787,7 +787,6 @@ export default tseslint.config(
             'app/components/account/TokenHistoryCard.tsx',
             'app/components/account/UpgradeableLoaderAccountSection.tsx',
             'app/components/account/VerifiedBuildCard.tsx',
-            'app/components/account/history/TokenInstructionsCard.tsx',
             'app/components/account/history/TokenTransfersCard.tsx',
             'app/components/account/sas/AttestationDataCard.tsx',
             'app/components/account/sas/SolanaAttestationCard.tsx',
