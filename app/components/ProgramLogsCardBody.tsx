@@ -119,7 +119,7 @@ export function ProgramLogsCardBody({
     }
 
     return (
-        <TableCardBody className={className} density={density}>
+        <TableCardBody className={className} density={density} layout="expanded">
             {instructionProgramIds.map((programId, index) => {
                 const programAddress = programId.toBase58();
                 let programLogs: InstructionLogs | undefined = logs[logIndex];
@@ -281,7 +281,7 @@ function ProgramLogRow({
                     <ChevronsUp className="m-1.5 cursor-pointer" size={13} />
                 </Link>
                 {programLogs && (
-                    <div className="flex flex-col items-start whitespace-pre-wrap break-all p-1.5 font-mono">
+                    <div className="flex flex-col items-start whitespace-pre-wrap break-all py-1.5 font-mono">
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>
