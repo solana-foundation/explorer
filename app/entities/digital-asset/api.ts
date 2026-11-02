@@ -1,7 +1,7 @@
 /**
  * DAS API enrichment for token icon metadata.
  *
- * Token discovery (Jupiter/UTL) does not always return icon URLs, so this
+ * Token discovery does not always return icon URLs, so this
  * module fetches them from the cluster's DAS API as a best-effort fallback.
  */
 
