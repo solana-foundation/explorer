@@ -154,7 +154,7 @@ describe('getTokenInfos', () => {
 
     // UTL omits these keys rather than sending null for some tokens. Requiring them would drop the
     // token outright, losing the name and symbol over a missing logo — the failure this whole path
-    // exists to prevent. `discover-with-utl.ts` reads the same API and treats both as optional.
+    // exists to prevent.
     it('should keep a token that omits logoURI, reporting the logo as null', async () => {
         const onError = vi.fn();
         const withoutLogo = { address: mockToken.address, decimals: 9, name: 'Wrapped SOL', symbol: 'SOL' };

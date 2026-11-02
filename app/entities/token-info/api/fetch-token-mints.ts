@@ -16,8 +16,6 @@ import { type FetchConfig, type TokenInfo } from '../lib/types';
  * `decimals` and `logoURI` are optional as well as nullable: UTL omits the key
  * outright for some tokens, and a missing logo must not cost the whole token its
  * name and symbol. `normalizeToken` puts back the `null` `TokenInfo` declares.
- * `app/features/search/api/discover-with-utl.ts` reads the same API and treats
- * both fields the same way.
  */
 const TokenInfoStruct = type({
     address: string(),

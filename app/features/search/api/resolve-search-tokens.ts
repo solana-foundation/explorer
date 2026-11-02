@@ -1,14 +1,12 @@
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { discoverWithJupiter, fetchJupiterImages } from './discover-with-jupiter';
-import { discoverWithUtl } from './discover-with-utl';
+import { discoverWithJupiter } from './discover-with-jupiter';
 import type { DiscoveredToken } from './types';
 
 const SEARCH_CACHE_REVALIDATE_S = 30;
 const DISCOVERY_TIMEOUT_MS = 3_000;
 const ENRICHMENT_TIMEOUT_MS = 2_000;
-const IMAGE_FALLBACK_TIMEOUT_MS = 2_000;
 const SEARCH_TOKENS_LIMIT = 20;
 
 export const SEARCH_CACHE_HEADERS = {
@@ -33,60 +31,40 @@ export async function resolveSearchTokens(
     cluster: ServerCluster,
     options: ResolveSearchTokensOptions = {},
 ): Promise<NormalizedToken[]> {
-    // --- Discovery (3s budget) ---
     const discoveryController = new AbortController();
     const discoveryTimeout = setTimeout(() => discoveryController.abort(), DISCOVERY_TIMEOUT_MS);
 
     let discovered: DiscoveredToken[];
-    let usedFallback = false;
     try {
-        const jupiterResult = await discoverWithJupiter(query, discoveryController.signal);
-        if (jupiterResult.ok) {
-            discovered = jupiterResult.tokens.slice(0, SEARCH_TOKENS_LIMIT);
-        } else {
-            // Jupiter unavailable or failed — fall back to UTL (degraded: curated list only, no address search)
-            usedFallback = true;
-            const utlResult = await discoverWithUtl(query, discoveryController.signal, SEARCH_TOKENS_LIMIT);
-            discovered = utlResult.tokens;
-        }
+        discovered = (await discoverWithJupiter(query, discoveryController.signal)).slice(0, SEARCH_TOKENS_LIMIT);
     } finally {
         clearTimeout(discoveryTimeout);
     }
 
-    // UTL hardcodes isVerified=false; treat fallback hits as trusted and skip the filter.
-    if (options.filterUnverified && !usedFallback) {
+    if (options.filterUnverified) {
         discovered = discovered.filter(t => t.isVerified);
     }
 
     if (discovered.length === 0) return [];
 
-    // --- Enrichment + Jupiter image fallback in parallel (2s budget each) ---
     const enrichmentController = new AbortController();
     const enrichmentTimeout = setTimeout(() => enrichmentController.abort(), ENRICHMENT_TIMEOUT_MS);
-
-    const imageController = new AbortController();
-    const imageTimeout = setTimeout(() => imageController.abort(), IMAGE_FALLBACK_TIMEOUT_MS);
 
     const rpcUrl = serverClusterUrl(cluster);
     const addresses = discovered.map(t => t.address);
 
-    let assets: Awaited<ReturnType<typeof getAssetBatch>> = undefined;
-    let jupiterIconMap = new Map<string, string>();
+    let assets: Awaited<ReturnType<typeof getAssetBatch>>;
     try {
-        [assets, jupiterIconMap] = await Promise.all([
-            getAssetBatch(addresses, rpcUrl, enrichmentController.signal),
-            fetchJupiterImages(discovered, imageController.signal),
-        ]);
+        assets = await getAssetBatch(addresses, rpcUrl, enrichmentController.signal);
     } finally {
         clearTimeout(enrichmentTimeout);
-        clearTimeout(imageTimeout);
     }
 
     const iconMap = new Map(assets?.map(a => [a.id, a.content?.links?.image]) ?? []);
 
     return discovered.map(t => ({
         decimals: t.decimals,
-        icon: t.logoUri ?? iconMap.get(t.address) ?? jupiterIconMap.get(t.address),
+        icon: t.logoUri ?? iconMap.get(t.address) ?? undefined,
         isVerified: t.isVerified,
         name: t.name,
         ticker: t.symbol,

@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { gen } from '@/app/__fixtures__/gen';
 import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
-import { clearLogoCacheForTests } from '@/app/features/search/api/discover-with-jupiter';
 
 import { GET } from '../route';
 import { makeDasAsset } from './__fixtures__/das';
@@ -37,7 +36,6 @@ beforeEach(() => {
     vi.stubGlobal('fetch', fetchMock);
     process.env = { ...originalEnv, JUPITER_API_KEY: 'test-key' };
     getAssetBatchMock.mockResolvedValue(undefined);
-    clearLogoCacheForTests();
 });
 
 afterEach(() => {
@@ -116,109 +114,39 @@ describe('GET /api/search', () => {
             // address detection is based on exact 32-byte bs58 — padded variant used here is text
             expect(['address', 'text']).toContain(data.queryType);
         });
-
-        it('should return empty when Jupiter returns non-ok and UTL also fails', async () => {
-            // Jupiter 429 → fall back to UTL; UTL fetch has no mock → caught as failure.
-            mockFetch(429, {});
-            const res = await GET(makeRequest('sol'));
-            const data = await res.json();
-            expect(data.results.tokens).toHaveLength(0);
-        });
     });
 
-    describe('UTL fallback', () => {
-        it('should use UTL when JUPITER_API_KEY is not set', async () => {
-            delete process.env.JUPITER_API_KEY;
-            mockFetch(200, {
-                content: [{ address: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }],
-            });
+    describe('Jupiter failure', () => {
+        it.each([
+            ['returns 401', () => mockFetch(401, {})],
+            ['returns 429', () => mockFetch(429, {})],
+            ['returns 500', () => mockFetch(500, {})],
+            ['returns an object instead of an array', () => mockFetch(200, { unexpected: 'shape' })],
+            ['rejects with a network error', () => fetchMock.mockRejectedValueOnce(new TypeError('fetch failed'))],
+            [
+                'is aborted',
+                () => fetchMock.mockRejectedValueOnce(new DOMException('This operation was aborted', 'AbortError')),
+            ],
+        ])('should return no tokens after one Jupiter request when Jupiter %s', async (_case, mockJupiter) => {
+            mockJupiter();
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
 
-            expect(data.results.tokens[0]).toMatchObject({
-                name: 'Wrapped SOL',
-                ticker: 'SOL',
-                tokenAddress: VALID_ADDRESS,
-            });
-        });
-
-        it('should mark UTL tokens as unverified', async () => {
-            delete process.env.JUPITER_API_KEY;
-            mockFetch(200, { content: [{ address: VALID_ADDRESS, name: 'Test', symbol: 'TST' }] });
-
-            const res = await GET(makeRequest('test'));
-            const data = await res.json();
-            expect(data.results.tokens[0].isVerified).toBe(false);
-        });
-
-        it('should fall back to UTL when Jupiter returns HTTP error', async () => {
-            mockFetch(500, {});
-            mockFetch(200, {
-                content: [{ address: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }],
-            });
-
-            const res = await GET(makeRequest('sol'));
-            const data = await res.json();
-
-            expect(data.results.tokens).toHaveLength(1);
-            expect(data.results.tokens[0]).toMatchObject({
-                isVerified: false,
-                name: 'Wrapped SOL',
-                ticker: 'SOL',
-                tokenAddress: VALID_ADDRESS,
-            });
-        });
-
-        it('should fall back to UTL when Jupiter response fails schema validation', async () => {
-            mockFetch(200, { unexpected: 'shape' });
-            mockFetch(200, {
-                content: [{ address: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }],
-            });
-
-            const res = await GET(makeRequest('sol'));
-            const data = await res.json();
-
-            expect(data.results.tokens).toHaveLength(1);
-            expect(data.results.tokens[0].name).toBe('Wrapped SOL');
-        });
-
-        it('should not fall back to UTL when Jupiter returns a legitimately empty result', async () => {
-            mockFetch(200, []);
-            const res = await GET(makeRequest('xyz123'));
-            const data = await res.json();
-            expect(data.results.tokens).toHaveLength(0);
-            // Only the Jupiter call was made — no UTL fallback.
+            expect(data.results.tokens).toEqual([]);
             expect(fetchMock).toHaveBeenCalledTimes(1);
+            expect(new URL(fetchMock.mock.calls[0][0]).host).toBe('api.jup.ag');
         });
 
-        it('should fall back to UTL when Jupiter is aborted', async () => {
-            const abortErr = new Error('aborted');
-            abortErr.name = 'AbortError';
-            fetchMock.mockRejectedValueOnce(abortErr);
-            mockFetch(200, {
-                content: [{ address: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }],
-            });
+        it('should return no tokens and send no request when no Jupiter API key is set', async () => {
+            delete process.env.JUPITER_API_KEY;
+            delete process.env.SEARCH_JUPITER_API_KEY;
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
-            expect(data.results.tokens).toHaveLength(1);
-            expect(data.results.tokens[0].name).toBe('Wrapped SOL');
-        });
-    });
 
-    describe('Jupiter image fallback', () => {
-        it('should enrich icon via Jupiter symbol search when discovery has no logo and DAS has none', async () => {
-            // Jupiter discovery returns token without a logo.
-            mockFetch(200, [makeJupiterToken({ icon: null, logoURI: null })]);
-            // DAS returns nothing.
-            getAssetBatchMock.mockResolvedValueOnce(undefined);
-            // Jupiter image-fallback search by symbol returns the token with a logo.
-            mockFetch(200, [makeJupiterToken({ logoURI: 'https://fallback.example.com/sol.png' })]);
-
-            const res = await GET(makeRequest('sol'));
-            const data = await res.json();
-            expect(data.results.tokens[0].icon).toBe('https://fallback.example.com/sol.png');
+            expect(data.results.tokens).toEqual([]);
+            expect(fetchMock).not.toHaveBeenCalled();
         });
     });
 
@@ -248,6 +176,7 @@ describe('GET /api/search', () => {
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
             expect(data.results.tokens[0].icon).toBeUndefined();
+            expect(fetchMock).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -294,18 +223,13 @@ describe('GET /api/search', () => {
             expect(data.results.tokens).toHaveLength(0);
         });
 
-        it('should keep UTL fallback tokens even when flag is set', async () => {
-            // Jupiter fails → UTL fallback. UTL hardcodes isVerified=false but bypasses the filter.
-            mockFetch(500, {});
-            mockFetch(200, {
-                content: [{ address: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }],
-            });
+        it('should exclude a Jupiter token that omits isVerified when flag is set', async () => {
+            mockFetch(200, [{ decimals: 9, id: VALID_ADDRESS, name: 'Wrapped SOL', symbol: 'SOL' }]);
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
 
-            expect(data.results.tokens).toHaveLength(1);
-            expect(data.results.tokens[0].isVerified).toBe(false);
+            expect(data.results.tokens).toEqual([]);
         });
     });
 
