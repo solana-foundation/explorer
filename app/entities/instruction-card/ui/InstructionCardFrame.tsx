@@ -60,7 +60,7 @@ export function CardTable({ children }: { children: React.ReactNode }) {
 // A full-width cell holds nested cards, so it only wraps and their titles keep whole words.
 const TABLE_CLASS = cn(
     '[&>tbody>tr:first-child>td]:!border-t-0',
-    '[&_td:first-child:not(:last-child)]:whitespace-normal [&_td:first-child:not(:last-child)]:break-words max-md:[&_td:first-child:not(:last-child)]:max-w-[40vw]',
+    '[&_td:first-child:not(:last-child)]:whitespace-normal [&_td:first-child:not(:last-child)]:break-words [&_td:first-child:not(:last-child)]:text-balance max-md:[&_td:first-child:not(:last-child)]:max-w-[40vw]',
     '[&_td:last-child:not(:first-child)]:whitespace-normal [&_td:last-child:not(:first-child)]:[overflow-wrap:anywhere]',
     '[&_td:only-child]:whitespace-normal',
 );
