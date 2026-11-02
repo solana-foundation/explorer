@@ -31,26 +31,25 @@ export function CustomIdlForm({
     const fileInputId = useId();
     const textInputId = useId();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const latestFile = useRef<File | undefined>(undefined);
+    const pendingFile = useRef<File | undefined>(undefined);
 
     const handleFile = async (file: File | undefined) => {
         if (!file) return;
-        latestFile.current = file;
-        let fileText: string;
-        try {
-            fileText = await file.text();
-        } catch {
-            if (latestFile.current === file) setError('The browser could not read this file.');
+        pendingFile.current = file;
+        const fileText = await file.text().catch(() => undefined);
+        if (pendingFile.current !== file) return;
+        pendingFile.current = undefined;
+        if (fileText === undefined) {
+            setError('The browser could not read this file.');
             return;
         }
-        if (latestFile.current !== file) return;
         setText(fileText);
         setOrigin({ fileName: file.name, kind: 'file' });
         setError(undefined);
     };
 
     const removeFile = () => {
-        latestFile.current = undefined;
+        pendingFile.current = undefined;
         setText('');
         setOrigin({ kind: 'pasted' });
         setError(undefined);
@@ -61,7 +60,7 @@ export function CustomIdlForm({
     const isDraggingFile = useWindowFileDrop(file => void handleFile(file));
 
     const submit = async () => {
-        if (isSaving) return;
+        if (isSaving || pendingFile.current) return;
         setIsSaving(true);
         onSavingChange?.(true);
         const result = await uploadCustomIdl({ origin, programAddress, text }).catch(() => undefined);
@@ -113,7 +112,7 @@ export function CustomIdlForm({
                     value={text}
                     aria-invalid={error !== undefined}
                     onChange={event => {
-                        latestFile.current = undefined;
+                        pendingFile.current = undefined;
                         setText(event.target.value);
                         setOrigin({ kind: 'pasted' });
                         setError(undefined);
