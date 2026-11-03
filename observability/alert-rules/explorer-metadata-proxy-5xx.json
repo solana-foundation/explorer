@@ -82,7 +82,7 @@
     },
     "annotations": {
         "summary": "explorer metadata proxy fails on most requests",
-        "description": "More than half of the /api/metadata/proxy requests in the trailing 15 minutes got a 5xx, sustained for 5m. This can mean the proxy is broken, the IPFS gateway is down, or third-party hosts serving much of the traffic are failing. Check which upstream hosts are failing, Sentry for proxy exceptions, and the Explorer dashboard: Top paths with 5xx.",
+        "description": "More than half of the uncached /api/metadata/proxy requests in the trailing 15 minutes got a 5xx, sustained for 5m. This can mean the proxy is broken or third-party hosts serving much of the traffic are failing. Find the failing upstream hosts in the uri parameter of proxy.path on the 5xx request lines in Loki. Check Sentry for proxy exceptions.",
         "runbook_url": "https://github.com/solana-foundation/explorer/tree/master/observability"
     },
     "notification_settings": {
