@@ -1,4 +1,4 @@
-import type { TokenInfo } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -34,10 +34,20 @@ describe('getFullTokenInfo', () => {
         await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toBeUndefined();
     });
 
-    it('should not copy the UTL verified flag into the token info', async () => {
-        stubResponses({ legacyTokens: [], tokenInfoRoute: { content: [UTL_TOKEN], ok: true, status: 200 } });
+    it('should resolve a UTL entry without its verified field', async () => {
+        stubResponses({
+            legacyTokens: [],
+            tokenInfoRoute: { content: [tokenInfo(MINT.toBase58(), true)], ok: true, status: 200 },
+        });
 
-        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.not.toHaveProperty('verified');
+        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toEqual({
+            address: MINT.toBase58(),
+            chainId: 101,
+            decimals: 6,
+            name: MINT.toBase58(),
+            symbol: MINT.toBase58(),
+            tags: [],
+        });
     });
 });
 
@@ -49,15 +59,6 @@ const LEGACY_TOKEN: FullTokenInfo = {
     decimals: 6,
     name: 'USD Coin',
     symbol: 'USDC',
-};
-
-const UTL_TOKEN: TokenInfo = {
-    address: MINT.toBase58(),
-    decimals: 6,
-    logoURI: null,
-    name: 'USD Coin',
-    symbol: 'USDC',
-    verified: true,
 };
 
 function stubResponses({
