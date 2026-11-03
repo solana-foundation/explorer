@@ -5,7 +5,7 @@ import { fetchUpstream } from '@/app/shared/lib/http-utils';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { getJupiterApiKey } from '../config';
-import type { DiscoveredToken, DiscoveryResult } from './types';
+import type { DiscoveredToken } from './types';
 
 const JupiterTokenSchema = type({
     decimals: optional(number()),
@@ -19,11 +19,11 @@ const JupiterTokenSchema = type({
 
 const JupiterSearchResponseSchema = array(JupiterTokenSchema);
 
-export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveryResult> {
+export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) {
         Logger.warn('[api:search] JUPITER_API_KEY is not configured — skipping Jupiter discovery');
-        return { ok: false, tokens: [] };
+        return [];
     }
 
     try {
@@ -42,107 +42,30 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
             } else {
                 Logger.warn(`[api:search] Jupiter returned ${response.status}`, { sentry: true });
             }
-            return { ok: false, tokens: [] };
+            return [];
         }
 
         const data = await response.json();
         if (!is(data, JupiterSearchResponseSchema)) {
             Logger.warn('[api:search] Jupiter schema mismatch', { sentry: true });
-            return { ok: false, tokens: [] };
+            return [];
         }
 
-        return {
-            ok: true,
-            tokens: data.map(item => ({
-                address: item.id,
-                decimals: item.decimals,
-                isVerified: item.isVerified === true,
-                logoUri: item.icon ?? item.logoURI ?? undefined,
-                name: item.name,
-                symbol: item.symbol,
-            })),
-        };
+        return data.map(item => ({
+            address: item.id,
+            decimals: item.decimals,
+            isVerified: item.isVerified === true,
+            logoUri: item.icon ?? item.logoURI ?? undefined,
+            name: item.name,
+            symbol: item.symbol,
+        }));
     } catch (error) {
         if (matchAbortError(error)) {
-            // Fall through to UTL so any remaining discovery budget is used; the shared signal
-            // may already be aborted, in which case UTL aborts quickly too (cheap CDN call).
-            return { ok: false, tokens: [] };
+            return [];
         }
         Logger.error(error instanceof Error ? error : new Error('[api:search] Jupiter discovery failed'), {
             sentry: true,
         });
-        return { ok: false, tokens: [] };
+        return [];
     }
-}
-
-// In-memory cache for logo lookups — replaces Next.js fetch cache (unavailable when passing signal).
-const logoCache = new Map<string, { expiresAt: number; logo: string }>();
-const LOGO_CACHE_TTL_MS = 30_000;
-
-export const clearLogoCacheForTests = () => logoCache.clear();
-
-// Fetches logo URIs for tokens whose discovery response didn't include one.
-// Searches by symbol (not address) because Jupiter strips the logo field from address-based queries.
-export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: AbortSignal): Promise<Map<string, string>> {
-    const jupiterApiKey = getJupiterApiKey();
-    if (!jupiterApiKey) return new Map();
-
-    const now = Date.now();
-    const results = new Map<string, string>();
-    const missing: DiscoveredToken[] = [];
-
-    for (const t of tokens) {
-        if (t.logoUri) continue;
-        const cached = logoCache.get(t.address);
-        if (cached) {
-            if (cached.expiresAt > now) {
-                results.set(t.address, cached.logo);
-            } else {
-                logoCache.delete(t.address);
-                missing.push(t);
-            }
-        } else {
-            missing.push(t);
-        }
-    }
-
-    if (missing.length === 0) return results;
-
-    await Promise.allSettled(
-        missing.map(async token => {
-            try {
-                const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(token.symbol)}`;
-
-                const response = await fetchUpstream(url, {
-                    headers: { Accept: 'application/json', 'x-api-key': jupiterApiKey },
-                    signal,
-                });
-                if (!response.ok) {
-                    Logger.warn(`[jupiter-images] ${response.status} for ${token.address}`);
-                    return;
-                }
-                const data = await response.json();
-                if (!is(data, JupiterSearchResponseSchema)) {
-                    Logger.warn('[jupiter-images] schema mismatch');
-                    return;
-                }
-                const match = data.find(t => t.id === token.address);
-                const logo = match?.icon ?? match?.logoURI;
-                if (logo) {
-                    results.set(token.address, logo);
-                    logoCache.set(token.address, { expiresAt: Date.now() + LOGO_CACHE_TTL_MS, logo });
-                } else if (!match) {
-                    Logger.warn(`[jupiter-images] no match for ${token.symbol} in ${data.length} results`);
-                }
-            } catch (error) {
-                if (!matchAbortError(error)) {
-                    Logger.error(error instanceof Error ? error : new Error('[jupiter-images] fetch failed'), {
-                        sentry: true,
-                    });
-                }
-            }
-        }),
-    );
-
-    return results;
 }
