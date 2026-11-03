@@ -65,7 +65,7 @@
         "@solana-program/token-2022": "0.16.0",
         "@solana/attestation": "2.1.0",
         "@solana/kit": "8.3.0",
-        "zod": "4.3.6"
+        "zod": "4.6.6"
     },
     "devDependencies": {
         "@sentry/core": "10.75.2",

@@ -26,11 +26,11 @@ catalogs:
     prettier: 3.9.6
     typescript: 5.7.3
   vitest:
-    '@vitest/browser': 4.1.10
-    '@vitest/browser-playwright': 4.1.10
-    '@vitest/coverage-v8': 4.1.10
+    '@vitest/browser': 4.1.12
+    '@vitest/browser-playwright': 4.1.12
+    '@vitest/coverage-v8': 4.1.12
     jsdom: 26.0.0
-    vitest: 4.1.10
+    vitest: 4.1.12
 
 ignoreScripts: true
 
