@@ -1,0 +1,92 @@
+{
+    "uid": "explorer-metadata-proxy-5xx",
+    "title": "explorer: metadata proxy failing",
+    "ruleGroup": "explorer-availability",
+    "folderUID": "explorer",
+    "noDataState": "OK",
+    "execErrState": "OK",
+    "for": "5m",
+    "data": [
+        {
+            "refId": "A",
+            "datasourceUid": "grafanacloud-logs",
+            "queryType": "range",
+            "relativeTimeRange": {
+                "from": 1200,
+                "to": 0
+            },
+            "model": {
+                "expr": "sum(count_over_time({service=\"explorer\", env=\"prd\"} |= \"/api/metadata/proxy\" | json path=\"path\", status=\"proxy.statusCode\" | path=\"/api/metadata/proxy\" | status=~\"5..\" [15m])) / sum(count_over_time({service=\"explorer\", env=\"prd\"} |= \"/api/metadata/proxy\" | json path=\"path\", status=\"proxy.statusCode\" | path=\"/api/metadata/proxy\" | status!=\"\" [15m]))",
+                "queryType": "range",
+                "refId": "A"
+            }
+        },
+        {
+            "refId": "B",
+            "datasourceUid": "__expr__",
+            "queryType": "",
+            "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+            },
+            "model": {
+                "type": "reduce",
+                "refId": "B",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                    "mode": "replaceNN",
+                    "replaceWithValue": 0
+                }
+            }
+        },
+        {
+            "refId": "C",
+            "datasourceUid": "__expr__",
+            "queryType": "",
+            "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+            },
+            "model": {
+                "type": "threshold",
+                "refId": "C",
+                "expression": "B",
+                "conditions": [
+                    {
+                        "evaluator": {
+                            "type": "gt",
+                            "params": [0.5]
+                        },
+                        "operator": {
+                            "type": "and"
+                        },
+                        "query": {
+                            "params": ["B"]
+                        },
+                        "reducer": {
+                            "type": "last",
+                            "params": []
+                        },
+                        "type": "query"
+                    }
+                ]
+            }
+        }
+    ],
+    "condition": "C",
+    "labels": {
+        "service": "explorer",
+        "severity": "critical",
+        "slack": "true"
+    },
+    "annotations": {
+        "summary": "explorer metadata proxy fails on most requests",
+        "description": "More than half of the /api/metadata/proxy requests in the trailing 15 minutes got a 5xx, sustained for 5m. Failing third-party hosts keep this share well under half, so a firing means the proxy itself is broken, or the IPFS gateway that ipfs:// URIs resolve to is down. Check Sentry for proxy exceptions, then the Explorer dashboard: Top paths with 5xx.",
+        "runbook_url": "https://github.com/solana-foundation/explorer/tree/master/observability"
+    },
+    "notification_settings": {
+        "receiver": "explorer-slack"
+    },
+    "isPaused": false
+}
