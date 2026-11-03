@@ -5,7 +5,6 @@ import { Epoch } from '@components/common/Epoch';
 import { SolarizedJsonViewer } from '@components/common/JsonViewer';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
-import { cn } from '@components/shared/utils';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
@@ -16,25 +15,11 @@ import { InstructionAddress } from './InstructionAddress';
 
 export function ValueCell({ value, colSpan }: { value: FieldValue; colSpan?: number }) {
     return (
-        <BaseTable.Cell className={cn('md:text-right', CELL_CLASS[value.kind])} colSpan={colSpan}>
+        <BaseTable.Cell className="md:text-right" colSpan={colSpan}>
             <Value value={value} />
         </BaseTable.Cell>
     );
 }
-
-const CELL_CLASS: Record<FieldValue['kind'], string | undefined> = {
-    address: undefined,
-    addresses: undefined,
-    bytes: undefined,
-    epoch: undefined,
-    json: undefined,
-    preformatted: undefined,
-    slot: undefined,
-    sol: undefined,
-    string: undefined,
-    text: undefined,
-    timestamp: 'font-mono',
-};
 
 function Value({ value }: { value: FieldValue }): React.ReactElement {
     switch (value.kind) {
@@ -66,7 +51,7 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
         case 'text':
             return <>{value.value}</>;
         case 'timestamp':
-            return <>{displayTimestampUtc(unixTimestampToMs(value.unixSeconds))}</>;
+            return <span className="font-mono">{displayTimestampUtc(unixTimestampToMs(value.unixSeconds))}</span>;
         case 'preformatted':
             return (
                 <pre className="mb-0 inline-block whitespace-pre-wrap text-left [overflow-wrap:anywhere]">
