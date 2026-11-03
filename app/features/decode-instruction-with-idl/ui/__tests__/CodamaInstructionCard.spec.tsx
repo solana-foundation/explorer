@@ -46,6 +46,9 @@ vi.mock('@/app/components/common/Address', () => ({
     ),
 }));
 
+// log-based events need the transaction providers; this card's tests cover the decoded instruction only
+vi.mock('../../model/use-codama-events', () => ({ useCodamaEvents: () => [] }));
+
 const PROGRAM = gen.publicKey(0);
 const AUTHORITY = gen.address(1);
 const VAULT = gen.address(2);

@@ -46,7 +46,10 @@ describe('ProgramMultisigCard', () => {
 
         render(<ProgramMultisigCard data={PROGRAM_DATA} />);
 
-        expect(vi.mocked(useSquadsMultisig).mock.lastCall?.[0]?.idl.metadata.name).toBe('anchorProgram');
+        // the card passes the Anchor-IDL-account SourcedIdl (not the PMP one) straight through — no anchor
+        // Program is built, so the IDL's own (raw) name comes through
+        const passed = vi.mocked(useSquadsMultisig).mock.lastCall?.[0]?.idl as AnchorIdl | undefined;
+        expect(passed?.metadata.name).toBe('anchor_program');
     });
 
     it('should build no Program when the only Anchor IDL is the PMP IDL', () => {

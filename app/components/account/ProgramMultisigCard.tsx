@@ -1,4 +1,4 @@
-import { getAnchorAccountIdls, useAnchorProgram } from '@entities/idl';
+import { IdlVariant, useProgramIdls } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense } from 'react';
 
@@ -34,17 +34,16 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     const { cluster, url } = useCluster();
     const { data: squadMapInfo } = useSquadsMultisigLookup(programAuthority, cluster);
     const squadsAddress = squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS;
-    const { program: anchorProgram } = useAnchorProgram({
-        cluster,
-        programAddress: squadsAddress,
-        select: getAnchorAccountIdls,
-        url,
-    });
+    // Squads ships its IDL through the Anchor IDL account (pre-0.30 → converted to codama). Decode the
+    // multisig account through that IDL, not the PMP one — decodeAccountWithIdl handles both standards.
+    const { idls } = useProgramIdls(squadsAddress, url, cluster);
+    const squadsIdl = idls?.find(idl => idl.source === IdlVariant.Anchor) ?? null;
     const { data: squadInfo } = useSquadsMultisig(
-        anchorProgram,
+        squadsIdl,
         squadMapInfo?.multisig,
         cluster,
         squadMapInfo?.version,
+        url,
     );
 
     let members: PublicKey[];

@@ -14,9 +14,12 @@ export function AccountDataTab({ programId }: { programId: PublicKey }) {
         url,
     });
 
-    // The tab renders for a decodable Anchor program or a Codama IDL (incl. converted legacy) with accounts.
-    const hasCodamaAccounts = !!idls && getCodamaIdlsWithAccounts(idls).length > 0;
-    if (!program && !hasCodamaAccounts) {
+    // The tab renders for a modern Anchor program, or a legacy Anchor IDL (now a Codama root) that declares
+    // accounts. Gate the Codama check on `legacyAnchorIdl` — the marker of an Anchor IDL the resolver
+    // converted (served through either the Anchor PDA or Program Metadata). A native Codama IDL (System,
+    // Token, …) also declares account types but carries no `legacyAnchorIdl`, and production shows no tab.
+    const hasConvertedAnchorAccounts = !!idls && getCodamaIdlsWithAccounts(idls).some(idl => !!idl.legacyAnchorIdl);
+    if (!program && !hasConvertedAnchorAccounts) {
         // eslint-disable-next-line unicorn/no-null -- a React component returns null to render nothing
         return null;
     }
