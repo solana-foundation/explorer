@@ -46,7 +46,7 @@ export function HexDataRow({ label, data }: { label: string; data: Uint8Array })
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                {label} <span className="text-dk-gray-700">(Hex)</span>
+                {label} <span>(Hex)</span>
             </BaseTable.Cell>
             <BaseTable.Cell>
                 <HexData raw={data} align="start" className="-my-1.5" />

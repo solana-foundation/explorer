@@ -125,6 +125,9 @@ export const RawParsedInstruction: Story = {
             canvas.getByText('Instruction Data'),
             canvas.getByText('"info"', { exact: false }),
         );
+        await expect(getComputedStyle(canvas.getByText('(JSON)')).color).toBe(
+            getComputedStyle(canvas.getByText('Instruction Data')).color,
+        );
     },
 };
 

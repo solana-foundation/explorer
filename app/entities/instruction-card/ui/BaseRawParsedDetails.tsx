@@ -10,7 +10,7 @@ export function BaseRawParsedDetails({ ix, children }: { ix: ParsedInstruction; 
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Instruction Data <span className="text-dk-gray-700">(JSON)</span>
+                    Instruction Data <span>(JSON)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell>
                     <pre className="block w-fit max-w-[36rem] whitespace-pre-wrap [overflow-wrap:anywhere]">
