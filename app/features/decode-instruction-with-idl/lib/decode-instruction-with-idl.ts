@@ -53,17 +53,18 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
         return selfCpi ? { kind: 'self-cpi-event', ...selfCpi } : { kind: 'unknown' };
     };
 
+    // A codama root — native, or an Anchor IDL the resolver already converted (legacy pre-0.30) — decodes
+    // through the codama engine. A legacy IDL must never reach `new Program()`: anchor 0.30.1 throws on it,
+    // and its instructions, events and accounts now decode via codama.
     const isRootNode = (idl as { kind?: string })?.kind === 'rootNode';
-    const legacyAnchorIdl = (idl as { legacyAnchorIdl?: unknown }).legacyAnchorIdl;
-
-    if (isRootNode && !legacyAnchorIdl) {
+    if (isRootNode) {
         return codamaDecode(idl as RootNode);
     }
 
-    const anchorIdl = legacyAnchorIdl ?? idl;
+    // A modern (0.30+) Anchor IDL builds a Program for the rich anchor decode.
     try {
         const program = new Program(
-            getFormattedIdl(formatSerdeIdl, anchorIdl, kitIx.programAddress),
+            getFormattedIdl(formatSerdeIdl, idl, kitIx.programAddress),
             getProvider(url),
         ) as Program<Idl>;
         return { details: decodeAnchorInstruction(program, ix), kind: 'anchor', program };
@@ -72,9 +73,7 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
     }
 
     try {
-        const root = isRootNode
-            ? (idl as RootNode)
-            : (rootNodeFromAnchor(idl as Parameters<typeof rootNodeFromAnchor>[0]) as unknown as RootNode);
+        const root = rootNodeFromAnchor(idl as Parameters<typeof rootNodeFromAnchor>[0]) as unknown as RootNode;
         const decode = codamaDecode(root);
         if (decode.kind !== 'unknown') return decode;
     } catch {

@@ -65,16 +65,14 @@ describe('decodeInstructionWithIdl', () => {
         expect(parseInstruction).not.toHaveBeenCalled();
     });
 
-    it('should decode a converted legacy Anchor IDL through the Anchor Program so tx events survive', () => {
+    it('should decode a converted legacy Anchor IDL through Codama, never new Program (tx events decode via codama)', () => {
         parseInstruction.mockReturnValue({ accounts: [], path: [] });
-        expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('anchor');
-        expect(parseInstruction).not.toHaveBeenCalled();
+        expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('codama');
+        // the hard rule: a legacy IDL never reaches new Program()
+        expect(programCtor).not.toHaveBeenCalled();
     });
 
-    it('should fall back to the existing root (not reconvert) when a legacy Anchor Program cannot be built', () => {
-        programCtor.mockImplementation(() => {
-            throw new Error('bad idl');
-        });
+    it('should decode a converted legacy IDL from its existing root, without reconverting from Anchor', () => {
         parseInstruction.mockReturnValue({ accounts: [], path: [] });
         expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('codama');
         expect(rootNodeFromAnchor).not.toHaveBeenCalled();
