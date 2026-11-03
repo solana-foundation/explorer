@@ -9,12 +9,10 @@ import { ERiskLevel } from '../model/use-rugcheck';
 export type VerificationTarget = {
     address: string;
     isTokenMint?: boolean;
-    solflareVerified?: boolean;
 };
 
 export enum EVerificationSource {
     CoinGecko = 'CoinGecko',
-    Solflare = 'Solflare',
     Jupiter = 'Jupiter',
     RugCheck = 'RugCheck',
 }

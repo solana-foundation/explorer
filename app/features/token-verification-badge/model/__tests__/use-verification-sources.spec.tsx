@@ -33,11 +33,6 @@ vi.mock('../use-rugcheck', async importOriginal => {
 
 const baseTarget: VerificationTarget = {
     address: 'token-address',
-    solflareVerified: true,
-};
-
-const legacyTarget: VerificationTarget = {
-    address: 'token-address',
 };
 
 describe('useTokenVerification', () => {
@@ -56,7 +51,6 @@ describe('useTokenVerification', () => {
                 coingecko?: ReturnType<typeof useCoinGeckoVerification>;
                 jupiter?: ReturnType<typeof useJupiterVerification>;
                 rugcheck?: ReturnType<typeof useRugCheckVerification>;
-                target?: VerificationTarget;
             },
             Partial<VerificationSource>,
         ]
@@ -114,24 +108,6 @@ describe('useTokenVerification', () => {
             { isRateLimited: true, verified: false },
         ],
         [
-            'Solflare as verified when solflareVerified is true',
-            EVerificationSource.Solflare,
-            {},
-            { isVerificationFound: true, verified: true },
-        ],
-        [
-            'Solflare as not verified when solflareVerified is false',
-            EVerificationSource.Solflare,
-            { target: { ...baseTarget, solflareVerified: false } },
-            { isVerificationFound: true, verified: false },
-        ],
-        [
-            'Solflare as not found when solflareVerified is undefined',
-            EVerificationSource.Solflare,
-            { target: legacyTarget },
-            { isVerificationFound: false, verified: false },
-        ],
-        [
             'RugCheck as verified with level Good when score <= 25',
             EVerificationSource.RugCheck,
             { rugcheck: { score: 15, status: RugCheckStatus.Success, verified: true } },
@@ -161,12 +137,12 @@ describe('useTokenVerification', () => {
             { rugcheck: { score: undefined, status: RugCheckStatus.FetchFailed, verified: false } },
             { isVerificationFound: false, level: undefined, verified: false },
         ],
-    ])('should map %s', (_label, name, { coingecko, jupiter, rugcheck, target = baseTarget }, expected) => {
+    ])('should map %s', (_label, name, { coingecko, jupiter, rugcheck }, expected) => {
         vi.mocked(useCoinGeckoVerification).mockReturnValue(coingecko);
         vi.mocked(useJupiterVerification).mockReturnValue(jupiter);
         vi.mocked(useRugCheckVerification).mockReturnValue(rugcheck);
 
-        const { result } = renderHook(() => useTokenVerification(target));
+        const { result } = renderHook(() => useTokenVerification(baseTarget));
 
         expect(result.current.sources.find(s => s.name === name)).toMatchObject(expected);
     });
@@ -191,7 +167,6 @@ describe('useTokenVerification', () => {
         expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
             EVerificationSource.CoinGecko,
             EVerificationSource.Jupiter,
-            EVerificationSource.Solflare,
             EVerificationSource.RugCheck,
         ]);
         expect(result.current.sourcesToApply).toHaveLength(0);
@@ -204,8 +179,8 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.FetchFailed,
-                verified: false,
+                status: JupiterStatus.Success,
+                verified: true,
             });
             vi.mocked(useRugCheckVerification).mockReturnValue({
                 score: undefined,
@@ -215,8 +190,7 @@ describe('useTokenVerification', () => {
 
             const { result } = renderHook(() => useTokenVerification(baseTarget));
 
-            expect(result.current.verificationFoundSources).toHaveLength(1);
-            expect(result.current.verificationFoundSources[0].name).toBe(EVerificationSource.Solflare);
+            expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([EVerificationSource.Jupiter]);
         });
     });
 
@@ -236,8 +210,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
-            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.sourcesToApply).toHaveLength(3);
             expect(result.current.sourcesToApply.map(s => s.name)).toEqual([
@@ -262,8 +235,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
-            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.sourcesToApply).toHaveLength(1);
             expect(result.current.sourcesToApply[0].name).toBe(EVerificationSource.CoinGecko);
@@ -284,8 +256,7 @@ describe('useTokenVerification', () => {
                 verified: false,
             });
 
-            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
-            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.sourcesToApply.map(s => s.name)).not.toContain(EVerificationSource.Jupiter);
         });
@@ -295,7 +266,11 @@ describe('useTokenVerification', () => {
         it('should handle mint with only address', () => {
             const { result } = renderHook(() => useTokenVerification({ address: 'some-address' }));
 
-            expect(result.current.sources).toHaveLength(4);
+            expect(result.current.sources.map(s => s.name)).toEqual([
+                EVerificationSource.CoinGecko,
+                EVerificationSource.Jupiter,
+                EVerificationSource.RugCheck,
+            ]);
             expect(result.current.verificationFoundSources).toHaveLength(0);
         });
 
@@ -318,7 +293,6 @@ describe('useTokenVerification', () => {
 
             expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
                 EVerificationSource.Jupiter,
-                EVerificationSource.Solflare,
                 EVerificationSource.RugCheck,
             ]);
             expect(result.current.rateLimitedSources.map(s => s.name)).toEqual([EVerificationSource.CoinGecko]);

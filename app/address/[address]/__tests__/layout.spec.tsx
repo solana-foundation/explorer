@@ -226,7 +226,6 @@ const TOKEN_INFO: FullTokenInfo = {
     decimals: 6,
     name: 'USD Coin',
     symbol: 'USDC',
-    verified: true,
 };
 
 function page({ mounted = true } = {}) {

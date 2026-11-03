@@ -10,11 +10,7 @@ export type TokenVerificationResult = {
     verificationFoundSources: VerificationSource[];
 };
 
-export function useTokenVerification({
-    address,
-    isTokenMint,
-    solflareVerified,
-}: VerificationTarget): TokenVerificationResult {
+export function useTokenVerification({ address, isTokenMint }: VerificationTarget): TokenVerificationResult {
     const coinInfo = useCoinGeckoVerification(address, isTokenMint);
     const jupiterInfo = useJupiterVerification(address);
     const rugCheckInfo = useRugCheckVerification(address);
@@ -51,13 +47,6 @@ export function useTokenVerification({
             name: EVerificationSource.Jupiter,
             url: `https://jup.ag/tokens/${address}`,
             verified: jupiterVerified,
-        },
-        {
-            applyUrl: 'https://help.solflare.com/en/articles/9260147-i-cannot-find-a-token-in-solflare',
-            isVerificationFound: solflareVerified !== undefined,
-            name: EVerificationSource.Solflare,
-            url: `https://www.solflare.com/prices/${address}`,
-            verified: solflareVerified ?? false,
         },
         {
             applyUrl: 'https://rugcheck.xyz/verify/token',

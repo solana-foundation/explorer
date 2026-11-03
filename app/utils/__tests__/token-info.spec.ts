@@ -1,8 +1,9 @@
+import type { TokenInfo } from '@entities/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type FullLegacyTokenInfo, getFullTokenInfo } from '../token-info';
+import { type FullTokenInfo, getFullTokenInfo } from '../token-info';
 
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
@@ -24,7 +25,7 @@ describe('getFullTokenInfo', () => {
     it('should resolve the legacy list entry when the token info request fails', async () => {
         stubResponses({ legacyTokens: [LEGACY_TOKEN], tokenInfoRoute: { ok: false, status: 503 } });
 
-        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toEqual({ ...LEGACY_TOKEN, verified: true });
+        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toEqual(LEGACY_TOKEN);
     });
 
     it('should resolve undefined when the token info route does not list the mint', async () => {
@@ -32,11 +33,17 @@ describe('getFullTokenInfo', () => {
 
         await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toBeUndefined();
     });
+
+    it('should not copy the UTL verified flag into the token info', async () => {
+        stubResponses({ legacyTokens: [], tokenInfoRoute: { content: [UTL_TOKEN], ok: true, status: 200 } });
+
+        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.not.toHaveProperty('verified');
+    });
 });
 
 const MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 
-const LEGACY_TOKEN: FullLegacyTokenInfo = {
+const LEGACY_TOKEN: FullTokenInfo = {
     address: MINT.toBase58(),
     chainId: 101,
     decimals: 6,
@@ -44,11 +51,20 @@ const LEGACY_TOKEN: FullLegacyTokenInfo = {
     symbol: 'USDC',
 };
 
+const UTL_TOKEN: TokenInfo = {
+    address: MINT.toBase58(),
+    decimals: 6,
+    logoURI: null,
+    name: 'USD Coin',
+    symbol: 'USDC',
+    verified: true,
+};
+
 function stubResponses({
     legacyTokens,
     tokenInfoRoute,
 }: {
-    legacyTokens: FullLegacyTokenInfo[];
+    legacyTokens: FullTokenInfo[];
     tokenInfoRoute: { content?: unknown; ok: boolean; status: number };
 }) {
     vi.mocked(fetch).mockImplementation(async input =>

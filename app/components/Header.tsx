@@ -25,9 +25,8 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
         () => ({
             address,
             isTokenMint: !!isTokenMint,
-            solflareVerified: tokenInfo && 'verified' in tokenInfo ? tokenInfo.verified : undefined,
         }),
-        [address, isTokenMint, tokenInfo],
+        [address, isTokenMint],
     );
 
     return (
