@@ -47,7 +47,7 @@
             "id": 2,
             "type": "timeseries",
             "title": "Log lines by level",
-            "description": "Stream label `level` set by /api/log-drain from Vercel's level field. The error-rate alert fires on error|fatal > 0.1/s for 5m.",
+            "description": "Stream label `level` set by /api/log-drain from Vercel's level field. The error-rate alert fires on error|fatal > 0.1/s for 5m. It does not count /api/metadata/proxy.",
             "gridPos": {
                 "h": 8,
                 "w": 12,
