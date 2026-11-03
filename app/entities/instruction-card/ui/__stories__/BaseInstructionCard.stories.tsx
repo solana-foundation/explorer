@@ -11,7 +11,7 @@ import { expect, within } from 'storybook/test';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { preformatted } from '../../model/fields';
+import { preformatted, string } from '../../model/fields';
 import { toInstructionNode } from '../../model/node';
 import { BaseInstructionCard } from '../BaseInstructionCard';
 import { InstructionFieldRows } from '../InstructionFields';
@@ -107,6 +107,24 @@ export const PreformattedValue: Story = {
     },
 };
 
+const LONG_STRING = 'COEj19zAcZN7K9UU0sq1XxAmnyYZiWBcKbstqFo3REQwcDuU'.repeat(6);
+
+export const StringValue: Story = {
+    args: {
+        children: <InstructionFieldRows fields={[string('DecryptableZeroBalance', LONG_STRING)]} />,
+        node: toInstructionNode({ index: 0, ix: sampleIx }),
+        title: 'Token-2022 Program: Configure Confidential Transfer Account',
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        const value = canvas.getByText(LONG_STRING);
+
+        await expect(lineCount(value)).toBeGreaterThan(1);
+        await expect(value.getClientRects()).toHaveLength(1);
+        await expectLabelOnFirstLine(canvas.getByText('DecryptableZeroBalance'), value);
+    },
+};
+
 const parsedIx = {
     parsed: { info: { lamports: 5000 }, type: 'transfer' },
     program: 'system',
@@ -138,6 +156,12 @@ async function expectLabelOnFirstLine(label: HTMLElement, value: HTMLElement): P
 
     await expect(middle).toBeGreaterThan(valueLine.top);
     await expect(middle).toBeLessThan(valueLine.bottom);
+}
+
+function lineCount(element: HTMLElement): number {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return new Set([...range.getClientRects()].map(line => Math.round(line.top))).size;
 }
 
 function firstLine(element: HTMLElement): DOMRect {

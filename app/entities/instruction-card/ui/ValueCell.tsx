@@ -44,9 +44,11 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
             return <Slot slot={value.slot} link />;
         case 'string':
             return (
-                <Copyable text={value.value}>
-                    <code className="whitespace-normal break-all">{value.value}</code>
-                </Copyable>
+                <div className="flex items-baseline">
+                    <Copyable text={value.value}>
+                        <code className="whitespace-normal break-all">{value.value}</code>
+                    </Copyable>
+                </div>
             );
         case 'text':
             return <>{value.value}</>;
