@@ -16,7 +16,7 @@ export function ArgTable({ label, args }: { label: string; args: readonly Instru
                 <BaseTable.SectionRow>
                     <BaseTable.Cell>{label}</BaseTable.Cell>
                     <TypeCell>Type</TypeCell>
-                    <BaseTable.Cell className="md:text-right">Value</BaseTable.Cell>
+                    <BaseTable.Cell>Value</BaseTable.Cell>
                 </BaseTable.SectionRow>
                 <ArgRows args={args} />
             </>

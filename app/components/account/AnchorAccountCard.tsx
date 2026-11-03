@@ -7,7 +7,7 @@ import { ArgRows } from '@entities/instruction-card';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { anchorAccountArgs, getAnchorProgramName } from '@utils/anchor';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
@@ -66,12 +66,12 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     return (
         <div>
             <Card ui="dashkit">
-                <CardHeader ui="dashkit">
+                <CardHeader ui="dashkit" density="compact">
                     <CardTitle as="h3" ui="dashkit">
                         {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
                     </CardTitle>
                 </CardHeader>
-                <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable ui="dashkit" variant="card" density="even" labels="muted" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell className="w-px">Field</BaseTable.HeaderCell>

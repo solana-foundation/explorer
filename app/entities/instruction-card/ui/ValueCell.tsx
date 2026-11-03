@@ -15,7 +15,7 @@ import { InstructionAddress } from './InstructionAddress';
 
 export function ValueCell({ value, colSpan }: { value: FieldValue; colSpan?: number }) {
     return (
-        <BaseTable.Cell className="md:text-right" colSpan={colSpan}>
+        <BaseTable.Cell colSpan={colSpan}>
             <Value value={value} />
         </BaseTable.Cell>
     );

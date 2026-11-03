@@ -17,11 +17,11 @@ export function ProgramField({ programId, validateProgram = false, colSpan, name
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Program</BaseTable.Cell>
-            <BaseTable.Cell className="md:text-right" colSpan={colSpan}>
+            <BaseTable.Cell colSpan={colSpan}>
                 {validateProgram ? (
-                    <AddressWithContext pubkey={programId} validator={programValidator} wrapLabel />
+                    <AddressWithContext pubkey={programId} validator={programValidator} align="left" wrapLabel />
                 ) : (
-                    <Address pubkey={programId} alignRight link wrapLabel fallbackText={name} />
+                    <Address pubkey={programId} link wrapLabel fallbackText={name} />
                 )}
             </BaseTable.Cell>
         </BaseTable.Row>

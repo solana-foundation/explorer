@@ -74,7 +74,7 @@ export function groupHexRows(spans: HexSpan[], rowSize = ROW_SIZE, spanSize = SP
     return rows;
 }
 
-const fullContentVariants = cva('items-center', {
+const fullContentVariants = cva('items-baseline', {
     variants: {
         align: {
             end: 'md:justify-end',

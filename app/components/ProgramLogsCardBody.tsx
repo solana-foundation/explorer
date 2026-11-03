@@ -13,7 +13,6 @@ import { useClusterPath } from '@utils/url';
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
@@ -94,7 +93,7 @@ export function ProgramLogsCardBody({
     cluster,
     url,
     className,
-    density,
+    density = 'even',
 }: {
     message: VersionedMessage | ParsedMessage;
     logs: InstructionLogs[];
@@ -260,11 +259,12 @@ function ProgramLogRow({
     return (
         <BaseTable.Row data-ix-index={index}>
             <BaseTable.Cell>
-                <Link className="flex items-center" href={anchorPath}>
+                <Link className="flex items-baseline" href={anchorPath}>
                     {/* badgeColor='white' falls through to a plain `.badge` (no bg-white-soft is defined in dashkit) — same as legacy. */}
                     <Badge
                         ui="dashkit"
                         variant={badgeColor === 'success' || badgeColor === 'warning' ? badgeColor : 'default'}
+                        baseline
                         className="mr-1.5"
                     >
                         #{index + 1}

@@ -65,9 +65,7 @@ function DecodedInstructionBody({
             {accounts.length > 0 && (
                 <BaseTable.SectionRow>
                     <BaseTable.Cell>Account Name</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right" colSpan={VALUE_COLUMNS}>
-                        Address
-                    </BaseTable.Cell>
+                    <BaseTable.Cell colSpan={VALUE_COLUMNS}>Address</BaseTable.Cell>
                 </BaseTable.SectionRow>
             )}
             <AccountRows rows={accounts} />
@@ -104,7 +102,7 @@ function AccountRows({ rows }: { rows: readonly AccountRow[] }) {
                             isWritable={isWritableRole(row.role)}
                             nested={row.depth > 0}
                         />
-                        <BaseTable.Cell className="md:text-right" colSpan={VALUE_COLUMNS}>
+                        <BaseTable.Cell colSpan={VALUE_COLUMNS}>
                             <InstructionAddress address={row.address} />
                         </BaseTable.Cell>
                     </BaseTable.Row>
