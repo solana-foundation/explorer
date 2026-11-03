@@ -13,7 +13,7 @@ export function BaseRawParsedDetails({ ix, children }: { ix: ParsedInstruction; 
                     Instruction Data <span className="text-dk-gray-700">(JSON)</span>
                 </BaseTable.Cell>
                 <BaseTable.Cell>
-                    <pre className="inline-block max-w-[36rem] whitespace-pre-wrap text-left [overflow-wrap:anywhere]">
+                    <pre className="block w-fit max-w-[36rem] whitespace-pre-wrap [overflow-wrap:anywhere]">
                         {JSON.stringify(ix.parsed, bigintAsString, 2)}
                     </pre>
                 </BaseTable.Cell>

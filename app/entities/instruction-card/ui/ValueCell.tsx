@@ -54,7 +54,7 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
             return <span className="font-mono">{displayTimestampUtc(unixTimestampToMs(value.unixSeconds))}</span>;
         case 'preformatted':
             return (
-                <pre className="mb-0 inline-block whitespace-pre-wrap text-left [overflow-wrap:anywhere]">
+                <pre className="mb-0 block w-fit whitespace-pre-wrap [overflow-wrap:anywhere]">
                     {joinLines(value.value)}
                 </pre>
             );
