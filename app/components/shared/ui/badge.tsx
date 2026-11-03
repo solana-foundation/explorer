@@ -171,6 +171,7 @@ const badgeVariants = cva([], {
             class: 'inline-block align-middle text-center whitespace-nowrap font-normal leading-none text-[76%] py-[0.33em] empty:hidden',
             ui: 'dashkit',
         },
+        { baseline: true, class: 'pt-[calc(0.33em_+_1.5px)] pb-[calc(0.33em_-_1.5px)]', ui: 'dashkit' },
         // pill=false: dashkit default — em-based horizontal padding + Bootstrap radius.
         { class: 'px-[0.5em] rounded-[0.375rem]', pill: false, ui: 'dashkit' },
         // size="sm" in dashkit mode mirrors the in-table appearance (parent `<td>` with 13px font
@@ -240,6 +241,7 @@ const badgeVariants = cva([], {
     // below, which resolves tone per-`ui` before handing it to cva.
     defaultVariants: {
         as: 'badge',
+        baseline: false,
         pill: false,
         size: 'xs',
         status: 'inactive',
@@ -249,6 +251,7 @@ const badgeVariants = cva([], {
     },
     variants: {
         as: { badge: '', link: '' },
+        baseline: { false: '', true: '' },
         pill: { false: '', true: '' },
         size: { lg: '', md: '', sm: '', xs: '' },
         status: { active: '', inactive: '' },
@@ -272,6 +275,7 @@ const badgeVariants = cva([], {
 function Badge({
     className,
     as,
+    baseline,
     pill,
     size,
     status,
@@ -293,7 +297,7 @@ function Badge({
             data-slot="badge"
             data-variant={variant ?? 'default'}
             className={cn(
-                badgeVariants({ as, pill, size, status, tone: resolvedTone, ui: resolvedUi, variant }),
+                badgeVariants({ as, baseline, pill, size, status, tone: resolvedTone, ui: resolvedUi, variant }),
                 className,
             )}
             {...props}

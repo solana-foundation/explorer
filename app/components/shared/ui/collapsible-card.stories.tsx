@@ -14,6 +14,10 @@ const meta: Meta<typeof CollapsibleCard> = {
         defaultExpanded: {
             control: 'boolean',
         },
+        density: {
+            control: 'inline-radio',
+            options: ['default', 'compact'],
+        },
     },
     component: CollapsibleCard,
     tags: ['autodocs', 'test'],
@@ -107,5 +111,24 @@ export const WithBadgeTitle: Story = {
         >
             <SampleContent />
         </CollapsibleCard>
+    ),
+};
+
+export const Compact: Story = {
+    args: {} as never,
+    render: () => (
+        <div className="max-w-[375px]">
+            <CollapsibleCard
+                density="compact"
+                title="Compute Budget Program: Set Compute Unit Limit"
+                headerButtons={
+                    <Button ui="dashkit" variant="white" size="sm" className="flex items-baseline">
+                        Raw
+                    </Button>
+                }
+            >
+                <SampleContent />
+            </CollapsibleCard>
+        </div>
     ),
 };

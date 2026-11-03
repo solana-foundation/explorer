@@ -37,6 +37,7 @@ const tableVariants = cva([], {
         body: 'default',
         density: 'default',
         head: 'default',
+        labels: 'default',
         nowrap: false,
         ui: 'tw',
         variant: 'plain',
@@ -66,6 +67,12 @@ const tableVariants = cva([], {
                 '[&_tbody_tr_td]:px-3 [&_tbody_tr_td]:py-2.5 [&_tbody_tr_td]:align-top',
                 '[&_tbody_tr_td:first-child]:pl-3 [&_tbody_tr_td:last-child]:pr-3',
             ].join(' '),
+            even: [
+                '[&_thead_tr_th]:p-3 [&_thead_tr_th]:align-baseline',
+                '[&_thead_tr_th:first-child]:pl-3 [&_thead_tr_th:last-child]:pr-3',
+                '[&_tbody_tr_td]:p-3 [&_tbody_tr_td]:align-baseline',
+                '[&_tbody_tr_td:first-child]:pl-3 [&_tbody_tr_td:last-child]:pr-3',
+            ].join(' '),
         },
         // `head` restyles just the header row while keeping the `<table>` structure. `subtle` takes
         // the transaction Token Balances table header's muted colour (`outer-space-300`), drops the
@@ -80,6 +87,10 @@ const tableVariants = cva([], {
                 '[&_thead_tr_th]:px-3 [&_thead_tr_th]:py-2.5',
                 '[&_thead_tr_th:first-child]:pl-3 [&_thead_tr_th:last-child]:pr-3',
             ].join(' '),
+        },
+        labels: {
+            default: '',
+            muted: '[&_tbody_tr:not([data-section])>td:first-child:not(:only-child)]:text-outer-space-300',
         },
         nowrap: { false: '', true: '' },
         ui: {
@@ -127,11 +138,11 @@ export interface BaseTableProps
     extends React.TableHTMLAttributes<HTMLTableElement>, VariantProps<typeof tableVariants> {}
 
 const BaseTableRoot = React.forwardRef<HTMLTableElement, BaseTableProps>(
-    ({ body, className, density, head, nowrap, ui, variant, ...props }, ref) => {
+    ({ body, className, density, head, labels, nowrap, ui, variant, ...props }, ref) => {
         const table = (
             <table
                 ref={ref}
-                className={cn(tableVariants({ body, density, head, nowrap, ui, variant }), className)}
+                className={cn(tableVariants({ body, density, head, labels, nowrap, ui, variant }), className)}
                 {...props}
             />
         );
@@ -170,6 +181,7 @@ const SectionRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HT
     ({ className, ...props }, ref) => (
         <tr
             ref={ref}
+            data-section=""
             className={cn(
                 'bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground',
                 className,

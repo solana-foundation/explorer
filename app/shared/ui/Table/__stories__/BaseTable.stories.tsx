@@ -13,14 +13,19 @@ const meta: Meta<typeof BaseTable> = {
         density: {
             control: 'inline-radio',
             description:
-                'Cell spacing. `dense` sets 12px horizontal / 10px vertical padding with top-aligned content — the inspector card tables.',
-            options: ['default', 'dense'],
+                'Cell spacing. `dense` sets 12px horizontal / 10px vertical padding with top-aligned content — the inspector card tables. `even` sets 12px padding on every side and aligns cells on the baseline.',
+            options: ['default', 'dense', 'even'],
         },
         head: {
             control: 'inline-radio',
             description:
                 'Header row styling. `subtle` uses the Token Balances header colour, a transparent (row-matching) background, and 8px/12px padding.',
             options: ['default', 'subtle'],
+        },
+        labels: {
+            control: 'inline-radio',
+            description: '`muted` sets a muted colour on the first cell of each data row.',
+            options: ['default', 'muted'],
         },
         nowrap: { control: 'boolean' },
         ui: { control: 'inline-radio', options: ['dashkit', 'tw'] },
@@ -185,6 +190,29 @@ export const DashkitCardDense: Story = {
     render: args => (
         <BaseTable {...args}>
             <CardSampleRows />
+        </BaseTable>
+    ),
+};
+
+export const DashkitCardEven: Story = {
+    args: { density: 'even', labels: 'muted', nowrap: true, ui: 'dashkit', variant: 'card' },
+    name: 'Dashkit / Card variant + even + muted labels',
+    render: args => (
+        <BaseTable {...args}>
+            <BaseTable.Body>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Program</BaseTable.Cell>
+                    <BaseTable.Cell>ComputeBudget111111111111111111111111111111</BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.SectionRow>
+                    <BaseTable.Cell>Account Name</BaseTable.Cell>
+                    <BaseTable.Cell>Address</BaseTable.Cell>
+                </BaseTable.SectionRow>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Source</BaseTable.Cell>
+                    <BaseTable.Cell>TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA</BaseTable.Cell>
+                </BaseTable.Row>
+            </BaseTable.Body>
         </BaseTable>
     ),
 };
