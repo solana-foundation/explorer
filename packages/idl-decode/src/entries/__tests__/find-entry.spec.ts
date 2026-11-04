@@ -89,4 +89,11 @@ describe('getEnumVariantName', () => {
         expect(getEnumVariantName(findEntry(entries, 'amount'))).toBeUndefined();
         expect(getEnumVariantName(findEntry(entries, 'missing'))).toBeUndefined();
     });
+
+    it('should return undefined for an enum node that declares no variants', () => {
+        // codama's constructor always sets `variants`; only a corrupted schema reaches the `?? []` guard
+        // eslint-disable-next-line typescript/consistent-type-assertions -- malformed enum node exercising the defensive fallback
+        const noVariants = { kind: 'enumTypeNode' } as DecodedEntry['node'];
+        expect(getEnumVariantName({ node: noVariants, path: ['mode'], value: 0 })).toBeUndefined();
+    });
 });

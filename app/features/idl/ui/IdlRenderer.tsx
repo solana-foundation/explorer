@@ -1,4 +1,11 @@
-import { type AnchorIdl, CodamaIdl, getDisplayIdlSpecType, getIdlStandard, type SupportedIdl } from '@entities/idl';
+import {
+    type AnchorIdl,
+    CodamaIdl,
+    getDisplayIdlSpecType,
+    getIdlStandard,
+    isConvertedLegacyShankIdl,
+    type SupportedIdl,
+} from '@entities/idl';
 import ReactJson from '@microlink/react-json-view';
 import { PublicKey } from '@solana/web3.js';
 import { useSetAtom } from 'jotai';
@@ -50,6 +57,9 @@ export function IdlRenderer({
         case 'codama':
             return (
                 <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
+                    {isConvertedLegacyShankIdl(idl) ? (
+                        <div className="my-1.5">{`Note: Shank IDLs are not fully supported. Unused types may be absent from detailed view.`}</div>
+                    ) : null}
                     <CodamaFormattedIdl idl={idl as CodamaIdl} programId={programId} searchStr={searchStr} />
                 </ErrorBoundary>
             );

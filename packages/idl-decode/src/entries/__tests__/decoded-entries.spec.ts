@@ -176,6 +176,33 @@ describe('getDecodedEntries', () => {
         expect(getDecodedEntries(decode)).toEqual([{ node: definedTypeLinkNode('gone'), path: ['ghost'], value: 5 }]);
     });
 
+    it('should treat missing schema arrays as empty via the defensive `?? []` guards', () => {
+        // codama constructors always populate fields/items/arguments; only a corrupted schema reaches the
+        // guards, so these hand-built nodes assert the walk stays empty instead of throwing.
+        const walk = (last: object, decoded: object) =>
+            // eslint-disable-next-line typescript/consistent-type-assertions -- malformed nodes exercising the defensive fallbacks
+            getDecodedEntries(
+                codamaArm({ ...decoded, path: [root, program, last] }) as unknown as Parameters<
+                    typeof getDecodedEntries
+                >[0],
+            );
+
+        // structTypeNode with no `fields`
+        expect(walk({ data: { kind: 'structTypeNode' }, kind: 'accountNode', name: 'a' }, { data: {} })).toEqual([]);
+
+        // tupleTypeNode with no `items`, reached as a struct field
+        const tupleHolder = {
+            // eslint-disable-next-line typescript/consistent-type-assertions -- malformed tuple node (no items)
+            data: structTypeNode([structFieldTypeNode({ name: 'pair', type: { kind: 'tupleTypeNode' } as never })]),
+            kind: 'accountNode',
+            name: 't',
+        };
+        expect(walk(tupleHolder, { data: { pair: [] } })).toEqual([]);
+
+        // instructionNode with no `arguments`
+        expect(walk({ kind: 'instructionNode', name: 'i' }, { accounts: [], data: {} })).toEqual([]);
+    });
+
     it('should throw the typed kind-mismatch error for the unknown and anchor arms', () => {
         expect(() => getDecodedEntries(unknownArm([]))).toThrowError(IdlError);
         expect(() => getDecodedEntries(anchorArm({ amount: 1n }))).toThrowError(IdlError);

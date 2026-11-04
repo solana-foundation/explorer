@@ -139,7 +139,7 @@ describe('README flows: how payload types reach the consumer', () => {
                     discriminator: base16('9b0caae01efacc82'),
                     enabledTransceivers: { map: 1n },
                     mint: DEFAULT_ADDRESS,
-                    mode: 'burning',
+                    mode: { __kind: 'Burning' },
                     nextTransceiverId: 1,
                     owner: DEFAULT_ADDRESS,
                     paused: false,
@@ -175,7 +175,7 @@ describe('README flows: how payload types reach the consumer', () => {
 
                 expect(data).toMatchObject({
                     discriminator: base64('mwyq4B76zII='), // the same bytes, re-encoded as base64 by the parser
-                    mode: { __kind: 'Burning' }, // 'burning' went in by name; a {__kind, __discriminator} object comes back
+                    mode: { __kind: 'Burning' }, // a {__kind} data-enum in, a {__kind, __discriminator} object back (codama >= 1.11)
                     owner: DEFAULT_ADDRESS,
                     pendingOwner: { __option: 'None' },
                 });
@@ -498,7 +498,7 @@ describe('README flows: schema-paired entries for unknown programs', () => {
             discriminator: base16('9b0caae01efacc82'),
             enabledTransceivers: { map: 1n },
             mint: DEFAULT_ADDRESS,
-            mode: 'burning',
+            mode: { __kind: 'Burning' },
             nextTransceiverId: 1,
             owner: DEFAULT_ADDRESS,
             paused: false,

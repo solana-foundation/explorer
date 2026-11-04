@@ -1,10 +1,12 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
 import {
+    codamaScalarTypeLabels,
     DecodedInstructionCard,
     parseCodamaArgs,
     type RawInstructionNode,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
+import { IdlStandard } from '@explorer/idl-decode';
 import { capitalizeFirstLetter } from '@utils/index';
 
 import { useCodamaEvents } from '../model/use-codama-events';
@@ -28,6 +30,7 @@ export function CodamaInstructionCard({
     }
 
     const programName = capitalizeFirstLetter(root.program.name);
+    const argTypes = codamaScalarTypeLabels({ decoded: parsedIx, kind: IdlStandard.Codama });
 
     return (
         <DecodedInstructionCard
@@ -35,7 +38,7 @@ export function CodamaInstructionCard({
             title={`${programName}: ${capitalizeFirstLetter(lastNode.name)}`}
             programName={programName}
             accountNames={parsedIx.accounts.map(account => account.name)}
-            args={parseCodamaArgs(parsedIx.data)}
+            args={parseCodamaArgs(parsedIx.data, argTypes)}
             events={events}
         />
     );

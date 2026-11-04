@@ -2,19 +2,17 @@
 export const exampleNativeTokenTransfersIdl = {
     kind: 'rootNode',
     standard: 'codama',
-    version: '1.5.0',
+    version: '1.9.2',
     program: {
         kind: 'programNode',
         name: 'exampleNativeTokenTransfers',
         publicKey: 'nttiK1SepaQt6sZ4WGW5whvc9tEnGXGxuKeptcQPCcS',
         version: '3.0.0',
         origin: 'anchor',
-        docs: [],
         accounts: [
             {
                 kind: 'accountNode',
                 name: 'config',
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -22,7 +20,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -39,7 +36,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -186,7 +182,6 @@ export const exampleNativeTokenTransfersIdl = {
                 kind: 'accountNode',
                 name: 'lUT',
                 size: 41,
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -194,7 +189,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -211,7 +205,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -221,7 +214,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'address',
-                            docs: [],
                             type: {
                                 kind: 'publicKeyTypeNode',
                             },
@@ -248,7 +240,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -265,7 +256,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -275,7 +265,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'address',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 32,
@@ -287,7 +276,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'tokenDecimals',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -308,7 +296,6 @@ export const exampleNativeTokenTransfersIdl = {
                 kind: 'accountNode',
                 name: 'pendingTokenAuthority',
                 size: 73,
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -316,7 +303,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -333,7 +319,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -343,7 +328,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'pendingAuthority',
-                            docs: [],
                             type: {
                                 kind: 'publicKeyTypeNode',
                             },
@@ -351,7 +335,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'rentPayer',
-                            docs: [],
                             type: {
                                 kind: 'publicKeyTypeNode',
                             },
@@ -369,7 +352,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'accountNode',
                 name: 'inboxItem',
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -377,7 +359,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -394,7 +375,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'init',
-                            docs: [],
                             type: {
                                 kind: 'booleanTypeNode',
                                 size: {
@@ -407,7 +387,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -417,7 +396,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'amount',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u64',
@@ -427,7 +405,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'recipientAddress',
-                            docs: [],
                             type: {
                                 kind: 'publicKeyTypeNode',
                             },
@@ -435,7 +412,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'votes',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'bitmap',
@@ -444,7 +420,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'releaseStatus',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'releaseStatus',
@@ -475,7 +450,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -492,7 +466,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -502,7 +475,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'rateLimit',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'rateLimitState',
@@ -522,7 +494,6 @@ export const exampleNativeTokenTransfersIdl = {
                 kind: 'accountNode',
                 name: 'outboxItem',
                 size: 139,
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -530,7 +501,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -547,7 +517,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'amount',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'trimmedAmount',
@@ -556,7 +525,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'sender',
-                            docs: [],
                             type: {
                                 kind: 'publicKeyTypeNode',
                             },
@@ -564,7 +532,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'recipientChain',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'chainId',
@@ -573,7 +540,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'recipientNttManager',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 32,
@@ -585,7 +551,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'recipientAddress',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 32,
@@ -597,7 +562,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'releaseTimestamp',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'i64',
@@ -607,7 +571,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'released',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'bitmap',
@@ -627,7 +590,6 @@ export const exampleNativeTokenTransfersIdl = {
                 kind: 'accountNode',
                 name: 'outboxRateLimit',
                 size: 32,
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -635,7 +597,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -652,7 +613,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'rateLimit',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'rateLimitState',
@@ -672,7 +632,6 @@ export const exampleNativeTokenTransfersIdl = {
                 kind: 'accountNode',
                 name: 'registeredTransceiver',
                 size: 42,
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -680,7 +639,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -697,7 +655,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -707,7 +664,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'id',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -717,7 +673,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'transceiverAddress',
-                            docs: [],
                             type: {
                                 kind: 'publicKeyTypeNode',
                             },
@@ -744,7 +699,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -761,7 +715,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'bump',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -771,7 +724,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'address',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 32,
@@ -794,7 +746,6 @@ export const exampleNativeTokenTransfersIdl = {
                 kind: 'accountNode',
                 name: 'bridgeData',
                 size: 32,
-                docs: [],
                 data: {
                     kind: 'structTypeNode',
                     fields: [
@@ -802,7 +753,6 @@ export const exampleNativeTokenTransfersIdl = {
                             kind: 'structFieldTypeNode',
                             name: 'discriminator',
                             defaultValueStrategy: 'omitted',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 8,
@@ -860,7 +810,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'initialize',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -869,7 +818,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -880,7 +828,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -888,7 +835,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -896,7 +842,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -904,7 +849,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -912,7 +856,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -934,7 +877,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -967,7 +909,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -975,7 +916,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -983,7 +923,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -996,7 +935,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1013,7 +951,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'chainId',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u16',
@@ -1023,7 +960,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'limit',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u64',
@@ -1033,7 +969,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'mode',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'mode',
@@ -1051,7 +986,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'initializeLut',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -1060,7 +994,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -1071,7 +1004,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1079,7 +1011,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'identityValueNode',
                         },
@@ -1090,7 +1021,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1098,7 +1028,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1106,7 +1035,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1114,7 +1042,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -1127,7 +1054,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1135,7 +1061,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1143,7 +1068,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1151,7 +1075,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1159,7 +1082,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1167,7 +1089,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1175,7 +1096,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1183,7 +1103,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1191,7 +1110,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1199,7 +1117,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1207,7 +1124,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1215,7 +1131,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1223,7 +1138,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -1231,7 +1145,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1248,7 +1161,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'recentSlot',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u64',
@@ -1267,15 +1179,12 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'version',
-                docs: [],
                 optionalAccountStrategy: 'programId',
-                accounts: [],
                 arguments: [
                     {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1301,7 +1210,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'transferBurn',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -1310,7 +1218,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -1321,7 +1228,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1329,7 +1235,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1345,7 +1250,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -1358,7 +1262,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1366,7 +1269,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1386,7 +1288,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -1399,7 +1300,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1407,7 +1307,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1423,7 +1322,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -1431,7 +1329,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1448,7 +1345,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'args',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'transferArgs',
@@ -1466,7 +1362,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'transferLock',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -1475,7 +1370,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -1486,7 +1380,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1494,7 +1387,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1510,7 +1402,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -1523,7 +1414,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1531,7 +1421,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1551,7 +1440,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -1564,7 +1452,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1572,7 +1459,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1588,7 +1474,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1605,7 +1490,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'args',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'transferArgs',
@@ -1623,7 +1507,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'redeem',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -1632,7 +1515,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -1643,7 +1525,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1651,7 +1532,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1667,7 +1547,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1675,7 +1554,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1703,7 +1581,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1711,7 +1588,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1719,7 +1595,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -1732,7 +1607,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1758,7 +1632,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'releaseInboundMint',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -1767,7 +1640,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -1778,7 +1650,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1786,7 +1657,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1794,7 +1664,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1802,7 +1671,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1810,7 +1678,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1818,7 +1685,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -1831,7 +1697,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1839,7 +1704,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -1847,7 +1711,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1864,7 +1727,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'args',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'releaseInboundArgs',
@@ -1882,7 +1744,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'releaseInboundUnlock',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -1891,7 +1752,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -1902,7 +1762,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1910,7 +1769,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1918,7 +1776,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1926,7 +1783,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1934,7 +1790,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -1942,7 +1797,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -1955,7 +1809,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -1963,7 +1816,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -1980,7 +1832,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'args',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'releaseInboundArgs',
@@ -1998,7 +1849,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'transferOwnership',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2007,7 +1857,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2015,7 +1864,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2023,7 +1871,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2031,7 +1878,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2039,7 +1885,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2047,7 +1892,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2055,7 +1899,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2081,7 +1924,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'transferOwnershipOneStepUnchecked',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2090,7 +1932,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2098,7 +1939,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2106,7 +1946,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2114,7 +1953,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2122,7 +1960,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2130,7 +1967,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2138,7 +1974,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2164,7 +1999,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'claimOwnership',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2173,7 +2007,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2181,7 +2014,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2189,7 +2021,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2197,7 +2028,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2205,7 +2035,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2213,7 +2042,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2239,7 +2067,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'acceptTokenAuthority',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2248,7 +2075,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2256,7 +2082,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2264,7 +2089,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2272,7 +2096,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2280,7 +2103,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -2293,7 +2115,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2301,7 +2122,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2327,7 +2147,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'acceptTokenAuthorityFromMultisig',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2336,7 +2155,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2344,7 +2162,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2352,7 +2169,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2360,7 +2176,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2368,7 +2183,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -2381,7 +2195,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2389,7 +2202,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2415,7 +2227,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setTokenAuthorityOneStepUnchecked',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2424,7 +2235,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2432,7 +2242,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2440,7 +2249,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2448,7 +2256,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2456,7 +2263,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2464,7 +2270,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2472,7 +2277,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -2485,7 +2289,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2511,7 +2314,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setTokenAuthority',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2520,7 +2322,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2528,7 +2329,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2536,7 +2336,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2544,7 +2343,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2552,7 +2350,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2560,7 +2357,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2568,7 +2364,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2576,7 +2371,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2584,7 +2378,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -2597,7 +2390,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2623,7 +2415,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'revertTokenAuthority',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2632,7 +2423,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2640,7 +2430,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2648,7 +2437,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2656,7 +2444,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2664,7 +2451,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2672,7 +2458,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2680,7 +2465,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -2693,7 +2477,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -2706,7 +2489,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2714,7 +2496,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2740,7 +2521,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'claimTokenAuthority',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2749,7 +2529,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2757,7 +2536,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2765,7 +2543,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2773,7 +2550,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2781,7 +2557,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2789,7 +2564,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2797,7 +2571,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -2810,7 +2583,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -2823,7 +2595,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2831,7 +2602,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2857,7 +2627,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'claimTokenAuthorityToMultisig',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2866,7 +2635,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2874,7 +2642,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2882,7 +2649,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2890,7 +2656,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: true,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2898,7 +2663,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2906,7 +2670,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2914,7 +2677,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
@@ -2927,7 +2689,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -2940,7 +2701,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2948,7 +2708,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -2974,7 +2733,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setPaused',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -2983,7 +2741,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -2991,7 +2748,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -2999,7 +2755,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3016,7 +2771,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'pause',
-                        docs: [],
                         type: {
                             kind: 'booleanTypeNode',
                             size: {
@@ -3038,7 +2792,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setPeer',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3047,7 +2800,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -3058,7 +2810,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3066,7 +2817,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3074,7 +2824,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3082,7 +2831,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3090,7 +2838,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -3103,7 +2850,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3120,7 +2866,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'chainId',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'chainId',
@@ -3129,7 +2874,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'address',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 32,
@@ -3141,7 +2885,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'limit',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u64',
@@ -3170,7 +2913,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'registerTransceiver',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3179,7 +2921,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3187,7 +2928,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3195,7 +2935,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -3214,7 +2953,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3222,7 +2960,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -3235,7 +2972,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3261,7 +2997,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'deregisterTransceiver',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3270,7 +3005,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3278,7 +3012,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3286,7 +3019,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -3294,7 +3026,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3320,7 +3051,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setOutboundLimit',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3329,7 +3059,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3337,7 +3066,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3345,7 +3073,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -3353,7 +3080,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3370,7 +3096,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'limit',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u64',
@@ -3389,7 +3114,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setInboundLimit',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3398,7 +3122,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3406,7 +3129,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3414,7 +3136,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -3422,7 +3143,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3439,7 +3159,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'limit',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u64',
@@ -3449,7 +3168,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'chainId',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'chainId',
@@ -3467,7 +3185,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'markOutboxItemAsReleased',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3476,7 +3193,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3484,7 +3200,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3492,7 +3207,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3500,7 +3214,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -3508,7 +3221,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3534,7 +3246,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setThreshold',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3543,7 +3254,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3551,7 +3261,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                 ],
                 arguments: [
@@ -3559,7 +3268,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3576,7 +3284,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'threshold',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u8',
@@ -3595,7 +3302,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'setWormholePeer',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3604,7 +3310,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3612,7 +3317,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3620,7 +3324,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -3631,7 +3334,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3639,7 +3341,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -3652,7 +3353,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3669,7 +3369,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'chainId',
-                        docs: [],
                         type: {
                             kind: 'definedTypeLinkNode',
                             name: 'chainId',
@@ -3678,7 +3377,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'address',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 32,
@@ -3699,7 +3397,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'receiveWormholeMessage',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3708,7 +3405,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -3719,7 +3415,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3727,7 +3422,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3735,7 +3429,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3743,7 +3436,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3751,7 +3443,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -3764,7 +3455,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3790,7 +3480,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'releaseWormholeOutbound',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3799,7 +3488,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -3810,7 +3498,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3818,7 +3505,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3826,7 +3512,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3834,7 +3519,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3842,7 +3526,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3850,7 +3533,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3858,7 +3540,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3866,7 +3547,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3874,7 +3554,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3882,7 +3561,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -3895,7 +3573,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3903,7 +3580,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'SysvarRent111111111111111111111111111111111',
@@ -3915,7 +3591,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -3932,7 +3607,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'revertOnDelay',
-                        docs: [],
                         type: {
                             kind: 'booleanTypeNode',
                             size: {
@@ -3954,7 +3628,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'broadcastWormholeId',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -3963,7 +3636,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -3974,7 +3646,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3982,7 +3653,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -3990,7 +3660,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4009,7 +3678,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4017,7 +3685,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4025,7 +3692,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4033,7 +3699,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4041,7 +3706,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -4054,7 +3718,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4062,7 +3725,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'SysvarRent111111111111111111111111111111111',
@@ -4074,7 +3736,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -4100,7 +3761,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'instructionNode',
                 name: 'broadcastWormholePeer',
-                docs: [],
                 optionalAccountStrategy: 'programId',
                 accounts: [
                     {
@@ -4109,7 +3769,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'payerValueNode',
                         },
@@ -4120,7 +3779,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4128,7 +3786,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4136,7 +3793,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: true,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4144,7 +3800,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4152,7 +3807,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4160,7 +3814,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4168,7 +3821,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: true,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4176,7 +3828,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4184,7 +3835,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: '11111111111111111111111111111111',
@@ -4197,7 +3847,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                     },
                     {
                         kind: 'instructionAccountNode',
@@ -4205,7 +3854,6 @@ export const exampleNativeTokenTransfersIdl = {
                         isWritable: false,
                         isSigner: false,
                         isOptional: false,
-                        docs: [],
                         defaultValue: {
                             kind: 'publicKeyValueNode',
                             publicKey: 'SysvarRent111111111111111111111111111111111',
@@ -4217,7 +3865,6 @@ export const exampleNativeTokenTransfersIdl = {
                         kind: 'instructionArgumentNode',
                         name: 'discriminator',
                         defaultValueStrategy: 'omitted',
-                        docs: [],
                         type: {
                             kind: 'fixedSizeTypeNode',
                             size: 8,
@@ -4234,7 +3881,6 @@ export const exampleNativeTokenTransfersIdl = {
                     {
                         kind: 'instructionArgumentNode',
                         name: 'chainId',
-                        docs: [],
                         type: {
                             kind: 'numberTypeNode',
                             format: 'u16',
@@ -4255,14 +3901,12 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'bitmap',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
                         {
                             kind: 'structFieldTypeNode',
                             name: 'map',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u128',
@@ -4275,14 +3919,12 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'releaseInboundArgs',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
                         {
                             kind: 'structFieldTypeNode',
                             name: 'revertWhenNotReady',
-                            docs: [],
                             type: {
                                 kind: 'booleanTypeNode',
                                 size: {
@@ -4298,14 +3940,12 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'transferArgs',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
                         {
                             kind: 'structFieldTypeNode',
                             name: 'amount',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u64',
@@ -4315,7 +3955,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'recipientChain',
-                            docs: [],
                             type: {
                                 kind: 'definedTypeLinkNode',
                                 name: 'chainId',
@@ -4324,7 +3963,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'recipientAddress',
-                            docs: [],
                             type: {
                                 kind: 'fixedSizeTypeNode',
                                 size: 32,
@@ -4336,7 +3974,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'shouldQueue',
-                            docs: [],
                             type: {
                                 kind: 'booleanTypeNode',
                                 size: {
@@ -4394,7 +4031,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'rateLimitState',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
@@ -4443,14 +4079,12 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'chainId',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
                         {
                             kind: 'structFieldTypeNode',
                             name: 'id',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u16',
@@ -4463,7 +4097,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'mode',
-                docs: [],
                 type: {
                     kind: 'enumTypeNode',
                     variants: [
@@ -4486,14 +4119,12 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'trimmedAmount',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
                         {
                             kind: 'structFieldTypeNode',
                             name: 'amount',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u64',
@@ -4503,7 +4134,6 @@ export const exampleNativeTokenTransfersIdl = {
                         {
                             kind: 'structFieldTypeNode',
                             name: 'decimals',
-                            docs: [],
                             type: {
                                 kind: 'numberTypeNode',
                                 format: 'u8',
@@ -4516,7 +4146,6 @@ export const exampleNativeTokenTransfersIdl = {
             {
                 kind: 'definedTypeNode',
                 name: 'bridgeConfig',
-                docs: [],
                 type: {
                     kind: 'structTypeNode',
                     fields: [
@@ -4548,7 +4177,6 @@ export const exampleNativeTokenTransfersIdl = {
                 },
             },
         ],
-        pdas: [],
         errors: [
             {
                 kind: 'errorNode',
@@ -4762,5 +4390,4 @@ export const exampleNativeTokenTransfersIdl = {
             },
         ],
     },
-    additionalPrograms: [],
 } as const;

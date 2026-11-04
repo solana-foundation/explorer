@@ -59,8 +59,8 @@
         "@solana/idl": "0.2.0"
     },
     "devDependencies": {
-        "@codama/dynamic-client": "0.1.0",
-        "@codama/dynamic-codecs": "1.1.30",
+        "@codama/dynamic-client": "1.0.0",
+        "@codama/dynamic-codecs": "1.3.0",
         "@codama/renderers-js": "~1.7.0",
         "@coral-xyz/anchor": "0.30.1",
         "@explorer/test-idl-program-amm-v3": "workspace:*",

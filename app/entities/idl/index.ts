@@ -8,7 +8,15 @@ export type {
     InstructionData,
     NestedInstructionAccountsData,
 } from './model/formatters/formatted-idl';
-export { getIdlBadgeLabel, getIdlProgramVersion, getIdlSpec, getIdlStandard, getIdlVersion } from './model/idl-version';
+export {
+    getIdlBadgeLabel,
+    getIdlProgramVersion,
+    getIdlSpec,
+    getIdlStandard,
+    getIdlVersion,
+    isConvertedLegacyAnchorIdl,
+    isConvertedLegacyShankIdl,
+} from './model/idl-version';
 export { type AnchorIdl, type CodamaIdl, type IdlStandard, type SupportedIdl } from './lib/types';
 export { type ProgramIdlPair } from './api/types';
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';

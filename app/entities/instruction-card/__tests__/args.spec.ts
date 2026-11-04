@@ -71,6 +71,55 @@ describe('parseCodamaArgs', () => {
         ]);
     });
 
+    it('should overlay precise scalar types from the path-keyed map and fall back on a miss', () => {
+        const types = new Map([
+            ['amount', 'u64'],
+            ['tick', 'i32'],
+            ['flag', 'bool'],
+            ['rewards.0', 'u128'],
+        ]);
+
+        expect(parseCodamaArgs({ amount: 7n, flag: true, other: 3, tick: -5 }, types)).toEqual([
+            textLeaf('amount', 'u64', '7'),
+            textLeaf('flag', 'bool', 'true'),
+            textLeaf('other', 'number', '3'),
+            textLeaf('tick', 'i32', '-5'),
+        ]);
+
+        // nested array leaves are keyed by their index path (`rewards.0`), the container keeps its label
+        const [rewards] = parseCodamaArgs({ rewards: [9n] }, types);
+        expect(rewards).toMatchObject({ children: [textLeaf('#0', 'u128', '9')], type: 'Array[1]' });
+    });
+
+    it('should keep a Some option transparent so its inner leaves match the type map', () => {
+        // the schema unwraps options, so the map keys omit the kit `value` segment: `opt`, not `opt.value`
+        const types = new Map([
+            ['opt', 'u64'],
+            ['pair.0', 'u64'],
+            ['pair.1', 'u64'],
+        ]);
+
+        const [opt, pair] = parseCodamaArgs(
+            { opt: { __option: 'Some', value: 7n }, pair: { __option: 'Some', value: [1n, 2n] } },
+            types,
+        );
+
+        // option(u64): the inner scalar resolves precisely instead of falling back to bignum
+        expect(opt).toMatchObject({ children: [textLeaf('value', 'u64', '7')], kind: 'group', type: 'Option(Some)' });
+        // option(tuple): the array container keeps its label, its elements resolve to u64
+        expect(pair).toMatchObject({
+            children: [
+                {
+                    children: [textLeaf('#0', 'u64', '1'), textLeaf('#1', 'u64', '2')],
+                    name: 'value',
+                    type: 'Array[2]',
+                },
+            ],
+            kind: 'group',
+            type: 'Option(Some)',
+        });
+    });
+
     it('should label an enum by its variant, an option by its state and a plain struct as object', () => {
         const [option, struct, variant] = parseCodamaArgs({
             option: some(1),

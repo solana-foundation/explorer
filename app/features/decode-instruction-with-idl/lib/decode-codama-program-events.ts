@@ -1,4 +1,4 @@
-import { type InstructionEvent, parseCodamaArgs } from '@entities/instruction-card';
+import { codamaScalarTypeLabels, type InstructionEvent, parseCodamaArgs } from '@entities/instruction-card';
 import type { ProgramEventPayload } from '@entities/program-logs';
 import { decodeEventWithIdl } from '@explorer/idl-decode/codama';
 import { camelToTitleCase } from '@utils/index';
@@ -18,7 +18,7 @@ export function decodeCodamaProgramEvents(eventPayloads: ProgramEventPayload[], 
             const name = node.kind === 'eventNode' ? node.name : 'event';
             return [
                 {
-                    args: parseCodamaArgs(decoded.decoded.data),
+                    args: parseCodamaArgs(decoded.decoded.data, codamaScalarTypeLabels(decoded)),
                     data: bytes,
                     kind: 'decoded',
                     name: camelToTitleCase(name),

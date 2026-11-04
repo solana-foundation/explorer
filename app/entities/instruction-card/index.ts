@@ -22,6 +22,7 @@ export {
 export type { FieldValue, InstructionField, InstructionFieldList, PayloadContentBlock } from './model/fields';
 export type { AccountName } from './model/accounts';
 export { argType, parseCodamaArgs } from './model/args';
+export { codamaScalarTypeLabels } from './model/codama-arg-types';
 export type { InstructionArg } from './model/args';
 export type { InstructionEvent } from './model/events';
 export { instructionDataOf, toInstructionNode, toRawInstructionNode } from './model/node';

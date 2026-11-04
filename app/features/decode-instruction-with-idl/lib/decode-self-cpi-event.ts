@@ -1,4 +1,4 @@
-import { type InstructionArg, parseCodamaArgs } from '@entities/instruction-card';
+import { codamaScalarTypeLabels, type InstructionArg, parseCodamaArgs } from '@entities/instruction-card';
 import { decodeEventWithIdl } from '@explorer/idl-decode/codama';
 import { instructionIsSelfCPI } from '@utils/anchor';
 import { capitalizeFirstLetter } from '@utils/index';
@@ -16,7 +16,7 @@ export function decodeSelfCpiEvent(data: Uint8Array, root: RootNode): SelfCpiEve
     if (decoded.kind === 'unknown') return undefined;
     const node = getLastNodeFromPath(decoded.decoded.path);
     return {
-        args: parseCodamaArgs(decoded.decoded.data),
+        args: parseCodamaArgs(decoded.decoded.data, codamaScalarTypeLabels(decoded)),
         name: node.kind === 'eventNode' ? node.name : 'event',
         programName: capitalizeFirstLetter(root.program.name),
     };

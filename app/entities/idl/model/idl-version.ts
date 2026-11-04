@@ -1,7 +1,7 @@
 import type { Idl } from '@coral-xyz/anchor';
 import type { RootNode } from 'codama';
 
-import { type IdlStandard, type IdlVersion, type SupportedIdl } from '../lib/types';
+import { type CodamaIdl, type IdlStandard, type IdlVersion, type SupportedIdl } from '../lib/types';
 import { getIdlSpecType as getSerdeIdlSpecType } from './idl-spec';
 
 /**
@@ -36,12 +36,36 @@ export function getIdlStandard(idl: SupportedIdl): IdlStandard {
 }
 
 /**
+ * A legacy (pre-0.30) Anchor IDL the resolver converted to a Codama root for decoding — it carries the
+ * original Anchor IDL as `legacyAnchorIdl`. The Codama root is an internal decode representation, so the
+ * IDL's published standard is still Anchor (legacy).
+ */
+export function isConvertedLegacyAnchorIdl(idl: SupportedIdl): boolean {
+    return 'legacyAnchorIdl' in idl && Boolean(idl.legacyAnchorIdl);
+}
+
+/**
+ * A converted-legacy IDL whose original was produced by Shank (`metadata.origin === 'shank'`). Shank IDLs
+ * omit unused types, so the detailed view may be incomplete — production shows a note for them, and this
+ * restores that note after the Codama conversion (which erases the `origin` marker from the root).
+ */
+export function isConvertedLegacyShankIdl(idl: SupportedIdl): boolean {
+    if (!isConvertedLegacyAnchorIdl(idl)) return false;
+    const metadata = (idl as CodamaIdl).legacyAnchorIdl?.metadata as { origin?: string } | undefined;
+    return metadata?.origin === 'shank';
+}
+
+/**
  * Single-line badge label describing the IDL's standard and version(s):
  *  - Codama:        `Codama (version 1.5.1)`         — root format version
  *  - Anchor modern: `Anchor 0.30.1 (version 0.1.0)`  — standard era (the modern-IDL marker) + spec
  *  - Anchor legacy: `Anchor (legacy)`                — no era number, no spec
  */
 export function getIdlBadgeLabel(idl: SupportedIdl): string {
+    // A converted-legacy Anchor IDL keeps its published "Anchor (legacy)" identity, matching production —
+    // the Codama root it was converted into is only the decode representation, not a Codama IDL.
+    if (isConvertedLegacyAnchorIdl(idl)) return 'Anchor (legacy)';
+
     const formatVersion = getIdlFormatVersion(idl);
 
     if (getIdlStandard(idl) === 'Codama') {
