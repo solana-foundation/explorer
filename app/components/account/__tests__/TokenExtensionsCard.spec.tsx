@@ -20,9 +20,9 @@ vi.mock('@entities/account', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/account')>()),
     useRefreshAccount: () => vi.fn(),
 }));
-vi.mock('@/app/utils/token-info', async importOriginal => ({
-    ...(await importOriginal<typeof import('@/app/utils/token-info')>()),
-    getTokenInfo: vi.fn(async () => undefined),
+vi.mock('@entities/token-info', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/token-info')>()),
+    fetchTokenInfoFromApi: vi.fn(async () => undefined),
 }));
 vi.mock('../TokenExtensionsSection', () => ({ TokenExtensionsSection: () => null }));
 

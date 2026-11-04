@@ -18,15 +18,6 @@ vi.mock('swr', () => ({
     default: vi.fn(() => ({ data: undefined })),
 }));
 
-vi.mock('@utils/token-info', () => ({
-    getTokenInfoSwrKey: (address: string, cluster: Cluster, genesisHash?: string) => [
-        'get-token-info',
-        address,
-        cluster,
-        genesisHash,
-    ],
-}));
-
 describe('useTokenInfo', () => {
     beforeEach(() => {
         mockRequestTokenInfo.mockClear();

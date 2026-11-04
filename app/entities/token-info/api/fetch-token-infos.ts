@@ -1,11 +1,11 @@
 import { chunk } from '@shared/lib/array';
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
-import { fetchTokenInfosFromApi } from '@utils/token-info';
 
 import { createAbortSignal } from '../lib/create-abort-signal';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../lib/request-limit';
 import type { TokenInfo } from '../lib/types';
+import { fetchTokenInfosFromApi } from './fetch-token-infos-from-api';
 
 // Bounds the fan-out: a whale address would otherwise put every chunk on the wire at once.
 const CHUNK_CONCURRENCY = 6;

@@ -1,11 +1,12 @@
 'use client';
 
 import { Cluster } from '@utils/cluster';
-import { fetchTokenInfosFromApi, getTokenInfoSwrKey } from '@utils/token-info';
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { mutate } from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
+
+import { fetchTokenInfosFromApi, getTokenInfoSwrKey } from '../api/fetch-token-infos-from-api';
 
 type RequestTokenInfo = (address: string, cluster: Cluster, genesisHash?: string) => void;
 type BatchRequest = { address: string; cluster: Cluster; genesisHash?: string };
