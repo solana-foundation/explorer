@@ -43,7 +43,7 @@ export function FieldNameCell({ name, type, nestingLevel }: { name: string; type
                 {/* The type below md is CSS content, so the row text does not hold a second copy of the type. */}
                 <div
                     data-type={type}
-                    className="min-w-0 max-md:after:block max-md:after:text-muted max-md:after:content-[attr(data-type)]"
+                    className="min-w-0 max-md:after:block max-md:after:italic max-md:after:content-[attr(data-type)]"
                 >
                     {name}
                 </div>
