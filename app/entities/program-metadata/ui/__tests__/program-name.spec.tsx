@@ -1,5 +1,4 @@
 import { DEFAULT_RPC_URL } from '@__fixtures__/gen';
-import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
 import { type AnchorIdl, type CodamaIdl, type ProgramIdls } from '@entities/idl';
 import { IdlVariant } from '@entities/idl/@x/program-metadata';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
@@ -13,12 +12,18 @@ import { Cluster } from '@/app/utils/cluster';
 
 import ProgramName from '../program-name';
 
-const mocks = vi.hoisted(() => ({ useProgramIdls: vi.fn() }));
+const mocks = vi.hoisted(() => ({ rootNodeFromAnchor: vi.fn(), useProgramIdls: vi.fn() }));
 
 vi.mock('@entities/idl/@x/program-metadata', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/idl/@x/program-metadata')>()),
     useProgramIdls: mocks.useProgramIdls,
 }));
+// real conversion by default (used by the Anchor-standard PMP name case); a single test overrides it to throw
+vi.mock('@codama/nodes-from-anchor', async importOriginal => {
+    const actual = await importOriginal<typeof import('@codama/nodes-from-anchor')>();
+    mocks.rootNodeFromAnchor.mockImplementation(actual.rootNodeFromAnchor);
+    return { ...actual, rootNodeFromAnchor: (...args: unknown[]) => mocks.rootNodeFromAnchor(...args) };
+});
 vi.mock('@/app/utils/anchor', () => ({ AnchorProgramName: () => <span>Anchor program name</span> }));
 
 const PROGRAM_ID = new PublicKey(codamaIdl.program.publicKey);
@@ -83,8 +88,10 @@ describe('ProgramName', () => {
     });
 
     it('should show the Anchor program name for an Anchor-standard PMP IDL that Codama cannot convert', () => {
+        mocks.rootNodeFromAnchor.mockImplementationOnce(() => {
+            throw new Error('cannot convert');
+        });
         const idl = anchorModernIdl as unknown as AnchorIdl;
-        expect(() => rootNodeFromAnchor(idl as never)).toThrow();
         mockIdls([{ idl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' }]);
 
         expect(() => renderName()).not.toThrow();

@@ -99,7 +99,32 @@ describe('AccountDataTab', () => {
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
-    it('should hide the tab when the only IDL is Codama', () => {
+    it('should hide the tab when the only IDL is Codama without account types', () => {
+        const codamaNoAccounts = {
+            ...codamaIdl,
+            program: { ...codamaIdl.program, accounts: [] },
+        } as unknown as CodamaIdl;
+        idlState.idls = [
+            { idl: codamaNoAccounts, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+        ];
+        renderTab();
+        expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
+    });
+
+    // A converted-legacy Anchor IDL carries `legacyAnchorIdl`, whether it came from the Anchor PDA (devi51)
+    // or Program Metadata (waveQX) — both show the tab.
+    it('should show the Anchor Data tab for a converted-legacy Anchor IDL served through Program Metadata', () => {
+        const converted = { ...CODAMA, legacyAnchorIdl: ANCHOR_WITH_ACCOUNTS } as unknown as CodamaIdl;
+        idlState.idls = [
+            { idl: converted, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+        ];
+        renderTab();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
+    });
+
+    // A native Codama IDL (System, Token, …) also declares account types but carries no `legacyAnchorIdl`,
+    // and production shows no Anchor Data tab there.
+    it('should hide the tab for a native Codama IDL served through Program Metadata', () => {
         idlState.idls = [
             { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
         ];

@@ -139,7 +139,7 @@ describe('README flows: how payload types reach the consumer', () => {
                     discriminator: base16('9b0caae01efacc82'),
                     enabledTransceivers: { map: 1n },
                     mint: DEFAULT_ADDRESS,
-                    mode: 'burning',
+                    mode: { __kind: 'Burning' },
                     nextTransceiverId: 1,
                     owner: DEFAULT_ADDRESS,
                     paused: false,
@@ -161,7 +161,10 @@ describe('README flows: how payload types reach the consumer', () => {
                     pendingOwner: { __option: 'None' } | { __option: 'Some'; value: string }; // Option<pubkey> → kit {__option} object, NOT `string | null`
                     mint: string; // Address/pubkey → string
                     tokenProgram: string; // Address/pubkey → string
-                    mode: number; // scalar enum → its variant INDEX, NOT the variant name
+                    // scalar enum → kit data-enum object (codama >= 1.11), NOT the bare variant index
+                    mode:
+                        | { __discriminator: number; __kind: 'Burning' }
+                        | { __discriminator: number; __kind: 'Locking' };
                     chainId: { id: number }; // defined type → resolved inline
                     nextTransceiverId: number;
                     threshold: number;
@@ -172,7 +175,7 @@ describe('README flows: how payload types reach the consumer', () => {
 
                 expect(data).toMatchObject({
                     discriminator: base64('mwyq4B76zII='), // the same bytes, re-encoded as base64 by the parser
-                    mode: 1, // 'burning' went in by name, its index came back out
+                    mode: { __kind: 'Burning' }, // a {__kind} data-enum in, a {__kind, __discriminator} object back (codama >= 1.11)
                     owner: DEFAULT_ADDRESS,
                     pendingOwner: { __option: 'None' },
                 });
@@ -294,14 +297,14 @@ describe('README flows: how payload types reach the consumer', () => {
                 if (node.data.kind !== 'structTypeNode') throw new Error('expected a struct-shaped account');
                 expect(node.name).toBe('multisig');
                 // every field's declared kind is known exactly — rendering dispatches on it, never on the value
-                expect(node.data.fields.map(field => `${field.name}: ${field.type.kind}`)).toEqual([
+                expect((node.data.fields ?? []).map(field => `${field.name}: ${field.type.kind}`)).toEqual([
                     'm: numberTypeNode',
                     'n: numberTypeNode',
                     'isInitialized: booleanTypeNode',
                     'signers: arrayTypeNode',
                 ]);
                 // and nested kinds too: signers is an array OF pubkeys → render as address links
-                const signers = node.data.fields.find(field => field.name === 'signers');
+                const signers = (node.data.fields ?? []).find(field => field.name === 'signers');
                 expect(signers?.type.kind === 'arrayTypeNode' && signers.type.item.kind).toBe('publicKeyTypeNode');
             });
 
@@ -414,7 +417,7 @@ describe('README flows: how payload types reach the consumer', () => {
 
                 expect(node.name).toBe('increment');
                 // the converted schema is exact: the declared discriminator plus each argument's kind
-                expect(node.arguments.map(argument => `${argument.name}: ${argument.type.kind}`)).toEqual([
+                expect((node.arguments ?? []).map(argument => `${argument.name}: ${argument.type.kind}`)).toEqual([
                     'discriminator: fixedSizeTypeNode',
                     'amount: numberTypeNode',
                 ]);
@@ -495,7 +498,7 @@ describe('README flows: schema-paired entries for unknown programs', () => {
             discriminator: base16('9b0caae01efacc82'),
             enabledTransceivers: { map: 1n },
             mint: DEFAULT_ADDRESS,
-            mode: 'burning',
+            mode: { __kind: 'Burning' },
             nextTransceiverId: 1,
             owner: DEFAULT_ADDRESS,
             paused: false,
@@ -515,7 +518,7 @@ describe('README flows: schema-paired entries for unknown programs', () => {
             'pendingOwner: none',
             `mint: address(${DEFAULT_ADDRESS})`,
             `tokenProgram: address(${DEFAULT_ADDRESS})`,
-            'mode: burning', // decoded as index 1 — the enum node restored the variant name
+            'mode: Burning', // scalar enum decodes to {__kind:'Burning'} (codama >= 1.11) — the capitalized variant name
             'chainId.id: u16(1)', // nested fields flatten into dot paths
             'nextTransceiverId: u8(1)',
             'threshold: u8(1)',

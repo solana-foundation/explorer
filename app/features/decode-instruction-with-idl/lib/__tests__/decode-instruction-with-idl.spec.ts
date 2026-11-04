@@ -44,8 +44,8 @@ const ix = new TransactionInstruction({
     programId: PublicKey.unique(),
 });
 const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
-// A Codama-native root node (as a PMP IDL is) — routed through Codama, never the Anchor Program.
 const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() }, standard: 'codama' };
+const legacyConvertedIdl = { ...codamaIdl, legacyAnchorIdl: anchorIdl };
 
 describe('decodeInstructionWithIdl', () => {
     beforeEach(() => {
@@ -60,11 +60,22 @@ describe('decodeInstructionWithIdl', () => {
     });
 
     it('should decode an Anchor IDL through the Anchor Program, not Codama (even when Codama could parse it)', () => {
-        // Codama would succeed here, but an Anchor IDL must still take the rich Anchor path so it keeps
-        // event cards + nested account groups. Codama is not consulted first.
         parseInstruction.mockReturnValue({ accounts: [], path: [] });
         expect(decodeInstructionWithIdl(ix, anchorIdl, 'http://localhost').kind).toBe('anchor');
         expect(parseInstruction).not.toHaveBeenCalled();
+    });
+
+    it('should decode a converted legacy Anchor IDL through Codama, never new Program (tx events decode via codama)', () => {
+        parseInstruction.mockReturnValue({ accounts: [], path: [] });
+        expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('codama');
+        // the hard rule: a legacy IDL never reaches new Program()
+        expect(programCtor).not.toHaveBeenCalled();
+    });
+
+    it('should decode a converted legacy IDL from its existing root, without reconverting from Anchor', () => {
+        parseInstruction.mockReturnValue({ accounts: [], path: [] });
+        expect(decodeInstructionWithIdl(ix, legacyConvertedIdl, 'http://localhost').kind).toBe('codama');
+        expect(rootNodeFromAnchor).not.toHaveBeenCalled();
     });
 
     it('should fall back to Codama-from-Anchor when the Anchor Program cannot be built', () => {

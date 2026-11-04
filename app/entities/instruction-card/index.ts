@@ -22,6 +22,7 @@ export {
 export type { FieldValue, InstructionField, InstructionFieldList, PayloadContentBlock } from './model/fields';
 export type { AccountName } from './model/accounts';
 export { argType, parseCodamaArgs } from './model/args';
+export { codamaScalarTypeLabels } from './model/codama-arg-types';
 export type { InstructionArg } from './model/args';
 export type { InstructionEvent } from './model/events';
 export { instructionDataOf, toInstructionNode, toRawInstructionNode } from './model/node';
@@ -30,6 +31,7 @@ export { InstructionSurfaceProvider, useInstructionSurface } from './model/surfa
 export type { InstructionSurface } from './model/surface';
 export { ArgRows } from './ui/ArgRows';
 export { DecodedInstructionCard } from './ui/DecodedInstructionCard';
+export { FieldValueView } from './ui/ValueCell';
 export { InstructionCardView } from './ui/InstructionCardView';
 export { inspectorSurface } from './ui/inspector-surface';
 export { InstructionFieldRows, InstructionFields } from './ui/InstructionFields';

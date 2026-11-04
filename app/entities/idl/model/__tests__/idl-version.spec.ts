@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
 import { type SupportedIdl } from '../../lib/types';
-import { getIdlBadgeLabel, getIdlFormatVersion, getIdlVersion } from '../idl-version';
+import { getIdlBadgeLabel, getIdlFormatVersion, getIdlVersion, isConvertedLegacyShankIdl } from '../idl-version';
 import { isIdlProgramIdMismatch, isInteractiveIdlSupported } from '../interactive-idl';
 
 const DEFAULT_PUBKEY = PublicKey.default.toString();
@@ -81,6 +81,28 @@ describe('getIdlBadgeLabel', () => {
 
     it('should render "Anchor (legacy)" for legacy Anchor IDL', () => {
         expect(getIdlBadgeLabel(createMockIdl('legacy'))).toBe('Anchor (legacy)');
+    });
+
+    it('should render "Anchor (legacy)" for a converted-legacy IDL (a Codama root carrying legacyAnchorIdl)', () => {
+        const converted = {
+            ...createMockIdl('codama', '1.9.2'),
+            legacyAnchorIdl: { instructions: [], metadata: { name: 'test' }, version: '0.0.0' },
+        } as unknown as SupportedIdl;
+        expect(getIdlBadgeLabel(converted)).toBe('Anchor (legacy)');
+    });
+});
+
+describe('isConvertedLegacyShankIdl', () => {
+    const converted = (origin?: string): SupportedIdl =>
+        ({
+            ...createMockIdl('codama', '1.9.2'),
+            legacyAnchorIdl: { instructions: [], metadata: origin ? { origin } : {}, version: '0.0.0' },
+        }) as unknown as SupportedIdl;
+
+    it('should be true only for a converted-legacy IDL whose original was produced by Shank', () => {
+        expect(isConvertedLegacyShankIdl(converted('shank'))).toBe(true);
+        expect(isConvertedLegacyShankIdl(converted())).toBe(false);
+        expect(isConvertedLegacyShankIdl(createMockIdl('codama', '1.9.2'))).toBe(false);
     });
 });
 

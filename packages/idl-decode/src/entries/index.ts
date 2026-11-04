@@ -57,7 +57,8 @@ export function getDecodedEntries(decode: AccountDecode | InstructionDecode): De
                 if (isSomeOption(value)) return collect(node.item, value.value, at);
                 return void entries.push({ node, path: at, value: undefined });
             case 'structTypeNode':
-                for (const field of node.fields) collect(field.type, memberOf(value, field.name), [...at, field.name]);
+                for (const field of node.fields ?? [])
+                    collect(field.type, memberOf(value, field.name), [...at, field.name]);
                 return;
             case 'arrayTypeNode':
             case 'setTypeNode':
@@ -66,7 +67,7 @@ export function getDecodedEntries(decode: AccountDecode | InstructionDecode): De
                 value.forEach((item, index) => collect(node.item, item, [...at, index]));
                 return;
             case 'tupleTypeNode':
-                node.items.forEach((item, index) => collect(item, memberOf(value, index), [...at, index]));
+                (node.items ?? []).forEach((item, index) => collect(item, memberOf(value, index), [...at, index]));
                 return;
             case 'mapTypeNode':
                 if (typeof value !== 'object' || value === null) return void entries.push({ node, path: at, value });
@@ -81,7 +82,7 @@ export function getDecodedEntries(decode: AccountDecode | InstructionDecode): De
     // narrow the envelope union first — TS cannot correlate path/node pairs across it (same as unwrap)
     if ('accounts' in decode.decoded) {
         const instruction = getLastNodeFromPath(decode.decoded.path);
-        for (const argument of instruction.arguments)
+        for (const argument of instruction.arguments ?? [])
             collect(argument.type, memberOf(data, argument.name), [argument.name]);
     } else {
         const account = getLastNodeFromPath(decode.decoded.path);
@@ -136,7 +137,7 @@ export function getEnumVariantName(entry: DecodedEntry | undefined): string | un
     if (entry?.node.kind !== 'enumTypeNode') return undefined;
     // eslint-disable-next-line no-underscore-dangle -- kit's own data-enum discriminant
     if (isDataEnumValue(entry.value)) return entry.value.__kind;
-    const variant = entry.node.variants[Number(entry.value)];
+    const variant = (entry.node.variants ?? [])[Number(entry.value)];
     return variant ? String(variant.name) : undefined;
 }
 
@@ -146,7 +147,7 @@ function isDataEnumValue(value: unknown): value is { __kind: string } {
 }
 
 function findDefinedType(root: RootNode | undefined, name: string): TypeNode | undefined {
-    return root?.program.definedTypes.find(definedType => definedType.name === name)?.type;
+    return root?.program.definedTypes?.find(definedType => definedType.name === name)?.type;
 }
 
 function isSomeOption(value: unknown): value is { __option: 'Some'; value: unknown } {

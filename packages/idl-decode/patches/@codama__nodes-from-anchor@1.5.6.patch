@@ -1,8 +1,8 @@
 diff --git a/dist/index.browser.cjs b/dist/index.browser.cjs
-index 768a01b1c661b7a845d1bec79d14756c57868bae..954755612baf4dd619e8fbeb5362764377788601 100644
+index 02b91d616a7d6f2c33389f2042af30695543cd63..5b00bb22fc125fdab92efc074bd0254a80c1e308 100644
 --- a/dist/index.browser.cjs
 +++ b/dist/index.browser.cjs
-@@ -556,6 +556,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+@@ -682,6 +682,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
    if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
      return typeNodeFromAnchorV01(idlType.value, generics);
    }
@@ -14,10 +14,10 @@ index 768a01b1c661b7a845d1bec79d14756c57868bae..954755612baf4dd619e8fbeb53627643
      return optionTypeNodeFromAnchorV01(idlType, generics);
    }
 diff --git a/dist/index.browser.mjs b/dist/index.browser.mjs
-index 4e20eb9e9cbee76cd6beccf6126661ea05c9bb97..51220104a68a7cc7a77e88c7725bdf3a0b0f6a82 100644
+index 2502feebd3edfb8b37644a11f9394604326bdd1b..5f3075d2c94d853fffb925ac0ec70e71d6722c2e 100644
 --- a/dist/index.browser.mjs
 +++ b/dist/index.browser.mjs
-@@ -554,6 +554,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+@@ -680,6 +680,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
    if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
      return typeNodeFromAnchorV01(idlType.value, generics);
    }
@@ -29,10 +29,10 @@ index 4e20eb9e9cbee76cd6beccf6126661ea05c9bb97..51220104a68a7cc7a77e88c7725bdf3a
      return optionTypeNodeFromAnchorV01(idlType, generics);
    }
 diff --git a/dist/index.node.cjs b/dist/index.node.cjs
-index ef2c5e19e99703eefd9ea689a6c4f939d68823b5..d2fa674cff529b4fd9387af85ca2d7b68a5a2831 100644
+index 894e5bd1a918a2155078303f1c4910ff8cc62eff..8365cdab77f1ae67820a6628fd62de03af13a569 100644
 --- a/dist/index.node.cjs
 +++ b/dist/index.node.cjs
-@@ -556,6 +556,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+@@ -682,6 +682,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
    if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
      return typeNodeFromAnchorV01(idlType.value, generics);
    }
@@ -44,10 +44,10 @@ index ef2c5e19e99703eefd9ea689a6c4f939d68823b5..d2fa674cff529b4fd9387af85ca2d7b6
      return optionTypeNodeFromAnchorV01(idlType, generics);
    }
 diff --git a/dist/index.node.mjs b/dist/index.node.mjs
-index 07f75ecba73390af1512bed6b1d03577f27518c5..576b41d69f30bed9759b9111de13f49567c14b50 100644
+index 3d245650c3e77fe3beafb9b626110a91c8ff8878..7035595059d0d6bba317cb8e2cb44dbc142fe836 100644
 --- a/dist/index.node.mjs
 +++ b/dist/index.node.mjs
-@@ -554,6 +554,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+@@ -680,6 +680,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
    if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
      return typeNodeFromAnchorV01(idlType.value, generics);
    }
@@ -59,10 +59,10 @@ index 07f75ecba73390af1512bed6b1d03577f27518c5..576b41d69f30bed9759b9111de13f495
      return optionTypeNodeFromAnchorV01(idlType, generics);
    }
 diff --git a/dist/index.react-native.mjs b/dist/index.react-native.mjs
-index 43bf56892c9b1c35d280b39536147b3a2cae0efe..9dffdd47c7c3b1b5eb5e53a1e46aaa2ea78fda2e 100644
+index b8c8f134ffb2013f4c689cf8ae0b9e1c58a6d03a..a76144955dc688d44f40c81d6a57bae1a16a5ac5 100644
 --- a/dist/index.react-native.mjs
 +++ b/dist/index.react-native.mjs
-@@ -554,6 +554,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+@@ -680,6 +680,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
    if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
      return typeNodeFromAnchorV01(idlType.value, generics);
    }

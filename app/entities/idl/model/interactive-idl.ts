@@ -1,6 +1,6 @@
 import { type SupportedIdl } from '../lib/types';
 import { getIdlDeclaredAddress } from '../lib/utils';
-import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
+import { getIdlSpecType as getSerdeIdlSpecType } from './idl-spec';
 import { getIdlVersion, MODERN_ANCHOR_IDL_WILDCARD } from './idl-version';
 
 /**

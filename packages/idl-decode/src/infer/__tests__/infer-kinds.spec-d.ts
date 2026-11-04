@@ -182,7 +182,9 @@ describe('CodamaValue per-kind decode shapes', () => {
         >().toBeUnknown();
     });
 
-    it('should map scalar enums to the variant index and data enums to the kit discriminated union', () => {
+    it('should map scalar enums to a kit data-enum object and data enums to the kit discriminated union', () => {
+        // codama >= 1.11 decodes a scalar (all-empty-variant) enum to a {__kind, __discriminator} object
+        // carrying the capitalized variant name — not the bare numeric index it returned before.
         expectTypeOf<
             Value<{
                 kind: 'enumTypeNode';
@@ -191,7 +193,9 @@ describe('CodamaValue per-kind decode shapes', () => {
                     { kind: 'enumEmptyVariantTypeNode'; name: 'burning' },
                 ];
             }>
-        >().toEqualTypeOf<number>();
+        >().toEqualTypeOf<
+            { __discriminator: number; __kind: 'Locking' } | { __discriminator: number; __kind: 'Burning' }
+        >();
         expectTypeOf<
             Value<{
                 kind: 'enumTypeNode';

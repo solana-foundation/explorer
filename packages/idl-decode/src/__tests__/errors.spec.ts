@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
     getIdlErrorMessage,
     IDL_ERROR__DECODE_UNIMPLEMENTED,
+    IDL_ERROR__EVENT_DECODE_FAILED,
     IDL_ERROR__IDL_ADDRESS_MISMATCH,
     IDL_ERROR__IDL_FETCH_FAILED,
     IDL_ERROR__INSTRUCTION_DECODE_FAILED,
@@ -30,6 +31,11 @@ describe('IdlError', () => {
     it('should describe unimplemented decode operations', () => {
         const error = new IdlError(IDL_ERROR__DECODE_UNIMPLEMENTED, { operation: 'decode account' });
         expect(error.message).toBe('decode account is not implemented');
+    });
+
+    it('should describe event-decode failures', () => {
+        const error = new IdlError(IDL_ERROR__EVENT_DECODE_FAILED, { dataLength: 12, standard: IdlStandard.Codama });
+        expect(error.message).toBe('could not decode event data (12 bytes) with the codama IDL');
     });
 
     it('should describe IDL fetch failures', () => {

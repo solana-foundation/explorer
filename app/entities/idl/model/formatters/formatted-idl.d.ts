@@ -39,7 +39,7 @@ export type ErrorData = {
     message: string;
 };
 
-type ConstantData = {
+export type ConstantData = {
     docs: string[];
     name: string;
     type: string;

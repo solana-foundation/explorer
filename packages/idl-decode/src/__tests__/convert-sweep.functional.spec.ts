@@ -41,6 +41,6 @@ describe('Anchor fixture conversion sweep', () => {
     it.each(anchorDocuments)('should convert $name with nodes-from-anchor', ({ doc }) => {
         const root = unwrapResult(convertToCodama(doc as AnchorIdl));
 
-        expect(root.program.instructions.length).toBeGreaterThan(0);
+        expect((root.program.instructions ?? []).length).toBeGreaterThan(0);
     });
 });

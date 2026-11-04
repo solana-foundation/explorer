@@ -15,7 +15,7 @@ export const base64 = (data: string): [string, string] => ['base64', data];
 /** Encode the named account's full field values (incl. discriminator defaults) with codama's OWN codec. */
 export function encodeAccount(idl: CodamaIdlInput, name: string, data: object): Uint8Array {
     const root = idl as unknown as CodamaIdl;
-    const node = root.program.accounts.find(item => item.name === name);
+    const node = (root.program.accounts ?? []).find(item => item.name === name);
     if (!node) throw new Error(`${name} must be declared by the IDL`);
     const codec = getNodeCodec([root, root.program, node] as Parameters<typeof getNodeCodec>[0]);
     return Uint8Array.from(codec.encode(data));

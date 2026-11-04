@@ -2,17 +2,25 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { getAnchorIdls, getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
-import { ArgRows } from '@entities/instruction-card';
+import {
+    getAnchorIdls,
+    getAnchorIdlsWithAccounts,
+    getCodamaIdlsWithAccounts,
+    useAnchorProgram,
+    useProgramIdls,
+} from '@entities/idl';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
-import { anchorAccountArgs, getAnchorProgramName } from '@utils/anchor';
+import { getAnchorProgramName } from '@utils/anchor';
 import React, { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { KeyValueRows } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
+
+import { CodamaAccountCard } from './CodamaAccountCard';
+import { anchorAccountRows } from './decoded-account-rows';
 
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
@@ -50,40 +58,26 @@ export function AnchorAccountCard({ account }: { account: Account }) {
             }
         }
 
-        return {
-            accountDef,
-            decodedAccountData,
-        };
+        return { accountDef, decodedAccountData };
     }, [idl, rawData]);
+
+    const codamaIdls = useMemo(() => (idls ? getCodamaIdlsWithAccounts(idls) : []), [idls]);
 
     if (lamports === undefined) return null;
     if (!idls) return <LoadingCard message="Loading program IDL" />;
-    if (getAnchorIdls(idls).length === 0) return <ErrorCard text="No Anchor IDL found" />;
-    if (!idl || !decodedAccountData || !accountDef) {
-        return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
+
+    if (idl && decodedAccountData && accountDef) {
+        return (
+            <OverviewCard
+                title={`${programName}: ${accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}`}
+            >
+                <KeyValueRows rows={anchorAccountRows(decodedAccountData)} />
+            </OverviewCard>
+        );
     }
 
-    return (
-        <div>
-            <Card ui="dashkit">
-                <CardHeader ui="dashkit">
-                    <CardTitle as="h3" ui="dashkit">
-                        {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
-                    </CardTitle>
-                </CardHeader>
-                <BaseTable ui="dashkit" variant="card" nowrap>
-                    <BaseTable.Head>
-                        <BaseTable.Row>
-                            <BaseTable.HeaderCell className="w-px">Field</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="w-px">Type</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="w-px">Value</BaseTable.HeaderCell>
-                        </BaseTable.Row>
-                    </BaseTable.Head>
-                    <BaseTable.Body>
-                        <ArgRows args={anchorAccountArgs(decodedAccountData, accountDef as IdlTypeDef, idl)} />
-                    </BaseTable.Body>
-                </BaseTable>
-            </Card>
-        </div>
-    );
+    if (codamaIdls.length > 0) return <CodamaAccountCard account={account} idls={codamaIdls} />;
+
+    if (getAnchorIdls(idls).length === 0) return <ErrorCard text="No Anchor IDL found" />;
+    return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
 }

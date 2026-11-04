@@ -21,33 +21,9 @@ describe('AnchorUnifiedProgram', () => {
 
         const interpreter = new AnchorInterpreter();
 
-        // Simple pre-0.30 IDL with camelCase instruction names
-        const pre030Idl = {
-            instructions: [
-                {
-                    accounts: [
-                        { isMut: true, isSigner: true, name: 'payer' } as any,
-                        { isMut: true, isSigner: false, name: 'account' },
-                        { isMut: false, isSigner: false, name: 'systemProgram' },
-                    ],
-                    args: [{ name: 'accountData', type: 'u64' }],
-                    name: 'createAccount',
-                },
-                {
-                    accounts: [
-                        { isMut: false, isSigner: true, name: 'authority' } as any,
-                        { isMut: true, isSigner: false, name: 'account' },
-                    ],
-                    args: [{ name: 'newData', type: 'u64' }],
-                    name: 'updateAccount',
-                },
-            ],
-            name: 'test_program',
-            types: [],
-            version: '0.1.0',
-        } as any;
-
-        // Simple 0.30+ IDL with snake_case instruction names
+        // Simple 0.30+ IDL with snake_case instruction names. Pre-0.30 (legacy) IDLs are converted to
+        // Codama root nodes upstream (`normalizeAnchorIdl`) and run through the CodamaInterpreter, so the
+        // AnchorInterpreter only ever receives modern Anchor IDLs.
         const v030Idl: AnchorIdl = {
             accounts: [
                 {
@@ -96,11 +72,8 @@ describe('AnchorUnifiedProgram', () => {
             ],
         };
 
-        it.each([
-            ['pre-0.30', pre030Idl],
-            ['0.30+', v030Idl],
-        ])('should expose program ID and camelCase instruction and argument names for %s IDL', async (_, idl) => {
-            const program = await interpreter.createProgram(connection, wallet, programId, idl);
+        it('should expose program ID and camelCase instruction and argument names for a 0.30+ IDL', async () => {
+            const program = await interpreter.createProgram(connection, wallet, programId, v030Idl);
             const returnedIdl = program.getIdl();
 
             expect(program.programId.toBase58()).toBe(programId.toBase58());
@@ -109,9 +82,9 @@ describe('AnchorUnifiedProgram', () => {
         });
 
         it('should preserve the original IDL and return the Anchor program IDL from getIdl', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
+            const program = await interpreter.createProgram(connection, wallet, programId, v030Idl);
 
-            expect(program.idl).toBe(pre030Idl);
+            expect(program.idl).toBe(v030Idl);
             // @ts-expect-error expect to access private property
             expect(program.getIdl()).toBe(program.program.idl);
         });
