@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
-import { is, number, optional, record, refine, string, type } from 'superstruct';
+import { is, number, object, optional, record, refine, string, type, unknown } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -10,7 +10,9 @@ const JupiterPriceTokenSchema = type({
     usdPrice: optional(refine(number(), 'positive', value => value > 0)),
 });
 
-const JupiterPriceResponseSchema = record(string(), JupiterPriceTokenSchema);
+const JupiterNoPriceSchema = refine(object({}), 'not an array', value => !Array.isArray(value));
+
+const JupiterPriceResponseSchema = record(string(), unknown());
 
 const JUPITER_API_KEY = process.env.JUPITER_API_KEY;
 
@@ -57,20 +59,23 @@ export async function GET(_request: Request, props: Params) {
 
         const data: unknown = await response.json();
 
-        if (!is(data, JupiterPriceResponseSchema)) {
+        if (is(data, JupiterNoPriceSchema)) {
+            return NextResponse.json({ price: null }, { headers: CACHE_HEADERS });
+        }
+
+        const token = is(data, JupiterPriceResponseSchema) ? data[mintAddress] : undefined;
+
+        if (!is(token, JupiterPriceTokenSchema)) {
             const err = new Error(`Jupiter price API returned unexpected schema for ${mintAddress}`);
             Logger.error(err, { sentry: true });
             return NextResponse.json({ price: null }, { headers: NO_STORE_HEADERS });
         }
 
-        // Jupiter v3 answers `{}` for a mint it has no price for, and omits usdPrice for a mint it knows but
-        // cannot price, e.g. Rox3dSucvX4iArhEZoCbaqerziZacnjzP3iaN15umTD returns only { liquidity, blockId, decimals }
-        const usdPrice = data[mintAddress]?.usdPrice;
-        if (usdPrice === undefined) {
+        if (token.usdPrice === undefined) {
             return NextResponse.json({ price: null }, { headers: CACHE_HEADERS });
         }
 
-        return NextResponse.json({ price: usdPrice }, { headers: CACHE_HEADERS });
+        return NextResponse.json({ price: token.usdPrice }, { headers: CACHE_HEADERS });
     } catch (error) {
         Logger.panic(new Error('Jupiter price API error', { cause: error }));
         return NextResponse.json({ error: 'Failed to fetch price data' }, { headers: NO_STORE_HEADERS, status: 500 });
