@@ -8,9 +8,12 @@ import { beforeEach, vi } from 'vitest';
 import { Cluster } from '@/app/utils/cluster';
 
 import { type AnchorIdl, type CodamaIdl } from '../../../lib/types';
+import anchor029Devi from '../../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchor030devi from '../../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import anchorLegacy094ShankWave from '../../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 import referenceIdl from '../../../mocks/anchor/reference-0.29.json';
 import { IdlVariant } from '../../idl-variant';
+import { normalizeAnchorIdl } from '../../normalize-anchor-idl';
 import { getAnchorIdls, type SourcedIdl } from '../../sourced-idl';
 import { type ProgramIdls } from '../../use-program-idls';
 import { getProvider } from '../anchor-provider';
@@ -82,6 +85,34 @@ describe('Allow for useAnchorProgram to create program instance', () => {
             expect(result.current.program?.programId.toString()).toEqual(programId);
         },
     );
+});
+
+// Real pre-0.30 fixtures (anchor 0.29 CLMM, 0.9.4 Shank) routed through the real resolver — the coverage
+// the migration dropped. anchor 0.30.1 throws when it builds a Program from either, so they must instead
+// convert to a Codama root and decode through codama; useAnchorProgram must build no Program from them.
+describe('Legacy Anchor IDLs convert to Codama and build no Anchor Program', () => {
+    const url = clusterApiUrl('devnet');
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it.each([
+        ['devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH', anchor029Devi],
+        ['waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF', anchorLegacy094ShankWave],
+    ])('should convert the %s legacy IDL to a Codama root and skip the Anchor Program', (programAddress, idl) => {
+        const normalized = normalizeAnchorIdl(idl, programAddress) as CodamaIdl;
+
+        expect((normalized as unknown as { kind?: string }).kind).toBe('rootNode');
+        expect(normalized.legacyAnchorIdl).toBeTruthy();
+
+        vi.mocked(getProvider).mockReturnValue(createMockProvider(url, programAddress) as unknown as AnchorProvider);
+        idlState.idls = [fromCodamaAccount(normalized)];
+
+        const { result } = renderAnchorProgram(programAddress, url);
+
+        expect(result.current).toEqual({ isLoading: false, program: null });
+    });
 });
 
 describe('useAnchorProgram', () => {

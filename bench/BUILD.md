@@ -15,8 +15,7 @@
 | Dynamic | `/address/[address]/domains` | 420 kB | 830 kB |
 | Dynamic | `/address/[address]/entries` | 420 kB | 830 kB |
 | Dynamic | `/address/[address]/feature-gate` | 400 kB | 830 kB |
-| Dynamic | `/address/[address]/idl` | 520 kB | 950 kB |
-| Dynamic | `/address/[address]/instructions` | 410 kB | 840 kB |
+| Dynamic | `/address/[address]/idl` | 520 kB | 930 kB |
 | Dynamic | `/address/[address]/metadata` | 400 kB | 830 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 400 kB | 830 kB |
 | Dynamic | `/address/[address]/program-multisig` | 420 kB | 830 kB |
@@ -54,17 +53,17 @@
 | Dynamic | `/block/[slot]/accounts` | 140 kB | 560 kB |
 | Dynamic | `/block/[slot]/programs` | 140 kB | 560 kB |
 | Dynamic | `/block/[slot]/rewards` | 150 kB | 570 kB |
-| Dynamic | `/epoch/[epoch]` | 20 kB | 450 kB |
+| Dynamic | `/epoch/[epoch]` | 20 kB | 430 kB |
 | Static | `/feature-gates` | 50 kB | 470 kB |
 | Dynamic | `/mcp` | — | — |
-| Static | `/mcp/start` | 20 kB | 460 kB |
+| Static | `/mcp/start` | 20 kB | 440 kB |
 | Dynamic | `/og/account/[address]` | — | — |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Dynamic | `/og/tx/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
 | Dynamic | `/robots.txt` | — | — |
-| Static | `/tos` | 10 kB | 440 kB |
-| Dynamic | `/tx/[signature]` | 460 kB | 890 kB |
-| Dynamic | `/tx/[signature]/inspect` | 460 kB | 880 kB |
-| Static | `/tx/inspector` | 460 kB | 880 kB |
+| Static | `/tos` | 10 kB | 420 kB |
+| Dynamic | `/tx/[signature]` | 460 kB | 860 kB |
+| Dynamic | `/tx/[signature]/inspect` | 460 kB | 860 kB |
+| Static | `/tx/inspector` | 460 kB | 860 kB |

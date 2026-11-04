@@ -45,6 +45,29 @@ describe('useIdlInstructionDecode', () => {
         expect(result.current).toEqual({ kind: 'codama' });
     });
 
+    it('should fall back to the Anchor IDL account IDL when the PMP IDL does not decode', () => {
+        // A Codama PMP IDL sits first but cannot decode this instruction; the legacy Anchor IDL (converted
+        // to a codama root) carries it and its events, so the hook must try it rather than give up.
+        idlState.idls = [PMP, ANCHOR];
+        safeDecodeInstructionWithIdl.mockReturnValueOnce({ kind: 'unknown' }).mockReturnValueOnce({ kind: 'codama' });
+
+        const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw }));
+
+        expect(safeDecodeInstructionWithIdl).toHaveBeenNthCalledWith(1, raw, pmpIdl, 'http://localhost');
+        expect(safeDecodeInstructionWithIdl).toHaveBeenNthCalledWith(2, raw, anchorIdl, 'http://localhost');
+        expect(result.current).toEqual({ kind: 'codama' });
+    });
+
+    it('should return unknown when no published IDL decodes the instruction', () => {
+        idlState.idls = [PMP, ANCHOR];
+        safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'unknown' });
+
+        const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw }));
+
+        expect(safeDecodeInstructionWithIdl).toHaveBeenCalledTimes(2);
+        expect(result.current).toEqual({ kind: 'unknown' });
+    });
+
     it('should decode with the IDL from the Anchor IDL account when the program has no PMP IDL', () => {
         idlState.idls = [ANCHOR];
         safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'anchor' });
