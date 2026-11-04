@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -14,8 +15,8 @@ import { GET } from '../route';
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 
-const VALID_MINT = 'So11111111111111111111111111111111111111112';
-const OTHER_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const VALID_MINT = gen.address(1);
+const OTHER_MINT = gen.address(2);
 const mockRequest = new Request(`http://localhost:3000/api/token-price/${VALID_MINT}`);
 
 // Cast: tests only stub the surface of Response that the route touches.

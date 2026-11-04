@@ -1,10 +1,11 @@
+import { gen } from '@__fixtures__/gen';
 import { vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../[mintAddress]/route';
 
-const VALID_MINT = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
+const VALID_MINT = gen.address(1);
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
