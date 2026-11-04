@@ -1,8 +1,9 @@
 import { renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
+import type { SWRConfiguration } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import { refocusTab, settleRetries, swrWrapper, UNTHROTTLED_FOCUS, waitForHook } from '@/app/__tests__/swr-hook';
 
 vi.mock('../../api/get-rpc', () => ({ getRpc: vi.fn() }));
 
@@ -42,8 +43,8 @@ const connectedState: ClusterState = {
     status: ClusterStatus.Connected,
 };
 
-function makeWrapper(state: ClusterState) {
-    const SwrWrapper = swrWrapper({ dedupingInterval: 0 });
+function makeWrapper(state: ClusterState, config: SWRConfiguration = { dedupingInterval: 0 }) {
+    const SwrWrapper = swrWrapper(config);
     return function Wrapper({ children }: { children: ReactNode }) {
         return createElement(SwrWrapper, null, createElement(StateContext.Provider, { value: state }, children));
     };
@@ -84,6 +85,19 @@ describe('useEpochSchedule', () => {
         expect(result.current).toBeUndefined();
         expect(getRpc).not.toHaveBeenCalled();
     });
+
+    it('should stay immutable and never refetch on tab focus', async () => {
+        const { result } = renderHook(() => useEpochSchedule(), {
+            wrapper: makeWrapper(connectedState, UNTHROTTLED_FOCUS),
+        });
+
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_SCHEDULE));
+        expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+
+        await refocusTab();
+        await settleRetries();
+        expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+    });
 });
 
 describe('useEpochInfo', () => {
@@ -103,6 +117,18 @@ describe('useEpochInfo', () => {
 
         expect(result.current).toBeUndefined();
         expect(getRpc).not.toHaveBeenCalled();
+    });
+
+    it('should revalidate on tab focus, so the epoch tracks the live cluster', async () => {
+        const { result } = renderHook(() => useEpochInfo(), {
+            wrapper: makeWrapper(connectedState, UNTHROTTLED_FOCUS),
+        });
+
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+        await refocusTab();
+        await waitForHook(() => expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2));
     });
 });
 
