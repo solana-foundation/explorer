@@ -82,7 +82,8 @@ describe('GET /api/token-price/[mintAddress]', () => {
         it.each([
             ['a negative usdPrice', { [VALID_MINT]: { usdPrice: -1 } }],
             ['a zero usdPrice', { [VALID_MINT]: { usdPrice: 0 } }],
-            ['a response without the mint address', {}],
+            ['a null token', { [VALID_MINT]: null }],
+            ['a null body', null],
         ])('should log the error and return { price: null } with no-store headers for %s', async (_reason, body) => {
             mockResponseOnce({ json: async () => body, ok: true });
 
@@ -97,11 +98,11 @@ describe('GET /api/token-price/[mintAddress]', () => {
             expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
         });
 
-        it('should not log an error when token has no usdPrice field', async () => {
-            mockResponseOnce({
-                json: async () => ({ [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }),
-                ok: true,
-            });
+        it.each([
+            ['a token without usdPrice', { [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }],
+            ['a response without the mint address', {}],
+        ])('should return { price: null } with cache headers and no error for %s', async (_reason, body) => {
+            mockResponseOnce({ json: async () => body, ok: true });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
