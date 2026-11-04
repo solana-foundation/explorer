@@ -7,7 +7,7 @@ describe('isTransientStatus', () => {
         expect(isTransientStatus(status)).toBe(true);
     });
 
-    it.each([200, 400, 401, 403, 404, 422])('should be false for %i', status => {
+    it.each([200, 400, 401, 403, 404, 422, 499])('should be false for %i', status => {
         expect(isTransientStatus(status)).toBe(false);
     });
 });
