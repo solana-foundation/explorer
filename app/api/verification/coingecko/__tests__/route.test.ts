@@ -95,6 +95,24 @@ describe('CoinGecko verification route (gt_verified)', () => {
         expect(Logger.warn).toHaveBeenCalledWith('[api:coingecko] Rate limit exceeded', { sentry: true });
     });
 
+    it.each([408, 500, 502, 503])('should pass through %i and report it to sentry as a warning', async status => {
+        mockFetch(status);
+        const r = await callRoute(VALID_ADDRESS);
+        expect(r.status).toBe(status);
+        expect(Logger.warn).toHaveBeenCalledWith(`[api:coingecko] Upstream returned ${status}`, {
+            address: VALID_ADDRESS,
+            sentry: true,
+        });
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it('should pass through a 403 and log panic', async () => {
+        mockFetch(403);
+        const r = await callRoute(VALID_ADDRESS);
+        expect(r.status).toBe(403);
+        expect(Logger.panic).toHaveBeenCalledWith(new Error('CoinGecko onchain info API error: 403'));
+    });
+
     it('should return 502 on a schema mismatch', async () => {
         mockFetch(200, { unexpected: 'shape' });
         expect((await callRoute(VALID_ADDRESS)).status).toBe(502);

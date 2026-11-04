@@ -1,6 +1,7 @@
 // Metadata URLs are on-chain data, so this module must not run on the server.
 import 'client-only';
 
+import { isTransientStatus } from '@/app/shared/lib/http-status';
 import { IPFS_PROTOCOL } from '@/app/shared/lib/ipfs';
 import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
 import { ROUTE_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
@@ -13,7 +14,7 @@ export async function fetchNftokenMetadata(uri: string): Promise<NftokenMetadata
     if (!requestUri) return { kind: 'unavailable' };
 
     const response = await fetch(requestUri, { cache: 'no-store', signal: AbortSignal.timeout(ROUTE_TIMEOUT_MS) });
-    if (isTransient(response.status)) throw new Error(`NFToken metadata fetch failed: ${response.status}`);
+    if (isTransientStatus(response.status)) throw new Error(`NFToken metadata fetch failed: ${response.status}`);
     if (!response.ok) return { kind: 'unavailable' };
 
     let json: unknown;
@@ -31,11 +32,4 @@ const FETCHABLE_PROTOCOLS = [...SAFE_EXTERNAL_PROTOCOLS, IPFS_PROTOCOL];
 function isFetchable(uri: string): boolean {
     const url = parseUrl(uri);
     return Boolean(url && FETCHABLE_PROTOCOLS.includes(url.protocol));
-}
-
-const REQUEST_TIMEOUT = 408;
-const RATE_LIMITED = 429;
-
-function isTransient(status: number): boolean {
-    return status === REQUEST_TIMEOUT || status === RATE_LIMITED || status >= 500;
 }

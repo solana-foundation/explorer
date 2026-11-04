@@ -3,6 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { is } from 'superstruct';
 
+import { isTransientStatus } from '@/app/shared/lib/http-status';
 import {
     CACHE_HEADERS,
     ERROR_CACHE_HEADERS,
@@ -33,6 +34,8 @@ export async function GET(_request: Request, props: Params) {
                 Logger.warn('[api:coingecko] Rate limit exceeded', { sentry: true });
             } else if (response.status === 404) {
                 Logger.warn('[api:coingecko] No data found', { address });
+            } else if (isTransientStatus(response.status)) {
+                Logger.warn(`[api:coingecko] Upstream returned ${response.status}`, { address, sentry: true });
             } else {
                 Logger.panic(new Error(`CoinGecko onchain info API error: ${response.status}`));
             }

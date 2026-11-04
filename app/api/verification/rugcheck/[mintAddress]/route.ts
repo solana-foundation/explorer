@@ -2,6 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { is, number, type } from 'superstruct';
 
+import { isTransientStatus } from '@/app/shared/lib/http-status';
 import {
     CACHE_HEADERS,
     ERROR_CACHE_HEADERS,
@@ -58,6 +59,8 @@ export async function GET(_request: Request, props: Params) {
 
             if (response.status === 429) {
                 Logger.warn('[api:rugcheck] Rate limit exceeded', { sentry: true });
+            } else if (isTransientStatus(response.status)) {
+                Logger.warn(`[api:rugcheck] Upstream returned ${response.status}`, { mintAddress, sentry: true });
             } else {
                 Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
             }
