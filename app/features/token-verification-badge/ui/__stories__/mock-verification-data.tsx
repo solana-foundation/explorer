@@ -23,15 +23,6 @@ export const mockJupiterSource = (overrides?: Partial<VerificationSource>): Veri
     ...overrides,
 });
 
-export const mockSolflareSource = (overrides?: Partial<VerificationSource>): VerificationSource => ({
-    applyUrl: 'https://help.solflare.com/en/articles/9260147-i-cannot-find-a-token-in-solflare',
-    isVerificationFound: true,
-    name: EVerificationSource.Solflare,
-    url: `https://www.solflare.com/prices/${MOCK_ADDRESS}`,
-    verified: true,
-    ...overrides,
-});
-
 export const mockRugCheckSource = (overrides?: Partial<VerificationSource>): VerificationSource => ({
     applyUrl: 'https://rugcheck.xyz/auth?redirectTo=%2Fauth',
     isVerificationFound: true,
@@ -46,28 +37,24 @@ export const mockRugCheckSource = (overrides?: Partial<VerificationSource>): Ver
 export const mockAllVerifiedSources = (): VerificationSource[] => [
     mockCoinGeckoSource(),
     mockJupiterSource(),
-    mockSolflareSource(),
     mockRugCheckSource(),
 ];
 
 export const mockPartiallyVerifiedSources = (): VerificationSource[] => [
     mockCoinGeckoSource(),
     mockJupiterSource(),
-    mockSolflareSource({ isVerificationFound: false, verified: false }),
     mockRugCheckSource({ level: ERiskLevel.Warning, score: 45 }),
 ];
 
 export const mockNotVerifiedSources = (): VerificationSource[] => [
     mockCoinGeckoSource({ isVerificationFound: false, verified: false }),
     mockJupiterSource({ isVerificationFound: false, verified: false }),
-    mockSolflareSource({ isVerificationFound: false, verified: false }),
     mockRugCheckSource({ isVerificationFound: false, level: undefined, score: undefined, verified: false }),
 ];
 
 export const mockRateLimitedSources = (): VerificationSource[] => [
     mockCoinGeckoSource({ isRateLimited: true, isVerificationFound: false, verified: false }),
     mockJupiterSource({ isRateLimited: true, isVerificationFound: false, verified: false }),
-    mockSolflareSource(),
     mockRugCheckSource({
         isRateLimited: true,
         isVerificationFound: false,
@@ -80,7 +67,6 @@ export const mockRateLimitedSources = (): VerificationSource[] => [
 export const mockDangerousTokenSources = (): VerificationSource[] => [
     mockCoinGeckoSource({ isVerificationFound: false, verified: false }),
     mockJupiterSource({ isVerificationFound: false, verified: false }),
-    mockSolflareSource({ isVerificationFound: false, verified: false }),
     mockRugCheckSource({ level: ERiskLevel.Danger, score: 85, verified: false }),
 ];
 

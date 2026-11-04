@@ -56,7 +56,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
-import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
+import { FullTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
@@ -88,7 +88,7 @@ export function TokenAccountSection({
 }: {
     account: Account;
     tokenAccount: TokenAccount;
-    tokenInfo?: FullLegacyTokenInfo;
+    tokenInfo?: FullTokenInfo;
 }) {
     const { cluster } = useCluster();
 
@@ -137,7 +137,7 @@ function FungibleTokenMintAccountCard({
 }: {
     account: Account;
     mintInfo: MintAccountInfo;
-    tokenInfo?: FullLegacyTokenInfo;
+    tokenInfo?: FullTokenInfo;
 }) {
     const fetchInfo = useRefreshAccount();
 

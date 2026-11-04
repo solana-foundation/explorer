@@ -25,7 +25,7 @@ type TokenExtensions = {
     readonly imageUrl?: string;
     readonly description?: string;
 };
-export type FullLegacyTokenInfo = {
+export type FullTokenInfo = {
     readonly chainId: number;
     readonly address: string;
     readonly name: string;
@@ -35,12 +35,9 @@ export type FullLegacyTokenInfo = {
     readonly tags?: string[];
     readonly extensions?: TokenExtensions;
 };
-export type FullTokenInfo = FullLegacyTokenInfo & {
-    readonly verified: boolean;
-};
 
 type FullLegacyTokenInfoList = {
-    tokens: FullLegacyTokenInfo[];
+    tokens: FullTokenInfo[];
 };
 
 type FetchTokenInfosRequest = {
@@ -142,7 +139,7 @@ export async function getTokenInfoWithoutOnChainFallback(
 async function getFullLegacyTokenInfoUsingCdn(
     address: PublicKey,
     chainId: ChainId,
-): Promise<FullLegacyTokenInfo | undefined> {
+): Promise<FullTokenInfo | undefined> {
     const tokenListResponse = await fetch(
         'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json',
     );
@@ -203,7 +200,7 @@ export async function getFullTokenInfo(
     const sdkTokenInfo = sdkTokenInfos?.[0];
 
     if (!sdkTokenInfo) {
-        if (legacyCdnTokenInfo) return { ...legacyCdnTokenInfo, verified: true };
+        if (legacyCdnTokenInfo) return legacyCdnTokenInfo;
         // A failed request throws, so a caller cannot read it as a mint without token info.
         if (sdkTokenInfos === undefined) throw new Error('[utils:token-info] Token info request failed');
         return undefined;
@@ -222,7 +219,6 @@ export async function getFullTokenInfo(
         name: sdkTokenInfo.name,
         symbol: sdkTokenInfo.symbol,
         tags,
-        verified: sdkTokenInfo.verified ?? false,
     };
 }
 
