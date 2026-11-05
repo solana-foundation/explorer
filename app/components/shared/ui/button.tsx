@@ -34,6 +34,8 @@ const buttonVariants = cva([], {
         // Toolbar action row (pairs with variant="quiet"): tighter box than `sm` so a bare
         // label + icon sits close to its neighbours without a fill to separate them.
         { class: 'h-7 gap-1.5 rounded px-0 text-sm font-normal [&_svg]:size-4', size: 'toolbar', ui: 'tw' },
+        // Text-height control inside a table row or a line of text (e.g. a size or a retry in a list row).
+        { class: 'h-auto gap-2 rounded px-0 py-0 text-sm [&_svg]:size-3.5', size: 'inline', ui: 'tw' },
         // Tall icon-over-label action tile (e.g. slideover footer actions).
         { class: 'h-16 flex-col gap-1 rounded-lg px-2 text-xs [&_svg]:size-4', size: 'tile', ui: 'tw' },
         { class: 'border-0 bg-accent text-gray-900 hover:bg-accent/90', ui: 'tw', variant: 'accent' },
@@ -169,7 +171,7 @@ const buttonVariants = cva([], {
     },
     variants: {
         active: { false: '', true: '' },
-        size: { compact: '', default: '', icon: '', lg: '', sm: '', tile: '', toolbar: '' },
+        size: { compact: '', default: '', icon: '', inline: '', lg: '', sm: '', tile: '', toolbar: '' },
         ui: { dashkit: '', tw: '' },
         variant: {
             accent: '',

@@ -18,7 +18,6 @@ import { address as toAddress } from '@solana/kit';
 import { displayTimestampUtc } from '@utils/date';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
@@ -28,7 +27,7 @@ import { ROW_PADDING } from '@/app/shared/ui/spacing';
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../model/use-account-history';
 import { useFetchAccountHistory } from '../model/use-fetch-account-history';
-import { useResolvedInstructionSummaries } from '../model/use-resolved-instruction-summaries';
+import { useResolvedRowTransaction } from '../model/use-resolved-row-transaction';
 import {
     BaseTransactionHistoryCard,
     historyGridCols,
@@ -36,26 +35,28 @@ import {
     type TransactionHistoryRowView,
 } from './BaseTransactionHistoryCard';
 import { CompactKeyValue } from './CompactKeyValue';
-import { InstructionList, InstructionListSkeleton } from './InstructionList';
+import { ProgramsBlock } from './InstructionList';
 import { RawDataSizeField } from './RawDataSizeField';
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer';
+
+const HISTORY_PAGE_SIZE = 5;
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const historyAddress = useMemo(() => toAddress(address), [address]);
     // One breakpoint subscription for the whole card — each row reads `isLg` as a prop rather than
-    // registering its own matchMedia listeners (25 rows × several media queries otherwise).
+    // registering its own matchMedia listeners (several media queries per row otherwise).
     const { isLg } = useBreakpoint();
     const filters = useHistoryFilters();
     const hasActiveFilters = Object.values(filters).some(value => value !== undefined);
     const filtersKey = JSON.stringify(filters);
     const history = useAccountHistory(address);
-    const fetchAccountHistory = useFetchAccountHistory(25, filters);
+    const fetchAccountHistory = useFetchAccountHistory(HISTORY_PAGE_SIZE, filters);
     const resetHistory = useResetAccountHistory();
     const filtersSupported = useHistoryFiltersSupported() && !isGtfaDisabled(address);
     const clearFilters = useClearHistoryFilters();
 
-    // Signatures only — the parsed transactions for instruction names / raw bytes are fetched lazily
-    // per row, one at a time, so the page never batch-hammers the RPC into 429s.
+    // Signatures only. Each row fetches its own transaction once it is visible, one at a time, so the page
+    // never sends a burst of calls that the RPC rate limits.
     const refresh = useCallback(
         () => fetchAccountHistory(historyAddress, false, true),
         [fetchAccountHistory, historyAddress],
@@ -131,10 +132,10 @@ function TransactionRow({
 }) {
     const { signature, slot, blockTime, status } = row;
     const { isVisible, ref } = useVisibility<HTMLDivElement>(true);
-    const instructionNames = useResolvedInstructionSummaries(signature, isVisible);
+    const rowTransaction = useResolvedRowTransaction(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    // Mount the mobile drawer only once the row is first tapped — otherwise every row would mount a
-    // closed drawer (with its own raw-tx subscription) up front.
+    // Mount the mobile drawer only once the row is first tapped, so the page does not mount a closed
+    // drawer for every row up front.
     const [drawerMounted, setDrawerMounted] = useState(false);
     const badge = STATUS_BADGE[status];
 
@@ -148,14 +149,7 @@ function TransactionRow({
         setDrawerOpen(true);
     };
 
-    const programsBlock =
-        instructionNames !== undefined && instructionNames.length > 0 ? (
-            <InstructionList instructions={instructionNames} />
-        ) : instructionNames === undefined ? (
-            <InstructionListSkeleton />
-        ) : (
-            <span className="text-outer-space-300">---</span>
-        );
+    const programsBlock = <ProgramsBlock state={rowTransaction} />;
 
     const signatureLink = <Signature signature={signature} link />;
     const statusBadge = (
@@ -227,7 +221,7 @@ function TransactionRow({
 
                     {isLg && (
                         <div>
-                            <TransactionRawDataSize signature={signature} isVisible={isVisible} />
+                            <RawDataSizeField state={rowTransaction} filename={signature} />
                         </div>
                     )}
                 </div>
@@ -242,7 +236,7 @@ function TransactionRow({
                     blockTime={blockTime}
                     statusLabel={badge.label}
                     statusVariant={badge.variant}
-                    instructionNames={instructionNames}
+                    rowTransaction={rowTransaction}
                 />
             )}
         </>
@@ -254,63 +248,5 @@ function MobileField({ label, children }: { label: string; children: React.React
         <CompactKeyValue divider={false} label={label}>
             {children}
         </CompactKeyValue>
-    );
-}
-
-// A transient RPC failure shouldn't strand the Size cell at `-` for the session. `useVisibility` is
-// one-shot (isVisible latches true on first intersection and never flips back), so re-intersection can't
-// drive a retry — we react to the FetchFailed status instead. Bounded so a persistently-down RPC doesn't
-// spin, and delayed so we don't immediately re-hit a rate limit.
-const MAX_RAW_FETCH_RETRIES = 3;
-const RAW_FETCH_RETRY_DELAY_MS = 1500;
-
-// Byte-size cell that opens the raw data (hex/base64 + copy + download) in a popover.
-// Fetches once the row scrolls into view (gated on `isVisible`, like the instruction summaries) so the
-// page never fires a getTransaction for every row at once and batch-hammers the RPC into 429s.
-function TransactionRawDataSize({ signature, isVisible }: { signature: string; isVisible: boolean }) {
-    const fetchRaw = useFetchRawTransaction();
-    const rawDetails = useRawTransactionDetails(signature);
-    const transactionData = rawDetails?.data?.raw?.messageBytes;
-    const loading = rawDetails === undefined || rawDetails.status === FetchStatus.Fetching;
-    const retriesRef = useRef(0);
-
-    // Once the automated budget is spent and the fetch is still failing, the one-shot visibility can't
-    // re-arm it, so surface a manual retry rather than stranding the cell at `-` for the session.
-    const exhausted = rawDetails?.status === FetchStatus.FetchFailed && retriesRef.current >= MAX_RAW_FETCH_RETRIES;
-
-    useEffect(() => {
-        if (!isVisible || transactionData) return;
-        // First time in view: no provider entry yet — kick off the initial fetch.
-        if (rawDetails === undefined) {
-            fetchRaw(signature);
-            return;
-        }
-        // Fetch failed: retry a bounded number of times on a delay. The status flips FetchFailed on each
-        // failed attempt, re-running this effect; the ref cap stops it once we've exhausted the budget.
-        if (rawDetails.status === FetchStatus.FetchFailed && retriesRef.current < MAX_RAW_FETCH_RETRIES) {
-            const timer = setTimeout(() => {
-                retriesRef.current += 1;
-                fetchRaw(signature);
-            }, RAW_FETCH_RETRY_DELAY_MS);
-            return () => clearTimeout(timer);
-        }
-    }, [isVisible, signature, rawDetails, transactionData, fetchRaw]);
-
-    // Reset the budget and re-fetch so a recovered RPC can populate the size on demand.
-    const retry = useCallback(() => {
-        retriesRef.current = 0;
-        fetchRaw(signature);
-    }, [fetchRaw, signature]);
-
-    return (
-        <RawDataSizeField
-            size={transactionData?.length}
-            data={transactionData}
-            filename={signature}
-            loading={loading}
-            onRetry={exhausted ? retry : undefined}
-            // Collapse the fixed button height so the size sits inline with the other cells.
-            buttonClassName="relative top-0.5 !h-auto !py-0 !text-sm [&_svg]:!size-3.5"
-        />
     );
 }

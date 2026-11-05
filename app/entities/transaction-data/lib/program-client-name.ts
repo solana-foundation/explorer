@@ -1,3 +1,8 @@
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+    AddressLookupTableInstruction,
+    identifyAddressLookupTableInstruction,
+} from '@solana-program/address-lookup-table';
 import { identifyStakeInstruction, STAKE_PROGRAM_ADDRESS, StakeInstruction } from '@solana-program/stake';
 import { identifySystemInstruction, SYSTEM_PROGRAM_ADDRESS, SystemInstruction } from '@solana-program/system';
 import {
@@ -43,11 +48,14 @@ type ProgramClient = {
  * Programs whose instruction names come from their generated `@solana-program/*` client: a
  * discriminator lookup, never a decode of the arguments or accounts.
  *
- * These are the programs the RPC normally pre-parses, so on a fetched transaction the name already
- * comes from `parsed.type`. This resolver covers the case where no RPC parse exists — a simulated
- * message — and reproduces that same wording via `rpcTypeOverrides`.
+ * These are the programs the RPC normally pre-parses. A simulated message and a history row carry no
+ * `parsed.type`, so this resolver names them and reproduces the RPC's wording via `rpcTypeOverrides`.
  */
 const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
+    [ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS]: {
+        identify: identifyAddressLookupTableInstruction,
+        names: AddressLookupTableInstruction,
+    },
     [ASSOCIATED_TOKEN_PROGRAM_ADDRESS]: {
         identify: identifyAssociatedTokenInstruction,
         names: AssociatedTokenInstruction,
@@ -75,13 +83,45 @@ const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
             TransferSol: 'transfer',
             TransferSolWithSeed: 'transferWithSeed',
             UpgradeNonceAccount: 'upgradeNonce',
-            WithdrawNonceAccount: 'withdrawNonce',
+            WithdrawNonceAccount: 'withdrawFromNonce',
         },
     },
-    // Token and Token-2022 enum names match the RPC's `parsed.type` for every instruction we have
-    // checked, so neither carries overrides. Token-2022's extension groups are unverified against the
-    // RPC — see the extension cases in program-client-name.spec.
-    [TOKEN_2022_PROGRAM_ADDRESS]: { identify: identifyToken2022Instruction, names: Token2022Instruction },
+    // Token's enum names all match the RPC's `parsed.type`. Token-2022's extension names often do not,
+    // because the RPC names each one after its extension.
+    [TOKEN_2022_PROGRAM_ADDRESS]: {
+        identify: identifyToken2022Instruction,
+        names: Token2022Instruction,
+        rpcTypeOverrides: {
+            ApplyConfidentialPendingBalance: 'applyPendingConfidentialTransferBalance',
+            ApplyConfidentialPendingBurn: 'applyPendingBurn',
+            ConfidentialDeposit: 'depositConfidentialTransfer',
+            ConfidentialWithdraw: 'withdrawConfidentialTransfer',
+            ConfigureConfidentialTransferAccountWithRegistry: 'configureConfidentialAccountWithRegistry',
+            DisableConfidentialCredits: 'disableConfidentialTransferConfidentialCredits',
+            DisableHarvestToMint: 'disableConfidentialTransferFeeHarvestToMint',
+            DisableMemoTransfers: 'disableRequiredMemoTransfers',
+            DisableNonConfidentialCredits: 'disableConfidentialTransferNonConfidentialCredits',
+            EnableConfidentialCredits: 'enableConfidentialTransferConfidentialCredits',
+            EnableHarvestToMint: 'enableConfidentialTransferFeeHarvestToMint',
+            EnableMemoTransfers: 'enableRequiredMemoTransfers',
+            EnableNonConfidentialCredits: 'enableConfidentialTransferNonConfidentialCredits',
+            HarvestWithheldTokensToMintForConfidentialTransferFee: 'harvestWithheldConfidentialTransferTokensToMint',
+            InitializeConfidentialMintBurn: 'initializeConfidentialMintBurnMint',
+            InitializeConfidentialTransferFee: 'initializeConfidentialTransferFeeConfig',
+            InitializeInterestBearingMint: 'initializeInterestBearingConfig',
+            InitializePermissionedBurn: 'initializePermissionedBurnConfig',
+            InitializeScaledUiAmountMint: 'initializeScaledUiAmountConfig',
+            RotateSupplyElgamalPubkey: 'rotateConfidentialMintBurnSupplyElGamalPubkey',
+            UpdateMultiplierScaledUiMint: 'updateMultiplier',
+            UpdateRateInterestBearingMint: 'updateInterestBearingConfigRate',
+            UpdateTokenGroupUpdateAuthority: 'updateTokenGroupAuthority',
+            UpdateTokenMetadataUpdateAuthority: 'updateTokenMetadataAuthority',
+            WithdrawWithheldTokensFromAccountsForConfidentialTransferFee:
+                'withdrawWithheldConfidentialTransferTokensFromAccounts',
+            WithdrawWithheldTokensFromMintForConfidentialTransferFee:
+                'withdrawWithheldConfidentialTransferTokensFromMint',
+        },
+    },
     [TOKEN_PROGRAM_ADDRESS]: { identify: identifyTokenInstruction, names: TokenInstruction },
 };
 

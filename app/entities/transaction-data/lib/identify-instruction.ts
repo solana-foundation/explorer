@@ -14,7 +14,7 @@ import type { InstructionNameLookup } from './types';
  * an instruction must never do that.
  *
  * Console, never Sentry. Every configured client raises the standard `FAILED_TO_IDENTIFY_INSTRUCTION`
- * for a discriminator it does not know (verified across all six), so that case returns silently and only
+ * for a discriminator it does not know (verified for each one), so that case returns silently and only
  * a client or caller defect reaches the report. It stays off Sentry because naming runs during render,
  * where a capture re-fires on every recompute rather than once per defect.
  * @param identify - The client's generated `identify*` function

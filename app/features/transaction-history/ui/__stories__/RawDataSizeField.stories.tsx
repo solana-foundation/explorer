@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
-import { expect, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { RawDataSizeField } from '../RawDataSizeField';
 
-const data = new Uint8Array(Array.from({ length: 96 }, (_, i) => i));
+const messageBytes = new Uint8Array(Array.from({ length: 96 }, (_, i) => i));
 
 const meta: Meta<typeof RawDataSizeField> = {
-    args: { data, filename: 'transaction', size: data.length },
+    args: { filename: 'transaction', state: { messageBytes, status: 'loaded', summaries: [] } },
     component: RawDataSizeField,
     tags: ['autodocs', 'test'],
     title: 'Features/TransactionHistory/RawDataSizeField',
@@ -22,21 +22,14 @@ export const WithData: Story = {
 };
 
 export const Loading: Story = {
-    args: { loading: true },
+    args: { state: { status: 'loading' } },
 };
 
-export const Unavailable: Story = {
-    args: { data: undefined, size: undefined },
-};
-
-// Fetch failed after exhausting retries — a manual Retry control replaces the dead `-`.
-export const Retry: Story = {
-    args: { data: undefined, onRetry: () => {}, size: undefined },
+const retrySize = fn();
+export const Failed: Story = {
+    args: { state: { retry: retrySize, status: 'failed' } },
     play: async ({ canvasElement }) => {
-        await expect(within(canvasElement).getByRole('button', { name: 'Retry loading size' })).toBeVisible();
+        await userEvent.click(within(canvasElement).getByRole('button', { name: 'Retry loading size' }));
+        await expect(retrySize).toHaveBeenCalled();
     },
-};
-
-export const Empty: Story = {
-    args: { data: new Uint8Array(0), size: 0 },
 };

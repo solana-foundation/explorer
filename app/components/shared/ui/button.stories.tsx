@@ -34,6 +34,7 @@ const sizeOptions = [
     'compact',
     'tile',
     'toolbar',
+    'inline',
 ] as const satisfies readonly ButtonSize[];
 
 // Dashkit migration shim — emits raw Bootstrap `.btn` + `.btn-<variant>` classes via `ui="dashkit"`.
@@ -194,6 +195,7 @@ export const VariantsBySize: Story = {
             compact: 'Compact',
             default: 'Default',
             icon: 'Icon',
+            inline: 'Inline',
             lg: 'Large',
             sm: 'Small',
             tile: 'Tile',
