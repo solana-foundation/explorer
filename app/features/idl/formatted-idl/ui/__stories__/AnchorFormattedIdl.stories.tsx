@@ -1,4 +1,5 @@
 import type { Idl } from '@coral-xyz/anchor';
+import { IdlVariant } from '@entities/idl';
 import idlMock from '@entities/idl/mocks/codama/whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc-idl.json';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -27,5 +28,6 @@ export const DisplayLegacyShankIdl: Story = {
     args: {
         idl: idlMock as unknown as Idl,
         programId: '6LtLpnUFNByNXLyCoK9wA2MykKAmQNZKBdY8s47dehDc',
+        source: IdlVariant.Anchor,
     },
 };

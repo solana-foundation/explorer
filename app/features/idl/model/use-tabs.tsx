@@ -5,6 +5,7 @@ import { cn } from '@components/shared/utils';
 import {
     FormattedIdl,
     getIdlStandard,
+    type IdlSource,
     isIdlProgramIdMismatch,
     isInteractiveIdlSupported,
     type SupportedIdl,
@@ -46,7 +47,13 @@ export type InteractTab = {
 
 type Tab = DataTab | InteractTab;
 
-export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, programId?: string, searchStr?: string) {
+export function useTabs(
+    idl: FormattedIdl | null,
+    originalIdl: SupportedIdl,
+    source: IdlSource,
+    programId?: string,
+    searchStr?: string,
+) {
     const tabs: Tab[] = useMemo(() => {
         if (!idl) return [];
 
@@ -116,7 +123,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
         if (originalIdl && isInteractiveIdlSupported(originalIdl) && IS_INTERACTIVE_IDL_ENABLED) {
             const isProgramIdMismatch = programId ? isIdlProgramIdMismatch(originalIdl, programId) : false;
             // Analytics is created during runtime because GA events are scoped to the IDL standard (Anchor | Codama).
-            const idlAnalytics = createIdlAnalytics(getIdlStandard(originalIdl));
+            const idlAnalytics = createIdlAnalytics(getIdlStandard(originalIdl), source);
 
             tabItems.push({
                 disabled: !idl.instructions?.length,
@@ -125,7 +132,9 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
                     isProgramIdMismatch ? (
                         <BaseWarningCard message="IDL program address does not match the current program" />
                     ) : (
+                        // Expanded sections can hold custom IDL names, so they must reset when the source changes.
                         <InteractWithIdl
+                            key={source}
                             data={idl.instructions}
                             onSectionsExpanded={idlAnalytics.trackSectionsExpanded}
                             onTabOpened={idlAnalytics.trackTabOpened}
@@ -141,7 +150,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
         }
 
         return tabItems;
-    }, [idl, originalIdl, programId, searchStr]);
+    }, [idl, originalIdl, source, programId, searchStr]);
 
     return tabs;
 }

@@ -1,4 +1,11 @@
-import { type AnchorIdl, CodamaIdl, getDisplayIdlSpecType, getIdlStandard, type SupportedIdl } from '@entities/idl';
+import {
+    type AnchorIdl,
+    CodamaIdl,
+    getDisplayIdlSpecType,
+    getIdlStandard,
+    type IdlSource,
+    type SupportedIdl,
+} from '@entities/idl';
 import ReactJson from '@microlink/react-json-view';
 import { PublicKey } from '@solana/web3.js';
 import { useSetAtom } from 'jotai';
@@ -13,12 +20,14 @@ import type { BaseIdl } from '../interactive-idl/model/unified-program';
 
 export function IdlRenderer({
     idl,
+    source,
     collapsed,
     raw,
     searchStr = '',
     programId,
 }: {
     idl: SupportedIdl;
+    source: IdlSource;
     collapsed: boolean | number;
     raw: boolean;
     searchStr: string;
@@ -28,18 +37,18 @@ export function IdlRenderer({
     const setProgramId = useSetAtom(programIdAtom);
 
     useEffect(() => {
-        setOriginalIdl(idl as BaseIdl);
+        setOriginalIdl({ idl: idl as BaseIdl, source });
         setProgramId(new PublicKey(programId));
-    }, [idl, programId, setOriginalIdl, setProgramId]);
+    }, [idl, source, programId, setOriginalIdl, setProgramId]);
 
     const trackedKey = useRef<string | null>(null);
     useEffect(() => {
-        const key = `${programId}:${getIdlStandard(idl)}`;
+        const key = `${programId}:${getIdlStandard(idl)}:${source}`;
         if (trackedKey.current !== key) {
             trackedKey.current = key;
-            createIdlAnalytics(getIdlStandard(idl)).trackIdlViewed(programId);
+            createIdlAnalytics(getIdlStandard(idl), source).trackIdlViewed(programId);
         }
-    }, [idl, programId]);
+    }, [idl, source, programId]);
 
     if (raw) {
         return <IdlJson idl={idl} collapsed={collapsed} />;
@@ -49,18 +58,28 @@ export function IdlRenderer({
     switch (spec) {
         case 'codama':
             return (
-                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering PMP IDL" />}>
-                    <CodamaFormattedIdl idl={idl as CodamaIdl} programId={programId} searchStr={searchStr} />
+                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Codama IDL" />} resetKeys={[idl]}>
+                    <CodamaFormattedIdl
+                        idl={idl as CodamaIdl}
+                        source={source}
+                        programId={programId}
+                        searchStr={searchStr}
+                    />
                 </ErrorBoundary>
             );
         default:
             return (
-                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />}>
+                <ErrorBoundary fallback={<IdlErrorFallback message="Error rendering Anchor IDL" />} resetKeys={[idl]}>
                     {spec === 'legacy-shank' ? (
                         <div className="my-1.5">{`Note: Shank IDLs are not fully supported. Unused types may be absent from detailed view.`}</div>
                     ) : null}
 
-                    <AnchorFormattedIdl idl={idl as AnchorIdl} programId={programId} searchStr={searchStr} />
+                    <AnchorFormattedIdl
+                        idl={idl as AnchorIdl}
+                        source={source}
+                        programId={programId}
+                        searchStr={searchStr}
+                    />
                 </ErrorBoundary>
             );
     }

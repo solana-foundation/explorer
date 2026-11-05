@@ -1,18 +1,37 @@
 import { type ProgramIdlPair } from '../api/types';
-import { type AnchorIdl, type CodamaIdl, type SupportedIdl } from '../lib/types';
+import { type AnchorIdl, type CodamaIdl, type SupportedIdl, type TaggedIdl } from '../lib/types';
+import { type CustomIdlOrigin, type CustomIdlRecord } from './custom-idl/types';
 import { IdlVariant } from './idl-variant';
 import { getIdlStandard } from './idl-version';
 
-type TaggedIdl = { standard: 'Anchor'; idl: AnchorIdl } | { standard: 'Codama'; idl: CodamaIdl };
-export type SourcedIdl = TaggedIdl & { source: IdlVariant; idlAddress: string | undefined };
+export type IdlSource = 'custom' | IdlVariant;
+
+export type SourcedIdl = TaggedIdl &
+    ({ source: 'custom'; origin: CustomIdlOrigin } | { source: IdlVariant; idlAddress: string | undefined });
+
+export type OnChainIdl = Extract<SourcedIdl, { source: IdlVariant }>;
+
+export function getSelectedIdls(
+    onChainIdls: readonly OnChainIdl[],
+    record: CustomIdlRecord | undefined,
+): readonly SourcedIdl[] {
+    if (isCustomIdlSelected(record)) return [{ ...record.customIdl, origin: record.origin, source: 'custom' }];
+    return onChainIdls;
+}
+
+export function isCustomIdlSelected(
+    record: CustomIdlRecord | undefined,
+): record is CustomIdlRecord & { selected: 'custom' } {
+    return record?.selected === 'custom';
+}
 
 export function getOnChainIdls({
     programMetadataIdl,
     programMetadataIdlAddress,
     anchorIdl,
     anchorIdlAddress,
-}: ProgramIdlPair): SourcedIdl[] {
-    const idls: SourcedIdl[] = [];
+}: ProgramIdlPair): OnChainIdl[] {
+    const idls: OnChainIdl[] = [];
     if (programMetadataIdl) {
         idls.push({
             ...tagIdl(programMetadataIdl),
@@ -36,7 +55,7 @@ export function getAnchorIdlsWithAccounts(idls: readonly SourcedIdl[]): AnchorId
     return getAnchorIdls(idls).filter(idl => (idl.accounts?.length ?? 0) > 0);
 }
 
-function tagIdl(idl: SupportedIdl): TaggedIdl {
+export function tagIdl(idl: SupportedIdl): TaggedIdl {
     return isCodamaIdl(idl) ? { idl, standard: 'Codama' } : { idl, standard: 'Anchor' };
 }
 

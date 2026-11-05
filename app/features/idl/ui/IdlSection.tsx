@@ -12,7 +12,7 @@ import { Dropdown, DropdownMenu, DropdownToggle } from '@components/shared/ui/dr
 import { Input } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import { Switch } from '@components/shared/ui/switch';
-import { type IdlVariant, type SupportedIdl } from '@entities/idl';
+import { type IdlSource, type SupportedIdl } from '@entities/idl';
 import { useMemo, useState } from 'react';
 import { AlertCircle, Code, Download, ExternalLink, Search } from 'react-feather';
 
@@ -28,17 +28,17 @@ export function IdlSection({
     badge,
     info,
     programId,
-    idlSource,
+    source,
     network,
     searchStr,
     onSearchChange,
 }: {
     idl: SupportedIdl;
     badge: React.ReactNode;
-    /** Metadata rows (address, source, program version) rendered directly under the badge row. */
+    /** Metadata rows (address, source, file, program version) rendered directly under the badge row. */
     info?: React.ReactNode;
     programId: string;
-    idlSource: IdlVariant;
+    source: IdlSource;
     network: string;
     searchStr: string;
     onSearchChange: (str: string) => void;
@@ -51,9 +51,10 @@ export function IdlSection({
         return toBase64(fromUtf8(JSON.stringify(idl, null, 2)));
     }, [idl]);
     const castawayUrl = useMemo(() => {
-        const params = new URLSearchParams({ idlSource, network, program: programId });
+        if (source === 'custom') return undefined;
+        const params = new URLSearchParams({ idlSource: source, network, program: programId });
         return `https://www.castaway.lol/?${params.toString()}`;
-    }, [idlSource, network, programId]);
+    }, [source, network, programId]);
 
     const handleDownloadIdl = () => triggerDownload(idlBase64, `${programId}-idl.json`);
     const handleOpenCastawayDialog = () => setIsCastawayDialogOpen(true);
@@ -97,7 +98,7 @@ export function IdlSection({
                             <DropdownMenu align="end" className="z-10">
                                 <div className="flex flex-col">
                                     <Button onClick={handleDownloadIdl}>Download IDL</Button>
-                                    <Button onClick={handleOpenCastawayDialog}>Generate SDK</Button>
+                                    {castawayUrl && <Button onClick={handleOpenCastawayDialog}>Generate SDK</Button>}
                                 </div>
                             </DropdownMenu>
                         </Dropdown>
@@ -150,6 +151,7 @@ export function IdlSection({
                 <WalletProvider>
                     <IdlRenderer
                         idl={idl}
+                        source={source}
                         collapsed={!isExpanded}
                         raw={isRawIdlView}
                         searchStr={searchStr}

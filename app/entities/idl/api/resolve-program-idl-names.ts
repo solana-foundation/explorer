@@ -4,6 +4,7 @@ import { address, createSolanaRpc } from '@solana/kit';
 import { type BackoffOptions, withBackoff } from '@utils/with-backoff';
 
 import { buildProgramIdlNames, type ProgramIdlNames } from '../model/instruction-name-table';
+import { getOnChainIdls } from '../model/sourced-idl';
 import { NON_ANCHOR_PROGRAMS } from './config';
 import { resolveProgramIdls } from './resolve-program-idls';
 import { type ProgramIdlPair } from './types';
@@ -35,5 +36,5 @@ export async function resolveProgramIdlNames(
         shouldRetry: backoffOptions.shouldRetry ?? isRetryableError,
     })) as ProgramIdlPair;
 
-    return buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl]);
+    return buildProgramIdlNames(getOnChainIdls(idls).map(({ idl }) => idl));
 }

@@ -10,7 +10,7 @@ import { useSquadsMultisig } from '@/app/providers/squadsMultisig';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
 
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 
 vi.mock('@providers/cluster', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/cluster')>()),
@@ -34,7 +34,7 @@ describe('ProgramMultisigCard', () => {
     });
 
     it('should decode the multisig with the IDL from the Anchor IDL account over the PMP IDL', () => {
-        idlState.idls = [
+        setOnChainIdls([
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
@@ -42,7 +42,7 @@ describe('ProgramMultisigCard', () => {
                 standard: 'Anchor',
             },
             { idl: namedIdl('anchor_program'), idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
-        ];
+        ]);
 
         render(<ProgramMultisigCard data={PROGRAM_DATA} />);
 
@@ -50,20 +50,38 @@ describe('ProgramMultisigCard', () => {
     });
 
     it('should build no Program when the only Anchor IDL is the PMP IDL', () => {
-        idlState.idls = [
+        setOnChainIdls([
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
                 source: IdlVariant.ProgramMetadata,
                 standard: 'Anchor',
             },
-        ];
+        ]);
 
         render(<ProgramMultisigCard data={PROGRAM_DATA} />);
 
         expect(vi.mocked(useSquadsMultisig).mock.lastCall?.[0]).toBeNull();
     });
+
+    it('should decode the multisig with the on-chain Squads IDL when a custom IDL is selected for Squads', () => {
+        idlState.idls = [
+            { idl: namedIdl('custom_program'), origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' },
+        ];
+        idlState.onChainIdls = [
+            { idl: namedIdl('anchor_program'), idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
+        ];
+
+        render(<ProgramMultisigCard data={PROGRAM_DATA} />);
+
+        expect(vi.mocked(useSquadsMultisig).mock.lastCall?.[0]?.idl.metadata.name).toBe('anchorProgram');
+    });
 });
+
+function setOnChainIdls(idls: NonNullable<ProgramIdls['onChainIdls']>) {
+    idlState.idls = idls;
+    idlState.onChainIdls = idls;
+}
 
 function namedIdl(name: string): AnchorIdl {
     return { ...anchorModernIdl, metadata: { ...anchorModernIdl.metadata, name } } as unknown as AnchorIdl;

@@ -13,7 +13,7 @@ import { AnchorProgramName } from '../anchor';
 const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
 const UNBUILDABLE_IDL = referenceIdl as unknown as AnchorIdl;
 
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { customIdl: { record: undefined, status: 'ready' }, idls: [], onChainIdls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({
@@ -87,6 +87,11 @@ describe('AnchorProgramName', () => {
                 },
             ],
             'StatelessProgram',
+        ],
+        [
+            'a selected custom Anchor IDL',
+            [{ idl: namedIdl('custom_program'), origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' }],
+            'CustomProgram',
         ],
     ] satisfies [string, NonNullable<ProgramIdls['idls']>, string][])(
         'should name the program with %s',

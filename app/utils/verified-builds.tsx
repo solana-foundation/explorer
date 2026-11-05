@@ -284,6 +284,7 @@ function useEnrichedOsecInfo({
 
     const { program: accountAnchorProgram, isLoading: isIdlLoading } = useAnchorProgram({
         cluster,
+        onChainOnly: true,
         programAddress: VERIFY_PROGRAM_ID,
         select: getAnchorAccountIdls,
         url: clusterUrl,
