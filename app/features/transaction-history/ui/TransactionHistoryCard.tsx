@@ -39,16 +39,18 @@ import { ProgramsBlock } from './InstructionList';
 import { RawDataSizeField } from './RawDataSizeField';
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer';
 
+const HISTORY_PAGE_SIZE = 5;
+
 export function TransactionHistoryCard({ address }: { address: string }) {
     const historyAddress = useMemo(() => toAddress(address), [address]);
     // One breakpoint subscription for the whole card — each row reads `isLg` as a prop rather than
-    // registering its own matchMedia listeners (25 rows × several media queries otherwise).
+    // registering its own matchMedia listeners (several media queries per row otherwise).
     const { isLg } = useBreakpoint();
     const filters = useHistoryFilters();
     const hasActiveFilters = Object.values(filters).some(value => value !== undefined);
     const filtersKey = JSON.stringify(filters);
     const history = useAccountHistory(address);
-    const fetchAccountHistory = useFetchAccountHistory(25, filters);
+    const fetchAccountHistory = useFetchAccountHistory(HISTORY_PAGE_SIZE, filters);
     const resetHistory = useResetAccountHistory();
     const filtersSupported = useHistoryFiltersSupported() && !isGtfaDisabled(address);
     const clearFilters = useClearHistoryFilters();
