@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -11,7 +12,7 @@ vi.hoisted(() => {
 
 import { GET } from '../[mintAddress]/route';
 
-const VALID_MINT = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
+const VALID_MINT = gen.address(1);
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
@@ -80,12 +81,24 @@ describe('Jupiter API Route', () => {
         expect(Logger.warn).toHaveBeenCalledWith('[api:jupiter] Rate limit exceeded', { sentry: true });
     });
 
-    it('should return upstream status and log panic for other error codes', async () => {
-        mockFetchResponse(503);
+    it.each([408, 500, 502, 503])('should pass through %i and report it to sentry as a warning', async status => {
+        mockFetchResponse(status);
         const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(503);
+        expect(response.status).toBe(status);
         expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
-        expect(Logger.panic).toHaveBeenCalled();
+        expect(Logger.warn).toHaveBeenCalledWith(`[api:jupiter] Upstream returned ${status}`, {
+            mintAddress: VALID_MINT,
+            sentry: true,
+        });
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it('should return upstream status and log panic for other error codes', async () => {
+        mockFetchResponse(403);
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(403);
+        expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
+        expect(Logger.panic).toHaveBeenCalledWith(new Error('Jupiter API error: 403'));
     });
 
     it('should return 500 when fetch throws', async () => {

@@ -1,10 +1,11 @@
+import { gen } from '@__fixtures__/gen';
 import { vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../[mintAddress]/route';
 
-const VALID_MINT = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
+const VALID_MINT = gen.address(1);
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
@@ -65,6 +66,17 @@ describe('Rugcheck API Route', () => {
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(429);
         expect(Logger.warn).toHaveBeenCalledWith('[api:rugcheck] Rate limit exceeded', { sentry: true });
+    });
+
+    it.each([408, 500, 502, 503])('should pass through %i and report it to sentry as a warning', async status => {
+        mockFetchResponse(status);
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(status);
+        expect(Logger.warn).toHaveBeenCalledWith(`[api:rugcheck] Upstream returned ${status}`, {
+            mintAddress: VALID_MINT,
+            sentry: true,
+        });
+        expect(Logger.panic).not.toHaveBeenCalled();
     });
 
     it('should return 502 when response schema is invalid', async () => {

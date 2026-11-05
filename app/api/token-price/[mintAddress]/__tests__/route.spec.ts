@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -14,7 +15,8 @@ import { GET } from '../route';
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 
-const VALID_MINT = 'So11111111111111111111111111111111111111112';
+const VALID_MINT = gen.address(1);
+const OTHER_MINT = gen.address(2);
 const mockRequest = new Request(`http://localhost:3000/api/token-price/${VALID_MINT}`);
 
 // Cast: tests only stub the surface of Response that the route touches.
@@ -82,7 +84,11 @@ describe('GET /api/token-price/[mintAddress]', () => {
         it.each([
             ['a negative usdPrice', { [VALID_MINT]: { usdPrice: -1 } }],
             ['a zero usdPrice', { [VALID_MINT]: { usdPrice: 0 } }],
-            ['a response without the mint address', {}],
+            ['a null token', { [VALID_MINT]: null }],
+            ['a null body', null],
+            ['an empty array', []],
+            ['the token nested under data', { data: { [VALID_MINT]: { usdPrice: 93.2 } } }],
+            ['only another mint', { [OTHER_MINT]: { usdPrice: 1 } }],
         ])('should log the error and return { price: null } with no-store headers for %s', async (_reason, body) => {
             mockResponseOnce({ json: async () => body, ok: true });
 
@@ -96,21 +102,28 @@ describe('GET /api/token-price/[mintAddress]', () => {
             );
             expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
         });
+    });
 
-        it('should not log an error when token has no usdPrice field', async () => {
-            mockResponseOnce({
-                json: async () => ({ [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }),
-                ok: true,
-            });
+    describe('no price', () => {
+        it.each([
+            ['a token without usdPrice', { [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }],
+            ['an empty object', {}],
+        ])(
+            'should return { price: null } with cache headers and not log an error or a warning for %s',
+            async (_reason, body) => {
+                mockResponseOnce({ json: async () => body, ok: true });
 
-            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
+                const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
-            expect(response.status).toBe(200);
-            const data = await response.json();
-            expect(data).toEqual({ price: null });
-            expect(Logger.error).not.toHaveBeenCalled();
-            expect(response.headers.get('Cache-Control')).toBe(CACHE_HEADERS['Cache-Control']);
-        });
+                expect(response.status).toBe(200);
+                const data = await response.json();
+                expect(data).toEqual({ price: null });
+                expect(Logger.error).not.toHaveBeenCalled();
+                expect(Logger.warn).not.toHaveBeenCalled();
+                expect(Logger.panic).not.toHaveBeenCalled();
+                expect(response.headers.get('Cache-Control')).toBe(CACHE_HEADERS['Cache-Control']);
+            },
+        );
     });
 
     describe('successful response', () => {
@@ -126,6 +139,18 @@ describe('GET /api/token-price/[mintAddress]', () => {
             expect(response.status).toBe(200);
             const data = await response.json();
             expect(data).toEqual({ price: 180.5 });
+            expect(response.headers.get('Cache-Control')).toBe(CACHE_HEADERS['Cache-Control']);
+        });
+
+        it('should return the requested mint price and ignore other keys', async () => {
+            mockResponseOnce({
+                json: async () => ({ [OTHER_MINT]: null, [VALID_MINT]: { usdPrice: 1 } }),
+                ok: true,
+            });
+
+            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
+
+            expect(await response.json()).toEqual({ price: 1 });
             expect(response.headers.get('Cache-Control')).toBe(CACHE_HEADERS['Cache-Control']);
         });
     });

@@ -2,6 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { array, boolean, is, optional, string, type } from 'superstruct';
 
+import { isTransientStatus } from '@/app/shared/lib/http-status';
 import {
     CACHE_HEADERS,
     ERROR_CACHE_HEADERS,
@@ -50,6 +51,8 @@ export async function GET(_request: Request, props: Params) {
         if (!response.ok) {
             if (response.status === 429) {
                 Logger.warn('[api:jupiter] Rate limit exceeded', { sentry: true });
+            } else if (isTransientStatus(response.status)) {
+                Logger.warn(`[api:jupiter] Upstream returned ${response.status}`, { mintAddress, sentry: true });
             } else if (response.status !== 404) {
                 Logger.panic(new Error(`Jupiter API error: ${response.status}`));
             }

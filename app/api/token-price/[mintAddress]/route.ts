@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
-import { is, number, optional, refine, type } from 'superstruct';
+import { is, number, object, optional, record, refine, string, type, unknown } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -9,6 +9,10 @@ import { CACHE_HEADERS, JUPITER_PRICE_ENDPOINT, NO_STORE_HEADERS } from './confi
 const JupiterPriceTokenSchema = type({
     usdPrice: optional(refine(number(), 'positive', value => value > 0)),
 });
+
+const JupiterNoPriceSchema = refine(object({}), 'not an array', value => !Array.isArray(value));
+
+const JupiterPriceResponseSchema = record(string(), unknown());
 
 const JUPITER_API_KEY = process.env.JUPITER_API_KEY;
 
@@ -53,8 +57,13 @@ export async function GET(_request: Request, props: Params) {
             );
         }
 
-        const data = (await response.json()) as Record<string, unknown>;
-        const token = data?.[mintAddress];
+        const data: unknown = await response.json();
+
+        if (is(data, JupiterNoPriceSchema)) {
+            return NextResponse.json({ price: null }, { headers: CACHE_HEADERS });
+        }
+
+        const token = is(data, JupiterPriceResponseSchema) ? data[mintAddress] : undefined;
 
         if (!is(token, JupiterPriceTokenSchema)) {
             const err = new Error(`Jupiter price API returned unexpected schema for ${mintAddress}`);
@@ -62,8 +71,6 @@ export async function GET(_request: Request, props: Params) {
             return NextResponse.json({ price: null }, { headers: NO_STORE_HEADERS });
         }
 
-        // Jupiter v3 omits usdPrice for tokens with no price data
-        // e.g. Rox3dSucvX4iArhEZoCbaqerziZacnjzP3iaN15umTD returns only { liquidity, blockId, decimals }
         if (token.usdPrice === undefined) {
             return NextResponse.json({ price: null }, { headers: CACHE_HEADERS });
         }
