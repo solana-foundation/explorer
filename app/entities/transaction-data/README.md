@@ -86,8 +86,8 @@ Break one of these and something downstream misreads a transaction. They are wha
 4. **A name source returns `undefined` for "not mine", never a guess.** Program gate first, discriminator
    second. Every source has the shape `(lookup, idlNames) => string | undefined`.
 5. **Row count and order survive every stage.** Consumers pair row `i` with `instructionLogs[i]`, so a
-   dropped row shifts every later CU figure onto the wrong instruction. Two places change the row count,
-   and neither can shift an index. Both summary builders filter Compute Budget out. That is safe because
+   dropped row shifts every later CU figure onto the wrong instruction. Three places change the row
+   count, and none can shift an index. Both summary builders filter Compute Budget out. That is safe because
    summary rows are never paired with logs at all, not because of where they run. `resolveRows` drops
    *every* row on an out-of-range `programIdIndex` rather than leaving a gap. The two surfaces that do
    pair rows with logs never filter.
@@ -120,8 +120,8 @@ Two things are held back from it. The built-in sources below are one. The other 
 `resolveProgramIdlNames` both filter out of the fetch entirely: those programs never reach the IDL source
 whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
 programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins
-with no built-in source at all (Config, Ed25519, Secp256k1, the BPF loaders other than the upgradeable one),
-which stay unnamed by design rather than by omission.
+with no built-in source at all (Config, Ed25519, Secp256k1, the loaders other than BPF Loader 2 and the
+upgradeable one), which stay unnamed by design rather than by omission.
 
 The built-in sources are a short list of exceptions, kept for three reasons.
 
@@ -135,7 +135,7 @@ on-chain account and can appear the day after this was checked. Re-check with
 | `program-client-name` → System / Token / Stake / ATA | ✅ pmp |
 | `program-client-name` → **Token-2022** | ❌ none |
 | `program-client-name` → Address Lookup Table | not checked; the fetch refuses it (`NON_ANCHOR_PROGRAMS`) |
-| `native-program-name` → Vote, upgradeable BPF loader | not checked; the fetch refuses them (`NON_ANCHOR_PROGRAMS`) |
+| `native-program-name` → Vote, BPF Loader 2, upgradeable BPF loader | not checked; the fetch refuses them (`NON_ANCHOR_PROGRAMS`) |
 | **ZK ElGamal**, **Lighthouse**, **Mango**, **Serum** | ❌ none |
 | **Pyth** | ❌ none on mainnet, devnet or testnet (checked 2026-09-01) |
 | **Token Swap** | ❌ none (program frozen; names come from a leading u8 tag) |
@@ -150,10 +150,10 @@ the program id is the whole lookup.
 `transferSol`; the RPC's `parsed.type` calls it `transfer`. A fetched transaction is named from
 `parsed.type` at stage 1 and never consults an IDL, so switching stage 3 to IDL wording would make the
 same instruction read `Transfer` on the tx page and `Transfer Sol` in the simulator — invariant 7. That
-is what the `rpcTypeOverrides` map in `program-client-name.ts` exists to prevent. Token and Token-2022
-carry no overrides because their *generated-client enum names* already match `parsed.type` for every
-instruction checked — not because of an IDL, which neither program's naming ever consults. Token-2022's
-extension groups are unverified against the RPC.
+is what the `rpcTypeOverrides` map in `program-client-name.ts` exists to prevent. Token carries no
+overrides because its *generated-client enum names* already match `parsed.type` for every instruction.
+Token-2022's extension instructions carry overrides, because the RPC names each one after its extension.
+Neither program's naming ever consults an IDL.
 
 **3. Cluster coverage.** A PMP IDL is an on-chain account, so it exists per cluster. As of 2026-08-19 the
 Compute Budget IDL account is present on mainnet and devnet, **absent on testnet**, and unreachable on
@@ -181,7 +181,7 @@ around it, while its tooltip shows one row alone, where `Instruction #4` identif
 `InstructionSummary` substitutes `Unknown Instruction` / `Unknown Program` instead, so a summary row never
 needs one.
 
-Within the pipeline, `summarizeInstruction` is the only place those sentinels are introduced — everything
+Within the pipeline, `toSummary` is the only place those sentinels are introduced — everything
 upstream of it returns `undefined`. `getProgramName` in `lib/get-program-name.ts` also defaults to
 `UNKNOWN_PROGRAM_NAME`, but it serves callers outside naming; the pipeline uses its `findProgramName`
 sibling, which returns `undefined`.

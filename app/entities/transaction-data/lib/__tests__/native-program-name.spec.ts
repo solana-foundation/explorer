@@ -4,6 +4,7 @@ import { resolveNativeProgramInstructionName } from '../native-program-name';
 
 const VOTE_PROGRAM = 'Vote111111111111111111111111111111111111111';
 const UPGRADEABLE_LOADER = 'BPFLoaderUpgradeab1e11111111111111111111111';
+const BPF_LOADER_2 = 'BPFLoader2111111111111111111111111111111111';
 
 function name(programId: string, bytes: number[]): string | undefined {
     return resolveNativeProgramInstructionName({ data: Uint8Array.from(bytes), programId });
@@ -23,6 +24,8 @@ describe('resolveNativeProgramInstructionName', () => {
         ['write', UPGRADEABLE_LOADER, [1, 0, 0, 0, 0, 0, 0, 0]],
         ['upgrade', UPGRADEABLE_LOADER, [3, 0, 0, 0]],
         ['setAuthorityChecked', UPGRADEABLE_LOADER, [7, 0, 0, 0]],
+        ['write', BPF_LOADER_2, [0, 0, 0, 0, 0, 0, 0, 0]],
+        ['finalize', BPF_LOADER_2, [1, 0, 0, 0]],
     ])('should word %s as the RPC does', (rpcType, programId, bytes) => {
         expect(name(programId, bytes)).toBe(camelToTitleCase(rpcType));
     });
@@ -38,6 +41,7 @@ describe('resolveNativeProgramInstructionName', () => {
     it.each([
         ['a Vote tag past the last instruction', VOTE_PROGRAM, [20, 0, 0, 0]],
         ['a loader tag past the last instruction', UPGRADEABLE_LOADER, [8, 0, 0, 0]],
+        ['a BPF Loader 2 tag past the last instruction', BPF_LOADER_2, [2, 0, 0, 0]],
         ['data shorter than a tag', VOTE_PROGRAM, [14, 0, 0]],
         ['another program', '11111111111111111111111111111111', [2, 0, 0, 0]],
     ])('should return undefined for %s', (_label, programId, bytes) => {

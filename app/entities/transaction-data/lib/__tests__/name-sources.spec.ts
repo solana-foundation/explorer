@@ -241,7 +241,7 @@ function unnamed(programId: string, ...data: number[]): InstructionNames {
     return { name: undefined, nameLookup: lookup(programId, ...data), programName: undefined };
 }
 
-/** A summary row as `summarizeInstruction` builds it: both names at their sentinels, lookup still set. */
+/** A summary row as `toSummary` builds it: both names at their sentinels, lookup still set. */
 function summary(programId: string, ...data: number[]): InstructionSummary {
     return {
         name: UNKNOWN_INSTRUCTION_NAME,

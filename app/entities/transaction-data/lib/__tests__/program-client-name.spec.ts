@@ -58,17 +58,17 @@ describe('resolveProgramClientInstructionName', () => {
     });
 
     /**
-     * The whole point of this resolver: a simulated instruction must read exactly as the same
-     * instruction reads on a fetched transaction, where the name comes from the RPC's `parsed.type`.
-     * The generated enum names disagree with the RPC for 7 of System's 13 instructions, for Stake's
-     * delegate, and for all three ATA instructions, so those are mapped back to the RPC spelling.
+     * A simulated instruction and a history row must read exactly as the same instruction reads on a
+     * fetched transaction, where the name comes from the RPC's `parsed.type`. The generated enum names
+     * disagree with agave's parsers for several System instructions, for Stake's delegate, for every ATA
+     * instruction and for many Token-2022 extension instructions, so those are mapped back.
      */
     describe('wording matches the RPC parse', () => {
         it.each([
             // System discriminators are 4-byte little-endian, unlike Token's single byte.
             ['transfer', SYSTEM_PROGRAM, [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             ['advanceNonce', SYSTEM_PROGRAM, [4, 0, 0, 0]],
-            ['withdrawNonce', SYSTEM_PROGRAM, [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+            ['withdrawFromNonce', SYSTEM_PROGRAM, [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             ['initializeNonce', SYSTEM_PROGRAM, [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             ['authorizeNonce', SYSTEM_PROGRAM, [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             ['createAccount', SYSTEM_PROGRAM, [0, 0, 0, 0]],
@@ -78,6 +78,34 @@ describe('resolveProgramClientInstructionName', () => {
             ['transferChecked', TOKEN_PROGRAM, [12, 0, 0, 0, 0, 0, 0, 0, 0, 6]],
             ['closeAccount', TOKEN_PROGRAM, [9]],
             ['closeLookupTable', ADDRESS_LOOKUP_TABLE_PROGRAM, [4, 0, 0, 0]],
+            // A Token-2022 extension instruction's leading byte selects the extension, the next its instruction.
+            ['applyPendingConfidentialTransferBalance', TOKEN_2022_PROGRAM, [27, 8]],
+            ['depositConfidentialTransfer', TOKEN_2022_PROGRAM, [27, 5]],
+            ['withdrawConfidentialTransfer', TOKEN_2022_PROGRAM, [27, 6]],
+            ['enableConfidentialTransferConfidentialCredits', TOKEN_2022_PROGRAM, [27, 9]],
+            ['disableConfidentialTransferConfidentialCredits', TOKEN_2022_PROGRAM, [27, 10]],
+            ['enableConfidentialTransferNonConfidentialCredits', TOKEN_2022_PROGRAM, [27, 11]],
+            ['disableConfidentialTransferNonConfidentialCredits', TOKEN_2022_PROGRAM, [27, 12]],
+            ['configureConfidentialAccountWithRegistry', TOKEN_2022_PROGRAM, [27, 14]],
+            ['enableRequiredMemoTransfers', TOKEN_2022_PROGRAM, [30, 0]],
+            ['disableRequiredMemoTransfers', TOKEN_2022_PROGRAM, [30, 1]],
+            ['initializeInterestBearingConfig', TOKEN_2022_PROGRAM, [33, 0]],
+            ['updateInterestBearingConfigRate', TOKEN_2022_PROGRAM, [33, 1]],
+            ['initializeConfidentialTransferFeeConfig', TOKEN_2022_PROGRAM, [37, 0]],
+            ['withdrawWithheldConfidentialTransferTokensFromMint', TOKEN_2022_PROGRAM, [37, 1]],
+            ['withdrawWithheldConfidentialTransferTokensFromAccounts', TOKEN_2022_PROGRAM, [37, 2]],
+            ['harvestWithheldConfidentialTransferTokensToMint', TOKEN_2022_PROGRAM, [37, 3]],
+            ['enableConfidentialTransferFeeHarvestToMint', TOKEN_2022_PROGRAM, [37, 4]],
+            ['disableConfidentialTransferFeeHarvestToMint', TOKEN_2022_PROGRAM, [37, 5]],
+            ['initializeConfidentialMintBurnMint', TOKEN_2022_PROGRAM, [42, 0]],
+            ['rotateConfidentialMintBurnSupplyElGamalPubkey', TOKEN_2022_PROGRAM, [42, 1]],
+            ['applyPendingBurn', TOKEN_2022_PROGRAM, [42, 5]],
+            ['initializeScaledUiAmountConfig', TOKEN_2022_PROGRAM, [43, 0]],
+            ['updateMultiplier', TOKEN_2022_PROGRAM, [43, 1]],
+            ['initializePermissionedBurnConfig', TOKEN_2022_PROGRAM, [46, 0]],
+            // Token group and token metadata instructions carry an 8-byte discriminator instead.
+            ['updateTokenGroupAuthority', TOKEN_2022_PROGRAM, [161, 105, 88, 1, 237, 221, 216, 203]],
+            ['updateTokenMetadataAuthority', TOKEN_2022_PROGRAM, [215, 228, 166, 228, 84, 100, 86, 123]],
         ])('should word %s as the RPC does', (parsedType, programId, bytes) => {
             expect(name(programId, bytes)).toBe(camelToTitleCase(parsedType));
         });

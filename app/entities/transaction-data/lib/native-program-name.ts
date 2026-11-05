@@ -1,10 +1,13 @@
 import { camelToTitleCase } from '@utils/index';
 
+import { readUint32LE } from '@/app/shared/lib/bytes';
+
 import type { InstructionNameLookup } from './types';
 
 // The RPC's `parsed.type` for each bincode u32 tag, in enum order. These programs ship no generated
 // client, and a name from bytes must read the same as the name the RPC gives the same instruction.
 const RPC_TYPES_BY_TAG: Partial<Record<string, readonly string[]>> = {
+    BPFLoader2111111111111111111111111111111111: ['write', 'finalize'],
     BPFLoaderUpgradeab1e11111111111111111111111: [
         'initializeBuffer',
         'write',
@@ -45,7 +48,6 @@ export function resolveNativeProgramInstructionName({ programId, data }: Instruc
     const rpcTypes = RPC_TYPES_BY_TAG[programId];
     if (!rpcTypes || data.length < TAG_BYTES) return undefined;
 
-    const tag = new DataView(data.buffer, data.byteOffset, data.byteLength).getUint32(0, true);
-    const rpcType = rpcTypes[tag];
+    const rpcType = rpcTypes[readUint32LE(data, 0)];
     return rpcType === undefined ? undefined : camelToTitleCase(rpcType);
 }
