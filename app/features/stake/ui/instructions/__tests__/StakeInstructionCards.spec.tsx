@@ -7,7 +7,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { vi } from 'vitest';
 
-import { type CardRow, findCell, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
+import { type CardRow, readCardRows, readCell, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { StakeDetailsCard } from '../StakeDetailsCard';
 
@@ -46,7 +46,7 @@ const AUTHORIZE_WITH_SEED = {
 
 /**
  * `name` labels the it.each case when the card title alone does not say which fixture ran.
- * `mono` names the rows whose value cell sets a monospace font.
+ * `mono` names the rows whose value has a monospace font.
  */
 const CASES: Array<{ info: object; mono?: string[]; name?: string; rows: CardRow[]; title: string; type: string }> = [
     {
@@ -468,7 +468,7 @@ describe('stake::instruction cards', () => {
             });
 
             expect(screen.getByText(title)).toBeInTheDocument();
-            mono.forEach(label => expect(findCell(label)).toHaveClass('font-mono'));
+            mono.forEach(label => expect(screen.getByText(readCell(label))).toHaveClass('font-mono'));
         },
     );
 

@@ -12,7 +12,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { vi } from 'vitest';
 
-import { type CardRow, findCell, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
+import { type CardRow, findCell, readCardRows, readCell, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { VoteDetailsCard } from '../VoteDetailsCard';
 
@@ -64,7 +64,7 @@ const TOWER = { hash: HASH, lockouts: LOCKOUTS, root: ROOT, timestamp: TS };
 
 /**
  * `name` labels the it.each case when the title alone does not say which fixture ran.
- * `mono` names the rows whose value cell sets a monospace font. `pre` names the rows drawn in a
+ * `mono` names the rows whose value has a monospace font. `pre` names the rows drawn in a
  * <pre>: line breaks survive only there, and `getByText` normalizes them away.
  */
 const CASES: Array<{
@@ -484,7 +484,7 @@ describe('vote::instruction cards', () => {
             expect(screen.getByText(title)).toBeInTheDocument();
         });
         expect(readCardRows()).toEqual(rows);
-        mono.forEach(label => expect(findCell(label)).toHaveClass('font-mono'));
+        mono.forEach(label => expect(screen.getByText(readCell(label))).toHaveClass('font-mono'));
         pre.forEach(label => expect(findPre(label)?.textContent).toBe(Object.fromEntries(rows)[label]));
     });
 

@@ -29,10 +29,10 @@ describe('FieldNameCell', () => {
         renderInTable(
             <>
                 <BaseTable.Row data-testid="top">
-                    <FieldNameCell name="top" nestingLevel={0} />
+                    <FieldNameCell name="top" type="u8" nestingLevel={0} />
                 </BaseTable.Row>
                 <BaseTable.Row data-testid="nested">
-                    <FieldNameCell name="nested" nestingLevel={1} />
+                    <FieldNameCell name="nested" type="u8" nestingLevel={1} />
                 </BaseTable.Row>
             </>,
         );

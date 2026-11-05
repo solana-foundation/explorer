@@ -16,7 +16,7 @@ export function InstructionNodeCards({
     const { Card } = useInstructionSurface();
 
     return (
-        <>
+        <div className="mb-6 flex flex-col gap-2">
             {nodes.map((node, i) =>
                 node ? (
                     <Card key={i} node={node} />
@@ -27,7 +27,7 @@ export function InstructionNodeCards({
                     />
                 ),
             )}
-        </>
+        </div>
     );
 }
 

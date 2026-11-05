@@ -61,10 +61,10 @@ export function BaseInstructionCard({
                         variant={showRaw ? 'black' : 'white'}
                         active={showRaw}
                         disabled={rawOnly}
-                        className={cn('flex items-center', rawOnly && '!pointer-events-auto cursor-not-allowed')}
+                        className={cn('flex items-baseline', rawOnly && '!pointer-events-auto cursor-not-allowed')}
                         onClick={toggleRaw}
                     >
-                        <Code className="mr-1.5" size={13} /> Raw
+                        <Code className="mr-1.5 self-center" size={13} /> Raw
                     </Button>
                 </div>
             }

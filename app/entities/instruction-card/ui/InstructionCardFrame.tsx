@@ -32,9 +32,11 @@ export function InstructionCardFrame({
         <CollapsibleCard
             ref={scrollAnchorRef}
             collapsible={collapsible}
+            density="compact"
+            className="mb-0"
             title={
-                <span className="flex min-w-0 flex-1 items-center">
-                    <Badge ui="dashkit" variant={badgeVariant} className="mr-1.5 flex-none">
+                <span className="flex min-w-0 flex-1 items-baseline">
+                    <Badge ui="dashkit" variant={badgeVariant} baseline className="mr-1.5 flex-none">
                         #{positionLabel(position)}
                     </Badge>
                     <span className="min-w-0 flex-1">{title}</span>
@@ -49,18 +51,23 @@ export function InstructionCardFrame({
 
 export function CardTable({ children }: { children: React.ReactNode }) {
     return (
-        <BaseTable ui="dashkit" variant="card" nowrap className={TABLE_CLASS}>
+        <BaseTable ui="dashkit" variant="card" density="even" labels="muted" nowrap className={TABLE_CLASS}>
             <BaseTable.Body>{children}</BaseTable.Body>
         </BaseTable>
     );
 }
 
 // Names and values wrap, so a long name or string does not widen the card past its frame.
-// A full-width cell holds nested cards, so the rules skip it and nested names do not inherit `overflow-wrap`.
+// A name breaks only a word wider than its mobile cap, so a short word never splits to make room for a value.
+// A full-width cell holds nested cards, so it only wraps and their titles keep whole words.
+// A browser may treat a percentage `calc()` width on a table cell as `auto`, so the widths are plain percentages.
 const TABLE_CLASS = cn(
     '[&>tbody>tr:first-child>td]:!border-t-0',
-    '[&_td:first-child:not(:last-child)]:whitespace-normal',
+    '[&_td:first-child:not(:last-child)]:whitespace-normal [&_td:first-child:not(:last-child)]:break-words [&_td:first-child:not(:last-child)]:text-balance max-md:[&_td:first-child:not(:last-child)]:max-w-[40vw]',
+    'max-md:[&_td:first-child:not(:last-child)]:w-[35%] md:[&_td:first-child:not(:last-child)]:w-1/4 xxl:[&_td:first-child:not(:last-child)]:w-[30%]',
+    '[&_td:last-child]:w-full',
     '[&_td:last-child:not(:first-child)]:whitespace-normal [&_td:last-child:not(:first-child)]:[overflow-wrap:anywhere]',
+    '[&_td:only-child]:whitespace-normal',
 );
 
 function toBadgeVariant(result: SignatureResult, index: number): 'success' | 'warning' | 'dark' {

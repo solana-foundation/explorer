@@ -41,6 +41,7 @@ const toneOptions = ['soft', 'solid'] as const satisfies readonly BadgeTone[];
 const meta: Meta<typeof Badge> = {
     argTypes: {
         as: { control: 'select', options: asOptions },
+        baseline: { control: 'boolean' },
         pill: { control: 'boolean' },
         size: { control: 'select', options: sizeOptions },
         status: { control: 'select', options: statusOptions },
@@ -308,6 +309,26 @@ export const DashkitPill: Story = {
                     </Badge>
                 ))}
             </div>
+        </div>
+    ),
+};
+
+export const DashkitBaseline: Story = {
+    name: 'Dashkit / Baseline',
+    render: () => (
+        <div className="flex flex-col gap-4 text-dk-sm text-white">
+            <span className="flex items-baseline">
+                <Badge ui="dashkit" variant="success" className="mr-1.5">
+                    #1
+                </Badge>
+                Compute Budget Program: Set Compute Unit Limit
+            </span>
+            <span className="flex items-baseline">
+                <Badge ui="dashkit" variant="success" baseline className="mr-1.5">
+                    #1
+                </Badge>
+                Compute Budget Program: Set Compute Unit Limit
+            </span>
         </div>
     ),
 };

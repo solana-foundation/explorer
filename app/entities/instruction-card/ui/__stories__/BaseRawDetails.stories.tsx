@@ -106,5 +106,8 @@ export const LoadedWithAccounts: Story = {
 
         // Should show instruction data row
         await expect(canvas.getByText('Instruction Data')).toBeInTheDocument();
+        await expect(getComputedStyle(canvas.getByText('(Hex)')).color).toBe(
+            getComputedStyle(canvas.getByText('Instruction Data')).color,
+        );
     },
 };

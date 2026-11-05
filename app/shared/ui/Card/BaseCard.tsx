@@ -8,11 +8,12 @@ type UI = 'dashkit' | 'tw';
 
 const cardVariants = cva(['relative flex min-w-0 flex-col break-words'], {
     compoundVariants: [
+        { class: 'mb-6', marginBottom: 'default', ui: 'dashkit' },
         { class: 'px-6 py-2.5', ui: 'tw', variant: 'default' },
         { class: 'px-3 py-2', ui: 'tw', variant: 'narrow' },
         { class: '', ui: 'tw', variant: 'tight' },
     ],
-    defaultVariants: { flex: 'default', ui: 'tw', variant: 'default' },
+    defaultVariants: { flex: 'default', marginBottom: 'default', ui: 'tw', variant: 'default' },
     variants: {
         flex: {
             default: '',
@@ -20,11 +21,12 @@ const cardVariants = cva(['relative flex min-w-0 flex-col break-words'], {
         },
         // Override the implicit margin-bottom that `ui="dashkit"` ships with.
         marginBottom: {
+            default: '',
             none: 'mb-0',
             sm: 'mb-2',
         },
         ui: {
-            dashkit: 'mb-6 rounded-lg border border-solid border-outer-space-800 bg-dk-gray-800-dark shadow-dk-card',
+            dashkit: 'rounded-lg border border-solid border-outer-space-800 bg-dk-gray-800-dark shadow-dk-card',
             tw: 'rounded-xl border border-solid border-heavy-metal-950 bg-heavy-metal-800 text-neutral-200',
         },
         // Card-level padding; only meaningful when ui="tw" (matches the legacy OKLCH Card's `variant` prop).
@@ -50,12 +52,17 @@ const BaseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
 );
 BaseCard.displayName = 'BaseCard';
 
+// Density is a variant because `cnPrefixed` does not remove `px-dk-4` when a class name sets `p-*`.
 const headerVariants = cva([], {
-    defaultVariants: { ui: 'tw' },
+    compoundVariants: [
+        { class: 'h-[60px] items-center px-dk-4 py-3', density: 'default', ui: 'dashkit' },
+        { class: 'items-baseline p-3', density: 'compact', ui: 'dashkit' },
+    ],
+    defaultVariants: { density: 'default', ui: 'tw' },
     variants: {
+        density: { compact: '', default: '' },
         ui: {
-            dashkit:
-                'flex h-[60px] items-center border-0 border-b border-solid border-dark-border px-dk-4 py-3 [&>:first-child]:flex-1',
+            dashkit: 'flex border-0 border-b border-solid border-dark-border [&>:first-child]:flex-1',
             tw: 'flex flex-col space-y-1.5 p-6',
         },
     },
@@ -65,9 +72,13 @@ interface UIPropOverride {
     ui?: UI;
 }
 
-const BaseCardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
-    ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cnPrefixed(headerVariants({ ui }), className)} {...props} />
+type BaseCardHeaderProps = React.HTMLAttributes<HTMLDivElement> &
+    UIPropOverride &
+    Pick<VariantProps<typeof headerVariants>, 'density'>;
+
+const BaseCardHeader = React.forwardRef<HTMLDivElement, BaseCardHeaderProps>(
+    ({ className, density, ui, ...props }, ref) => (
+        <div ref={ref} className={cnPrefixed(headerVariants({ density, ui }), className)} {...props} />
     ),
 );
 BaseCardHeader.displayName = 'BaseCardHeader';

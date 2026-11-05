@@ -7,7 +7,7 @@ import { ArgRows } from '@entities/instruction-card';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { anchorAccountArgs, getAnchorProgramName } from '@utils/anchor';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { equals, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
@@ -66,16 +66,19 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     return (
         <div>
             <Card ui="dashkit">
-                <CardHeader ui="dashkit">
+                <CardHeader ui="dashkit" density="compact">
                     <CardTitle as="h3" ui="dashkit">
                         {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
                     </CardTitle>
                 </CardHeader>
-                <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable ui="dashkit" variant="card" density="even" labels="muted" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell className="w-px">Field</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="w-px">Type</BaseTable.HeaderCell>
+                            {/* Below md each row shows its type under the field name, so the Type column collapses. */}
+                            <BaseTable.HeaderCell className="w-px max-md:!p-0">
+                                <span className="max-md:hidden">Type</span>
+                            </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell className="w-px">Value</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>

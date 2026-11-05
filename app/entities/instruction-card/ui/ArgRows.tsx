@@ -5,7 +5,7 @@ import { cva } from 'class-variance-authority';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { InstructionArg } from '../model/args';
-import { ExpandableRow, FieldNameCell } from './ExpandableRow';
+import { ExpandableRow, FieldNameCell, TypeCell } from './ExpandableRow';
 import { ValueCell } from './ValueCell';
 
 /** The header row and the rows of an argument table. An empty list draws nothing. */
@@ -15,8 +15,8 @@ export function ArgTable({ label, args }: { label: string; args: readonly Instru
             <>
                 <BaseTable.SectionRow>
                     <BaseTable.Cell>{label}</BaseTable.Cell>
-                    <BaseTable.Cell>Type</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
+                    <TypeCell>Type</TypeCell>
+                    <BaseTable.Cell>Value</BaseTable.Cell>
                 </BaseTable.SectionRow>
                 <ArgRows args={args} />
             </>
@@ -44,8 +44,8 @@ function ArgRow({ arg, depth, testId }: { arg: InstructionArg; depth: number; te
     }
     return (
         <BaseTable.Row data-testid={testId} className={nestedRowVariants({ nested: depth > 0 })}>
-            <FieldNameCell name={arg.name} nestingLevel={depth} />
-            <BaseTable.Cell>{arg.type}</BaseTable.Cell>
+            <FieldNameCell name={arg.name} type={arg.type} nestingLevel={depth} />
+            <TypeCell>{arg.type}</TypeCell>
             {arg.kind === 'leaf' ? <ValueCell value={arg.value} /> : <BaseTable.Cell />}
         </BaseTable.Row>
     );

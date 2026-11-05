@@ -1,7 +1,6 @@
 import { Address } from '@components/common/Address';
 import { HexData } from '@components/shared/HexData';
 import { TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -32,8 +31,8 @@ export function BaseRawDetails({ ix }: { ix: TransactionInstruction }) {
                         <div className="mr-1.5 md:inline">Account #{keyIndex + 1}</div>
                         <AccountRoleBadges isWritable={isWritable} isSigner={isSigner} />
                     </BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={pubkey} alignRight link />
+                    <BaseTable.Cell>
+                        <Address pubkey={pubkey} link wrapLabel />
                     </BaseTable.Cell>
                 </BaseTable.Row>
             ))}
@@ -47,10 +46,10 @@ export function HexDataRow({ label, data }: { label: string; data: Uint8Array })
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                {label} <span className="text-dk-gray-700">(Hex)</span>
+                {label} <span>(Hex)</span>
             </BaseTable.Cell>
-            <BaseTable.Cell className="text-right">
-                <HexData raw={data} />
+            <BaseTable.Cell>
+                <HexData raw={data} align="start" className="-my-1.5" />
             </BaseTable.Cell>
         </BaseTable.Row>
     );

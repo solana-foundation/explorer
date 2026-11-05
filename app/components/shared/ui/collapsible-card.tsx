@@ -1,5 +1,6 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { cn } from '@components/shared/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
@@ -13,10 +14,10 @@ type CollapsibleCardProps = {
     className?: string;
     headerButtons?: ReactNode;
     collapsible?: boolean;
-};
+} & VariantProps<typeof headerVariants>;
 
 export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
-    ({ title, children, defaultExpanded = true, className, headerButtons, collapsible = true }, ref) => {
+    ({ title, children, defaultExpanded = true, className, headerButtons, collapsible = true, density }, ref) => {
         const [expanded, setExpanded] = useState(defaultExpanded);
 
         return (
@@ -28,9 +29,10 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
             >
                 <BaseCardHeader
                     ui="dashkit"
-                    className={cn('h-auto min-h-[60px] gap-2', collapsible && !expanded && 'border-b-0')}
+                    density={density}
+                    className={cn(headerVariants({ density }), collapsible && !expanded && 'border-b-0')}
                 >
-                    <BaseCardTitle ui="dashkit" className="flex min-w-0 items-center break-all">
+                    <BaseCardTitle ui="dashkit" className="flex min-w-0 items-center [overflow-wrap:anywhere]">
                         {title}
                     </BaseCardTitle>
                     {headerButtons}
@@ -41,7 +43,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                             size="sm"
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse' : 'Expand'}
-                            className="flex items-center justify-center py-[5.3px] transition-colors"
+                            className={collapseButtonVariants({ density })}
                             onClick={() => setExpanded(current => !current)}
                         >
                             <ChevronDown
@@ -72,3 +74,23 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
     },
 );
 CollapsibleCard.displayName = 'CollapsibleCard';
+
+const headerVariants = cva('gap-2', {
+    defaultVariants: { density: 'default' },
+    variants: {
+        density: {
+            compact: '',
+            default: 'h-auto min-h-[60px]',
+        },
+    },
+});
+
+const collapseButtonVariants = cva('flex items-center justify-center py-[5.3px] transition-colors', {
+    defaultVariants: { density: 'default' },
+    variants: {
+        density: {
+            compact: 'self-start',
+            default: '',
+        },
+    },
+});
