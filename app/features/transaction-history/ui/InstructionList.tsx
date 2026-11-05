@@ -11,19 +11,15 @@ export function ProgramsBlock({ state }: { state: RowTransactionState }) {
         case 'loading':
             return <InstructionListSkeleton />;
         case 'failed':
-            return (
-                <RetryButton
-                    label="Retry loading programs"
-                    onRetry={state.retry}
-                    className="!h-auto !py-0 !text-sm [&_svg]:!size-3.5"
-                />
-            );
+            return <RetryButton label="Retry loading programs" onRetry={state.retry} />;
         case 'loaded':
             return state.summaries.length > 0 ? (
                 <InstructionList instructions={state.summaries} />
             ) : (
                 <span className="text-outer-space-300">---</span>
             );
+        default:
+            return state satisfies never;
     }
 }
 

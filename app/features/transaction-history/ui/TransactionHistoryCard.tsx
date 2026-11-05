@@ -28,7 +28,6 @@ import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../model/use-account-history';
 import { useFetchAccountHistory } from '../model/use-fetch-account-history';
 import { useResolvedRowTransaction } from '../model/use-resolved-row-transaction';
-import type { RowTransactionState } from '../model/use-row-transaction';
 import {
     BaseTransactionHistoryCard,
     historyGridCols,
@@ -220,7 +219,7 @@ function TransactionRow({
 
                     {isLg && (
                         <div>
-                            <TransactionRawDataSize signature={signature} rowTransaction={rowTransaction} />
+                            <RawDataSizeField state={rowTransaction} filename={signature} />
                         </div>
                     )}
                 </div>
@@ -247,28 +246,5 @@ function MobileField({ label, children }: { label: string; children: React.React
         <CompactKeyValue divider={false} label={label}>
             {children}
         </CompactKeyValue>
-    );
-}
-
-// Byte-size cell that opens the raw data (hex/base64 + copy + download) in a popover.
-function TransactionRawDataSize({
-    signature,
-    rowTransaction,
-}: {
-    signature: string;
-    rowTransaction: RowTransactionState;
-}) {
-    const messageBytes = rowTransaction.status === 'loaded' ? rowTransaction.messageBytes : undefined;
-
-    return (
-        <RawDataSizeField
-            size={messageBytes?.length}
-            data={messageBytes}
-            filename={signature}
-            loading={rowTransaction.status === 'loading'}
-            onRetry={rowTransaction.status === 'failed' ? rowTransaction.retry : undefined}
-            // Collapse the fixed button height so the size sits inline with the other cells.
-            buttonClassName="relative top-0.5 !h-auto !py-0 !text-sm [&_svg]:!size-3.5"
-        />
     );
 }

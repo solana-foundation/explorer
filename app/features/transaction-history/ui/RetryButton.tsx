@@ -6,7 +6,8 @@ export function RetryButton({ label, onRetry, className }: { label: string; onRe
     return (
         <Button
             variant="ghost"
-            className={cn('!px-0 text-outer-space-300', className)}
+            size="inline"
+            className={cn('text-outer-space-300', className)}
             onClick={() => onRetry()}
             aria-label={label}
         >

@@ -62,6 +62,14 @@ describe('ProgramsBlock', () => {
         expect(retry).toHaveBeenCalledOnce();
     });
 
+    it('should list the instructions of a loaded row', () => {
+        const summaries = [{ name: 'Swap', programName: 'Raydium CLMM' }];
+        render(<ProgramsBlock state={{ messageBytes: new Uint8Array(0), status: 'loaded', summaries }} />);
+
+        expect(screen.getByText('Swap')).toBeInTheDocument();
+        expect(screen.queryByText('---')).not.toBeInTheDocument();
+    });
+
     it('should show no retry while loading', () => {
         render(<ProgramsBlock state={{ status: 'loading' }} />);
 
