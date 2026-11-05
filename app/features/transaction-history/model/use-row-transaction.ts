@@ -4,14 +4,14 @@ import {
     type InstructionSummary,
 } from '@entities/transaction-data';
 import { useCluster } from '@providers/cluster';
-import { withBackoff } from '@utils/with-backoff';
-import pLimit from 'p-limit';
 import { useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
-// One global slot, so requests run one at a time and avoid rate-limit (429) errors. The SWR call below
-// owns caching, dedup and revalidation.
-const limit = pLimit(1);
+import { createRateLimitedQueue } from '../lib/rate-limited-queue';
+
+// Rate-limited endpoints cap getTransaction calls per client in a rolling window, and rejected calls
+// count too. The budget stays under that cap, with room for other callers. SWR owns caching and dedup.
+const queue = createRateLimitedQueue({ budget: 12, rateLimitRetries: 2, windowMs: 10_000 });
 
 // Automatic retries after the first failed attempt.
 const RETRY_COUNT = 3;
@@ -23,8 +23,8 @@ export type RowTransactionState =
 
 /**
  * The message bytes and per-instruction summaries for one history row, from a single base64
- * `getTransaction`. Fetches run through a global sequential queue to avoid rate-limit (429) errors, and
- * only when `enabled` (so callers can gate on row visibility).
+ * `getTransaction`. Fetches run through one rate-limited queue for every row, and only when `enabled` (so
+ * callers can gate on row visibility).
  */
 export function useRowTransaction(signature: string, enabled = true): RowTransactionState {
     const { url } = useCluster();
@@ -35,9 +35,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         // eslint-disable-next-line unicorn/no-null -- SWR uses null key to disable the request
         enabled ? `history-row-transaction:${url}:${signature}` : null,
         async () => {
-            // The inner backoff holds the single slot during its sleeps, so a rate-limited signature blocks
-            // every other row. It stays short, and the SWR retries below run later with the slot free.
-            const raw = await limit(() => withBackoff(() => fetchRawTransaction(url, signature), { maxRetries: 2 }));
+            const raw = await queue(() => fetchRawTransaction(url, signature));
             // A null tx is a transient miss (a load-balanced node that has not indexed the signature yet),
             // not "no instructions". Under useSWRImmutable a returned value is a permanent success, so the
             // fetcher throws and SWR retries.

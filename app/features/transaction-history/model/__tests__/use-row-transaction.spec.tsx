@@ -13,8 +13,10 @@ vi.mock('@entities/transaction-data', () => ({
     getCompiledInstructionSummaries: mocks.getCompiledInstructionSummaries,
 }));
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'https://api.devnet.solana.com' }) }));
-// withBackoff would retry a rejected fetch on its own and use up the queued `*Once` results.
-vi.mock('@utils/with-backoff', () => ({ withBackoff: (fn: () => Promise<unknown>) => fn() }));
+// The real queue spends its budget across tests in this file and would pause the later ones.
+vi.mock('../../lib/rate-limited-queue', () => ({
+    createRateLimitedQueue: () => (task: () => Promise<unknown>) => task(),
+}));
 
 import { type RowTransactionState, useRowTransaction } from '../use-row-transaction';
 
@@ -25,15 +27,7 @@ const SUMMARIES = [{ name: 'Transfer', programName: 'System Program' }];
 // The first attempt and the three automatic retries.
 const ATTEMPTS_PER_CHAIN = 4;
 
-// A fetch left pending holds the module-wide queue slot, so every test releases its own.
-let releasePending: ((raw: null) => void) | undefined;
-
-afterEach(async () => {
-    releasePending?.(null);
-    releasePending = undefined;
-    await settleRetries();
-    vi.resetAllMocks();
-});
+afterEach(() => vi.resetAllMocks());
 
 describe('useRowTransaction', () => {
     it('should return the message bytes and the summaries read from them', async () => {
@@ -97,7 +91,7 @@ describe('useRowTransaction', () => {
 
         const { result } = renderHook(() => useRowTransaction('sig'), { wrapper });
         const failed = await waitForHook(() => failedState(result.current));
-        mocks.fetchRawTransaction.mockReturnValueOnce(new Promise(resolve => (releasePending = resolve)));
+        mocks.fetchRawTransaction.mockReturnValueOnce(new Promise(() => {}));
         act(() => failed.retry());
 
         await waitForHook(() => expect(result.current).toEqual({ status: 'loading' }));
