@@ -7,6 +7,8 @@ import { useCluster } from '@providers/cluster';
 import { useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { createRateLimitedQueue } from '../lib/rate-limited-queue';
 
 // Rate-limited endpoints cap getTransaction calls per client in a rolling window, and rejected calls
@@ -45,8 +47,9 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         {
             // SWR sets `isValidating` false and keeps `error` between attempts, so only the retry handler
             // can tell a wait from the end of the retries.
-            onErrorRetry: (_error, _key, config, revalidate, opts) => {
+            onErrorRetry: (error, _key, config, revalidate, opts) => {
                 if (opts.retryCount > RETRY_COUNT) {
+                    Logger.error(error, { signature, url });
                     setRetriesUsedUp(true);
                     return;
                 }
