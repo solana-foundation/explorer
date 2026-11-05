@@ -1,8 +1,9 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
+import type { SWRConfiguration } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import { refocusTab, settleRetries, swrWrapper, UNTHROTTLED_FOCUS, waitForHook } from '@/app/__tests__/swr-hook';
 
 vi.mock('../../api/get-rpc', () => ({ getRpc: vi.fn() }));
 
@@ -13,6 +14,14 @@ import { type ClusterState, StateContext } from '../cluster-provider';
 import { useClusterInfo, useEpochInfo, useEpochSchedule, useFirstAvailableBlock } from '../use-cluster-info';
 
 const EPOCH_INFO = { absoluteSlot: 100n, blockHeight: 90n, epoch: 5n, slotIndex: 10n, slotsInEpoch: 432_000n };
+// The same epoch a few thousand slots later — what a refetch returns once the cached snapshot is stale.
+const EPOCH_INFO_LATER = {
+    absoluteSlot: 4100n,
+    blockHeight: 4000n,
+    epoch: 5n,
+    slotIndex: 4010n,
+    slotsInEpoch: 432_000n,
+};
 const EPOCH_SCHEDULE = {
     firstNormalEpoch: 0n,
     firstNormalSlot: 0n,
@@ -42,8 +51,8 @@ const connectedState: ClusterState = {
     status: ClusterStatus.Connected,
 };
 
-function makeWrapper(state: ClusterState) {
-    const SwrWrapper = swrWrapper({ dedupingInterval: 0 });
+function makeWrapper(state: ClusterState, config: SWRConfiguration = { dedupingInterval: 0 }) {
+    const SwrWrapper = swrWrapper(config);
     return function Wrapper({ children }: { children: ReactNode }) {
         return createElement(SwrWrapper, null, createElement(StateContext.Provider, { value: state }, children));
     };
@@ -84,6 +93,19 @@ describe('useEpochSchedule', () => {
         expect(result.current).toBeUndefined();
         expect(getRpc).not.toHaveBeenCalled();
     });
+
+    it('should stay immutable and never refetch on tab focus', async () => {
+        const { result } = renderHook(() => useEpochSchedule(), {
+            wrapper: makeWrapper(connectedState, UNTHROTTLED_FOCUS),
+        });
+
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_SCHEDULE));
+        expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+
+        await refocusTab();
+        await settleRetries();
+        expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+    });
 });
 
 describe('useEpochInfo', () => {
@@ -103,6 +125,59 @@ describe('useEpochInfo', () => {
 
         expect(result.current).toBeUndefined();
         expect(getRpc).not.toHaveBeenCalled();
+    });
+
+    it('should revalidate on tab focus, so the epoch tracks the live cluster', async () => {
+        const { result } = renderHook(() => useEpochInfo(), {
+            wrapper: makeWrapper(connectedState, UNTHROTTLED_FOCUS),
+        });
+
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+        await refocusTab();
+        await waitForHook(() => expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2));
+    });
+
+    // The reported bug: a later navigation remounts the hook against the snapshot cached earlier for the
+    // cluster, so the countdown started from a stale slot. A revalidate on mount must refresh it.
+    it('should refresh a stale cached value on remount', async () => {
+        // Both mounts share one cache; a fresh cache would refetch for that reason alone and prove nothing.
+        const cache = new Map();
+        const wrapper = makeWrapper(connectedState, { dedupingInterval: 0, provider: () => cache });
+
+        const view = renderHook(() => useEpochInfo(), { wrapper });
+        await waitForHook(() => expect(view.result.current).toEqual(EPOCH_INFO));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+        view.unmount();
+
+        rpc.getEpochInfo.mockReturnValue({ send: () => Promise.resolve(EPOCH_INFO_LATER) });
+
+        const { result } = renderHook(() => useEpochInfo(), { wrapper });
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+    });
+
+    // The other half of the bug: a long-lived page must re-sync on its own, with no focus or navigation.
+    // Dropping `refreshInterval` from the hook makes this fail.
+    it('should refetch on the refresh interval without a focus event', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        try {
+            rpc.getEpochInfo
+                .mockReturnValueOnce({ send: () => Promise.resolve(EPOCH_INFO) })
+                .mockReturnValue({ send: () => Promise.resolve(EPOCH_INFO_LATER) });
+
+            const { result } = renderHook(() => useEpochInfo(), { wrapper: makeWrapper(connectedState) });
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+            await act(() => vi.advanceTimersByTimeAsync(30_000));
+
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });
 
