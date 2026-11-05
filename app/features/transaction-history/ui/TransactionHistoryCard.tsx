@@ -132,8 +132,8 @@ function TransactionRow({
     const { isVisible, ref } = useVisibility<HTMLDivElement>(true);
     const rowTransaction = useResolvedRowTransaction(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    // Mount the mobile drawer only once the row is first tapped — otherwise every row would mount a
-    // closed drawer (with its own raw-tx subscription) up front.
+    // Mount the mobile drawer only once the row is first tapped, so the page does not mount a closed
+    // drawer for every row up front.
     const [drawerMounted, setDrawerMounted] = useState(false);
     const badge = STATUS_BADGE[status];
 

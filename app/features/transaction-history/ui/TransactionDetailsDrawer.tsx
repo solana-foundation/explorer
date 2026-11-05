@@ -5,11 +5,9 @@ import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { DialogClose, DialogTitle } from '@components/shared/ui/dialog';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ArrowRight, X } from 'react-feather';
 
-import { FetchStatus } from '@/app/providers/cache';
-import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { CopyButton } from '@/app/shared/ui/CopyButton';
 import { Drawer } from '@/app/shared/ui/drawer';
@@ -42,13 +40,7 @@ export function TransactionDetailsDrawer({
     const txPath = useClusterPath({ pathname: `/tx/${signature}` });
     const blockPath = useClusterPath({ pathname: `/block/${slot}` });
 
-    const fetchRaw = useFetchRawTransaction();
-    const rawDetails = useRawTransactionDetails(signature);
-    const transactionData = rawDetails?.data?.raw?.messageBytes;
-    const rawLoading = rawDetails?.status === FetchStatus.Fetching;
-    useEffect(() => {
-        if (open && !transactionData && !rawLoading) fetchRaw(signature);
-    }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+    const messageBytes = rowTransaction.status === 'loaded' ? rowTransaction.messageBytes : undefined;
 
     const header = (
         <Drawer.Header>
@@ -120,8 +112,8 @@ export function TransactionDetailsDrawer({
                 {/* The raw-data field carries its own "Size" caption, so this row has no label. */}
                 <div className="flex flex-col gap-2 pb-1 pt-2 text-white">
                     <RawDataField
-                        data={transactionData}
-                        loading={rawDetails === undefined || rawLoading}
+                        data={messageBytes}
+                        loading={rowTransaction.status === 'loading'}
                         filename={signature}
                         variant="embedded"
                         bytesPrefix="Size "
