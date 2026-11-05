@@ -69,7 +69,7 @@ describe('ProgramsBlock', () => {
     });
 
     it('should show a dash for a transaction with no instructions to list', () => {
-        render(<ProgramsBlock state={{ status: 'loaded', summaries: [] }} />);
+        render(<ProgramsBlock state={{ messageBytes: new Uint8Array(0), status: 'loaded', summaries: [] }} />);
 
         expect(screen.getByText('---')).toBeInTheDocument();
     });

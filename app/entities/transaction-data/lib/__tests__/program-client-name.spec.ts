@@ -7,6 +7,7 @@ const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROGRAM = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 const ASSOCIATED_TOKEN_PROGRAM = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 const STAKE_PROGRAM = 'Stake11111111111111111111111111111111111111';
+const ADDRESS_LOOKUP_TABLE_PROGRAM = 'AddressLookupTab1e1111111111111111111111111';
 
 const CONFIGURED_PROGRAMS = [
     ['System', SYSTEM_PROGRAM],
@@ -14,6 +15,7 @@ const CONFIGURED_PROGRAMS = [
     ['Token-2022', TOKEN_2022_PROGRAM],
     ['Associated Token', ASSOCIATED_TOKEN_PROGRAM],
     ['Stake', STAKE_PROGRAM],
+    ['Address Lookup Table', ADDRESS_LOOKUP_TABLE_PROGRAM],
 ] as const;
 
 function name(programId: string, bytes: number[]): string | undefined {
@@ -30,6 +32,7 @@ describe('resolveProgramClientInstructionName', () => {
             ['Token-2022 transferChecked', TOKEN_2022_PROGRAM, [12, 0, 0, 0, 0, 0, 0, 0, 0, 6], 'Transfer Checked'],
             ['ATA createIdempotent', ASSOCIATED_TOKEN_PROGRAM, [1], 'Create Idempotent'],
             ['Stake withdraw', STAKE_PROGRAM, [4, 0, 0, 0, 0, 0, 0, 0, 0], 'Withdraw'],
+            ['ALT extendLookupTable', ADDRESS_LOOKUP_TABLE_PROGRAM, [2, 0, 0, 0], 'Extend Lookup Table'],
         ])('should name a %s instruction', (_label, programId, bytes, expected) => {
             expect(name(programId, bytes)).toBe(expected);
         });
@@ -74,6 +77,7 @@ describe('resolveProgramClientInstructionName', () => {
             ['recoverNested', ASSOCIATED_TOKEN_PROGRAM, [2]],
             ['transferChecked', TOKEN_PROGRAM, [12, 0, 0, 0, 0, 0, 0, 0, 0, 6]],
             ['closeAccount', TOKEN_PROGRAM, [9]],
+            ['closeLookupTable', ADDRESS_LOOKUP_TABLE_PROGRAM, [4, 0, 0, 0]],
         ])('should word %s as the RPC does', (parsedType, programId, bytes) => {
             expect(name(programId, bytes)).toBe(camelToTitleCase(parsedType));
         });

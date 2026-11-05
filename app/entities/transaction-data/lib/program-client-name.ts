@@ -1,3 +1,8 @@
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+    AddressLookupTableInstruction,
+    identifyAddressLookupTableInstruction,
+} from '@solana-program/address-lookup-table';
 import { identifyStakeInstruction, STAKE_PROGRAM_ADDRESS, StakeInstruction } from '@solana-program/stake';
 import { identifySystemInstruction, SYSTEM_PROGRAM_ADDRESS, SystemInstruction } from '@solana-program/system';
 import {
@@ -48,6 +53,10 @@ type ProgramClient = {
  * message — and reproduces that same wording via `rpcTypeOverrides`.
  */
 const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
+    [ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS]: {
+        identify: identifyAddressLookupTableInstruction,
+        names: AddressLookupTableInstruction,
+    },
     [ASSOCIATED_TOKEN_PROGRAM_ADDRESS]: {
         identify: identifyAssociatedTokenInstruction,
         names: AssociatedTokenInstruction,

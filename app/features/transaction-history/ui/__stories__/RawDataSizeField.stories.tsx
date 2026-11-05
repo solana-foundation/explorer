@@ -29,7 +29,7 @@ export const Unavailable: Story = {
     args: { data: undefined, size: undefined },
 };
 
-// Fetch failed after exhausting retries — a manual Retry control replaces the dead `-`.
+// The fetch failed, so a manual Retry control replaces the dead `-`.
 export const Retry: Story = {
     args: { data: undefined, onRetry: () => {}, size: undefined },
     play: async ({ canvasElement }) => {

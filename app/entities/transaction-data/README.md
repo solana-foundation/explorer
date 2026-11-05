@@ -39,14 +39,15 @@ Stages 2 and 3 are wrapped together by the two hooks the barrel exports, so a co
 
 | Surface | Stage 1 | Stages 2 + 3 |
 | --- | --- | --- |
-| account-page transaction history | `getInstructionSummaries` | `useResolvedSummaryNames` |
+| account-page transaction history | `getCompiledInstructionSummaries` | `useResolvedSummaryNames` |
 | CU profiling chart | `resolveInstructionNames` | `useResolvedInstructionNames` |
 | instruction simulation | `resolveNamesFromData` | `useResolvedInstructionNames` |
 | transaction-share OG image | `getInstructionSummaries` | `getIdlNames` + `applyNameSourcesToSummaries` |
 
 Those four are the only consumers. `getInstructionSummaries` calls `resolveInstructionNames` per
-instruction and adds the sentinels; the CU chart calls `resolveInstructionNames` itself, so it keeps the
-`undefined` and falls back to the row's position.
+instruction and adds the sentinels. `getCompiledInstructionSummaries` does the same from a wire message
+with `resolveNamesFromData`, so every history-row name comes from a name source. The CU chart calls
+`resolveInstructionNames` itself, so it keeps the `undefined` and falls back to the row's position.
 
 The OG image is the first consumer that runs **server side**. Every other one reaches stages 2 and 3
 through a hook, which a route handler cannot call, so it runs both itself: stage 2 through `getIdlNames`
@@ -86,15 +87,15 @@ Break one of these and something downstream misreads a transaction. They are wha
    second. Every source has the shape `(lookup, idlNames) => string | undefined`.
 5. **Row count and order survive every stage.** Consumers pair row `i` with `instructionLogs[i]`, so a
    dropped row shifts every later CU figure onto the wrong instruction. Two places change the row count,
-   and neither can shift an index. `getInstructionSummaries` filters Compute Budget out — safe because
-   summary rows are never paired with logs at all, not because of where it runs. `resolveRows` drops
+   and neither can shift an index. Both summary builders filter Compute Budget out. That is safe because
+   summary rows are never paired with logs at all, not because of where they run. `resolveRows` drops
    *every* row on an out-of-range `programIdIndex` rather than leaving a gap. The two surfaces that do
    pair rows with logs never filter.
 6. **Only bytes 0–15 name an instruction** (`MAX_DISCRIMINATOR_BYTES`). Nothing downstream sees the
    argument payload.
 7. **One instruction has one wording everywhere.** `rpcTypeOverrides` in `program-client-name.ts` makes
-   the generated-client name match the RPC's `parsed.type`, so a simulated instruction reads the same as
-   a fetched one.
+   the generated-client name match the RPC's `parsed.type`, and `native-program-name.ts` stores the RPC's
+   `parsed.type` per tag, so a simulated or history-row instruction reads the same as a fetched one.
 
 ## Adding a name source
 
@@ -118,8 +119,9 @@ Two things are held back from it. The built-in sources below are one. The other 
 (`entities/idl/api/config.ts`), which `useProgramIdlNames` and its server-side counterpart
 `resolveProgramIdlNames` both filter out of the fetch entirely: those programs never reach the IDL source
 whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
-programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins with no built-in source at all (Vote, Config, Address Lookup Table,
-Ed25519, Secp256k1, the BPF loaders), which stay unnamed by design rather than by omission.
+programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins
+with no built-in source at all (Config, Ed25519, Secp256k1, the BPF loaders other than the upgradeable one),
+which stay unnamed by design rather than by omission.
 
 The built-in sources are a short list of exceptions, kept for three reasons.
 
@@ -132,6 +134,8 @@ on-chain account and can appear the day after this was checked. Re-check with
 | `compute-budget-name` | ✅ pmp, 5 ix |
 | `program-client-name` → System / Token / Stake / ATA | ✅ pmp |
 | `program-client-name` → **Token-2022** | ❌ none |
+| `program-client-name` → Address Lookup Table | not checked; the fetch refuses it (`NON_ANCHOR_PROGRAMS`) |
+| `native-program-name` → Vote, upgradeable BPF loader | not checked; the fetch refuses them (`NON_ANCHOR_PROGRAMS`) |
 | **ZK ElGamal**, **Lighthouse**, **Mango**, **Serum** | ❌ none |
 | **Pyth** | ❌ none on mainnet, devnet or testnet (checked 2026-09-01) |
 | **Token Swap** | ❌ none (program frozen; names come from a leading u8 tag) |

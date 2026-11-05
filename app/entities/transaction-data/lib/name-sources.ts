@@ -9,6 +9,7 @@ import { resolveWormholeInstructionName } from '@explorer/decoder-wormhole/detec
 
 import { resolveComputeBudgetInstructionName } from './compute-budget-name';
 import { resolveMemoInstructionName } from './memo-name';
+import { resolveNativeProgramInstructionName } from './native-program-name';
 import { resolveProgramClientInstructionName } from './program-client-name';
 import type { InstructionNameLookup, InstructionNames, InstructionSummary, ResolvedNames } from './types';
 
@@ -37,6 +38,7 @@ const NAME_SOURCES: readonly NameSource[] = [
     // Ahead of the IDL so a simulated System/Token instruction is worded as the RPC words it — see the
     // override map in program-client-name.
     lookup => resolveProgramClientInstructionName(lookup),
+    lookup => resolveNativeProgramInstructionName(lookup),
     ({ programId, data }, idlNames) => idlNames.get(programId)?.resolveInstructionName?.(data),
 ];
 

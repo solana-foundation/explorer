@@ -16,7 +16,7 @@ import { Drawer } from '@/app/shared/ui/drawer';
 import { displayTimestampUtc } from '@/app/utils/date';
 import { useClusterPath } from '@/app/utils/url';
 
-import type { InstructionSummariesState } from '../model/use-instruction-summaries';
+import type { RowTransactionState } from '../model/use-row-transaction';
 import { CompactKeyValue } from './CompactKeyValue';
 import { ProgramsBlock } from './InstructionList';
 
@@ -28,7 +28,7 @@ export function TransactionDetailsDrawer({
     blockTime,
     statusLabel,
     statusVariant,
-    instructions,
+    rowTransaction,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -37,7 +37,7 @@ export function TransactionDetailsDrawer({
     blockTime: number | null | undefined;
     statusLabel: string;
     statusVariant: 'success' | 'warning';
-    instructions: InstructionSummariesState;
+    rowTransaction: RowTransactionState;
 }) {
     const txPath = useClusterPath({ pathname: `/tx/${signature}` });
     const blockPath = useClusterPath({ pathname: `/block/${slot}` });
@@ -114,7 +114,7 @@ export function TransactionDetailsDrawer({
                 </CompactKeyValue>
                 <CompactKeyValue label="Programs">
                     <div className="min-w-0">
-                        <ProgramsBlock state={instructions} />
+                        <ProgramsBlock state={rowTransaction} />
                     </div>
                 </CompactKeyValue>
                 {/* The raw-data field carries its own "Size" caption, so this row has no label. */}

@@ -47,15 +47,16 @@ const withDrawerProviders: Decorator = (Story, context) => (
 const meta = {
     args: {
         blockTime: BLOCK_TIME,
-        instructions: {
+        onOpenChange: fn(),
+        open: true,
+        rowTransaction: {
+            messageBytes: MESSAGE_BYTES,
             status: 'loaded',
             summaries: [
                 { name: 'Transfer', programName: 'System' },
                 { name: 'CreateAccount', programName: 'System' },
             ],
         },
-        onOpenChange: fn(),
-        open: true,
         signature: SIGNATURE,
         slot: SLOT,
         statusLabel: 'Success',
@@ -81,7 +82,11 @@ export const Default: Story = {};
 // A failed transaction shows the warning badge.
 export const Failed: Story = {
     args: {
-        instructions: { status: 'loaded', summaries: [{ name: 'Transfer', programName: 'System' }] },
+        rowTransaction: {
+            messageBytes: MESSAGE_BYTES,
+            status: 'loaded',
+            summaries: [{ name: 'Transfer', programName: 'System' }],
+        },
         statusLabel: 'Failed',
         statusVariant: 'warning',
     },
@@ -89,20 +94,20 @@ export const Failed: Story = {
 
 // No cache entry yet → the program list shows its skeleton and the raw-data field shows its loader.
 export const Loading: Story = {
-    args: { instructions: { status: 'loading' } },
+    args: { rowTransaction: { status: 'loading' } },
     parameters: { raw: {} },
 };
 
 // Fetched but no block time and no instructions → Time row is hidden and Programs shows "---".
 export const Unavailable: Story = {
-    args: { blockTime: null, instructions: { status: 'loaded', summaries: [] } },
+    args: { blockTime: null, rowTransaction: { messageBytes: MESSAGE_BYTES, status: 'loaded', summaries: [] } },
     parameters: { raw: { [SIGNATURE]: { data: { raw: null }, status: FetchStatus.Fetched } } },
 };
 
 // The instruction fetch failed, so Programs offers a retry instead of a skeleton.
 const retryPrograms = fn();
 export const ProgramsFailed: Story = {
-    args: { instructions: { retry: retryPrograms, status: 'failed' } },
+    args: { rowTransaction: { retry: retryPrograms, status: 'failed' } },
     play: async () => {
         // The drawer renders in a portal outside the story canvas.
         const body = within(document.body);

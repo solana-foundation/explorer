@@ -4,7 +4,12 @@ export { adaptParsedTransaction } from './lib/adapt-parsed-transaction';
 export { encodeTransactionData, type EncodingFormat } from './lib/encoding';
 export { formatTransactionVersion } from './lib/format-transaction-version';
 export { getProgramName, UNKNOWN_PROGRAM_NAME } from './lib/get-program-name';
-export { getInstructionSummaries, resolveInstructionNames, resolveNamesFromData } from './lib/instruction-summary';
+export {
+    getCompiledInstructionSummaries,
+    getInstructionSummaries,
+    resolveInstructionNames,
+    resolveNamesFromData,
+} from './lib/instruction-summary';
 export { mergeTransactionMap } from './lib/merge-transaction-map';
 export { resolveInnerInstructions } from './lib/resolve-inner-instructions';
 export { isResolvedLookupTable, rowAddresses } from './lib/row-addresses';

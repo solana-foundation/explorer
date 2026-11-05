@@ -3,10 +3,10 @@ import { type InstructionSummary } from '@entities/transaction-data';
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
 
 import { summarizeInstructions } from '../lib/summarize-instructions';
-import type { InstructionSummariesState } from '../model/use-instruction-summaries';
+import type { RowTransactionState } from '../model/use-row-transaction';
 import { RetryButton } from './RetryButton';
 
-export function ProgramsBlock({ state }: { state: InstructionSummariesState }) {
+export function ProgramsBlock({ state }: { state: RowTransactionState }) {
     switch (state.status) {
         case 'loading':
             return <InstructionListSkeleton />;

@@ -18,7 +18,7 @@ export type RawDataSizeFieldProps = {
     data: ByteArray | undefined;
     filename: string;
     loading?: boolean;
-    /** When set, the size fetch failed after exhausting its retries; render a manual retry control. */
+    /** When set, the size fetch failed; render a manual retry control. */
     onRetry?: () => void;
     /** Extra classes for the popover trigger button (e.g. vertical alignment in a table cell). */
     buttonClassName?: string;
@@ -30,8 +30,8 @@ export function RawDataSizeField({ size, data, filename, loading, onRetry, butto
     }
 
     if (size === undefined) {
-        // Fetch failed for good — offer a retry instead of a dead `-`. Otherwise the size is genuinely
-        // unavailable (nothing to fetch), so keep the static placeholder.
+        // A failed fetch gets a retry instead of a dead `-`. Without one, the size is unavailable (nothing to
+        // fetch), so the static placeholder stays.
         if (onRetry) {
             return <RetryButton label="Retry loading size" onRetry={onRetry} className={buttonClassName} />;
         }
