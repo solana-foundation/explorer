@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const { fetchTokenInfosFromApiMock } = vi.hoisted(() => ({
     fetchTokenInfosFromApiMock: vi.fn().mockResolvedValue([]),
 }));
-vi.mock('@utils/token-info', async importOriginal => ({
-    ...(await importOriginal<typeof import('@utils/token-info')>()),
+vi.mock('../../api/fetch-token-infos-from-api', async importOriginal => ({
+    ...(await importOriginal<typeof import('../../api/fetch-token-infos-from-api')>()),
     fetchTokenInfosFromApi: fetchTokenInfosFromApiMock,
 }));
 

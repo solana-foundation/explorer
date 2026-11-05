@@ -2,6 +2,7 @@ import { gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { inspectorSurface, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { isParsedInstruction } from '@entities/instruction-parser';
+import { fetchTokenInfoFromApi } from '@entities/token-info';
 import { useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import type { ReadonlyUint8Array } from '@solana/kit';
@@ -34,7 +35,6 @@ import {
 } from '@/app/__tests__/card-harness';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
-import { getTokenInfo } from '@/app/utils/token-info';
 
 import { TokenDetailsCard } from '../token/TokenDetailsCard';
 
@@ -47,9 +47,9 @@ vi.mock('@providers/accounts', async importOriginal => ({
     useTokenAccountInfo: vi.fn(),
 }));
 
-vi.mock('@/app/utils/token-info', async importOriginal => ({
-    ...(await importOriginal<typeof import('@/app/utils/token-info')>()),
-    getTokenInfo: vi.fn(),
+vi.mock('@entities/token-info', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/token-info')>()),
+    fetchTokenInfoFromApi: vi.fn(),
 }));
 
 const [SOURCE, DESTINATION, AUTHORITY, MINT, SIGNER_1, SIGNER_2] = Array.from({ length: 6 }, (_, n) =>
@@ -64,7 +64,7 @@ describe('TokenDetailsCard', () => {
     beforeEach(() => {
         vi.mocked(useTokenAccountInfo).mockReturnValue(undefined);
         vi.mocked(useMintAccountInfo).mockReturnValue(undefined);
-        vi.mocked(getTokenInfo).mockResolvedValue(undefined);
+        vi.mocked(fetchTokenInfoFromApi).mockResolvedValue(undefined);
     });
 
     afterEach(() => {
@@ -105,8 +105,8 @@ describe('TokenDetailsCard', () => {
         vi.mocked(useMintAccountInfo).mockImplementation(mint =>
             mint === MINT.toBase58() ? ({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>) : undefined,
         );
-        vi.mocked(getTokenInfo).mockImplementation(async mint =>
-            mint.equals(MINT) ? ({ symbol: 'USDC' } as Awaited<ReturnType<typeof getTokenInfo>>) : undefined,
+        vi.mocked(fetchTokenInfoFromApi).mockImplementation(async mint =>
+            mint.equals(MINT) ? ({ symbol: 'USDC' } as Awaited<ReturnType<typeof fetchTokenInfoFromApi>>) : undefined,
         );
 
         renderTxCard(transfer('1500000'));
@@ -452,7 +452,9 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
     ])('should show the amount argument $amount as the instruction holds it', async ({ amount, shown }) => {
         vi.mocked(useTokenAccountInfo).mockReturnValue({ mint: MINT } as ReturnType<typeof useTokenAccountInfo>);
         vi.mocked(useMintAccountInfo).mockReturnValue({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>);
-        vi.mocked(getTokenInfo).mockResolvedValue({ symbol: 'USDC' } as Awaited<ReturnType<typeof getTokenInfo>>);
+        vi.mocked(fetchTokenInfoFromApi).mockResolvedValue({ symbol: 'USDC' } as Awaited<
+            ReturnType<typeof fetchTokenInfoFromApi>
+        >);
         const data = getTransferInstructionDataEncoder().encode({ amount });
         renderTxCard(byteFormCard(data, [SOURCE, DESTINATION, AUTHORITY].map(readonlyKey), TOKEN_PROGRAM_ID));
 

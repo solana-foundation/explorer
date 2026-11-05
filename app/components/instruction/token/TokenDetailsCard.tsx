@@ -9,6 +9,7 @@ import {
     type InstructionNode,
     type RawInstructionNode,
 } from '@entities/instruction-card';
+import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { type AccountMeta, PublicKey } from '@solana/web3.js';
 import { capitalizeFirstLetter, normalizeTokenAmount } from '@utils/index';
@@ -21,7 +22,6 @@ import { useCluster } from '@/app/providers/cluster';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
-import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
 
@@ -120,7 +120,7 @@ function declaredStringFields(struct: Struct<TokenInfo, Record<string, Struct<un
 }
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await getTokenInfo(new PublicKey(address), cluster, url);
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
 }
 
 /** An instruction without `amount` needs no mint, so it looks up no account. */

@@ -1,10 +1,10 @@
 'use client';
 
 import { Cluster } from '@utils/cluster';
-import { getTokenInfoSwrKey } from '@utils/token-info';
 import { useEffect } from 'react';
 import useSWR from 'swr';
 
+import { getTokenInfoSwrKey } from '../api/fetch-token-infos-from-api';
 import type { TokenInfo } from '../lib/types';
 import { useTokenInfoBatch } from './token-info-batch-provider';
 

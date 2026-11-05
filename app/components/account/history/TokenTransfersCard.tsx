@@ -6,6 +6,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
+import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
@@ -27,7 +28,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
-import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -51,7 +51,7 @@ type TransferData = {
 };
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await getTokenInfo(new PublicKey(address), cluster, url);
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
 }
 
 function TransferRow({

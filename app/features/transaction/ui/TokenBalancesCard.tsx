@@ -4,7 +4,7 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { cn } from '@components/shared/utils';
-import { getChainId } from '@entities/token-info';
+import { fetchTokenInfosFromApi, getChainId } from '@entities/token-info';
 import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -16,7 +16,6 @@ import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
-import { getTokenInfos } from '@/app/utils/token-info';
 
 type TokenBalanceRow = {
     account: PublicKey;
@@ -60,7 +59,6 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, genesisHash } = useCluster();
     const mintKey = rows.map(r => r.mint).join(',');
 
-    // getTokenInfos needs a chainId, which only a genesisHash can derive on the Custom cluster.
     const canResolveSymbols = Boolean(mintKey) && Boolean(getChainId(cluster, genesisHash));
 
     const { data: tokenSymbols } = useSWRImmutable(
@@ -89,9 +87,14 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
 type TokenSymbolsSwrKey = readonly ['token-balance-symbols', string, Cluster, string | undefined];
 
 async function fetchTokenSymbols([, mintKey, cluster, genesisHash]: TokenSymbolsSwrKey): Promise<Map<string, string>> {
-    const mints = mintKey.split(',').map(mint => new PublicKey(mint));
-    const tokens = await getTokenInfos(mints, cluster, genesisHash);
-    // getTokenInfos reports a failed request as undefined. Reading that as "no symbols" would cache
+    const mints = mintKey.split(',');
+    const tokens = await fetchTokenInfosFromApi({
+        addresses: mints,
+        cluster,
+        genesisHash,
+        includeOnChainFallback: true,
+    });
+    // fetchTokenInfosFromApi reports a failed request as undefined. Reading that as "no symbols" would cache
     // the fallback under an immutable key and pin it there for the session.
     if (!tokens) throw new Error(`Could not resolve token symbols for ${mints.length} mints`);
     return new Map(tokens.map(t => [t.address, t.symbol]));

@@ -3,6 +3,7 @@ import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
+import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData } from '@providers/accounts';
@@ -56,7 +57,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
-import { FullTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
+import { FullTokenInfo } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
@@ -304,7 +305,7 @@ function NonFungibleTokenMintAccountCard({
 }
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await getTokenInfo(new PublicKey(address), cluster, url);
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
 }
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {

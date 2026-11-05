@@ -1,8 +1,7 @@
-import { getTokenInfoSwrKey } from '@utils/token-info';
 import React, { useCallback } from 'react';
 import { mutate } from 'swr';
 
-import type { TokenInfo } from '@/app/entities/token-info';
+import { getTokenInfoSwrKey, type TokenInfo } from '@/app/entities/token-info';
 
 import { TokenInfoBatchContext } from '../../app/entities/token-info/model/token-info-batch-provider';
 

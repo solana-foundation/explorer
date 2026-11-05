@@ -1,12 +1,12 @@
 import { Cluster } from '@utils/cluster';
-import { fetchTokenInfosFromApi } from '@utils/token-info';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { tokenInfo } from '../../__fixtures__/token-info';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../../lib/request-limit';
 import { fetchTokenInfos } from '../fetch-token-infos';
+import { fetchTokenInfosFromApi } from '../fetch-token-infos-from-api';
 
-vi.mock('@utils/token-info', () => ({ fetchTokenInfosFromApi: vi.fn() }));
+vi.mock('../fetch-token-infos-from-api', () => ({ fetchTokenInfosFromApi: vi.fn() }));
 
 const mockedFetch = vi.mocked(fetchTokenInfosFromApi);
 
