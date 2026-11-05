@@ -43,6 +43,21 @@ export const Json: Story = {
     },
 };
 
+// `rendered` swaps the plain text for markup; the copy control still copies `code`.
+export const Rendered: Story = {
+    args: {
+        caption: 'Terminal',
+        code: ADD_COMMAND,
+        onCopy: fn(),
+        rendered: (
+            <>
+                claude mcp add <span className="text-accent">--transport http</span> solana-explorer
+                https://explorer.solana.com/mcp
+            </>
+        ),
+    },
+};
+
 export const Copied: Story = {
     args: {
         caption: '.mcp.json',

@@ -45,4 +45,20 @@ describe('BaseCodeBlock', () => {
         rerender(<BaseCodeBlock code={CODE} copyState="copied" onCopy={vi.fn()} />);
         expect(screen.getByRole('status')).toHaveTextContent('Copied');
     });
+
+    it('should show rendered markup in place of the plain code', () => {
+        render(<BaseCodeBlock code={CODE} rendered={<mark>highlighted</mark>} />);
+
+        expect(screen.getByText('highlighted', { selector: 'mark' })).toBeInTheDocument();
+        expect(screen.queryByText(CODE)).not.toBeInTheDocument();
+    });
+
+    it('should drop the frame for the reference variant', () => {
+        const { rerender } = render(<BaseCodeBlock code={CODE} data-testid="block" />);
+        expect(screen.getByTestId('block')).toHaveClass('border-outer-space-800');
+
+        rerender(<BaseCodeBlock code={CODE} data-testid="block" variant="reference" />);
+        expect(screen.getByTestId('block')).toHaveClass('border-l');
+        expect(screen.getByTestId('block')).not.toHaveClass('rounded-lg');
+    });
 });

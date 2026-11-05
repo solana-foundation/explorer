@@ -71,7 +71,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         // The Overview card's Fee payer row shows the fee payer address (the address also appears in the
         // Account List, so match all occurrences).
         expect((await screen.findAllByText('F3S4PD17Eo3FyCMropzDLCpBFuQuBmufUVBBdKEHbQFT')).length).toBeGreaterThan(0);
-        expect(screen.queryByText(/Inspector Input/i)).toBeNull();
+        expect(screen.queryByLabelText(/Inspector input/i)).toBeNull();
 
         expect(screen.getByText(/Account List/i)).not.toBeNull();
         // The card title splits programName and "Instruction" into separate spans so the
@@ -122,7 +122,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
 
         // The Overview card's Fee payer row shows the fee payer address (also present in the Account List).
         expect((await screen.findAllByText('62gRsAdA6dcbf4Frjp7YRFLpFgdGu8emAACcnnREX3L3')).length).toBeGreaterThan(0);
-        expect(screen.queryByText(/Inspector Input/i)).toBeNull();
+        expect(screen.queryByLabelText(/Inspector input/i)).toBeNull();
 
         // Note: Instructions section may show LoadingCard if lookup tables aren't fully resolved,
         // but the main transaction data is correctly displayed
@@ -144,7 +144,7 @@ describe('TransactionInspectorPage with a ?message= param', () => {
         renderPage({ transactions: false });
 
         expect(await screen.findByRole('heading', { name: 'Overview' })).toBeInTheDocument();
-        expect(screen.queryByText('Inspector Input')).toBeNull();
+        expect(screen.queryByLabelText('Inspector input')).toBeNull();
         expect(screen.getByText('v1')).toBeInTheDocument();
         expect(screen.getByText('Compute unit limit')).toBeInTheDocument();
         expect(screen.getByText('300,000')).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe('TransactionInspectorPage with a ?message= param', () => {
         renderPage();
 
         await waitFor(() => {
-            expect(screen.queryByText(/Inspector Input/i)).toBeNull();
+            expect(screen.queryByLabelText(/Inspector input/i)).toBeNull();
         });
         await waitFor(() => {
             expect(screen.queryByText(/Loading/i)).toBeNull();

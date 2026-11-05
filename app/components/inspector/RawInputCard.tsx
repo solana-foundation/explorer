@@ -2,16 +2,14 @@ import { getBase58Encoder } from '@solana/kit';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
-import { AlertCircle } from 'react-feather';
 
-import { Button } from '@/app/components/shared/ui/button';
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { bridgeV1MessageBytes, isV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
-import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { FormControl } from '@/app/shared/ui/FormControl';
-import { TabsContent, TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 
+import { BaseInspectorInput } from './BaseInspectorInput';
+import { ENCODING_PARAM, type ExampleEncoding, parseExampleEncoding } from './inspector-examples';
+import { InspectorInstructions } from './InspectorInstructions';
 import type { InspectorData, TransactionData } from './InspectorPage';
 
 const BASE58_ENCODER = getBase58Encoder();
@@ -49,99 +47,6 @@ function parseAccountAddresses(input: string): string[] {
     );
 }
 
-type TabData = {
-    id: string;
-    label: string;
-    content: React.ReactNode;
-};
-
-function TabInstructions() {
-    const [activeTab, setActiveTab] = React.useState('cli');
-
-    const tabs: TabData[] = [
-        {
-            content: (
-                <div className="p-3">
-                    Use <code>--dump-transaction-message</code> flag
-                </div>
-            ),
-            id: 'cli',
-            label: 'CLI',
-        },
-        {
-            content: (
-                <div className="p-3">
-                    Add <code>base64</code> crate dependency and{' '}
-                    <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
-                </div>
-            ),
-            id: 'rust',
-            label: 'Rust',
-        },
-        {
-            content: (
-                <div className="p-3">
-                    <div className="mb-3">
-                        <div className="mb-1.5 underline">@solana/web3.js &lt; 2.0.0</div>
-                        <div className="mb-1.5">
-                            <div className="mb-[3px]">Legacy Transaction:</div>
-                            <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
-                        </div>
-                        <div>
-                            <div className="mb-[3px]">Versioned Transaction:</div>
-                            <code>console.log(Buffer.from(tx.serialize()).toString(&quot;base64&quot;));</code>
-                        </div>
-                    </div>
-                    <div>
-                        <div className="mb-1.5 underline">@solana/web3.js &gt;= 2.0.0</div>
-                        <div>
-                            <div className="mb-[3px]">Legacy Transaction:</div>
-                            <code>console.log(getBase64EncodedWireTransaction(tx));</code>
-                        </div>
-                    </div>
-                </div>
-            ),
-            id: 'ts',
-            label: 'TypeScript',
-        },
-        {
-            content: (
-                <div className="p-3">
-                    Add <code>vault_transaction</code> from{' '}
-                    <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;</code>
-                </div>
-            ),
-            id: 'squads',
-            label: 'Squads',
-        },
-    ];
-
-    return (
-        <div>
-            <TabsList>
-                {tabs.map(tab => (
-                    <TabsTrigger
-                        key={tab.id}
-                        active={activeTab === tab.id}
-                        // master used `me-3 nav-link` (no nav-item margins): 0.75rem trailing gap only
-                        className="ml-0 mr-3"
-                        onClick={() => setActiveTab(tab.id)}
-                    >
-                        {tab.label}
-                    </TabsTrigger>
-                ))}
-            </TabsList>
-            <div>
-                {tabs.map(tab => (
-                    <TabsContent key={tab.id} active={activeTab === tab.id}>
-                        {tab.content}
-                    </TabsContent>
-                ))}
-            </div>
-        </div>
-    );
-}
-
 export function RawInput({
     value,
     setTransactionData,
@@ -152,12 +57,28 @@ export function RawInput({
     const rawInput = React.useRef<HTMLTextAreaElement>(null);
     const [error, setError] = React.useState<string>();
     const [rows, setRows] = React.useState(3);
+    const [hasValue, setHasValue] = React.useState(false);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
     const router = useRouter();
 
+    // One encoding for every tab that offers the choice, so switching it in one tab switches the others.
+    const encoding = parseExampleEncoding(currentSearchParams?.get(ENCODING_PARAM));
+    const setEncoding = React.useCallback(
+        (next: ExampleEncoding) => {
+            const nextParams = new URLSearchParams(currentSearchParams?.toString());
+            // base64 is the default, so it leaves the URL clean.
+            if (next === 'base64') nextParams.delete(ENCODING_PARAM);
+            else nextParams.set(ENCODING_PARAM, next);
+            const queryString = nextParams.toString();
+            router.replace(`${currentPathname}${queryString ? `?${queryString}` : ''}`, { scroll: false });
+        },
+        [currentPathname, currentSearchParams, router],
+    );
+
     const onInput = React.useCallback(() => {
         const input = rawInput.current?.value;
+        setHasValue(Boolean(input));
         if (!input) {
             setError(undefined);
             return;
@@ -229,6 +150,7 @@ export function RawInput({
     const clearInput = React.useCallback(() => {
         if (rawInput.current) {
             rawInput.current.value = '';
+            setHasValue(false);
             setError(undefined);
             setTransactionData(undefined);
         }
@@ -243,6 +165,11 @@ export function RawInput({
         }
     }, [currentSearchParams, router, currentPathname, setTransactionData]);
 
+    // The input is the only control on the empty inspector page, so it takes focus on mount.
+    React.useEffect(() => {
+        rawInput.current?.focus({ preventScroll: true });
+    }, []);
+
     React.useEffect(() => {
         const input = rawInput.current;
         if (input && value) {
@@ -253,40 +180,21 @@ export function RawInput({
 
     const placeholder = 'Paste a raw base58/base64 encoded transaction message or Squads vault transaction account';
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <div className="flex items-center justify-between">
-                    <CardTitle as="h3" ui="dashkit">
-                        Inspector Input
-                    </CardTitle>
-                    <Button ui="dashkit" variant="white" size="sm" onClick={clearInput} type="button">
-                        Clear
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardBody ui="dashkit">
-                <FormControl variant="flush-auto" className="font-mono">
-                    <textarea
-                        rows={rows}
-                        onInput={onInput}
-                        ref={rawInput}
-                        placeholder={placeholder}
-                        name="tx-inspector-input"
-                    />
-                </FormControl>
-                <div className="flex items-center">
-                    {error && (
-                        <>
-                            <AlertCircle className="mr-1.5 text-dk-warning-on-dark" size={14} aria-hidden />
-                            <span className="text-dk-warning-on-dark">{error}</span>
-                        </>
-                    )}
-                </div>
-            </CardBody>
-            <CardFooter ui="dashkit">
-                <h3>Instructions</h3>
-                <TabInstructions />
-            </CardFooter>
-        </Card>
+        <>
+            <BaseInspectorInput
+                ref={rawInput}
+                rows={rows}
+                onInput={onInput}
+                onClear={clearInput}
+                hasValue={hasValue}
+                error={error}
+                placeholder={placeholder}
+                name="tx-inspector-input"
+            />
+            {/* pb-9 plus the layout's own gap leaves 60px above the footer. */}
+            <section className="flex flex-col pb-9">
+                <InspectorInstructions encoding={encoding} onEncodingChange={setEncoding} />
+            </section>
+        </>
     );
 }
