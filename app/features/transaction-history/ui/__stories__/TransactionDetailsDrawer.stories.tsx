@@ -2,7 +2,7 @@ import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProv
 import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-import { fn } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import type { CacheEntry } from '@/app/providers/cache';
 import { FetchStatus } from '@/app/providers/cache';
@@ -47,10 +47,13 @@ const withDrawerProviders: Decorator = (Story, context) => (
 const meta = {
     args: {
         blockTime: BLOCK_TIME,
-        instructionNames: [
-            { name: 'Transfer', programName: 'System' },
-            { name: 'CreateAccount', programName: 'System' },
-        ],
+        instructions: {
+            status: 'loaded',
+            summaries: [
+                { name: 'Transfer', programName: 'System' },
+                { name: 'CreateAccount', programName: 'System' },
+            ],
+        },
         onOpenChange: fn(),
         open: true,
         signature: SIGNATURE,
@@ -78,7 +81,7 @@ export const Default: Story = {};
 // A failed transaction shows the warning badge.
 export const Failed: Story = {
     args: {
-        instructionNames: [{ name: 'Transfer', programName: 'System' }],
+        instructions: { status: 'loaded', summaries: [{ name: 'Transfer', programName: 'System' }] },
         statusLabel: 'Failed',
         statusVariant: 'warning',
     },
@@ -86,12 +89,24 @@ export const Failed: Story = {
 
 // No cache entry yet → the program list shows its skeleton and the raw-data field shows its loader.
 export const Loading: Story = {
-    args: { instructionNames: undefined },
+    args: { instructions: { status: 'loading' } },
     parameters: { raw: {} },
 };
 
 // Fetched but no block time and no instructions → Time row is hidden and Programs shows "---".
 export const Unavailable: Story = {
-    args: { blockTime: null, instructionNames: [] },
+    args: { blockTime: null, instructions: { status: 'loaded', summaries: [] } },
     parameters: { raw: { [SIGNATURE]: { data: { raw: null }, status: FetchStatus.Fetched } } },
+};
+
+// The instruction fetch failed, so Programs offers a retry instead of a skeleton.
+const retryPrograms = fn();
+export const ProgramsFailed: Story = {
+    args: { instructions: { retry: retryPrograms, status: 'failed' } },
+    play: async () => {
+        // The drawer renders in a portal outside the story canvas.
+        const body = within(document.body);
+        await userEvent.click(await body.findByRole('button', { name: 'Retry loading programs' }));
+        await expect(retryPrograms).toHaveBeenCalled();
+    },
 };

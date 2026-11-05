@@ -8,7 +8,6 @@ import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { ArrowRight, X } from 'react-feather';
 
-import type { InstructionSummary } from '@/app/entities/transaction-data';
 import { FetchStatus } from '@/app/providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { RelativeTime } from '@/app/shared/RelativeTime';
@@ -17,8 +16,9 @@ import { Drawer } from '@/app/shared/ui/drawer';
 import { displayTimestampUtc } from '@/app/utils/date';
 import { useClusterPath } from '@/app/utils/url';
 
+import type { InstructionSummariesState } from '../model/use-instruction-summaries';
 import { CompactKeyValue } from './CompactKeyValue';
-import { InstructionList, InstructionListSkeleton } from './InstructionList';
+import { ProgramsBlock } from './InstructionList';
 
 export function TransactionDetailsDrawer({
     open,
@@ -28,7 +28,7 @@ export function TransactionDetailsDrawer({
     blockTime,
     statusLabel,
     statusVariant,
-    instructionNames,
+    instructions,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -37,7 +37,7 @@ export function TransactionDetailsDrawer({
     blockTime: number | null | undefined;
     statusLabel: string;
     statusVariant: 'success' | 'warning';
-    instructionNames: InstructionSummary[] | undefined;
+    instructions: InstructionSummariesState;
 }) {
     const txPath = useClusterPath({ pathname: `/tx/${signature}` });
     const blockPath = useClusterPath({ pathname: `/block/${slot}` });
@@ -114,13 +114,7 @@ export function TransactionDetailsDrawer({
                 </CompactKeyValue>
                 <CompactKeyValue label="Programs">
                     <div className="min-w-0">
-                        {instructionNames !== undefined && instructionNames.length > 0 ? (
-                            <InstructionList instructions={instructionNames} />
-                        ) : instructionNames === undefined ? (
-                            <InstructionListSkeleton />
-                        ) : (
-                            <span className="text-outer-space-300">---</span>
-                        )}
+                        <ProgramsBlock state={instructions} />
                     </div>
                 </CompactKeyValue>
                 {/* The raw-data field carries its own "Size" caption, so this row has no label. */}

@@ -5,9 +5,11 @@ import { Button } from '@components/shared/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { Skeleton } from '@components/shared/ui/skeleton';
 import { cn } from '@components/shared/utils';
-import { Code, RefreshCw } from 'react-feather';
+import { Code } from 'react-feather';
 
 import type { ByteArray } from '@/app/shared/lib/bytes';
+
+import { RetryButton } from './RetryButton';
 
 export type RawDataSizeFieldProps = {
     /** Payload size in bytes. `undefined` renders a placeholder (info unavailable). */
@@ -31,17 +33,7 @@ export function RawDataSizeField({ size, data, filename, loading, onRetry, butto
         // Fetch failed for good — offer a retry instead of a dead `-`. Otherwise the size is genuinely
         // unavailable (nothing to fetch), so keep the static placeholder.
         if (onRetry) {
-            return (
-                <Button
-                    variant="ghost"
-                    className={cn('!px-0 text-outer-space-300', buttonClassName)}
-                    onClick={onRetry}
-                    aria-label="Retry loading size"
-                >
-                    <RefreshCw size={14} />
-                    <span>Retry</span>
-                </Button>
-            );
+            return <RetryButton label="Retry loading size" onRetry={onRetry} className={buttonClassName} />;
         }
         return <span className="text-outer-space-300">-</span>;
     }

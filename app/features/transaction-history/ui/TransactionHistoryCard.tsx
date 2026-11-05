@@ -36,7 +36,7 @@ import {
     type TransactionHistoryRowView,
 } from './BaseTransactionHistoryCard';
 import { CompactKeyValue } from './CompactKeyValue';
-import { InstructionList, InstructionListSkeleton } from './InstructionList';
+import { ProgramsBlock } from './InstructionList';
 import { RawDataSizeField } from './RawDataSizeField';
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer';
 
@@ -131,7 +131,7 @@ function TransactionRow({
 }) {
     const { signature, slot, blockTime, status } = row;
     const { isVisible, ref } = useVisibility<HTMLDivElement>(true);
-    const instructionNames = useResolvedInstructionSummaries(signature, isVisible);
+    const instructions = useResolvedInstructionSummaries(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
     // Mount the mobile drawer only once the row is first tapped — otherwise every row would mount a
     // closed drawer (with its own raw-tx subscription) up front.
@@ -148,14 +148,7 @@ function TransactionRow({
         setDrawerOpen(true);
     };
 
-    const programsBlock =
-        instructionNames !== undefined && instructionNames.length > 0 ? (
-            <InstructionList instructions={instructionNames} />
-        ) : instructionNames === undefined ? (
-            <InstructionListSkeleton />
-        ) : (
-            <span className="text-outer-space-300">---</span>
-        );
+    const programsBlock = <ProgramsBlock state={instructions} />;
 
     const signatureLink = <Signature signature={signature} link />;
     const statusBadge = (
@@ -242,7 +235,7 @@ function TransactionRow({
                     blockTime={blockTime}
                     statusLabel={badge.label}
                     statusVariant={badge.variant}
-                    instructionNames={instructionNames}
+                    instructions={instructions}
                 />
             )}
         </>

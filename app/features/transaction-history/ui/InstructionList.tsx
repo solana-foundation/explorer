@@ -3,6 +3,29 @@ import { type InstructionSummary } from '@entities/transaction-data';
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
 
 import { summarizeInstructions } from '../lib/summarize-instructions';
+import type { InstructionSummariesState } from '../model/use-instruction-summaries';
+import { RetryButton } from './RetryButton';
+
+export function ProgramsBlock({ state }: { state: InstructionSummariesState }) {
+    switch (state.status) {
+        case 'loading':
+            return <InstructionListSkeleton />;
+        case 'failed':
+            return (
+                <RetryButton
+                    label="Retry loading programs"
+                    onRetry={state.retry}
+                    className="!h-auto !py-0 !text-sm [&_svg]:!size-3.5"
+                />
+            );
+        case 'loaded':
+            return state.summaries.length > 0 ? (
+                <InstructionList instructions={state.summaries} />
+            ) : (
+                <span className="text-outer-space-300">---</span>
+            );
+    }
+}
 
 type InstructionListProps = {
     instructions: InstructionSummary[];
@@ -19,7 +42,7 @@ export function InstructionList({ instructions }: InstructionListProps) {
     );
 }
 
-export function InstructionListSkeleton() {
+function InstructionListSkeleton() {
     return (
         <div className="my-1 flex flex-col gap-1">
             <Skeleton className="h-3.5 w-44" />
