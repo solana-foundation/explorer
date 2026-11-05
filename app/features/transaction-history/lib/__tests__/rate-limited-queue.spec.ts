@@ -64,6 +64,21 @@ describe('createRateLimitedQueue', () => {
         expect(alwaysLimited).toHaveBeenCalledTimes(2);
     });
 
+    it('should pause the queue even when the rate-limited task has no retries left', async () => {
+        const queue = createRateLimitedQueue({ budget: 10, rateLimitRetries: 0, windowMs: WINDOW_MS });
+        const starts = startTimes();
+        const limited = vi.fn(() => starts.record().then(() => Promise.reject(rateLimited())));
+
+        const first = queue(limited);
+        const assertion = expect(first).rejects.toThrow(SolanaError);
+        const second = queue(starts.record);
+        await vi.runAllTimersAsync();
+
+        await assertion;
+        await second;
+        expect(starts.relative()).toEqual([0, WINDOW_MS]);
+    });
+
     it('should reject any other error at once and leave the queue unpaused', async () => {
         const queue = createRateLimitedQueue({ budget: 10, rateLimitRetries: 1, windowMs: WINDOW_MS });
         const starts = startTimes();

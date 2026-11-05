@@ -46,8 +46,9 @@ export function createRateLimitedQueue({
             try {
                 return await task();
             } catch (error) {
-                if (!isRateLimited(error) || retries >= rateLimitRetries) throw error;
+                if (!isRateLimited(error)) throw error;
                 pausedUntil = Date.now() + windowMs;
+                if (retries >= rateLimitRetries) throw error;
             }
         }
     }
