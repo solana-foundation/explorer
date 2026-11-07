@@ -2354,7 +2354,7 @@
     "simds": [
       "0599"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1081,
     "title": "SIMD-0599: Remove inactive stakes from stake delegations"
   },
   {
@@ -2434,5 +2434,27 @@
     ],
     "testnet_activation_epoch": null,
     "title": "SIMD-0433: Loader V3 Set Program Data to ELF Length"
+  },
+  {
+    "comms_required": null,
+    "description": "",
+    "devnet_activation_epoch": 1202,
+    "key": "8whkDenELnfwYLirBc4Wb4H2Z1z5K7tiykpdxJS7cWg1",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.4.1"
+    ],
+    "min_fd_versions": [
+      "v26.10.6"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "apfitzge"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [],
+    "simds": [],
+    "testnet_activation_epoch": null,
+    "title": "Apply a minimum loaded data size to loader-v3 ProgramData accounts"
   }
 ]
