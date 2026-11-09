@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import { Slot } from '@components/common/Slot';
+import { useRefreshAccount } from '@entities/account';
 import { type FeatureInfoType, getFeatureInfo } from '@entities/feature-gate';
 import { useSlotTime } from '@entities/slot-time';
 import { AccountCard } from '@features/account';
@@ -8,7 +9,7 @@ import { PublicKey } from '@solana/web3.js';
 import { parseFeatureAccount, useFeatureAccount } from '@utils/parseFeatureAccount';
 import { useBuildClusterPath } from '@utils/url';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
@@ -80,7 +81,22 @@ const BaseFeatureCard = ({
     isPending?: boolean;
 }) => {
     const { cluster } = useCluster();
-    const clusterInfo = useClusterInfo();
+    const clusterInfo = useClusterInfo({ enabled: cluster !== Cluster.Custom });
+    const refresh = useRefreshAccount();
+    const currentEpoch = clusterInfo?.epochInfo.epoch;
+    const refreshedForEpoch = useRef<bigint | undefined>(undefined);
+
+    useEffect(() => {
+        if (!isPending || currentEpoch === undefined) return;
+        if (refreshedForEpoch.current === undefined) {
+            refreshedForEpoch.current = currentEpoch;
+            return;
+        }
+        if (currentEpoch > refreshedForEpoch.current) {
+            refreshedForEpoch.current = currentEpoch;
+            refresh(account.pubkey, 'parsed');
+        }
+    }, [currentEpoch, isPending, refresh, account.pubkey]);
 
     const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={new PublicKey(address)} raw /> },

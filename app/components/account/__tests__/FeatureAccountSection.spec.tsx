@@ -7,8 +7,11 @@ import { vi } from 'vitest';
 
 import { FeatureAccountSection } from '@/app/components/account/FeatureAccountSection';
 import type { Account } from '@/app/providers/accounts';
+import { useClusterInfo } from '@/app/providers/cluster';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@/app/utils/parseFeatureAccount';
+
+const { refreshAccount } = vi.hoisted(() => ({ refreshAccount: vi.fn() }));
 
 vi.mock('next/navigation', () => ({
     useSearchParams: vi.fn(),
@@ -17,6 +20,10 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: Cluster.Devnet })),
     useClusterInfo: vi.fn(() => CLUSTER_INFO),
+}));
+
+vi.mock('@entities/account', () => ({
+    useRefreshAccount: () => refreshAccount,
 }));
 
 vi.mock('@entities/slot-time', () => ({
@@ -33,6 +40,8 @@ vi.mock('@components/common/Address', () => ({
 
 describe('FeatureAccountSection', () => {
     beforeEach(() => {
+        refreshAccount.mockClear();
+        vi.mocked(useClusterInfo).mockReturnValue(CLUSTER_INFO as ReturnType<typeof useClusterInfo>);
         vi.mocked(useSearchParams).mockReturnValue(
             new URLSearchParams({ cluster: clusterSlug(Cluster.Devnet) }) as ReturnType<typeof useSearchParams>,
         );
@@ -48,6 +57,33 @@ describe('FeatureAccountSection', () => {
         render(<FeatureAccountSection account={featureAccount({ activated: false })} />);
 
         expect(screen.getByRole('link', { name: 'Devnet Epoch 4' })).toHaveAttribute('href', '/epoch/4?cluster=devnet');
+    });
+
+    it('should refetch the pending feature account when the epoch rolls over', () => {
+        const account = featureAccount({ activated: false });
+        const { rerender } = render(<FeatureAccountSection account={account} />);
+        expect(refreshAccount).not.toHaveBeenCalled();
+
+        vi.mocked(useClusterInfo).mockReturnValue({
+            ...CLUSTER_INFO,
+            epochInfo: { ...CLUSTER_INFO.epochInfo, epoch: 4n },
+        } as ReturnType<typeof useClusterInfo>);
+        rerender(<FeatureAccountSection account={account} />);
+
+        expect(refreshAccount).toHaveBeenCalledWith(account.pubkey, 'parsed');
+    });
+
+    it('should not refetch an already-activated feature account when the epoch rolls over', () => {
+        const account = featureAccount({ activated: true });
+        const { rerender } = render(<FeatureAccountSection account={account} />);
+
+        vi.mocked(useClusterInfo).mockReturnValue({
+            ...CLUSTER_INFO,
+            epochInfo: { ...CLUSTER_INFO.epochInfo, epoch: 4n },
+        } as ReturnType<typeof useClusterInfo>);
+        rerender(<FeatureAccountSection account={account} />);
+
+        expect(refreshAccount).not.toHaveBeenCalled();
     });
 });
 
