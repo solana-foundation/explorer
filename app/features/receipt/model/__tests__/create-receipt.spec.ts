@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { truncateAddress } from '@entities/address';
-import { type TokenInfo, TokenInfoHttpError } from '@entities/token-info';
+import { type TokenInfo, TokenInfoHttpError, TokenInfoInvalidResponseError } from '@entities/token-info';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { getTokenInfo } from '@entities/token-info/server';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
@@ -42,7 +42,10 @@ import { createReceipt } from '../create-receipt';
 import { type ReceiptResult } from '../receipt-data';
 
 vi.mock('../../api/get-tx');
-vi.mock('@entities/token-info/server');
+vi.mock('@entities/token-info/server', async () => ({
+    ...(await vi.importActual<typeof import('@entities/token-info/server')>('@entities/token-info/server')),
+    getTokenInfo: vi.fn(),
+}));
 
 function unwrap(result: ReceiptResult) {
     expect(result.kind).toBe('ok');
@@ -477,16 +480,27 @@ describe('createReceipt', () => {
             });
         });
 
-        it('should log a failed token info lookup with the mint and the cluster', async () => {
+        it('should log a transient token info failure as a warning with the mint and the cluster', async () => {
             const lookupError = new TokenInfoHttpError({ status: 503, statusText: 'Service Unavailable' });
-            vi.mocked(getTx).mockResolvedValueOnce({
+            mockTokenInfoFailure(lookupError);
+            const logWarn = vi.spyOn(Logger, 'warn');
+            const logError = vi.spyOn(Logger, 'error');
+
+            await createReceipt(mockSignature);
+
+            const [mint] = vi.mocked(getTokenInfo).mock.calls[0];
+            expect(logWarn).toHaveBeenCalledWith('[receipt] Token info lookup failed', {
                 cluster: Cluster.MainnetBeta,
-                transaction: mockUsdcTransferTransaction,
+                error: lookupError,
+                mint,
             });
-            vi.mocked(getTokenInfo).mockImplementationOnce(async (_mint, _cluster, _genesisHash, config) => {
-                config?.onError?.(lookupError);
-                return undefined;
-            });
+            expect(logError).not.toHaveBeenCalled();
+        });
+
+        it('should log any other token info failure as an error with the mint and the cluster', async () => {
+            const lookupError = new TokenInfoInvalidResponseError();
+            mockTokenInfoFailure(lookupError);
+            const logWarn = vi.spyOn(Logger, 'warn');
             const logError = vi.spyOn(Logger, 'error');
 
             await createReceipt(mockSignature);
@@ -496,6 +510,7 @@ describe('createReceipt', () => {
                 expect.objectContaining({ cause: lookupError, message: '[receipt] Token info lookup failed' }),
                 { cluster: Cluster.MainnetBeta, mint },
             );
+            expect(logWarn).not.toHaveBeenCalled();
         });
     });
 
@@ -787,4 +802,15 @@ describe('createReceipt', () => {
 
 function listedToken(symbol: string, logoURI: string | null = null): TokenInfo {
     return { ...tokenInfo(gen.address()), logoURI, symbol };
+}
+
+function mockTokenInfoFailure(lookupError: Error): void {
+    vi.mocked(getTx).mockResolvedValueOnce({
+        cluster: Cluster.MainnetBeta,
+        transaction: mockUsdcTransferTransaction,
+    });
+    vi.mocked(getTokenInfo).mockImplementationOnce(async (_mint, _cluster, _genesisHash, config) => {
+        config?.onError?.(lookupError);
+        return undefined;
+    });
 }

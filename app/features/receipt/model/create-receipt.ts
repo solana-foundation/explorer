@@ -1,6 +1,7 @@
 import 'server-only';
 
-import { getTokenInfo } from '@entities/token-info/server';
+import { getTokenInfo, isTransientError } from '@entities/token-info/server';
+import { type Cluster } from '@utils/cluster';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -23,12 +24,17 @@ export async function createReceipt(signature: string, cluster?: QueryCluster): 
         cluster: data.cluster,
         getTokenInfo: mint =>
             getTokenInfo(mint, data.cluster, undefined, {
-                onError: error =>
-                    Logger.error(new Error('[receipt] Token info lookup failed', { cause: error }), {
-                        cluster: data.cluster,
-                        mint,
-                    }),
+                onError: error => reportTokenInfoError(error, { cluster: data.cluster, mint }),
             }),
         tx: data.transaction,
     });
+}
+
+function reportTokenInfoError(error: unknown, context: { cluster: Cluster; mint: string }): void {
+    const message = '[receipt] Token info lookup failed';
+    if (isTransientError(error)) {
+        Logger.warn(message, { error, ...context });
+        return;
+    }
+    Logger.error(new Error(message, { cause: error }), context);
 }
