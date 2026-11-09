@@ -9,11 +9,11 @@ import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { createRateLimitedQueue } from '../lib/rate-limited-queue';
+import { createRateLimitedQueue, type RateLimitedQueue } from '../lib/rate-limited-queue';
 
 // Rate-limited endpoints cap getTransaction calls per client in a rolling window, and rejected calls
 // count too. The budget stays under that cap, with room for other callers. SWR owns caching and dedup.
-const queue = createRateLimitedQueue({ budget: 12, rateLimitRetries: 2, windowMs: 10_000 });
+const QUEUE_OPTIONS = { budget: 12, rateLimitRetries: 2, windowMs: 10_000 };
 
 // Automatic retries after the first failed attempt.
 const RETRY_COUNT = 3;
@@ -37,7 +37,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         // eslint-disable-next-line unicorn/no-null -- SWR uses null key to disable the request
         enabled ? `history-row-transaction:${url}:${signature}` : null,
         async () => {
-            const raw = await queue(() => fetchRawTransaction(url, signature));
+            const raw = await queueFor(url)(() => fetchRawTransaction(url, signature));
             // A null tx is a transient miss (a load-balanced node that has not indexed the signature yet),
             // not "no instructions". Under useSWRImmutable a returned value is a permanent success, so the
             // fetcher throws and SWR retries.
@@ -70,6 +70,17 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         };
     }
     return { status: 'loading' };
+}
+
+const queues = new Map<string, RateLimitedQueue>();
+
+function queueFor(url: string): RateLimitedQueue {
+    let queue = queues.get(url);
+    if (!queue) {
+        queue = createRateLimitedQueue(QUEUE_OPTIONS);
+        queues.set(url, queue);
+    }
+    return queue;
 }
 
 // A custom onErrorRetry turns off SWR's default backoff, so this copies it. The random factor runs from 0.5

@@ -4,19 +4,19 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FAST_RETRY, settleRetries, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
 const mocks = vi.hoisted(() => ({
+    createRateLimitedQueue: vi.fn(() => (task: () => Promise<unknown>) => task()),
     fetchRawTransaction: vi.fn(),
     getCompiledInstructionSummaries: vi.fn(),
+    useCluster: vi.fn(() => ({ url: 'https://api.devnet.solana.com' })),
 }));
 
 vi.mock('@entities/transaction-data', () => ({
     fetchRawTransaction: mocks.fetchRawTransaction,
     getCompiledInstructionSummaries: mocks.getCompiledInstructionSummaries,
 }));
-vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'https://api.devnet.solana.com' }) }));
+vi.mock('@providers/cluster', () => ({ useCluster: mocks.useCluster }));
 // The real queue spends its budget across tests in this file and would pause the later ones.
-vi.mock('../../lib/rate-limited-queue', () => ({
-    createRateLimitedQueue: () => (task: () => Promise<unknown>) => task(),
-}));
+vi.mock('../../lib/rate-limited-queue', () => ({ createRateLimitedQueue: mocks.createRateLimitedQueue }));
 
 import { type RowTransactionState, useRowTransaction } from '../use-row-transaction';
 
@@ -123,6 +123,25 @@ describe('useRowTransaction', () => {
         rerender({ enabled: true });
 
         await waitForHook(() => expect(result.current.status).toBe('loaded'));
+    });
+
+    it('should share one queue per cluster', async () => {
+        mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
+        mocks.getCompiledInstructionSummaries.mockReturnValue(SUMMARIES);
+
+        mocks.useCluster.mockReturnValue({ url: 'https://api.mainnet-beta.solana.com' });
+        const { result: mainnetRows, unmount } = renderHook(
+            () => [useRowTransaction('sig-1').status, useRowTransaction('sig-2').status],
+            { wrapper },
+        );
+        await waitForHook(() => expect(mainnetRows.current).toEqual(['loaded', 'loaded']));
+        unmount();
+
+        mocks.useCluster.mockReturnValue({ url: 'https://api.testnet.solana.com' });
+        const { result: testnetRow } = renderHook(() => useRowTransaction('sig-3').status, { wrapper });
+        await waitForHook(() => expect(testnetRow.current).toBe('loaded'));
+
+        expect(mocks.createRateLimitedQueue).toHaveBeenCalledTimes(2);
     });
 });
 
