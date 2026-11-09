@@ -3,13 +3,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { FAST_RETRY, settleRetries, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
-const mocks = vi.hoisted(() => ({
-    createRateLimitedQueue: vi.fn(() => (task: () => Promise<unknown>) => task()),
-    fetchRawTransaction: vi.fn(),
-    getCompiledInstructionSummaries: vi.fn(),
-    logWarning: vi.fn(),
-    useCluster: vi.fn(() => ({ url: 'https://api.devnet.solana.com' })),
-}));
+const mocks = vi.hoisted(() => {
+    const queue = vi.fn((task: () => Promise<unknown>) => task());
+    return {
+        createRateLimitedQueue: vi.fn(() => queue),
+        fetchRawTransaction: vi.fn(),
+        getCompiledInstructionSummaries: vi.fn(),
+        logWarning: vi.fn(),
+        queue,
+        useCluster: vi.fn(() => ({ url: 'https://api.devnet.solana.com' })),
+    };
+});
 
 vi.mock('@entities/transaction-data', () => ({
     fetchRawTransaction: mocks.fetchRawTransaction,
@@ -64,6 +68,17 @@ describe('useRowTransaction', () => {
         await waitForHook(() => expect(result.current.status).toBe('failed'));
         expect(statuses).toEqual(['loading', 'failed']);
         expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(ATTEMPTS_PER_CHAIN);
+        expect(mocks.queue).toHaveBeenCalledTimes(ATTEMPTS_PER_CHAIN);
+    });
+
+    it('should fetch only when the queue runs the task', async () => {
+        mocks.queue.mockReturnValue(new Promise(() => {}));
+
+        renderHook(() => useRowTransaction('sig'), { wrapper });
+        await waitForHook(() => expect(mocks.queue).toHaveBeenCalledOnce());
+        await settleRetries();
+
+        expect(mocks.fetchRawTransaction).not.toHaveBeenCalled();
     });
 
     it('should log one warning for Sentry, after the last automatic retry', async () => {
