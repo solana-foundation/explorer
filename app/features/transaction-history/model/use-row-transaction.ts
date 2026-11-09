@@ -9,6 +9,7 @@ import { useLayoutEffect, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
 import { createRateLimitedQueue, type RateLimitedQueue, TaskSkippedError } from '../lib/rate-limited-queue';
 
@@ -44,7 +45,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         enabled ? key : null,
         async () => {
             const raw = await queueFor(url)(
-                () => fetchRawTransaction(url, signature),
+                () => fetchRawTransaction(url, signature, { abortSignal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) }),
                 () => enabledRowKeys.has(key),
             );
             // A null tx is a transient miss (a load-balanced node that has not indexed the signature yet),

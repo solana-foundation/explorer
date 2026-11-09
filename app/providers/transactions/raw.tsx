@@ -65,7 +65,7 @@ async function loadRawTransaction(
 
     let fetchStatus;
     try {
-        const raw = await fetchRawTransaction(url, signature, commitment);
+        const raw = await fetchRawTransaction(url, signature, { commitment });
         fetchStatus = FetchStatus.Fetched;
 
         dispatch({

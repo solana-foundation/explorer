@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { FAST_RETRY, settleRetries, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
 const mocks = vi.hoisted(() => {
     const queue = vi.fn((task: () => Promise<unknown>) => task());
@@ -39,6 +40,7 @@ const SUMMARIES = [{ name: 'Transfer', programName: 'System Program' }];
 const ATTEMPTS_PER_CHAIN = 4;
 
 afterEach(() => {
+    vi.restoreAllMocks();
     vi.resetAllMocks();
     vi.useRealTimers();
 });
@@ -151,6 +153,39 @@ describe('useRowTransaction', () => {
         }
     });
 
+    it('should retry a fetch that hangs past the RPC timeout', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        abortTimeoutsOnFakeTimers();
+        mocks.fetchRawTransaction.mockImplementation(hangUntilAborted);
+        const retryEverySecond = swrWrapper({ dedupingInterval: 0, errorRetryInterval: 1000 });
+
+        renderHook(() => useRowTransaction('sig'), { wrapper: retryEverySecond });
+        await act(() => vi.advanceTimersByTimeAsync(UPSTREAM_TIMEOUT_MS - 1));
+        expect(mocks.fetchRawTransaction).toHaveBeenCalledOnce();
+        await act(() => vi.advanceTimersByTimeAsync(1 + 1000));
+        expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(2);
+    });
+
+    it('should start the RPC timeout when the queue runs the fetch', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        abortTimeoutsOnFakeTimers();
+        mocks.queue.mockImplementation(
+            task => new Promise(resolve => setTimeout(() => resolve(task()), UPSTREAM_TIMEOUT_MS + 1)),
+        );
+        mocks.fetchRawTransaction.mockImplementation(
+            async (_url: string, _signature: string, { abortSignal }: { abortSignal: AbortSignal }) => {
+                abortSignal.throwIfAborted();
+                return { messageBytes: MESSAGE_BYTES };
+            },
+        );
+        mocks.getCompiledInstructionSummaries.mockReturnValue(SUMMARIES);
+
+        const { result } = renderHook(() => useRowTransaction('sig'), { wrapper });
+        await act(() => vi.advanceTimersByTimeAsync(UPSTREAM_TIMEOUT_MS + 1));
+
+        expect(result.current.status).toBe('loaded');
+    });
+
     it('should send one more chain of attempts per Retry click', async () => {
         mocks.fetchRawTransaction.mockRejectedValue(new Error('HTTP error (429)'));
 
@@ -225,7 +260,7 @@ describe('useRowTransaction', () => {
         rerender();
 
         await waitForHook(() => expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(2));
-        expect(mocks.fetchRawTransaction).toHaveBeenLastCalledWith('http://localhost:8899', 'sig');
+        expect(mocks.fetchRawTransaction).toHaveBeenLastCalledWith('http://localhost:8899', 'sig', expect.anything());
     });
 
     it('should show loading, not failed, after a failed row moves to another cluster', async () => {
@@ -260,6 +295,24 @@ describe('useRowTransaction', () => {
         expect(mocks.createRateLimitedQueue).toHaveBeenCalledTimes(2);
     });
 });
+
+function abortTimeoutsOnFakeTimers(): void {
+    vi.spyOn(AbortSignal, 'timeout').mockImplementation(ms => {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(new DOMException('signal timed out', 'TimeoutError')), ms);
+        return controller.signal;
+    });
+}
+
+function hangUntilAborted(
+    _url: string,
+    _signature: string,
+    { abortSignal }: { abortSignal: AbortSignal },
+): Promise<never> {
+    return new Promise((_resolve, reject) => {
+        abortSignal.addEventListener('abort', () => reject(abortSignal.reason));
+    });
+}
 
 function failedState(state: RowTransactionState): { retry: () => void } {
     if (state.status !== 'failed') throw new Error(`expected failed, got ${state.status}`);

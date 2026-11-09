@@ -63,7 +63,7 @@ describe('useFetchRawTransaction', () => {
 
             result.current('sig', commitment);
 
-            await waitForHook(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', commitment));
+            await waitForHook(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', { commitment }));
         },
     );
 

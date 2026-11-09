@@ -41,7 +41,7 @@ describe('useRowTransaction with the rate-limited queue', () => {
         await waitForHook(() => expect(blocker.current.status).toBe('loaded'));
         await settleRetries();
 
-        expect(mocks.fetchRawTransaction).not.toHaveBeenCalledWith(expect.anything(), 'left');
+        expect(mocks.fetchRawTransaction.mock.calls.map(([, signature]) => signature)).toEqual(['blocker']);
         expect(mocks.logWarning).not.toHaveBeenCalled();
     });
 
