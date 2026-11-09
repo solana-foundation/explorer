@@ -133,9 +133,16 @@ describe('displayTimestampRelative', () => {
         expect(displayTimestampRelative(NOW + offset, NOW)).toBe(expected);
     });
 
-    it('should render a sub-second difference as "just now"', () => {
+    it('should render anything under 10 seconds as "just now"', () => {
         expect(displayTimestampRelative(NOW, NOW)).toBe('just now');
         expect(displayTimestampRelative(NOW - 200, NOW)).toBe('just now');
+        expect(displayTimestampRelative(NOW - 9 * SECOND, NOW)).toBe('just now');
+        expect(displayTimestampRelative(NOW + 9 * SECOND, NOW)).toBe('just now');
+    });
+
+    it('should render 10 seconds and beyond with the elapsed value', () => {
+        expect(displayTimestampRelative(NOW - 10 * SECOND, NOW)).toBe('10 seconds ago');
+        expect(displayTimestampRelative(NOW + 10 * SECOND, NOW)).toBe('in 10 seconds');
     });
 
     it('should return an empty string for non-finite inputs', () => {

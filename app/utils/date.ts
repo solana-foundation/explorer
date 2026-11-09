@@ -112,6 +112,11 @@ export function displayTimestampRelative(unixTimestampMs: number, nowMs: number)
     const [from, to] = past ? [unixTimestampMs, nowMs] : [nowMs, unixTimestampMs];
     const seconds = differenceInSeconds(to, from);
 
+    // A live, frequently re-estimated instant (e.g. the home-page cluster time) hovers within a few
+    // seconds of now and would flicker between "just now" and "N seconds ago"; collapse the whole
+    // sub-10s window, in either direction, to a single stable "just now".
+    if (seconds < 10) return 'just now';
+
     let duration: Duration;
     if (seconds < 10 * MINUTE_S) {
         duration = { minutes: differenceInMinutes(to, from), seconds: seconds % MINUTE_S };
