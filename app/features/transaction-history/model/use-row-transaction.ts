@@ -12,11 +12,14 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { createRateLimitedQueue, type RateLimitedQueue } from '../lib/rate-limited-queue';
 
-// Rate-limited endpoints cap getTransaction calls per client in a rolling window, and rejected calls
-// count too. The budget stays under that cap, with room for other callers. SWR owns caching and dedup.
+// The measured limit of the mainnet explorer-api endpoint is 15 getTransaction calls per client in a rolling 10 s.
+// The measured limit is lower than the 40 in the Solana cluster docs.
+// The endpoint returns the limit in the `x-ratelimit-method-limit` response header.
+// The budget is below the limit to allow calls from other callers.
 const QUEUE_OPTIONS = { budget: 12, rateLimitRetries: 2, windowMs: 10_000 };
 
-// Automatic retries after the first failed attempt.
+// The queue's 429 retries run inside each SWR retry.
+// One row can make up to (RETRY_COUNT + 1) * (rateLimitRetries + 1) calls.
 const RETRY_COUNT = 3;
 
 export type RowTransactionState =
