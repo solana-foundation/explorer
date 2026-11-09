@@ -33,30 +33,28 @@ export type BaseInspectorInputProps = Omit<React.TextareaHTMLAttributes<HTMLText
 export const BaseInspectorInput = React.forwardRef<HTMLTextAreaElement, BaseInspectorInputProps>(
     ({ error, hasValue, onClear, className, ...props }, ref) => (
         <div className="flex flex-col gap-2">
-            <div className="relative">
-                <textarea
-                    ref={ref}
-                    aria-label={INSPECTOR_INPUT_LABEL}
-                    aria-invalid={error ? true : undefined}
-                    className={cn(textareaVariants({ invalid: Boolean(error) }), className)}
-                    {...props}
-                />
-                {hasValue && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        onClick={onClear}
-                        className="absolute bottom-3 right-3"
-                    >
-                        Clear
-                    </Button>
-                )}
-            </div>
-            {error && (
-                <div className="flex items-start gap-1.5 text-sm leading-5 text-destructive" role="alert">
-                    <NormalizedAlertCircle className="mt-0.5 shrink-0" />
-                    <span>{error}</span>
+            <textarea
+                ref={ref}
+                aria-label={INSPECTOR_INPUT_LABEL}
+                aria-invalid={error ? true : undefined}
+                className={cn(textareaVariants({ invalid: Boolean(error) }), className)}
+                {...props}
+            />
+            {(error || hasValue) && (
+                <div className="flex items-start justify-between gap-3">
+                    {error ? (
+                        <div className="flex items-start gap-1.5 text-sm leading-5 text-destructive" role="alert">
+                            <NormalizedAlertCircle className="mt-0.5 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    ) : (
+                        <span />
+                    )}
+                    {hasValue && (
+                        <Button variant="outline" size="sm" type="button" onClick={onClear} className="shrink-0">
+                            Clear
+                        </Button>
+                    )}
                 </div>
             )}
         </div>
