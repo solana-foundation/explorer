@@ -3,7 +3,15 @@ import { createElement, type ReactNode } from 'react';
 import type { SWRConfiguration } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { refocusTab, settleRetries, swrWrapper, UNTHROTTLED_FOCUS, waitForHook } from '@/app/__tests__/swr-hook';
+import {
+    FAST_RETRY,
+    refocusTab,
+    settleRetries,
+    swrWrapper,
+    UNTHROTTLED_FOCUS,
+    waitForHook,
+} from '@/app/__tests__/swr-hook';
+import { Logger } from '@/app/shared/lib/logger';
 
 vi.mock('../../api/get-rpc', () => ({ getRpc: vi.fn() }));
 
@@ -152,6 +160,21 @@ describe('useEpochInfo', () => {
         const { result } = renderHook(() => useEpochInfo(), { wrapper });
         await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
         expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+    });
+
+    it('should log the error when the epoch-info fetch fails', async () => {
+        const failure = new Error('rpc unreachable');
+        rpc.getEpochInfo.mockReturnValue({ send: () => Promise.reject(failure) });
+        const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => {});
+
+        renderHook(() => useEpochInfo(), {
+            wrapper: makeWrapper(connectedState, { dedupingInterval: 0, ...FAST_RETRY }),
+        });
+
+        await waitForHook(() => expect(errorSpy).toHaveBeenCalledWith(failure, { query: 'epoch-info' }));
+
+        await settleRetries();
+        errorSpy.mockRestore();
     });
 
     it('should refetch on the refresh interval without a focus event', async () => {
