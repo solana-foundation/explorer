@@ -1,5 +1,7 @@
 import { isSolanaError, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR } from '@solana/kit';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
 export type RateLimitedQueue = <T>(task: () => Promise<T>) => Promise<T>;
 
 const TOO_MANY_REQUESTS = 429;
@@ -20,6 +22,13 @@ export function createRateLimitedQueue({
     windowMs: number;
     rateLimitRetries: number;
 }): RateLimitedQueue {
+    invariant(Number.isInteger(budget) && budget >= 1, 'budget must be a positive integer');
+    invariant(Number.isInteger(windowMs) && windowMs >= 1, 'windowMs must be a positive integer');
+    invariant(
+        Number.isInteger(rateLimitRetries) && rateLimitRetries >= 0,
+        'rateLimitRetries must be a non-negative integer',
+    );
+
     const starts: number[] = [];
     let pausedUntil = 0;
     let tail: Promise<unknown> = Promise.resolve();

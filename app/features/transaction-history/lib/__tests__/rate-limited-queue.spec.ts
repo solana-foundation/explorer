@@ -94,6 +94,24 @@ describe('createRateLimitedQueue', () => {
         expect(failing).toHaveBeenCalledOnce();
         expect(starts.relative()).toEqual([0, 0]);
     });
+
+    it.each([
+        { budget: 0 },
+        { budget: Number.NaN },
+        { budget: 1.5 },
+        { windowMs: 0 },
+        { windowMs: Number.NaN },
+        { windowMs: Number.POSITIVE_INFINITY },
+        { rateLimitRetries: -1 },
+        { rateLimitRetries: 0.5 },
+        { rateLimitRetries: Number.NaN },
+    ])('should reject the option %o', invalid => {
+        const [name] = Object.keys(invalid);
+
+        expect(() =>
+            createRateLimitedQueue({ budget: 1, rateLimitRetries: 0, windowMs: WINDOW_MS, ...invalid }),
+        ).toThrow(name);
+    });
 });
 
 function rateLimited(): SolanaError {
