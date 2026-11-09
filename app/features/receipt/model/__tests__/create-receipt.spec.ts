@@ -306,7 +306,7 @@ describe('createReceipt', () => {
                 '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
                 Cluster.MainnetBeta,
                 undefined,
-                { onError: expect.any(Function) },
+                { onError: expect.any(Function), signal: expect.any(AbortSignal) },
             );
         });
 
@@ -389,7 +389,7 @@ describe('createReceipt', () => {
                 '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
                 Cluster.MainnetBeta,
                 undefined,
-                { onError: expect.any(Function) },
+                { onError: expect.any(Function), signal: expect.any(AbortSignal) },
             );
         });
 
@@ -426,7 +426,7 @@ describe('createReceipt', () => {
                 'AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U',
                 Cluster.MainnetBeta,
                 undefined,
-                { onError: expect.any(Function) },
+                { onError: expect.any(Function), signal: expect.any(AbortSignal) },
             );
         });
 
@@ -474,6 +474,7 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(mint, Cluster.MainnetBeta, undefined, {
                 onError: expect.any(Function),
+                signal: expect.any(AbortSignal),
             });
         });
 

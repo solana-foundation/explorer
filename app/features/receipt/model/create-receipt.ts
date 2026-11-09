@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { getTokenInfo, isTransientError } from '@entities/token-info/server';
+import { createAbortSignal, getTokenInfo, isTransientError } from '@entities/token-info/server';
 import { type Cluster } from '@utils/cluster';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -25,6 +25,7 @@ export async function createReceipt(signature: string, cluster?: QueryCluster): 
         getTokenInfo: mint =>
             getTokenInfo(mint, data.cluster, undefined, {
                 onError: error => reportTokenInfoError(error, { cluster: data.cluster, mint }),
+                signal: createAbortSignal(),
             }),
         tx: data.transaction,
     });
