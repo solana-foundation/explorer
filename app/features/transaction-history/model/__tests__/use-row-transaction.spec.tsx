@@ -125,6 +125,19 @@ describe('useRowTransaction', () => {
         await waitForHook(() => expect(result.current.status).toBe('loaded'));
     });
 
+    it('should fetch with the new URL after the cluster changes', async () => {
+        mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
+        mocks.getCompiledInstructionSummaries.mockReturnValue(SUMMARIES);
+
+        const { rerender, result } = renderHook(() => useRowTransaction('sig'), { wrapper });
+        await waitForHook(() => expect(result.current.status).toBe('loaded'));
+        mocks.useCluster.mockReturnValue({ url: 'http://localhost:8899' });
+        rerender();
+
+        await waitForHook(() => expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(2));
+        expect(mocks.fetchRawTransaction).toHaveBeenLastCalledWith('http://localhost:8899', 'sig');
+    });
+
     it('should show loading, not failed, after a failed row moves to another cluster', async () => {
         mocks.fetchRawTransaction.mockRejectedValue(new Error('HTTP error (429)'));
 
