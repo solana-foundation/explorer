@@ -340,15 +340,12 @@ describe('createReceipt', () => {
             });
         });
 
-        it.each([
-            ['returns undefined', () => vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined)],
-            ['throws an error', () => vi.mocked(getTokenInfo).mockRejectedValueOnce(new Error('Token info not found'))],
-        ])('should handle token transfer when getTokenInfo %s', async (_, mockTokenInfo) => {
+        it('should show TOKEN when getTokenInfo returns undefined', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockUsdcTransferTransaction,
             });
-            mockTokenInfo();
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined);
 
             const receipt = unwrap(await createReceipt(mockSignature));
 

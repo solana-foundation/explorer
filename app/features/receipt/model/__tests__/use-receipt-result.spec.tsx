@@ -59,19 +59,27 @@ describe('useReceiptResult', () => {
     });
 
     it('should build the receipt again when the genesis hash changes', async () => {
+        const symbolByGenesisHash: Record<string, string> = {
+            [GENESIS_HASHES.DEVNET]: 'DEVUSDC',
+            [GENESIS_HASHES.MAINNET]: 'USDC',
+        };
+        vi.mocked(fetch).mockImplementation(async (_input, init) => {
+            const { genesisHash } = JSON.parse(String(init?.body));
+            return Response.json({
+                content: [{ ...tokenInfo(MINT.toBase58()), symbol: symbolByGenesisHash[genesisHash] }],
+            });
+        });
         mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.DEVNET);
         const tx = tokenTransfer();
         const { rerender, result } = renderHook(() => useReceiptResult(SIGNATURE, tx), {
             wrapper: swrWrapper(),
         });
-        await waitForHook(() => expect(result.current.data?.kind).toBe('ok'));
+        await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'DEVUSDC' } }));
 
         mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.MAINNET);
         rerender();
 
-        await waitForHook(() =>
-            expect(sentBodies().map(body => body.genesisHash)).toEqual([GENESIS_HASHES.DEVNET, GENESIS_HASHES.MAINNET]),
-        );
+        await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'USDC' } }));
     });
 
     it('should build the receipt again when the cluster changes', async () => {
@@ -98,6 +106,18 @@ describe('useReceiptResult', () => {
         await waitForHook(() => expect(result.current.data?.kind).toBe('ok'));
     });
 
+    it('should show TOKEN when the mint is not a valid address', async () => {
+        const tx = tokenTransfer('not-a-mint');
+        const { result } = renderHook(() => useReceiptResult(SIGNATURE, tx), {
+            wrapper: swrWrapper(),
+        });
+
+        await waitForHook(() =>
+            expect(result.current.data).toMatchObject({ kind: 'ok', receipt: { total: { unit: 'TOKEN' } } }),
+        );
+        expect(fetch).not.toHaveBeenCalled();
+    });
+
     it('should not build a receipt when receipts are disabled', async () => {
         mocks.isReceiptEnabled = false;
 
@@ -121,7 +141,7 @@ function connectedTo(cluster: Cluster, genesisHash: string): ClusterContext {
     };
 }
 
-function tokenTransfer(): TransactionWithMeta {
+function tokenTransfer(mint = MINT.toBase58()): TransactionWithMeta {
     const [authority, source, destination, receiver] = [
         gen.publicKey(),
         gen.publicKey(),
@@ -129,22 +149,21 @@ function tokenTransfer(): TransactionWithMeta {
         gen.publicKey(),
     ];
     const accountKeys = [authority, source, destination];
+    const transfer = buildTokenTransferCheckedIx({
+        amount: '1000000',
+        authority,
+        decimals: 6,
+        destinationTokenAccount: destination,
+        mint: MINT,
+        sourceTokenAccount: source,
+    });
     return buildParsedTransaction({
         accountKeys,
-        instructions: [
-            buildTokenTransferCheckedIx({
-                amount: '1000000',
-                authority,
-                decimals: 6,
-                destinationTokenAccount: destination,
-                mint: MINT,
-                sourceTokenAccount: source,
-            }),
-        ],
+        instructions: [{ ...transfer, parsed: { ...transfer.parsed, info: { ...transfer.parsed.info, mint } } }],
         postTokenBalances: [
             {
                 accountIndex: accountKeys.indexOf(destination),
-                mint: MINT.toBase58(),
+                mint,
                 owner: receiver.toBase58(),
                 programId: TOKEN_PROGRAM_ADDRESS,
                 uiTokenAmount: { amount: '1000000', decimals: 6, uiAmount: 1, uiAmountString: '1' },
