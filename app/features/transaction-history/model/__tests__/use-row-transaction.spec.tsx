@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => {
         createRateLimitedQueue: vi.fn(() => queue),
         fetchRawTransaction: vi.fn(),
         getCompiledInstructionSummaries: vi.fn(),
+        logError: vi.fn(),
         logWarning: vi.fn(),
         queue,
         useCluster: vi.fn(() => ({ url: 'https://api.devnet.solana.com' })),
@@ -20,7 +21,7 @@ vi.mock('@entities/transaction-data', () => ({
     getCompiledInstructionSummaries: mocks.getCompiledInstructionSummaries,
 }));
 vi.mock('@providers/cluster', () => ({ useCluster: mocks.useCluster }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: mocks.logWarning } }));
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: mocks.logError, warn: mocks.logWarning } }));
 // The real queue spends its budget across tests in this file and would pause the later ones.
 vi.mock('../../lib/rate-limited-queue', () => ({ createRateLimitedQueue: mocks.createRateLimitedQueue }));
 
@@ -50,6 +51,24 @@ describe('useRowTransaction', () => {
         );
         expect(mocks.getCompiledInstructionSummaries).toHaveBeenCalledWith(MESSAGE_BYTES);
         expect(mocks.fetchRawTransaction).toHaveBeenCalledOnce();
+    });
+
+    it('should keep the bytes, fetch once and report the error when the summaries fail to decode', async () => {
+        const decodeError = new Error('decode failed');
+        mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
+        mocks.getCompiledInstructionSummaries.mockImplementation(() => {
+            throw decodeError;
+        });
+
+        const { result } = renderHook(() => useRowTransaction('sig'), { wrapper });
+        await waitForHook(() =>
+            expect(result.current).toEqual({ messageBytes: MESSAGE_BYTES, status: 'loaded', summaries: [] }),
+        );
+        await settleRetries();
+
+        expect(mocks.fetchRawTransaction).toHaveBeenCalledOnce();
+        expect(mocks.logError).toHaveBeenCalledOnce();
+        expect(mocks.logError).toHaveBeenCalledWith(decodeError, expect.objectContaining({ sentry: 'always' }));
     });
 
     it('should keep loading through the automatic retries and fail once they run out', async () => {
