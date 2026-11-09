@@ -55,7 +55,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
                     setFailedKey(errorKey);
                     return;
                 }
-                setTimeout(revalidate, retryDelay(opts.retryCount, config.errorRetryInterval), opts);
+                setTimeout(revalidate, config.errorRetryInterval, opts);
             },
             shouldRetryOnError: true,
         },
@@ -83,10 +83,4 @@ function queueFor(url: string): RateLimitedQueue {
         queues.set(url, queue);
     }
     return queue;
-}
-
-// A custom onErrorRetry turns off SWR's default backoff, so this copies it. The random factor runs from 0.5
-// to 1.5 and doubles per retry.
-function retryDelay(retryCount: number, errorRetryInterval: number): number {
-    return ~~((Math.random() + 0.5) * (1 << Math.min(retryCount, 8))) * errorRetryInterval;
 }

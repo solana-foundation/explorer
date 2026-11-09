@@ -27,7 +27,10 @@ const SUMMARIES = [{ name: 'Transfer', programName: 'System Program' }];
 // The first attempt and the three automatic retries.
 const ATTEMPTS_PER_CHAIN = 4;
 
-afterEach(() => vi.resetAllMocks());
+afterEach(() => {
+    vi.resetAllMocks();
+    vi.useRealTimers();
+});
 
 describe('useRowTransaction', () => {
     it('should return the message bytes and the summaries read from them', async () => {
@@ -59,6 +62,20 @@ describe('useRowTransaction', () => {
         await waitForHook(() => expect(result.current.status).toBe('failed'));
         expect(statuses).toEqual(['loading', 'failed']);
         expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(ATTEMPTS_PER_CHAIN);
+    });
+
+    it('should wait the retry interval before each automatic retry', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        mocks.fetchRawTransaction.mockRejectedValue(new Error('HTTP error (500)'));
+        const retryEverySecond = swrWrapper({ dedupingInterval: 0, errorRetryInterval: 1000 });
+
+        renderHook(() => useRowTransaction('sig'), { wrapper: retryEverySecond });
+        for (const attempts of [2, 3, 4]) {
+            await act(() => vi.advanceTimersByTimeAsync(999));
+            expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(attempts - 1);
+            await act(() => vi.advanceTimersByTimeAsync(1));
+            expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(attempts);
+        }
     });
 
     it('should send one more chain of attempts per Retry click', async () => {
