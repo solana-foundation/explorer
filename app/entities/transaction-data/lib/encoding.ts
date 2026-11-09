@@ -1,13 +1,13 @@
-import { getBase58Decoder } from '@solana/kit';
+import { getBase58Decoder, type ReadonlyUint8Array } from '@solana/kit';
 
-import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
+import { toBase64, toHex } from '@/app/shared/lib/bytes';
 
 const BASE58_DECODER = getBase58Decoder();
 
 export type EncodingFormat = 'hex' | 'base58' | 'base64';
 
 interface EncodingProvider {
-    encode(data: ByteArray): string;
+    encode(data: ReadonlyUint8Array): string;
 }
 
 const hexProvider: EncodingProvider = {
@@ -28,7 +28,7 @@ const providers: Record<EncodingFormat, EncodingProvider> = {
     hex: hexProvider,
 };
 
-export function encodeTransactionData(data: ByteArray, format: EncodingFormat): string {
+export function encodeTransactionData(data: ReadonlyUint8Array, format: EncodingFormat): string {
     if (!(data instanceof Uint8Array)) {
         throw new Error('encodeTransactionData expects Uint8Array or Buffer');
     }

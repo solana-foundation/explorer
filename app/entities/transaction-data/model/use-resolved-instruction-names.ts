@@ -27,7 +27,9 @@ export function useResolvedInstructionNames(instructions: readonly NamedInstruct
  * a still-loading transaction.
  * @param summaries - Summary rows for one signature, names still at their sentinels
  */
-export function useResolvedSummaryNames(summaries: InstructionSummary[] | undefined): InstructionSummary[] | undefined {
+export function useResolvedSummaryNames(
+    summaries: readonly InstructionSummary[] | undefined,
+): readonly InstructionSummary[] | undefined {
     const idlNames = useIdlNames(summaries ?? NO_ROWS);
 
     return useMemo(

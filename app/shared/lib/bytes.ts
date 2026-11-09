@@ -1,3 +1,4 @@
+import type { ReadonlyUint8Array } from '@solana/kit';
 import type BN from 'bn.js';
 
 /**
@@ -64,7 +65,7 @@ const toCharCode = (c: string): number => c.charCodeAt(0);
  * Avoids String.fromCharCode(...bytes) spread which overflows the call stack
  * for inputs larger than ~65K bytes (V8 argument count limit).
  */
-const fromCharCode = (bytes: Uint8Array): string => Array.from(bytes, b => String.fromCharCode(b)).join('');
+const fromCharCode = (bytes: ReadonlyUint8Array): string => Array.from(bytes, b => String.fromCharCode(b)).join('');
 
 /**
  * Decode base64 string to Uint8Array
@@ -83,7 +84,7 @@ export function fromBase64(base64: string): Uint8Array {
  * Encode Uint8Array to base64 string
  * Replaces: buffer.toString('base64')
  */
-export function toBase64(bytes: Uint8Array): string {
+export function toBase64(bytes: ReadonlyUint8Array): string {
     // Use native Uint8Array.prototype.toBase64 when available (Chrome 133+, Firefox 133+, Safari 18.2+)
     if ('toBase64' in Uint8Array.prototype) {
         return (Uint8Array.prototype.toBase64 as () => string).call(bytes);
@@ -134,7 +135,7 @@ export function fromHex(hex: string): Uint8Array {
 /**
  * Fallback for toHex when native API is not available.
  */
-const toHexFallback = (bytes: ByteArray): string => {
+const toHexFallback = (bytes: ReadonlyUint8Array): string => {
     let hex = '';
     bytes.forEach(b => {
         hex += b.toString(16).padStart(2, '0');
@@ -159,7 +160,7 @@ export function toBuffer(bytes: ByteArray): Buffer {
  * Native API available in Chrome 133+, Firefox 133+, Safari 18.2+
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/toHex
  */
-export function toHex(bytes: ByteArray): string {
+export function toHex(bytes: ReadonlyUint8Array): string {
     // Use native Uint8Array.prototype.toHex when available (Chrome 133+, Firefox 133+, Safari 18.2+)
     if ('toHex' in Uint8Array.prototype) {
         return (Uint8Array.prototype.toHex as () => string).call(bytes);

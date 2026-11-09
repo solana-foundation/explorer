@@ -88,7 +88,7 @@ export function applyNameSources(names: InstructionNames, idlNames: Map<string, 
  * @param idlNames - IDL-derived names per program id, for the programs in this transaction
  */
 export function applyNameSourcesToSummaries(
-    summaries: InstructionSummary[],
+    summaries: readonly InstructionSummary[],
     idlNames: Map<string, ProgramIdlNames>,
 ): InstructionSummary[] {
     return summaries.map(summary => {

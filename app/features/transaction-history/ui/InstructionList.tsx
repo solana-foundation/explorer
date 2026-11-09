@@ -24,7 +24,7 @@ export function ProgramsBlock({ state }: { state: RowTransactionState }) {
 }
 
 type InstructionListProps = {
-    instructions: InstructionSummary[];
+    instructions: readonly InstructionSummary[];
 };
 
 export function InstructionList({ instructions }: InstructionListProps) {

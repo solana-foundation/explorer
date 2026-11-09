@@ -1,9 +1,10 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
+import type { ReadonlyUint8Array } from '@solana/kit';
 import { cva } from 'class-variance-authority';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { ByteArray, toHex } from '@/app/shared/lib/bytes';
+import { toHex } from '@/app/shared/lib/bytes';
 
 import { cn } from './utils';
 
@@ -84,8 +85,8 @@ const fullContentVariants = cva('items-baseline', {
 });
 
 type HexDataBase = {
-    raw: ByteArray;
-    copyableRaw?: ByteArray;
+    raw: ReadonlyUint8Array;
+    copyableRaw?: ReadonlyUint8Array;
     className?: string;
     inverted?: boolean;
     isCopyable?: boolean;

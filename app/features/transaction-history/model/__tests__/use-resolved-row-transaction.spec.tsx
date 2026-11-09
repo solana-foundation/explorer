@@ -138,7 +138,7 @@ function loaded(summaries: InstructionSummary[]): RowTransactionState {
     return { messageBytes: MESSAGE_BYTES, status: 'loaded', summaries };
 }
 
-function summariesOf(state: RowTransactionState): InstructionSummary[] {
+function summariesOf(state: RowTransactionState): readonly InstructionSummary[] {
     if (state.status !== 'loaded') throw new Error(`expected loaded summaries, got ${state.status}`);
     return state.summaries;
 }

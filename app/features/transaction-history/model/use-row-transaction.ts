@@ -4,6 +4,7 @@ import {
     type InstructionSummary,
 } from '@entities/transaction-data';
 import { useCluster } from '@providers/cluster';
+import type { ReadonlyUint8Array } from '@solana/kit';
 import { useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
@@ -21,7 +22,7 @@ const RETRY_COUNT = 3;
 export type RowTransactionState =
     | { status: 'loading' }
     | { status: 'failed'; retry: () => void }
-    | { status: 'loaded'; messageBytes: Uint8Array; summaries: InstructionSummary[] };
+    | { status: 'loaded'; messageBytes: ReadonlyUint8Array; summaries: readonly InstructionSummary[] };
 
 /**
  * The message bytes and per-instruction summaries for one history row, from a single base64
