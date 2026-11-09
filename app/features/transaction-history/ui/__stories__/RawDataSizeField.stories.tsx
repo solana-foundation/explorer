@@ -26,7 +26,7 @@ export const Loading: Story = {
 };
 
 const retrySize = fn();
-export const Failed: Story = {
+export const Retry: Story = {
     args: { state: { retry: retrySize, status: 'failed' } },
     play: async ({ canvasElement }) => {
         await userEvent.click(within(canvasElement).getByRole('button', { name: 'Retry loading size' }));
