@@ -79,13 +79,17 @@ describe('createRateLimitedQueue', () => {
         expect(starts.relative()).toEqual([0, WINDOW_MS]);
     });
 
-    it('should reject any other error at once and leave the queue unpaused', async () => {
+    it.each([
+        ['an HTTP 500', () => httpError(500, 'Internal Server Error')],
+        ['a network failure', () => new TypeError('Failed to fetch')],
+    ])('should reject %s at once and leave the queue unpaused', async (_label, makeError) => {
         const queue = createRateLimitedQueue({ budget: 10, rateLimitRetries: 1, windowMs: WINDOW_MS });
         const starts = startTimes();
-        const failing = vi.fn(() => starts.record().then(() => Promise.reject(new Error('HTTP error (500)'))));
+        const error = makeError();
+        const failing = vi.fn(() => starts.record().then(() => Promise.reject(error)));
 
         const first = queue(failing);
-        const assertion = expect(first).rejects.toThrow('HTTP error (500)');
+        const assertion = expect(first).rejects.toBe(error);
         const second = queue(starts.record);
         await vi.runAllTimersAsync();
 
@@ -115,11 +119,11 @@ describe('createRateLimitedQueue', () => {
 });
 
 function rateLimited(): SolanaError {
-    return new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
-        headers: new Headers(),
-        message: 'Too Many Requests',
-        statusCode: 429,
-    });
+    return httpError(429, 'Too Many Requests');
+}
+
+function httpError(statusCode: number, message: string): SolanaError {
+    return new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, { headers: new Headers(), message, statusCode });
 }
 
 function startTimes(): { record: () => Promise<void>; relative: () => number[] } {
