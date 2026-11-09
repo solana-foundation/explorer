@@ -13,12 +13,12 @@ import type {
     SubscriptionDelegation,
 } from '@solana/subscriptions';
 import { PlanStatus } from '@solana/subscriptions';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { pluralUnits } from '@utils/index';
 import { type ReactNode, useState } from 'react';
 import { Code } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
 import { type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
@@ -61,7 +61,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
         { label: 'Period', value: pluralUnits(terms.periodHours, 'hour') },
         terms.createdAt !== 0n && {
             label: 'Created At',
-            value: displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true),
+            value: <Timestamp unixTimestamp={Number(terms.createdAt)} />,
         },
         { label: 'Expires At', value: displayExpiry(endTs) },
         metadataUri && {
@@ -125,7 +125,7 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
         { label: 'Period Length', value: pluralUnits(periodLengthS, 'second') },
         currentPeriodStartTs !== 0n && {
             label: 'Current Period Start',
-            value: displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true),
+            value: <Timestamp unixTimestamp={Number(currentPeriodStartTs)} />,
         },
         { label: 'Expires At', value: displayExpiry(expiryTs) },
         { label: 'Subscription Authority', value: addressValue(subscriptionAuthority) },
@@ -153,7 +153,7 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
         { label: 'Amount Pulled (this period)', value: amountPulledInPeriod.toString() },
         currentPeriodStartTs !== 0n && {
             label: 'Current Period Start',
-            value: displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true),
+            value: <Timestamp unixTimestamp={Number(currentPeriodStartTs)} />,
         },
         { label: 'Expires At', value: displayExpiry(expiresAtTs) },
         { label: 'Payer', value: addressValue(header.payer) },

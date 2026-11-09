@@ -3,7 +3,6 @@
 import { Epoch } from '@components/common/Epoch';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { AlpenglowCard } from '@features/alpenglow';
@@ -20,6 +19,7 @@ import { slotsToHumanString } from '@utils/index';
 import { percentage } from '@utils/math';
 import React from 'react';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
@@ -100,7 +100,7 @@ function StatsCardBody() {
                     <tr>
                         <td className="w-full">Cluster time</td>
                         <td className="text-right font-mono">
-                            <TimestampToggle unixTimestamp={blockTime} shorter></TimestampToggle>
+                            <Timestamp unixTimestamp={Math.floor(blockTime / 1000)} />
                         </td>
                     </tr>
                 )}

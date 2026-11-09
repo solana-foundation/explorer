@@ -5,9 +5,9 @@ import { Epoch } from '@components/common/Epoch';
 import { SolarizedJsonViewer } from '@components/common/JsonViewer';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { FieldValue } from '../model/fields';
@@ -53,7 +53,7 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
         case 'text':
             return <>{value.value}</>;
         case 'timestamp':
-            return <span className="font-mono">{displayTimestampUtc(unixTimestampToMs(value.unixSeconds))}</span>;
+            return <Timestamp unixTimestamp={value.unixSeconds} />;
         case 'preformatted':
             return (
                 <pre className="mb-0 block w-fit whitespace-pre-wrap [overflow-wrap:anywhere]">
