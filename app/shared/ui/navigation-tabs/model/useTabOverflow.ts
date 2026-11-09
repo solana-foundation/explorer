@@ -22,6 +22,11 @@ function getVisibleTabsCount({
 
     if (containerWidth === 0) return tabElements.length;
 
+    const lastTab = tabElements[tabElements.length - 1];
+    if (lastTab && lastTab.getBoundingClientRect().right - containerRect.left <= containerWidth + 0.5) {
+        return tabElements.length;
+    }
+
     const gap = parseFloat(getComputedStyle(tablist).columnGap) || 0;
     const moreWidth = moreMeasure.getBoundingClientRect().width;
     const hiddenTabIndex = tabElements.findIndex((tabElement, index) => {

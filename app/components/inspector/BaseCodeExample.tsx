@@ -35,18 +35,10 @@ const KEYWORDS: Record<CodeExampleLanguage, string[]> = {
     url: [],
 };
 
-const UNDERLINE_PATH =
-    'M1.2,2.26 L5.3,2.55 L9.3,2.59 L13.4,2.46 L17.5,2.27 L21.5,2.28 L25.6,2.20 L29.7,2.25 L33.7,2.11 L37.8,1.72 L41.9,1.50 L45.9,1.36 L50.0,1.60 L54.1,1.76 L58.1,1.86 L62.2,1.82 L66.3,1.75 L70.3,1.99 L74.4,2.33 L78.5,2.67 L82.5,2.64 L86.6,2.33 L90.7,2.20 L94.7,2.01 L98.8,2.12 Q100.0,2.81 98.8,4.10 L94.7,3.99 L90.7,4.22 L86.6,4.34 L82.5,4.55 L78.5,4.68 L74.4,4.42 L70.3,4.00 L66.3,3.90 L62.2,3.81 L58.1,3.88 L54.1,3.75 L50.0,3.67 L45.9,3.45 L41.9,3.51 L37.8,3.76 L33.7,4.01 L29.7,4.24 L25.6,4.22 L21.5,4.15 L17.5,4.16 L13.4,4.36 L9.3,4.56 L5.3,4.43 L1.2,4.27 Q0.0,3.53 1.2,2.24 Z';
-// Tailwind emerald-400.
-const UNDERLINE_FILL = '#34d399';
+// Highlighter-style band in Tailwind emerald-400; clone keeps it continuous across wrapped lines.
 const UNDERLINE_STYLE: React.CSSProperties = {
     WebkitBoxDecorationBreak: 'clone',
-    backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 6" preserveAspectRatio="none"><path d="${UNDERLINE_PATH}" fill="${UNDERLINE_FILL}"/></svg>`,
-    )}")`,
-    backgroundPosition: 'left bottom',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '100% 6px',
+    backgroundImage: 'linear-gradient(transparent 75%, rgba(52, 211, 153, 0.45) 75%)',
     boxDecorationBreak: 'clone',
 };
 
