@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     createRateLimitedQueue: vi.fn(() => (task: () => Promise<unknown>) => task()),
     fetchRawTransaction: vi.fn(),
     getCompiledInstructionSummaries: vi.fn(),
+    logWarning: vi.fn(),
     useCluster: vi.fn(() => ({ url: 'https://api.devnet.solana.com' })),
 }));
 
@@ -15,6 +16,7 @@ vi.mock('@entities/transaction-data', () => ({
     getCompiledInstructionSummaries: mocks.getCompiledInstructionSummaries,
 }));
 vi.mock('@providers/cluster', () => ({ useCluster: mocks.useCluster }));
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: mocks.logWarning } }));
 // The real queue spends its budget across tests in this file and would pause the later ones.
 vi.mock('../../lib/rate-limited-queue', () => ({ createRateLimitedQueue: mocks.createRateLimitedQueue }));
 
@@ -62,6 +64,27 @@ describe('useRowTransaction', () => {
         await waitForHook(() => expect(result.current.status).toBe('failed'));
         expect(statuses).toEqual(['loading', 'failed']);
         expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(ATTEMPTS_PER_CHAIN);
+    });
+
+    it('should log one warning for Sentry, after the last automatic retry', async () => {
+        const warningsAtEachAttempt: number[] = [];
+        mocks.fetchRawTransaction.mockImplementation(async () => {
+            warningsAtEachAttempt.push(mocks.logWarning.mock.calls.length);
+            throw new Error('HTTP error (429)');
+        });
+
+        const { result } = renderHook(() => useRowTransaction('sig'), { wrapper });
+        await waitForHook(() => expect(result.current.status).toBe('failed'));
+
+        expect(warningsAtEachAttempt).toEqual([0, 0, 0, 0]);
+        expect(mocks.logWarning).toHaveBeenCalledOnce();
+        expect(mocks.logWarning).toHaveBeenCalledWith(
+            '[transaction-history] row fetch failed after its retries',
+            expect.objectContaining({
+                sentry: 'always',
+                sentryExtras: expect.not.objectContaining({ url: expect.anything() }),
+            }),
+        );
     });
 
     it('should wait the retry interval before each automatic retry', async () => {

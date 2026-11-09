@@ -51,7 +51,13 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
             // can tell a wait from the end of the retries.
             onErrorRetry: (error, errorKey, config, revalidate, opts) => {
                 if (opts.retryCount > RETRY_COUNT) {
-                    Logger.error(error, { signature, url });
+                    Logger.warn('[transaction-history] row fetch failed after its retries', {
+                        error,
+                        sentry: 'always',
+                        sentryExtras: { error: String(error), signature },
+                        signature,
+                        url,
+                    });
                     setFailedKey(errorKey);
                     return;
                 }
