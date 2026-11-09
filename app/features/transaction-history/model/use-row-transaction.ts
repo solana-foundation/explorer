@@ -52,7 +52,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
             // not "no instructions". Under useSWRImmutable a returned value is a permanent success, so the
             // fetcher throws and SWR retries.
             if (!raw) throw new Error(`history-row-transaction: transaction not found for ${signature}`);
-            return { messageBytes: raw.messageBytes, summaries: decodeSummaries(raw.messageBytes, signature) };
+            return { messageBytes: raw.messageBytes, summaries: getCompiledInstructionSummaries(raw.messageBytes) };
         },
         {
             // SWR sets `isValidating` false and keeps `error` between attempts, so only the retry handler
@@ -99,16 +99,6 @@ function useEnabledRowKey(key: string, enabled: boolean): void {
             enabledRowKeys.delete(key);
         };
     }, [key, enabled]);
-}
-
-// The same bytes fail to decode on every attempt, so a decode error is reported and the fetch is not retried.
-function decodeSummaries(messageBytes: ReadonlyUint8Array, signature: string): readonly InstructionSummary[] {
-    try {
-        return getCompiledInstructionSummaries(messageBytes);
-    } catch (error) {
-        Logger.error(error, { sentry: 'always', sentryExtras: { signature }, signature });
-        return [];
-    }
 }
 
 const queues = new Map<string, RateLimitedQueue>();

@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => {
         createRateLimitedQueue: vi.fn(() => queue),
         fetchRawTransaction: vi.fn(),
         getCompiledInstructionSummaries: vi.fn(),
-        logError: vi.fn(),
         logWarning: vi.fn(),
         queue,
         useCluster: vi.fn(() => ({ url: 'https://api.devnet.solana.com' })),
@@ -22,7 +21,7 @@ vi.mock('@entities/transaction-data', () => ({
     getCompiledInstructionSummaries: mocks.getCompiledInstructionSummaries,
 }));
 vi.mock('@providers/cluster', () => ({ useCluster: mocks.useCluster }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: mocks.logError, warn: mocks.logWarning } }));
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { warn: mocks.logWarning } }));
 // The real queue spends its budget across tests in this file and would pause the later ones.
 vi.mock('../../lib/rate-limited-queue', async importOriginal => ({
     ...(await importOriginal<typeof import('../../lib/rate-limited-queue')>()),
@@ -59,22 +58,15 @@ describe('useRowTransaction', () => {
         expect(mocks.fetchRawTransaction).toHaveBeenCalledOnce();
     });
 
-    it('should keep the bytes, fetch once and report the error when the summaries fail to decode', async () => {
-        const decodeError = new Error('decode failed');
+    it('should fail, not load an empty row, when the summaries throw', async () => {
         mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
         mocks.getCompiledInstructionSummaries.mockImplementation(() => {
-            throw decodeError;
+            throw new Error('summary failed');
         });
 
         const { result } = renderHook(() => useRowTransaction('sig'), { wrapper });
-        await waitForHook(() =>
-            expect(result.current).toEqual({ messageBytes: MESSAGE_BYTES, status: 'loaded', summaries: [] }),
-        );
-        await settleRetries();
 
-        expect(mocks.fetchRawTransaction).toHaveBeenCalledOnce();
-        expect(mocks.logError).toHaveBeenCalledOnce();
-        expect(mocks.logError).toHaveBeenCalledWith(decodeError, expect.objectContaining({ sentry: 'always' }));
+        await waitForHook(() => expect(result.current.status).toBe('failed'));
     });
 
     it('should keep loading through the automatic retries and fail once they run out', async () => {
