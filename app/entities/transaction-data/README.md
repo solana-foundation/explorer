@@ -16,7 +16,7 @@ STAGE 1 — sync, no I/O                                        per instruction
   PartiallyDecoded ──────┘                              │
                                                         ├──→ InstructionNames
   compiled bytes ────────────→ resolveNamesFromData ────┘    { name         }
-       (simulation)                                          { programName  }
+       (simulation, history rows)                            { programName  }
                     both call findProgramName → programName   { nameLookup? }
 
 STAGE 2 — async, the ONLY I/O in the pipeline                    per transaction, one batch
