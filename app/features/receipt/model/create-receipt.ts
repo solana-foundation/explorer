@@ -1,5 +1,9 @@
 import 'server-only';
 
+import { getTokenInfo } from '@entities/token-info/server';
+
+import { Logger } from '@/app/shared/lib/logger';
+
 import { getTx } from '../api/get-tx';
 import { type QueryCluster } from './cluster';
 import { extractReceiptData, type ReceiptResult } from './receipt-data';
@@ -15,5 +19,16 @@ import { extractReceiptData, type ReceiptResult } from './receipt-data';
  */
 export async function createReceipt(signature: string, cluster?: QueryCluster): Promise<ReceiptResult> {
     const data = await getTx(signature, undefined, cluster);
-    return extractReceiptData(data.transaction, data.cluster);
+    return extractReceiptData({
+        cluster: data.cluster,
+        getTokenInfo: mint =>
+            getTokenInfo(mint, data.cluster, undefined, {
+                onError: error =>
+                    Logger.error(new Error('[receipt] Token info lookup failed', { cause: error }), {
+                        cluster: data.cluster,
+                        mint,
+                    }),
+            }),
+        tx: data.transaction,
+    });
 }

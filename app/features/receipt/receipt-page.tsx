@@ -12,7 +12,6 @@ import { Cluster, clusterName, ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
-import useSWR from 'swr';
 
 import { formatUsdValue, PriceStatus, USD_FALLBACK, useTokenPrice } from '@/app/entities/token-price';
 import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
@@ -25,7 +24,8 @@ import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
-import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/receipt-data';
+import { type ReceiptUnavailabilityReason } from './model/receipt-data';
+import { useReceiptResult } from './model/use-receipt-result';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
 import { ReceiptView } from './ui/ReceiptView';
@@ -39,18 +39,11 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & WithAutoRefre
     const fetchDetails = useFetchTransactionDetails();
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
-    const { status: clusterStatus, cluster } = useCluster();
+    const { status: clusterStatus } = useCluster();
     const transactionPath = useClusterPath({ pathname: `/tx/${signature}` });
 
     const tx = details?.data?.transactionWithMeta;
-    const { data: receiptResult, isLoading: isReceiptLoading } = useSWR(
-        tx ? ['receipt', signature, cluster] : null,
-        () => {
-            if (!tx) return undefined;
-            return extractReceiptData(tx, cluster);
-        },
-        { revalidateOnFocus: false },
-    );
+    const { data: receiptResult, isLoading: isReceiptLoading } = useReceiptResult(signature, tx);
     const receipt = receiptResult?.kind === 'ok' ? receiptResult.receipt : undefined;
 
     useEffect(() => {
