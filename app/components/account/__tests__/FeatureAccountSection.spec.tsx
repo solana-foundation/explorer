@@ -74,6 +74,20 @@ describe('FeatureAccountSection', () => {
         expect(refreshAccount).toHaveBeenCalledWith(account.pubkey, 'parsed');
     });
 
+    it('should not refetch the pending feature account while the epoch stays the same', () => {
+        const account = featureAccount({ activated: false });
+        const { rerender } = render(<FeatureAccountSection account={account} />);
+        expect(refreshAccount).not.toHaveBeenCalled();
+
+        vi.mocked(useClusterInfo).mockReturnValue({
+            ...CLUSTER_INFO,
+            epochInfo: { ...CLUSTER_INFO.epochInfo, slotIndex: 21n },
+        } as ReturnType<typeof useClusterInfo>);
+        rerender(<FeatureAccountSection account={account} />);
+
+        expect(refreshAccount).not.toHaveBeenCalled();
+    });
+
     it('should not refetch an already-activated feature account when the epoch rolls over', () => {
         const account = featureAccount({ activated: true });
         const { rerender } = render(<FeatureAccountSection account={account} />);
@@ -93,6 +107,7 @@ describe('FeatureAccountSection', () => {
         render(<FeatureAccountSection account={featureAccount({ activated: false })} />);
 
         expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
+        expect(refreshAccount).not.toHaveBeenCalled();
     });
 });
 

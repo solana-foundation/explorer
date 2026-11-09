@@ -1,5 +1,6 @@
 'use client';
 
+import { Logger } from '@shared/lib/logger';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import { immutable } from 'swr/immutable';
@@ -18,6 +19,7 @@ export type ClusterQueryResult<T> = {
 };
 
 type Options = { enabled?: boolean };
+type QueryOptions = Options & { refreshInterval?: number };
 
 const EPOCH_INFO_REFRESH_MS = 30_000;
 
@@ -35,7 +37,7 @@ export function useEpochInfo(options: Options = {}): EpochInfo | undefined {
 }
 
 function useEpochInfoResult(options: Options = {}): ClusterQueryResult<EpochInfo> {
-    return useClusterQuery('epoch-info', fetchEpochInfo, options, EPOCH_INFO_REFRESH_MS);
+    return useClusterQuery('epoch-info', fetchEpochInfo, { ...options, refreshInterval: EPOCH_INFO_REFRESH_MS });
 }
 
 export function useFirstAvailableBlock(options: Options = {}): bigint | undefined {
@@ -55,18 +57,16 @@ export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
 function useClusterQuery<T>(
     name: string,
     fetcher: (url: string) => Promise<T>,
-    { enabled = true }: Options,
-    refreshInterval?: number,
+    { enabled = true, refreshInterval }: QueryOptions = {},
 ): ClusterQueryResult<T> {
     const { url, status } = useCluster();
     const shouldFetch = enabled && status === ClusterStatus.Connected && Boolean(url);
-    const { data, error, isLoading } = useSWR(
-        shouldFetch ? [name, url] : undefined,
-        () => fetcher(url),
-        // SWR retries a failed fetch without limit by default. The cap limits the requests to an unreachable RPC.
-        // Without a refresh interval the value can't change for a cluster URL, so the immutable middleware pins it.
-        { errorRetryCount: 3, refreshInterval, use: refreshInterval ? [] : [immutable] },
-    );
+    const { data, error, isLoading } = useSWR(shouldFetch ? [name, url] : undefined, () => fetcher(url), {
+        errorRetryCount: 3,
+        onError: err => Logger.error(err, { query: name }),
+        refreshInterval,
+        use: refreshInterval !== undefined ? [] : [immutable],
+    });
 
     return { data, error, isLoading: shouldFetch && isLoading };
 }
