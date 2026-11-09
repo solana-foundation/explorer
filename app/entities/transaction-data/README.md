@@ -119,7 +119,7 @@ Two things are held back from it. The built-in sources below are one. The other 
 (`entities/idl/api/config.ts`), which `useProgramIdlNames` and its server-side counterpart
 `resolveProgramIdlNames` both filter out of the fetch entirely: those programs never reach the IDL source
 whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
-programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins
+programs we *chose* not to read an IDL for. The fetch refuses them structurally. It also covers builtins
 with no built-in source at all (Config, Ed25519, Secp256k1, the loaders other than BPF Loader 2 and the
 upgradeable one), which stay unnamed by design rather than by omission.
 
@@ -181,7 +181,7 @@ around it, while its tooltip shows one row alone, where `Instruction #4` identif
 `InstructionSummary` substitutes `Unknown Instruction` / `Unknown Program` instead, so a summary row never
 needs one.
 
-Within the pipeline, `toSummary` is the only place those sentinels are introduced — everything
+Within the pipeline, `toSummary` is the only place those sentinels are introduced. Everything
 upstream of it returns `undefined`. `getProgramName` in `lib/get-program-name.ts` also defaults to
 `UNKNOWN_PROGRAM_NAME`, but it serves callers outside naming; the pipeline uses its `findProgramName`
 sibling, which returns `undefined`.

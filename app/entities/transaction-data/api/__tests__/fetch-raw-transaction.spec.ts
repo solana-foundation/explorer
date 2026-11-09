@@ -38,7 +38,7 @@ describe('fetchRawTransaction', () => {
         ]);
     });
 
-    it('should reject the request once the caller deadline fires', async () => {
+    it('should reject the request when the caller aborts it', async () => {
         const controller = new AbortController();
         fetchMock.mockImplementationOnce(
             (_url: string, init: RequestInit) =>

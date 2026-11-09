@@ -4,8 +4,7 @@ import { readUint32LE } from '@/app/shared/lib/bytes';
 
 import type { InstructionNameLookup } from './types';
 
-// The RPC's `parsed.type` for each bincode u32 tag, in enum order. These programs ship no generated
-// client, and a name from bytes must read the same as the name the RPC gives the same instruction.
+// The RPC's `parsed.type` for each bincode u32 tag, in enum order.
 const RPC_TYPES_BY_TAG: Partial<Record<string, readonly string[]>> = {
     BPFLoader2111111111111111111111111111111111: ['write', 'finalize'],
     BPFLoaderUpgradeab1e11111111111111111111111: [
