@@ -31,12 +31,13 @@ export type RowTransactionState =
  */
 export function useRowTransaction(signature: string, enabled = true): RowTransactionState {
     const { url } = useCluster();
-    const [retriesUsedUp, setRetriesUsedUp] = useState(false);
+    const key = `history-row-transaction:${url}:${signature}`;
+    const [failedKey, setFailedKey] = useState<string>();
     // A landed transaction never changes, so treat it as immutable: fetch once,
     // then serve from cache on remount (e.g. tab switches) without re-fetching.
     const { data, mutate } = useSWRImmutable(
         // eslint-disable-next-line unicorn/no-null -- SWR uses null key to disable the request
-        enabled ? `history-row-transaction:${url}:${signature}` : null,
+        enabled ? key : null,
         async () => {
             const raw = await queueFor(url)(() => fetchRawTransaction(url, signature));
             // A null tx is a transient miss (a load-balanced node that has not indexed the signature yet),
@@ -48,10 +49,10 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         {
             // SWR sets `isValidating` false and keeps `error` between attempts, so only the retry handler
             // can tell a wait from the end of the retries.
-            onErrorRetry: (error, _key, config, revalidate, opts) => {
+            onErrorRetry: (error, errorKey, config, revalidate, opts) => {
                 if (opts.retryCount > RETRY_COUNT) {
                     Logger.error(error, { signature, url });
-                    setRetriesUsedUp(true);
+                    setFailedKey(errorKey);
                     return;
                 }
                 setTimeout(revalidate, retryDelay(opts.retryCount, config.errorRetryInterval), opts);
@@ -61,10 +62,10 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
     );
 
     if (data !== undefined) return { ...data, status: 'loaded' };
-    if (retriesUsedUp) {
+    if (failedKey === key) {
         return {
             retry: () => {
-                setRetriesUsedUp(false);
+                setFailedKey(undefined);
                 void mutate();
             },
             status: 'failed',

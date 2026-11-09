@@ -125,10 +125,23 @@ describe('useRowTransaction', () => {
         await waitForHook(() => expect(result.current.status).toBe('loaded'));
     });
 
+    it('should show loading, not failed, after a failed row moves to another cluster', async () => {
+        mocks.fetchRawTransaction.mockRejectedValue(new Error('HTTP error (429)'));
+
+        const { rerender, result } = renderHook(() => useRowTransaction('sig'), { wrapper });
+        await waitForHook(() => expect(result.current.status).toBe('failed'));
+        mocks.fetchRawTransaction.mockReturnValue(new Promise(() => {}));
+        mocks.useCluster.mockReturnValue({ url: 'http://localhost:8899' });
+        rerender();
+
+        expect(result.current).toEqual({ status: 'loading' });
+    });
+
     it('should share one queue per cluster', async () => {
         mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
         mocks.getCompiledInstructionSummaries.mockReturnValue(SUMMARIES);
 
+        // The module keeps each cluster's queue across tests, so no other test may use these two URLs.
         mocks.useCluster.mockReturnValue({ url: 'https://api.mainnet-beta.solana.com' });
         const { result: mainnetRows, unmount } = renderHook(
             () => [useRowTransaction('sig-1').status, useRowTransaction('sig-2').status],
