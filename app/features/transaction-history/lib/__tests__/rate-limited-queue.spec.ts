@@ -85,6 +85,21 @@ describe('createRateLimitedQueue', () => {
         expect(starts.relative()).toEqual([0, WINDOW_MS, WINDOW_MS]);
     });
 
+    it('should skip the retry of a rate-limited task whose shouldRun returns false during the pause', async () => {
+        const queue = createRateLimitedQueue({ budget: 10, rateLimitRetries: 1, windowMs: WINDOW_MS });
+        let shouldRun = true;
+        const limited = vi.fn(() => Promise.reject(rateLimited()));
+
+        const result = queue(limited, () => shouldRun);
+        const assertion = expect(result).rejects.toThrow(TaskSkippedError);
+        await vi.advanceTimersByTimeAsync(WINDOW_MS / 2);
+        shouldRun = false;
+        await vi.runAllTimersAsync();
+
+        await assertion;
+        expect(limited).toHaveBeenCalledOnce();
+    });
+
     it('should reject with the rate-limit error once its retries run out', async () => {
         const queue = createRateLimitedQueue({ budget: 10, rateLimitRetries: 1, windowMs: WINDOW_MS });
         const alwaysLimited = vi.fn(() => Promise.reject(rateLimited()));

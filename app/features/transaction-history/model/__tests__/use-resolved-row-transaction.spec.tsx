@@ -98,7 +98,7 @@ describe('useResolvedRowTransaction', () => {
 
         const { result } = renderHook(() => useResolvedRowTransaction('sig'));
 
-        expect(summariesOf(result.current)).toEqual([{ name: 'Transfer', programName: 'System Program' }]);
+        expect(result.current).toEqual(loaded([{ name: 'Transfer', programName: 'System Program' }]));
     });
 
     it('should pass the looked-up programs to the resolver hook', () => {

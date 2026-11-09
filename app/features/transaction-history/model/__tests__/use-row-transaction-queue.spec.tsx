@@ -1,4 +1,4 @@
-import { render, renderHook } from '@testing-library/react';
+import { act, render, renderHook } from '@testing-library/react';
 import { StrictMode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,15 +19,50 @@ vi.mock('@entities/transaction-data', () => ({
     getCompiledInstructionSummaries: mocks.getCompiledInstructionSummaries,
 }));
 vi.mock('@providers/cluster', () => ({ useCluster: mocks.useCluster }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: mocks.logWarning } }));
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { warn: mocks.logWarning } }));
 
 const MESSAGE_BYTES = new Uint8Array([1, 2, 3]);
 
 afterEach(() => {
     vi.resetAllMocks();
+    vi.useRealTimers();
 });
 
 describe('useRowTransaction with the rate-limited queue', () => {
+    it('should start at most 12 row fetches in 10 s', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'Date'] });
+        setClusterUrl('https://budget.queue.test');
+        mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
+        const Swr = swrWrapper({ dedupingInterval: 0 });
+        const signatures = Array.from({ length: 13 }, (_, index) => `row-${index}`);
+
+        render(
+            <Swr>
+                {signatures.map(signature => (
+                    <Row key={signature} signature={signature} statuses={[]} />
+                ))}
+            </Swr>,
+        );
+        await act(() => vi.advanceTimersByTimeAsync(9_999));
+        expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(12);
+        await act(() => vi.advanceTimersByTimeAsync(1));
+
+        expect(mocks.fetchRawTransaction).toHaveBeenCalledTimes(13);
+    });
+
+    it('should fetch a row that mounts offscreen and then becomes visible', async () => {
+        setClusterUrl('https://offscreen.queue.test');
+        mocks.fetchRawTransaction.mockResolvedValue({ messageBytes: MESSAGE_BYTES });
+
+        const { rerender, result } = renderHook(({ enabled }) => useRowTransaction('offscreen', enabled), {
+            initialProps: { enabled: false },
+            wrapper: swrWrapper({ dedupingInterval: 0 }),
+        });
+        rerender({ enabled: true });
+
+        await waitForHook(() => expect(result.current.status).toBe('loaded'));
+    });
+
     it('should not fetch a row that unmounts while it waits in the queue', async () => {
         setClusterUrl('https://unmount.queue.test');
         const releaseBlocker = blockFetchOf('blocker');
