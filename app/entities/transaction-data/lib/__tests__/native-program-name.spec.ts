@@ -42,6 +42,7 @@ describe('resolveNativeProgramInstructionName', () => {
         ['a Vote tag past the last instruction', VOTE_PROGRAM, [20, 0, 0, 0]],
         ['a loader tag past the last instruction', UPGRADEABLE_LOADER, [8, 0, 0, 0]],
         ['a BPF Loader 2 tag past the last instruction', BPF_LOADER_2, [2, 0, 0, 0]],
+        ['tag 256, whose low byte is 0', VOTE_PROGRAM, [0, 1, 0, 0]],
         ['data shorter than a tag', VOTE_PROGRAM, [14, 0, 0]],
         ['another program', '11111111111111111111111111111111', [2, 0, 0, 0]],
     ])('should return undefined for %s', (_label, programId, bytes) => {
