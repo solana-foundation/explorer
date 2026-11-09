@@ -17,7 +17,7 @@ import { useClusterPath } from '@/app/utils/url';
 import type { RowTransactionState } from '../model/use-row-transaction';
 import { CompactKeyValue } from './CompactKeyValue';
 import { ProgramsBlock } from './InstructionList';
-import { RetryButton } from './RetryButton';
+import { SizeRetryButton } from './RawDataSizeField';
 
 export function TransactionDetailsDrawer({
     open,
@@ -118,7 +118,7 @@ function SizeField({ state, filename }: { state: RowTransactionState; filename: 
     if (state.status === 'failed') {
         return (
             <CompactKeyValue label="Size">
-                <RetryButton label="Retry loading size" onRetry={state.retry} />
+                <SizeRetryButton onRetry={state.retry} />
             </CompactKeyValue>
         );
     }

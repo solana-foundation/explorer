@@ -17,7 +17,7 @@ export function RawDataSizeField({ state, filename }: { state: RowTransactionSta
         case 'loading':
             return <Skeleton className="tx-size-skeleton my-1 h-3.5 w-16" />;
         case 'failed':
-            return <RetryButton label="Retry loading size" onRetry={state.retry} className={ROW_BASELINE} />;
+            return <SizeRetryButton onRetry={state.retry} className={ROW_BASELINE} />;
         case 'loaded':
             return (
                 <Popover>
@@ -35,4 +35,8 @@ export function RawDataSizeField({ state, filename }: { state: RowTransactionSta
         default:
             return state satisfies never;
     }
+}
+
+export function SizeRetryButton({ onRetry, className }: { onRetry: () => void; className?: string }) {
+    return <RetryButton label="Retry loading size" onRetry={onRetry} className={className} />;
 }
