@@ -17,6 +17,7 @@ import { useClusterPath } from '@/app/utils/url';
 import type { RowTransactionState } from '../model/use-row-transaction';
 import { CompactKeyValue } from './CompactKeyValue';
 import { ProgramsBlock } from './InstructionList';
+import { RetryButton } from './RetryButton';
 
 export function TransactionDetailsDrawer({
     open,
@@ -39,8 +40,6 @@ export function TransactionDetailsDrawer({
 }) {
     const txPath = useClusterPath({ pathname: `/tx/${signature}` });
     const blockPath = useClusterPath({ pathname: `/block/${slot}` });
-
-    const messageBytes = rowTransaction.status === 'loaded' ? rowTransaction.messageBytes : undefined;
 
     const header = (
         <Drawer.Header>
@@ -109,17 +108,30 @@ export function TransactionDetailsDrawer({
                         <ProgramsBlock state={rowTransaction} />
                     </div>
                 </CompactKeyValue>
-                {/* The raw-data field carries its own "Size" caption, so this row has no label. */}
-                <div className="flex flex-col gap-2 pb-1 pt-2 text-white">
-                    <RawDataField
-                        data={messageBytes}
-                        loading={rowTransaction.status === 'loading'}
-                        filename={signature}
-                        variant="embedded"
-                        bytesPrefix="Size "
-                    />
-                </div>
+                <SizeField state={rowTransaction} filename={signature} />
             </div>
         </Drawer>
+    );
+}
+
+function SizeField({ state, filename }: { state: RowTransactionState; filename: string }) {
+    if (state.status === 'failed') {
+        return (
+            <CompactKeyValue label="Size">
+                <RetryButton label="Retry loading size" onRetry={state.retry} />
+            </CompactKeyValue>
+        );
+    }
+    // The raw-data field carries its own "Size" caption, so this row has no label.
+    return (
+        <div className="flex flex-col gap-2 pb-1 pt-2 text-white">
+            <RawDataField
+                data={state.status === 'loaded' ? state.messageBytes : undefined}
+                loading={state.status === 'loading'}
+                filename={filename}
+                variant="embedded"
+                bytesPrefix="Size "
+            />
+        </div>
     );
 }

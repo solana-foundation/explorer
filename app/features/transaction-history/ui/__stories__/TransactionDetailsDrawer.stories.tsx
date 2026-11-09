@@ -81,14 +81,16 @@ export const Unavailable: Story = {
     args: { blockTime: null, rowTransaction: { messageBytes: MESSAGE_BYTES, status: 'loaded', summaries: [] } },
 };
 
-// The instruction fetch failed, so Programs offers a retry instead of a skeleton.
-const retryPrograms = fn();
+// The row fetch failed, so Programs and Size each offer a retry.
+const retryRow = fn();
 export const ProgramsFailed: Story = {
-    args: { rowTransaction: { retry: retryPrograms, status: 'failed' } },
+    args: { rowTransaction: { retry: retryRow, status: 'failed' } },
     play: async () => {
         // The drawer renders in a portal outside the story canvas.
         const body = within(document.body);
         await userEvent.click(await body.findByRole('button', { name: 'Retry loading programs' }));
-        await expect(retryPrograms).toHaveBeenCalled();
+        await userEvent.click(await body.findByRole('button', { name: 'Retry loading size' }));
+        await expect(retryRow).toHaveBeenCalledTimes(2);
+        await expect(body.queryByText('No data')).toBeNull();
     },
 };
