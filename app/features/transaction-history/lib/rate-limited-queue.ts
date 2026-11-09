@@ -2,7 +2,14 @@ import { isSolanaError, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR } from '@solana/
 
 import { invariant } from '@/app/shared/lib/invariant';
 
-export type RateLimitedQueue = <T>(task: () => Promise<T>) => Promise<T>;
+export type RateLimitedQueue = <T>(task: () => Promise<T>, shouldRun?: () => boolean) => Promise<T>;
+
+export class TaskSkippedError extends Error {
+    constructor() {
+        super('skipped a task whose shouldRun returned false');
+        this.name = 'TaskSkippedError';
+    }
+}
 
 const TOO_MANY_REQUESTS = 429;
 
@@ -33,8 +40,9 @@ export function createRateLimitedQueue({
     let pausedUntil = 0;
     let tail: Promise<unknown> = Promise.resolve();
 
-    async function waitForSlot(): Promise<void> {
+    async function waitForSlot(shouldRun: () => boolean): Promise<void> {
         for (;;) {
+            if (!shouldRun()) throw new TaskSkippedError();
             const now = Date.now();
             if (now < pausedUntil) {
                 await sleep(pausedUntil - now);
@@ -49,9 +57,9 @@ export function createRateLimitedQueue({
         }
     }
 
-    async function run<T>(task: () => Promise<T>): Promise<T> {
+    async function run<T>(task: () => Promise<T>, shouldRun: () => boolean): Promise<T> {
         for (let retries = 0; ; retries++) {
-            await waitForSlot();
+            await waitForSlot(shouldRun);
             try {
                 return await task();
             } catch (error) {
@@ -62,8 +70,8 @@ export function createRateLimitedQueue({
         }
     }
 
-    return task => {
-        const result = tail.then(() => run(task));
+    return (task, shouldRun = () => true) => {
+        const result = tail.then(() => run(task, shouldRun));
         tail = result.catch(() => undefined);
         return result;
     };

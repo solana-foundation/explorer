@@ -23,8 +23,12 @@ vi.mock('@entities/transaction-data', () => ({
 vi.mock('@providers/cluster', () => ({ useCluster: mocks.useCluster }));
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: mocks.logError, warn: mocks.logWarning } }));
 // The real queue spends its budget across tests in this file and would pause the later ones.
-vi.mock('../../lib/rate-limited-queue', () => ({ createRateLimitedQueue: mocks.createRateLimitedQueue }));
+vi.mock('../../lib/rate-limited-queue', async importOriginal => ({
+    ...(await importOriginal<typeof import('../../lib/rate-limited-queue')>()),
+    createRateLimitedQueue: mocks.createRateLimitedQueue,
+}));
 
+import { TaskSkippedError } from '../../lib/rate-limited-queue';
 import { type RowTransactionState, useRowTransaction } from '../use-row-transaction';
 
 const wrapper = swrWrapper({ ...FAST_RETRY, dedupingInterval: 0 });
@@ -98,6 +102,18 @@ describe('useRowTransaction', () => {
         await settleRetries();
 
         expect(mocks.fetchRawTransaction).not.toHaveBeenCalled();
+    });
+
+    it('should not retry or report a fetch that the queue skips', async () => {
+        mocks.queue.mockRejectedValue(new TaskSkippedError());
+
+        const { result } = renderHook(() => useRowTransaction('sig'), { wrapper });
+        await waitForHook(() => expect(mocks.queue).toHaveBeenCalledOnce());
+        await settleRetries();
+
+        expect(mocks.queue).toHaveBeenCalledOnce();
+        expect(mocks.logWarning).not.toHaveBeenCalled();
+        expect(result.current).toEqual({ status: 'loading' });
     });
 
     it('should log one warning for Sentry, after the last automatic retry', async () => {

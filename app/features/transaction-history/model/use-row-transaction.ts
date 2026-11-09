@@ -5,12 +5,12 @@ import {
 } from '@entities/transaction-data';
 import { useCluster } from '@providers/cluster';
 import type { ReadonlyUint8Array } from '@solana/kit';
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { createRateLimitedQueue, type RateLimitedQueue } from '../lib/rate-limited-queue';
+import { createRateLimitedQueue, type RateLimitedQueue, TaskSkippedError } from '../lib/rate-limited-queue';
 
 // The measured limit of the mainnet explorer-api endpoint is 15 getTransaction calls per client in a rolling 10 s.
 // The measured limit is lower than the 40 in the Solana cluster docs.
@@ -36,13 +36,17 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
     const { url } = useCluster();
     const key = `history-row-transaction:${url}:${signature}`;
     const [failedKey, setFailedKey] = useState<string>();
+    useEnabledRowKey(key, enabled);
     // A landed transaction never changes, so treat it as immutable: fetch once,
     // then serve from cache on remount (e.g. tab switches) without re-fetching.
     const { data, mutate } = useSWRImmutable(
         // eslint-disable-next-line unicorn/no-null -- SWR uses null key to disable the request
         enabled ? key : null,
         async () => {
-            const raw = await queueFor(url)(() => fetchRawTransaction(url, signature));
+            const raw = await queueFor(url)(
+                () => fetchRawTransaction(url, signature),
+                () => enabledRowKeys.has(key),
+            );
             // A null tx is a transient miss (a load-balanced node that has not indexed the signature yet),
             // not "no instructions". Under useSWRImmutable a returned value is a permanent success, so the
             // fetcher throws and SWR retries.
@@ -53,6 +57,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
             // SWR sets `isValidating` false and keeps `error` between attempts, so only the retry handler
             // can tell a wait from the end of the retries.
             onErrorRetry: (error, errorKey, config, revalidate, opts) => {
+                if (error instanceof TaskSkippedError) return;
                 if (opts.retryCount > RETRY_COUNT) {
                     Logger.warn('[transaction-history] row fetch failed after its retries', {
                         error,
@@ -81,6 +86,18 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
         };
     }
     return { status: 'loading' };
+}
+
+const enabledRowKeys = new Set<string>();
+
+function useEnabledRowKey(key: string, enabled: boolean): void {
+    useLayoutEffect(() => {
+        if (!enabled) return;
+        enabledRowKeys.add(key);
+        return () => {
+            enabledRowKeys.delete(key);
+        };
+    }, [key, enabled]);
 }
 
 // The same bytes fail to decode on every attempt, so a decode error is reported and the fetch is not retried.

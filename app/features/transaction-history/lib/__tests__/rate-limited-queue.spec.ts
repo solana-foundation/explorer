@@ -1,7 +1,7 @@
 import { SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, SolanaError } from '@solana/kit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createRateLimitedQueue } from '../rate-limited-queue';
+import { createRateLimitedQueue, TaskSkippedError } from '../rate-limited-queue';
 
 const WINDOW_MS = 1000;
 
@@ -33,6 +33,39 @@ describe('createRateLimitedQueue', () => {
         releaseFirst();
         await secondDone;
         expect(second).toHaveBeenCalledOnce();
+    });
+
+    it('should skip a task whose shouldRun returns false when its turn comes, without spending budget', async () => {
+        const queue = createRateLimitedQueue({ budget: 2, rateLimitRetries: 0, windowMs: WINDOW_MS });
+        const starts = startTimes();
+        const skippedTask = vi.fn(starts.record);
+
+        const first = queue(starts.record);
+        const skipped = queue(skippedTask, () => false);
+        const assertion = expect(skipped).rejects.toThrow(TaskSkippedError);
+        const third = queue(starts.record);
+        await vi.runAllTimersAsync();
+
+        await assertion;
+        await Promise.all([first, third]);
+        expect(skippedTask).not.toHaveBeenCalled();
+        expect(starts.relative()).toEqual([0, 0]);
+    });
+
+    it('should skip a task whose shouldRun returns false while it waits for a slot', async () => {
+        const queue = createRateLimitedQueue({ budget: 1, rateLimitRetries: 0, windowMs: WINDOW_MS });
+        let shouldRun = true;
+        const waiting = vi.fn(async () => {});
+
+        await queue(async () => {});
+        const skipped = queue(waiting, () => shouldRun);
+        const assertion = expect(skipped).rejects.toThrow(TaskSkippedError);
+        await vi.advanceTimersByTimeAsync(WINDOW_MS / 2);
+        shouldRun = false;
+        await vi.runAllTimersAsync();
+
+        await assertion;
+        expect(waiting).not.toHaveBeenCalled();
     });
 
     it('should pause every task for a window after a rate-limited call, then run that task again', async () => {
