@@ -30,7 +30,7 @@ export type RowTransactionState =
 
 /**
  * The message bytes and per-instruction summaries for one history row, from a single base64
- * `getTransaction`. Fetches run through one rate-limited queue for every row, and only when `enabled` (so
+ * `getTransaction`. Fetches run through one rate-limited queue per cluster, and only when `enabled` (so
  * callers can gate on row visibility).
  */
 export function useRowTransaction(signature: string, enabled = true): RowTransactionState {
@@ -70,6 +70,7 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
                     setFailedKey(errorKey);
                     return;
                 }
+                // SWR's default `errorRetryInterval` is 5 s, or 10 s on a slow connection.
                 setTimeout(revalidate, config.errorRetryInterval, opts);
             },
             shouldRetryOnError: true,
