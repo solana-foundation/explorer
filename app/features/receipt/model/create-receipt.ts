@@ -36,5 +36,5 @@ function reportTokenInfoError(error: unknown, context: { cluster: Cluster; mint:
         Logger.warn(message, { error, ...context });
         return;
     }
-    Logger.error(new Error(message, { cause: error }), context);
+    Logger.error(new Error(message, { cause: error }), { sentry: true, sentryExtras: context });
 }

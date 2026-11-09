@@ -487,7 +487,7 @@ describe('createReceipt', () => {
 
             const [mint] = vi.mocked(getTokenInfo).mock.calls[0];
             expect(logWarn).toHaveBeenCalledWith('[receipt] Token info lookup failed', {
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Devnet,
                 error: lookupError,
                 mint,
             });
@@ -505,7 +505,7 @@ describe('createReceipt', () => {
             const [mint] = vi.mocked(getTokenInfo).mock.calls[0];
             expect(logError).toHaveBeenCalledWith(
                 expect.objectContaining({ cause: lookupError, message: '[receipt] Token info lookup failed' }),
-                { cluster: Cluster.MainnetBeta, mint },
+                { sentry: true, sentryExtras: { cluster: Cluster.Devnet, mint } },
             );
             expect(logWarn).not.toHaveBeenCalled();
         });
@@ -803,7 +803,7 @@ function listedToken(symbol: string, logoURI: string | null = null): TokenInfo {
 
 function mockTokenInfoFailure(lookupError: Error): void {
     vi.mocked(getTx).mockResolvedValueOnce({
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Devnet,
         transaction: mockUsdcTransferTransaction,
     });
     vi.mocked(getTokenInfo).mockImplementationOnce(async (_mint, _cluster, _genesisHash, config) => {
