@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 
 import { FeatureAccountSection } from '@/app/components/account/FeatureAccountSection';
 import type { Account } from '@/app/providers/accounts';
-import { useClusterInfo } from '@/app/providers/cluster';
+import { useCluster, useClusterInfo } from '@/app/providers/cluster';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@/app/utils/parseFeatureAccount';
 
@@ -41,6 +41,7 @@ vi.mock('@components/common/Address', () => ({
 describe('FeatureAccountSection', () => {
     beforeEach(() => {
         refreshAccount.mockClear();
+        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Devnet } as ReturnType<typeof useCluster>);
         vi.mocked(useClusterInfo).mockReturnValue(CLUSTER_INFO as ReturnType<typeof useClusterInfo>);
         vi.mocked(useSearchParams).mockReturnValue(
             new URLSearchParams({ cluster: clusterSlug(Cluster.Devnet) }) as ReturnType<typeof useSearchParams>,
@@ -84,6 +85,14 @@ describe('FeatureAccountSection', () => {
         rerender(<FeatureAccountSection account={account} />);
 
         expect(refreshAccount).not.toHaveBeenCalled();
+    });
+
+    it('should not poll cluster info on a custom cluster', () => {
+        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Custom } as ReturnType<typeof useCluster>);
+
+        render(<FeatureAccountSection account={featureAccount({ activated: false })} />);
+
+        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
     });
 });
 
