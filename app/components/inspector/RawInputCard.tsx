@@ -8,7 +8,6 @@ import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/pars
 import { bridgeV1MessageBytes, isV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
 
 import { BaseInspectorInput } from './BaseInspectorInput';
-import { ENCODING_PARAM, type ExampleEncoding, parseExampleEncoding } from './inspector-examples';
 import { InspectorInstructions } from './InspectorInstructions';
 import type { InspectorData, TransactionData } from './InspectorPage';
 
@@ -61,20 +60,6 @@ export function RawInput({
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
     const router = useRouter();
-
-    // One encoding for every tab that offers the choice, so switching it in one tab switches the others.
-    const encoding = parseExampleEncoding(currentSearchParams?.get(ENCODING_PARAM));
-    const setEncoding = React.useCallback(
-        (next: ExampleEncoding) => {
-            const nextParams = new URLSearchParams(currentSearchParams?.toString());
-            // base64 is the default, so it leaves the URL clean.
-            if (next === 'base64') nextParams.delete(ENCODING_PARAM);
-            else nextParams.set(ENCODING_PARAM, next);
-            const queryString = nextParams.toString();
-            router.replace(`${currentPathname}${queryString ? `?${queryString}` : ''}`, { scroll: false });
-        },
-        [currentPathname, currentSearchParams, router],
-    );
 
     const onInput = React.useCallback(() => {
         const input = rawInput.current?.value;
@@ -191,9 +176,8 @@ export function RawInput({
                 placeholder={placeholder}
                 name="tx-inspector-input"
             />
-            {/* pb-9 plus the layout's own gap leaves 60px above the footer. */}
             <section className="flex flex-col pb-9">
-                <InspectorInstructions encoding={encoding} onEncodingChange={setEncoding} />
+                <InspectorInstructions />
             </section>
         </>
     );

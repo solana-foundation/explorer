@@ -46,8 +46,12 @@ describe('BaseCodeBlock', () => {
         expect(screen.getByRole('status')).toHaveTextContent('Copied');
     });
 
-    it('should show rendered markup in place of the plain code', () => {
-        render(<BaseCodeBlock code={CODE} rendered={<mark>highlighted</mark>} />);
+    it('should show child markup in place of the plain code', () => {
+        render(
+            <BaseCodeBlock code={CODE}>
+                <mark>highlighted</mark>
+            </BaseCodeBlock>,
+        );
 
         expect(screen.getByText('highlighted', { selector: 'mark' })).toBeInTheDocument();
         expect(screen.queryByText(CODE)).not.toBeInTheDocument();

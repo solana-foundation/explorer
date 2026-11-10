@@ -158,6 +158,7 @@ const buttonVariants = cva([], {
             ui: 'dashkit',
             variant: 'danger',
         },
+        { active: true, class: '!border-accent', ui: 'tw' },
         // Toggle-on ring; only meaningful when paired with `variant="black"` in `btn-group-toggle`.
         { active: true, class: 'shadow-[0_0_0_0.15rem_#33a382]', ui: 'dashkit' },
     ],

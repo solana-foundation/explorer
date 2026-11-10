@@ -66,22 +66,20 @@ export interface BaseCodeBlockProps
         Omit<VariantProps<typeof preVariants>, 'wrap' | 'variant'>,
         VariantProps<typeof rootVariants> {
     caption?: string;
+    children?: React.ReactNode;
     code: string;
     copyState?: CopyState;
-    /** Presence of a handler is what renders the copy control. */
     onCopy?: () => void;
-    /** Markup shown in place of `code`, e.g. highlighted tokens; `code` stays the copied text. */
-    rendered?: React.ReactNode;
     wrap?: 'nowrap' | 'wrap';
 }
 
 export function BaseCodeBlock({
     caption,
+    children,
     className,
     code,
     copyState = 'copy',
     onCopy,
-    rendered,
     variant,
     wrap,
     ...props
@@ -120,7 +118,7 @@ export function BaseCodeBlock({
 
             <pre className={preVariants({ variant, wrap })}>
                 <code className="bg-transparent p-0 font-mono text-xs leading-relaxed text-neutral-200">
-                    {rendered ?? code}
+                    {children ?? code}
                 </code>
             </pre>
 

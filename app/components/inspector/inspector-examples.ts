@@ -32,22 +32,30 @@ export const EXAMPLE_CLI_FOCUS = '--dump-transaction-message';
 /** The line that prints the message in each encoding; the Rust instruction chip shows the same line. */
 export const RUST_PRINT_LINE: Record<ExampleEncoding, string> = {
     base58: 'println!("{}", bs58::encode(transaction.message_data()).into_string());',
-    base64: 'println!("{}", base64::encode(&transaction.message_data()));',
+    base64: 'println!("{}", STANDARD.encode(transaction.message_data()));',
 };
 /** The crate the print line needs. */
 export const RUST_ENCODING_CRATE: Record<ExampleEncoding, string> = { base58: 'bs58', base64: 'base64' };
 
+// `base64`'s free `encode` was removed in 0.22, so the print line goes through the `Engine` trait.
+const RUST_ENCODING_USE: Record<ExampleEncoding, string> = {
+    base58: '',
+    base64: 'use base64::{engine::general_purpose::STANDARD, Engine as _};\n',
+};
+
 export function rustExample(encoding: ExampleEncoding): CodeSample {
     const focus = RUST_PRINT_LINE[encoding];
     return {
-        code: `use solana_sdk::{hash::Hash, message::Message, pubkey, system_instruction, transaction::Transaction};
+        // `transfer` moved out of `solana_sdk` into `solana-system-interface` by solana-sdk 5.0.
+        code: `${RUST_ENCODING_USE[encoding]}use solana_sdk::{hash::Hash, message::Message, pubkey, transaction::Transaction};
+use solana_system_interface::instruction::transfer;
 use std::str::FromStr;
 
 fn main() {
     let from = pubkey!("${FROM}");
     let to = pubkey!("${TO}");
     let blockhash = Hash::from_str("${BLOCKHASH}").unwrap();
-    let instruction = system_instruction::transfer(&from, &to, 100_000_000);
+    let instruction = transfer(&from, &to, 100_000_000);
     let message = Message::new_with_blockhash(&[instruction], Some(&from), &blockhash);
     let transaction = Transaction::new_unsigned(message);
     ${focus}

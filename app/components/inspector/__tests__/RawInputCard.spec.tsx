@@ -89,10 +89,7 @@ describe('RawInput', () => {
             kitExample('base64').focus,
             EXAMPLE_SQUADS_VAULT_TRANSACTION,
         ]) {
-            // Highlighting splits the marked text into spans, so match on the mark's whole text content.
-            expect(
-                screen.getByText((_content, element) => element?.tagName === 'MARK' && element.textContent === focus),
-            ).toBeInTheDocument();
+            expect(screen.getByText(focus, { selector: 'mark' })).toBeInTheDocument();
         }
     });
 
@@ -100,9 +97,7 @@ describe('RawInput', () => {
     test('should print the Rust format placeholder in the instruction', () => {
         render(<RawInput setTransactionData={vi.fn()} />);
 
-        expect(
-            screen.getByText('println!("{}", base64::encode(&transaction.message_data()));', { selector: 'code' }),
-        ).toBeInTheDocument();
+        expect(screen.getByText(RUST_PRINT_LINE.base64, { selector: 'code' })).toBeInTheDocument();
     });
 
     test('should switch the instruction panel when a tab is clicked', () => {

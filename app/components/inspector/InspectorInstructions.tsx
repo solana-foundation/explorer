@@ -1,12 +1,13 @@
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { cn } from '@/app/components/shared/utils';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 import { TabsContent } from '@/app/shared/ui/Tabs';
 
 import { BaseCodeExample } from './BaseCodeExample';
 import {
+    ENCODING_PARAM,
     EXAMPLE_CLI_COMMAND,
     EXAMPLE_CLI_FOCUS,
     EXAMPLE_ENCODINGS,
@@ -14,6 +15,7 @@ import {
     EXAMPLE_SQUADS_VAULT_TRANSACTION,
     type ExampleEncoding,
     kitExample,
+    parseExampleEncoding,
     RUST_ENCODING_CRATE,
     RUST_PRINT_LINE,
     rustExample,
@@ -30,13 +32,25 @@ const INLINE_CODE =
     'inline-block max-w-full rounded bg-heavy-metal-800 my-0.5 px-1.5 py-px align-middle text-neutral-100 [overflow-wrap:anywhere]';
 
 /** The "How to get the input" tabs below the inspector field: one worked example per source. */
-export function InspectorInstructions({
-    encoding,
-    onEncodingChange,
-}: {
-    encoding: ExampleEncoding;
-    onEncodingChange: (encoding: ExampleEncoding) => void;
-}) {
+export function InspectorInstructions() {
+    const currentPathname = usePathname();
+    const currentSearchParams = useSearchParams();
+    const router = useRouter();
+
+    // One encoding for every tab that offers the choice, so switching it in one tab switches the others.
+    const encoding = parseExampleEncoding(currentSearchParams?.get(ENCODING_PARAM));
+    const onEncodingChange = React.useCallback(
+        (next: ExampleEncoding) => {
+            const nextParams = new URLSearchParams(currentSearchParams?.toString());
+            // base64 is the default, so it leaves the URL clean.
+            if (next === 'base64') nextParams.delete(ENCODING_PARAM);
+            else nextParams.set(ENCODING_PARAM, next);
+            const queryString = nextParams.toString();
+            router.replace(`${currentPathname}${queryString ? `?${queryString}` : ''}`, { scroll: false });
+        },
+        [currentPathname, currentSearchParams, router],
+    );
+
     const [activeTab, setActiveTab] = React.useState('cli');
     const rust = rustExample(encoding);
     const kit = kitExample(encoding);
@@ -79,8 +93,7 @@ export function InspectorInstructions({
                     encodingChoice={<EncodingChoice encoding={encoding} onEncodingChange={onEncodingChange} />}
                     instruction={
                         <SnippetGroup
-                            // `@solana/web3.js` 2.x was renamed to `@solana/kit` with the same API, so one group covers both.
-                            title={['@solana/kit', '@solana/web3.js 2.0.0 and later']}
+                            title={['@solana/kit', '@solana/web3.js 2.x']}
                             rows={[
                                 ['Transaction message:', ts.message],
                                 ['Wire transaction:', ts.wire],
@@ -170,8 +183,8 @@ function EncodingChoice({
                     key={value}
                     variant={value === encoding ? 'default' : 'outline'}
                     size="compact"
+                    active={value === encoding}
                     aria-pressed={value === encoding}
-                    className={cn(value === encoding && '!border-accent')}
                     onClick={() => onEncodingChange(value)}
                 >
                     {value}
@@ -190,7 +203,6 @@ function TabBody({
     encodingChoice?: React.ReactNode;
     instruction: React.ReactNode;
     example: React.ReactNode;
-    /** A second case for the same tab, below the example so the instruction stays next to its own example. */
     note?: React.ReactNode;
 }) {
     return (
