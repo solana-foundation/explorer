@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -8,8 +9,8 @@ import { fetchTokenInfoFromApi, fetchTokenInfosFromApi } from '../fetch-token-in
 
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
-const USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const WSOL = 'So11111111111111111111111111111111111111112';
+const MINT_A = gen.address();
+const MINT_B = gen.address();
 
 describe('fetchTokenInfosFromApi', () => {
     beforeEach(() => {
@@ -21,13 +22,13 @@ describe('fetchTokenInfosFromApi', () => {
     });
 
     it('should post the addresses to the token info route and resolve its content', async () => {
-        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(USDC), tokenInfo(WSOL)] }));
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(MINT_A), tokenInfo(MINT_B)] }));
 
         const tokens = await fetchTokenInfosFromApi(request({ includeOnChainFallback: true }));
 
-        expect(tokens).toEqual([tokenInfo(USDC), tokenInfo(WSOL)]);
+        expect(tokens).toEqual([tokenInfo(MINT_A), tokenInfo(MINT_B)]);
         expect(sentRequest()).toEqual({
-            body: { addresses: [USDC, WSOL], cluster: Cluster.MainnetBeta, includeOnChainFallback: true },
+            body: { addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta, includeOnChainFallback: true },
             method: 'POST',
             url: '/api/token-info',
         });
@@ -39,7 +40,7 @@ describe('fetchTokenInfosFromApi', () => {
         await fetchTokenInfosFromApi(request({ cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET }));
 
         expect(sentRequest().body).toEqual({
-            addresses: [USDC, WSOL],
+            addresses: [MINT_A, MINT_B],
             cluster: Cluster.Custom,
             genesisHash: GENESIS_HASHES.MAINNET,
             includeOnChainFallback: false,
@@ -68,7 +69,7 @@ describe('fetchTokenInfosFromApi', () => {
         ['an object with string content', { content: 'not a list' }],
         ['a number', 42],
         ['null', null],
-        ['a bare array', [tokenInfo(USDC)]],
+        ['a bare array', [tokenInfo(MINT_A)]],
     ])('should resolve undefined for a 200 body that is %s', async (_, body) => {
         vi.mocked(fetch).mockResolvedValue(Response.json(body));
 
@@ -113,13 +114,13 @@ describe('fetchTokenInfoFromApi', () => {
     });
 
     it('should request one mint without the on-chain fallback and resolve its token', async () => {
-        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(USDC)] }));
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(MINT_A)] }));
 
-        const token = await fetchTokenInfoFromApi(new PublicKey(USDC), Cluster.MainnetBeta);
+        const token = await fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.MainnetBeta);
 
-        expect(token).toEqual(tokenInfo(USDC));
+        expect(token).toEqual(tokenInfo(MINT_A));
         expect(sentRequest().body).toEqual({
-            addresses: [USDC],
+            addresses: [MINT_A],
             cluster: Cluster.MainnetBeta,
             includeOnChainFallback: false,
         });
@@ -128,7 +129,7 @@ describe('fetchTokenInfoFromApi', () => {
     it('should resolve undefined when the route does not list the mint', async () => {
         vi.mocked(fetch).mockResolvedValue(Response.json({ content: [] }));
 
-        await expect(fetchTokenInfoFromApi(new PublicKey(USDC), Cluster.MainnetBeta)).resolves.toBeUndefined();
+        await expect(fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.MainnetBeta)).resolves.toBeUndefined();
     });
 });
 
@@ -136,7 +137,7 @@ type Request = Parameters<typeof fetchTokenInfosFromApi>[0];
 
 function request(overrides: Partial<Request> = {}): Request {
     return {
-        addresses: [USDC, WSOL],
+        addresses: [MINT_A, MINT_B],
         cluster: Cluster.MainnetBeta,
         genesisHash: undefined,
         includeOnChainFallback: false,
