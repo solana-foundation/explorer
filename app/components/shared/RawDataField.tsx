@@ -4,11 +4,12 @@
 import { HexData } from '@components/shared/HexData';
 import { Button } from '@components/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
+import type { ReadonlyUint8Array } from '@solana/kit';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Copy, Download } from 'react-feather';
 
 import { DownloadDropdown, DownloadState } from '@/app/shared/components/DownloadDropdown';
-import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
+import { toBase64, toHex } from '@/app/shared/lib/bytes';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 import { CopyButton } from '@/app/shared/ui/CopyButton';
 
@@ -30,7 +31,7 @@ const FADE_TO_BG =
 const LOAD_FAILED = 'Failed to load account data.';
 
 export type RawDataFieldProps = {
-    data: ByteArray | undefined;
+    data: ReadonlyUint8Array | undefined;
     error?: Error;
     loading?: boolean;
     filename: string;
@@ -374,9 +375,9 @@ type ViewState =
     | { kind: 'loading' }
     | { error: Error; kind: 'failed' }
     | { kind: 'idle' }
-    | { data: ByteArray; kind: 'empty' }
-    | { data: ByteArray; kind: 'tooLarge' }
-    | { data: ByteArray; kind: 'ready' };
+    | { data: ReadonlyUint8Array; kind: 'empty' }
+    | { data: ReadonlyUint8Array; kind: 'tooLarge' }
+    | { data: ReadonlyUint8Array; kind: 'ready' };
 
 function viewState({ data, error, loading }: Pick<RawDataFieldProps, 'data' | 'error' | 'loading'>): ViewState {
     if (loading) return { kind: 'loading' };
@@ -385,6 +386,6 @@ function viewState({ data, error, loading }: Pick<RawDataFieldProps, 'data' | 'e
     return data.length > MAX_INLINE_BYTES ? { data, kind: 'tooLarge' } : { data, kind: 'ready' };
 }
 
-function encode(bytes: ByteArray, tab: 'hex' | 'base64') {
+function encode(bytes: ReadonlyUint8Array, tab: 'hex' | 'base64') {
     return tab === 'base64' ? toBase64(new Uint8Array(bytes)) : toHex(bytes);
 }

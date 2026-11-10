@@ -9,10 +9,9 @@ import {
     DropdownMenuTrigger,
 } from '@components/shared/ui/dropdown-menu';
 import { encodeTransactionData as encodeBytes, type EncodingFormat } from '@entities/transaction-data';
+import type { ReadonlyUint8Array } from '@solana/kit';
 import React from 'react';
 import { Download } from 'react-feather';
-
-import { type ByteArray } from '@/app/shared/lib/bytes';
 
 export enum DownloadState {
     Downloaded = 'downloaded',
@@ -43,7 +42,7 @@ export function DownloadDropdown({
     onDownload,
     children,
 }: {
-    data: ByteArray | undefined;
+    data: ReadonlyUint8Array | undefined;
     loading?: boolean;
     disabled?: boolean;
     error?: Error;
@@ -95,7 +94,7 @@ export function DownloadDropdown({
     );
 }
 
-function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string): boolean {
+function handleDownload(data: ReadonlyUint8Array, encoding: EncodingFormat, filename: string): boolean {
     try {
         const encoded = encodeBytes(data, encoding);
         triggerDownloadText(encoded, `${filename}_${encoding}.txt`);

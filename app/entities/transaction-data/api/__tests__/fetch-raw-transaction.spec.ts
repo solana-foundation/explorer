@@ -30,12 +30,27 @@ describe('fetchRawTransaction', () => {
     it('should ask for base64 bytes at the newest version Explorer renders', async () => {
         respondWith(transactionResult(createV1TransactionBytes({})));
 
-        await fetchRawTransaction(URL, SIGNATURE, 'confirmed');
+        await fetchRawTransaction(URL, SIGNATURE, { commitment: 'confirmed' });
 
         expect(requestBody().params).toEqual([
             SIGNATURE,
             { commitment: 'confirmed', encoding: 'base64', maxSupportedTransactionVersion: 1 },
         ]);
+    });
+
+    it('should reject the request when the caller aborts it', async () => {
+        const controller = new AbortController();
+        fetchMock.mockImplementationOnce(
+            (_url: string, init: RequestInit) =>
+                new Promise((_resolve, reject) => {
+                    init.signal?.addEventListener('abort', () => reject(new Error('The operation was aborted')));
+                }),
+        );
+
+        const pending = fetchRawTransaction(URL, SIGNATURE, { abortSignal: controller.signal });
+        controller.abort();
+
+        await expect(pending).rejects.toThrow();
     });
 
     it('should request the confirmed commitment by default', async () => {

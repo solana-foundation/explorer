@@ -3,9 +3,28 @@ import { type InstructionSummary } from '@entities/transaction-data';
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
 
 import { summarizeInstructions } from '../lib/summarize-instructions';
+import type { RowTransactionState } from '../model/use-row-transaction';
+import { RetryButton } from './RetryButton';
+
+export function ProgramsBlock({ state }: { state: RowTransactionState }) {
+    switch (state.status) {
+        case 'loading':
+            return <InstructionListSkeleton />;
+        case 'failed':
+            return <RetryButton label="Retry loading programs" onRetry={state.retry} />;
+        case 'loaded':
+            return state.summaries.length > 0 ? (
+                <InstructionList instructions={state.summaries} />
+            ) : (
+                <span className="text-outer-space-300">---</span>
+            );
+        default:
+            return state satisfies never;
+    }
+}
 
 type InstructionListProps = {
-    instructions: InstructionSummary[];
+    instructions: readonly InstructionSummary[];
 };
 
 export function InstructionList({ instructions }: InstructionListProps) {
@@ -19,7 +38,7 @@ export function InstructionList({ instructions }: InstructionListProps) {
     );
 }
 
-export function InstructionListSkeleton() {
+function InstructionListSkeleton() {
     return (
         <div className="my-1 flex flex-col gap-1">
             <Skeleton className="h-3.5 w-44" />

@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Component, type ReactNode, Suspense } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
 import useSWR, { SWRConfig } from 'swr';
-import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { createRootWithoutAct } from '@/app/__tests__/root-without-act';
 
 import AddressTabError from '../error';
 
@@ -85,18 +86,6 @@ describe('AddressTabError', () => {
         expect(cache.get('pending')).toBe(pending);
     });
 });
-
-function createRootWithoutAct(): Root {
-    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', false);
-    const container = document.body.appendChild(document.createElement('div'));
-    const root = createRoot(container);
-    onTestFinished(() => {
-        root.unmount();
-        container.remove();
-        vi.unstubAllGlobals();
-    });
-    return root;
-}
 
 function Providers({ children }: { children: ReactNode }) {
     return (

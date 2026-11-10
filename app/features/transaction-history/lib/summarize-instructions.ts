@@ -5,7 +5,7 @@ export type SummarizedInstruction = {
     count: number;
 };
 
-export function summarizeInstructions(instructions: InstructionSummary[]): SummarizedInstruction[] {
+export function summarizeInstructions(instructions: readonly InstructionSummary[]): SummarizedInstruction[] {
     const groups = new Map<string, SummarizedInstruction>();
     for (const instruction of instructions) {
         const key = JSON.stringify([instruction.programName, instruction.name]);

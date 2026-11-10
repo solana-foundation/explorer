@@ -24,7 +24,7 @@ import type { RawTransaction } from '../model/types';
 export async function fetchRawTransaction(
     url: string,
     signature: string,
-    commitment: Finality = 'confirmed',
+    { abortSignal, commitment = 'confirmed' }: { abortSignal?: AbortSignal; commitment?: Finality } = {},
 ): Promise<RawTransaction | null> {
     const response = await createSolanaRpc(url)
         .getTransaction(createSignature(signature), {
@@ -32,7 +32,7 @@ export async function fetchRawTransaction(
             encoding: 'base64',
             maxSupportedTransactionVersion: MAX_SUPPORTED_TRANSACTION_VERSION,
         })
-        .send();
+        .send({ abortSignal });
 
     if (response === null) {
         // The cache providers distinguish "fetched, not found" from "not fetched yet" by null vs undefined.

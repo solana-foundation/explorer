@@ -4,63 +4,39 @@ import { RawDataField } from '@components/shared/RawDataField';
 import { Button } from '@components/shared/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { Skeleton } from '@components/shared/ui/skeleton';
-import { cn } from '@components/shared/utils';
-import { Code, RefreshCw } from 'react-feather';
+import { Code } from 'react-feather';
 
-import type { ByteArray } from '@/app/shared/lib/bytes';
+import type { RowTransactionState } from '../model/use-row-transaction';
+import { RetryButton } from './RetryButton';
 
-export type RawDataSizeFieldProps = {
-    /** Payload size in bytes. `undefined` renders a placeholder (info unavailable). */
-    size: number | undefined;
-    /** Raw bytes shown in the popover (only relevant when `size > 0`). */
-    data: ByteArray | undefined;
-    filename: string;
-    loading?: boolean;
-    /** When set, the size fetch failed after exhausting its retries; render a manual retry control. */
-    onRetry?: () => void;
-    /** Extra classes for the popover trigger button (e.g. vertical alignment in a table cell). */
-    buttonClassName?: string;
-};
+// Moves the text-height button down to the baseline of the row's other cells.
+const ROW_BASELINE = 'relative top-0.5';
 
-export function RawDataSizeField({ size, data, filename, loading, onRetry, buttonClassName }: RawDataSizeFieldProps) {
-    if (loading) {
-        return <Skeleton className="tx-size-skeleton my-1 h-3.5 w-16" />;
-    }
-
-    if (size === undefined) {
-        // Fetch failed for good — offer a retry instead of a dead `-`. Otherwise the size is genuinely
-        // unavailable (nothing to fetch), so keep the static placeholder.
-        if (onRetry) {
+export function RawDataSizeField({ state, filename }: { state: RowTransactionState; filename: string }) {
+    switch (state.status) {
+        case 'loading':
+            return <Skeleton className="tx-size-skeleton my-1 h-3.5 w-16" />;
+        case 'failed':
+            return <SizeRetryButton onRetry={state.retry} className={ROW_BASELINE} />;
+        case 'loaded':
             return (
-                <Button
-                    variant="ghost"
-                    className={cn('!px-0 text-outer-space-300', buttonClassName)}
-                    onClick={onRetry}
-                    aria-label="Retry loading size"
-                >
-                    <RefreshCw size={14} />
-                    <span>Retry</span>
-                </Button>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost" size="inline" className={ROW_BASELINE}>
+                            <Code size={14} />
+                            <span>{state.messageBytes.length.toLocaleString('en-US')}</span>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto !rounded-lg border-none p-0" align="end">
+                        <RawDataField data={state.messageBytes} filename={filename} />
+                    </PopoverContent>
+                </Popover>
             );
-        }
-        return <span className="text-outer-space-300">-</span>;
+        default:
+            return state satisfies never;
     }
+}
 
-    if (size > 0) {
-        return (
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="ghost" className={cn('!px-0', buttonClassName)}>
-                        <Code size={14} />
-                        <span>{size.toLocaleString('en-US')}</span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto !rounded-lg border-none p-0" align="end">
-                    <RawDataField data={data} filename={filename} />
-                </PopoverContent>
-            </Popover>
-        );
-    }
-
-    return <span>{size.toLocaleString('en-US')}</span>;
+export function SizeRetryButton({ onRetry, className }: { onRetry: () => void; className?: string }) {
+    return <RetryButton label="Retry loading size" onRetry={onRetry} className={className} />;
 }

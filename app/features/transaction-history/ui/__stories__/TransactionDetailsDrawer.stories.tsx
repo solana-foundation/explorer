@@ -1,12 +1,7 @@
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-import { fn } from 'storybook/test';
-
-import type { CacheEntry } from '@/app/providers/cache';
-import { FetchStatus } from '@/app/providers/cache';
-import type { Details } from '@/app/providers/transactions/raw';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { TransactionDetailsDrawer } from '../TransactionDetailsDrawer';
 
@@ -17,52 +12,35 @@ const BLOCK_TIME = 1_718_000_000;
 // Representative wire bytes so the raw-data field shows a byte count and enables copy/download.
 const MESSAGE_BYTES = new Uint8Array(Array.from({ length: 215 }, (_, i) => i % 256));
 
-// A fully fetched raw transaction. Only `messageBytes` is read by the drawer; the version-1 variant
-// is the cheapest valid `RawTransaction` (no web3.js message/transaction views required).
-const FETCHED: CacheEntry<Details> = {
-    data: {
-        raw: {
-            messageBytes: MESSAGE_BYTES,
-            serializedSize: MESSAGE_BYTES.length + 64,
-            signatures: [SIGNATURE],
-            slot: SLOT,
-            version: 1,
-        },
-    },
-    status: FetchStatus.Fetched,
-};
-
-/**
- * Wraps the drawer in the cluster + transactions providers it reads from. Seeds the raw-details cache
- * from `parameters.raw` (keyed by signature) so `useRawTransactionDetails` resolves without RPC.
- */
-const withDrawerProviders: Decorator = (Story, context) => (
+// The drawer builds its tx and block links from the cluster.
+const withCluster: Decorator = Story => (
     <MockClusterProvider>
-        <MockTransactionsProvider raw={context.parameters.raw}>
-            <Story />
-        </MockTransactionsProvider>
+        <Story />
     </MockClusterProvider>
 );
 
 const meta = {
     args: {
         blockTime: BLOCK_TIME,
-        instructionNames: [
-            { name: 'Transfer', programName: 'System' },
-            { name: 'CreateAccount', programName: 'System' },
-        ],
         onOpenChange: fn(),
         open: true,
+        rowTransaction: {
+            messageBytes: MESSAGE_BYTES,
+            status: 'loaded',
+            summaries: [
+                { name: 'Transfer', programName: 'System' },
+                { name: 'CreateAccount', programName: 'System' },
+            ],
+        },
         signature: SIGNATURE,
         slot: SLOT,
         statusLabel: 'Success',
         statusVariant: 'success',
     },
     component: TransactionDetailsDrawer,
-    decorators: [withDrawerProviders],
+    decorators: [withCluster],
     parameters: {
         ...nextjsParameters,
-        raw: { [SIGNATURE]: FETCHED },
         viewport: { defaultViewport: 'mobile1' },
     },
     tags: ['autodocs', 'test'],
@@ -72,26 +50,47 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Fully loaded: timestamp, block link, program list, and raw-data size.
-export const Default: Story = {};
+// Fully loaded: timestamp, block link, program list, and the size from the row's own bytes.
+export const Default: Story = {
+    play: async () => {
+        // The drawer renders in a portal outside the story canvas.
+        await expect(await within(document.body).findByText('215 bytes')).toBeVisible();
+    },
+};
 
 // A failed transaction shows the warning badge.
 export const Failed: Story = {
     args: {
-        instructionNames: [{ name: 'Transfer', programName: 'System' }],
+        rowTransaction: {
+            messageBytes: MESSAGE_BYTES,
+            status: 'loaded',
+            summaries: [{ name: 'Transfer', programName: 'System' }],
+        },
         statusLabel: 'Failed',
         statusVariant: 'warning',
     },
 };
 
-// No cache entry yet → the program list shows its skeleton and the raw-data field shows its loader.
+// The row is still loading, so the program list shows its skeleton and the raw-data field its loader.
 export const Loading: Story = {
-    args: { instructionNames: undefined },
-    parameters: { raw: {} },
+    args: { rowTransaction: { status: 'loading' } },
 };
 
-// Fetched but no block time and no instructions → Time row is hidden and Programs shows "---".
+// No block time and no instructions to list, so the Time row is hidden and Programs shows "---".
 export const Unavailable: Story = {
-    args: { blockTime: null, instructionNames: [] },
-    parameters: { raw: { [SIGNATURE]: { data: { raw: null }, status: FetchStatus.Fetched } } },
+    args: { blockTime: null, rowTransaction: { messageBytes: MESSAGE_BYTES, status: 'loaded', summaries: [] } },
+};
+
+// The row fetch failed, so Programs and Size each offer a retry.
+const retryRow = fn();
+export const ProgramsFailed: Story = {
+    args: { rowTransaction: { retry: retryRow, status: 'failed' } },
+    play: async () => {
+        // The drawer renders in a portal outside the story canvas.
+        const body = within(document.body);
+        await userEvent.click(await body.findByRole('button', { name: 'Retry loading programs' }));
+        await userEvent.click(await body.findByRole('button', { name: 'Retry loading size' }));
+        await expect(retryRow).toHaveBeenCalledTimes(2);
+        await expect(body.queryByText('No data')).toBeNull();
+    },
 };

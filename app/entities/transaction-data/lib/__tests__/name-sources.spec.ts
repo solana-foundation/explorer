@@ -46,6 +46,9 @@ describe('resolveNamesFromLookup', () => {
             // Mango is the one chain member with no other case here, so without this, deleting it from
             // NAME_SOURCES fails nothing. Mango keys its instructions by a leading u32 LE discriminator; 2 = Deposit.
             ['Mango', [MANGO_PROGRAM, 2, 0, 0, 0], 'Deposit'],
+            // Native programs ship no fetchable IDL either, so the chain must name them; without this,
+            // dropping or reordering resolveNativeProgramInstructionName fails nothing. Vote tag 2 = vote.
+            ['native Vote', [VOTE_PROGRAM, 2, 0, 0, 0], 'Vote'],
         ] as const)('should resolve a %s name without any IDL', (_program, [programId, ...data], expected) => {
             expect(resolveNamesFromLookup(lookup(programId, ...data), idlNames({})).name).toBe(expected);
         });
@@ -231,6 +234,7 @@ const MANGO_PROGRAM = 'mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68';
 const PYTH_PROGRAM = 'FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH';
 const TOKEN_SWAP_PROGRAM = 'SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8';
 const WORMHOLE_PROGRAM = 'WormT3McKhFJ2RkiGpdw9GKvNCrB2aB54gb2uV9MfQC';
+const VOTE_PROGRAM = 'Vote111111111111111111111111111111111111111';
 
 function lookup(programId: string, ...data: number[]): InstructionNameLookup {
     return { data: Uint8Array.from(data), programId };
@@ -241,7 +245,7 @@ function unnamed(programId: string, ...data: number[]): InstructionNames {
     return { name: undefined, nameLookup: lookup(programId, ...data), programName: undefined };
 }
 
-/** A summary row as `summarizeInstruction` builds it: both names at their sentinels, lookup still set. */
+/** A summary row as `toSummary` builds it: both names at their sentinels, lookup still set. */
 function summary(programId: string, ...data: number[]): InstructionSummary {
     return {
         name: UNKNOWN_INSTRUCTION_NAME,

@@ -5,20 +5,19 @@ import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { DialogClose, DialogTitle } from '@components/shared/ui/dialog';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ArrowRight, X } from 'react-feather';
 
-import type { InstructionSummary } from '@/app/entities/transaction-data';
-import { FetchStatus } from '@/app/providers/cache';
-import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { CopyButton } from '@/app/shared/ui/CopyButton';
 import { Drawer } from '@/app/shared/ui/drawer';
 import { displayTimestampUtc } from '@/app/utils/date';
 import { useClusterPath } from '@/app/utils/url';
 
+import type { RowTransactionState } from '../model/use-row-transaction';
 import { CompactKeyValue } from './CompactKeyValue';
-import { InstructionList, InstructionListSkeleton } from './InstructionList';
+import { ProgramsBlock } from './InstructionList';
+import { SizeRetryButton } from './RawDataSizeField';
 
 export function TransactionDetailsDrawer({
     open,
@@ -28,7 +27,7 @@ export function TransactionDetailsDrawer({
     blockTime,
     statusLabel,
     statusVariant,
-    instructionNames,
+    rowTransaction,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -37,18 +36,10 @@ export function TransactionDetailsDrawer({
     blockTime: number | null | undefined;
     statusLabel: string;
     statusVariant: 'success' | 'warning';
-    instructionNames: InstructionSummary[] | undefined;
+    rowTransaction: RowTransactionState;
 }) {
     const txPath = useClusterPath({ pathname: `/tx/${signature}` });
     const blockPath = useClusterPath({ pathname: `/block/${slot}` });
-
-    const fetchRaw = useFetchRawTransaction();
-    const rawDetails = useRawTransactionDetails(signature);
-    const transactionData = rawDetails?.data?.raw?.messageBytes;
-    const rawLoading = rawDetails?.status === FetchStatus.Fetching;
-    useEffect(() => {
-        if (open && !transactionData && !rawLoading) fetchRaw(signature);
-    }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const header = (
         <Drawer.Header>
@@ -114,26 +105,33 @@ export function TransactionDetailsDrawer({
                 </CompactKeyValue>
                 <CompactKeyValue label="Programs">
                     <div className="min-w-0">
-                        {instructionNames !== undefined && instructionNames.length > 0 ? (
-                            <InstructionList instructions={instructionNames} />
-                        ) : instructionNames === undefined ? (
-                            <InstructionListSkeleton />
-                        ) : (
-                            <span className="text-outer-space-300">---</span>
-                        )}
+                        <ProgramsBlock state={rowTransaction} />
                     </div>
                 </CompactKeyValue>
-                {/* The raw-data field carries its own "Size" caption, so this row has no label. */}
-                <div className="flex flex-col gap-2 pb-1 pt-2 text-white">
-                    <RawDataField
-                        data={transactionData}
-                        loading={rawDetails === undefined || rawLoading}
-                        filename={signature}
-                        variant="embedded"
-                        bytesPrefix="Size "
-                    />
-                </div>
+                <SizeField state={rowTransaction} filename={signature} />
             </div>
         </Drawer>
+    );
+}
+
+function SizeField({ state, filename }: { state: RowTransactionState; filename: string }) {
+    if (state.status === 'failed') {
+        return (
+            <CompactKeyValue label="Size">
+                <SizeRetryButton onRetry={state.retry} />
+            </CompactKeyValue>
+        );
+    }
+    // The raw-data field carries its own "Size" caption, so this row has no label.
+    return (
+        <div className="flex flex-col gap-2 pb-1 pt-2 text-white">
+            <RawDataField
+                data={state.status === 'loaded' ? state.messageBytes : undefined}
+                loading={state.status === 'loading'}
+                filename={filename}
+                variant="embedded"
+                bytesPrefix="Size "
+            />
+        </div>
     );
 }

@@ -55,7 +55,7 @@ export function formatTooltipTitle({ label, programName }: { label: string; prog
     return programName ? `${programName}: ${label}` : label;
 }
 
-// Kept in step with the sentinel `getInstructionSummaries` substitutes for history rows, so one
+// Kept in step with the sentinel the summary builders substitute for history rows, so one
 // instruction reads the same wherever it appears. Declared here rather than imported: this entity owns
 // its own fallback by design — see "Two row shapes" in the transaction-data README.
 const UNKNOWN_INSTRUCTION_LABEL = 'Unknown Instruction';

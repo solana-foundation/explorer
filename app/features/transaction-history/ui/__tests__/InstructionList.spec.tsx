@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { InstructionList } from '../InstructionList';
+import { InstructionList, ProgramsBlock } from '../InstructionList';
 
 describe('InstructionList', () => {
     it('should render the full list', () => {
@@ -49,5 +49,36 @@ describe('InstructionList', () => {
 
         expect(screen.getByText('2 ×')).toBeInTheDocument();
         expect(screen.queryByText('1 ×')).not.toBeInTheDocument();
+    });
+});
+
+describe('ProgramsBlock', () => {
+    it('should call retry when the failed fetch is retried', () => {
+        const retry = vi.fn();
+        render(<ProgramsBlock state={{ retry, status: 'failed' }} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Retry loading programs' }));
+
+        expect(retry).toHaveBeenCalledOnce();
+    });
+
+    it('should list the instructions of a loaded row', () => {
+        const summaries = [{ name: 'Swap', programName: 'Raydium CLMM' }];
+        render(<ProgramsBlock state={{ messageBytes: new Uint8Array(0), status: 'loaded', summaries }} />);
+
+        expect(screen.getByText('Swap')).toBeInTheDocument();
+        expect(screen.queryByText('---')).not.toBeInTheDocument();
+    });
+
+    it('should show no retry while loading', () => {
+        render(<ProgramsBlock state={{ status: 'loading' }} />);
+
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    it('should show a dash for a transaction with no instructions to list', () => {
+        render(<ProgramsBlock state={{ messageBytes: new Uint8Array(0), status: 'loaded', summaries: [] }} />);
+
+        expect(screen.getByText('---')).toBeInTheDocument();
     });
 });
