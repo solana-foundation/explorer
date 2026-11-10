@@ -97,9 +97,9 @@ const HOUR_S = 3600;
 const DAY_S = 86400;
 
 // Human "time since" with granularity that coarsens as the event recedes, per these bands:
-//   <10m  minutes + seconds   |  10m–1h  minutes         |  1h–8h   hours + minutes
-//   8h–48h hours              |  48h–12d days + hours     |  12d–30d days
-//   30d–365d months + days    |  1y–3y   years + months   |  >3y     years
+//   <5s   just now            |  <10m  minutes + seconds   |  10m–1h  minutes
+//   1h–8h hours + minutes     |  8h–48h hours              |  48h–12d days + hours
+//   12d–30d days              |  30d–365d months + days    |  1y–3y   years + months  |  >3y years
 // Built on date-fns difference/duration helpers so months and years are calendar-accurate (not a
 // flat 30/365 days). date-fns' formatDuration drops a zero secondary unit ("3 hours 0 minutes" →
 // "3 hours") and pluralizes for us. Both args are milliseconds.
@@ -112,10 +112,11 @@ export function displayTimestampRelative(unixTimestampMs: number, nowMs: number)
     const [from, to] = past ? [unixTimestampMs, nowMs] : [nowMs, unixTimestampMs];
     const seconds = differenceInSeconds(to, from);
 
-    // A live, frequently re-estimated instant (e.g. the home-page cluster time) hovers within a few
-    // seconds of now and would flicker between "just now" and "N seconds ago"; collapse the whole
-    // sub-10s window, in either direction, to a single stable "just now".
-    if (seconds < 10) return 'just now';
+    // Any just-estimated or near-present instant sits within a few seconds of now, so the sub-5s
+    // window — in either direction — collapses to a single stable "just now". This also stops live,
+    // frequently re-estimated instants (e.g. the home-page cluster time) from flickering between
+    // "just now" and "N seconds ago".
+    if (seconds < 5) return 'just now';
 
     let duration: Duration;
     if (seconds < 10 * MINUTE_S) {
