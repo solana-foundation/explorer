@@ -3,8 +3,20 @@ import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
-import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
+
+const COLUMNS: ReadonlyArray<GridTableColumn<{ entry: PublicKey; index: number }>> = [
+    {
+        cellClassName: 'font-mono',
+        header: 'Index',
+        render: ({ index }) => index,
+    },
+    {
+        cellClassName: 'font-mono',
+        header: 'Address',
+        render: ({ entry }) => <Address pubkey={entry} link />,
+    },
+];
 
 export function LookupTableEntriesCard(
     params:
@@ -23,44 +35,17 @@ export function LookupTableEntriesCard(
         }
     }, [params]);
 
-    return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit">
-                    Lookup Table Entries
-                </CardTitle>
-            </CardHeader>
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Index</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Address</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>
-                    {lookupTableState.addresses.length > 0 &&
-                        lookupTableState.addresses.map((entry: PublicKey, index) => {
-                            return renderRow(entry, index);
-                        })}
-                </BaseTable.Body>
-            </BaseTable>
+    const rows = lookupTableState.addresses.map((entry, index) => ({ entry, index }));
 
-            {lookupTableState.addresses.length === 0 && (
-                <CardFooter ui="dashkit">
-                    <div className="text-center text-dk-gray-700">No entries found</div>
-                </CardFooter>
-            )}
-        </Card>
+    return (
+        <GridTableCard
+            title="Lookup Table Entries"
+            ariaLabel="Lookup table entries"
+            gridTemplate="grid-cols-[auto_1fr]"
+            columns={COLUMNS}
+            rows={rows}
+            getRowKey={({ index }) => index}
+            empty="No entries found"
+        />
     );
 }
-
-const renderRow = (entry: PublicKey, index: number) => {
-    return (
-        <BaseTable.Row key={index}>
-            <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
-            <BaseTable.Cell className="font-mono">
-                <Address pubkey={entry} link />
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-};

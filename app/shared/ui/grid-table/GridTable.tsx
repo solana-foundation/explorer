@@ -81,6 +81,7 @@ export function GridTableCard<T>({
     actions,
     collapsible,
     defaultExpanded,
+    footer,
     ...grid
 }: GridTableProps<T> & {
     id?: string;
@@ -88,6 +89,7 @@ export function GridTableCard<T>({
     actions?: ReactNode;
     collapsible?: boolean;
     defaultExpanded?: boolean;
+    footer?: ReactNode;
 }) {
     return (
         <CollapsibleSection
@@ -101,6 +103,7 @@ export function GridTableCard<T>({
             <Card variant="tight" className="rounded-lg border-outer-space-800 bg-outer-space-900">
                 <GridTable {...grid} />
             </Card>
+            {footer}
         </CollapsibleSection>
     );
 }

@@ -19,8 +19,7 @@ import { ChevronDown } from 'react-feather';
 import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { ProxiedImage } from '@/app/features/metadata';
-import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 type Display = 'summary' | 'detail' | null;
 
@@ -90,53 +89,84 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
         return <LoadingCard message="Loading token holdings" />;
     }
 
-    return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit">
-                    Token Holdings
-                </CardTitle>
-                <DisplayDropdown display={display} />
-            </CardHeader>
+    const isDetail = display === 'detail';
 
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-px p-0 text-center text-dk-gray-700">
-                            Logo
-                        </BaseTable.HeaderCell>
-                        {display === 'detail' && (
-                            <BaseTable.HeaderCell className="text-dk-gray-700">Account Address</BaseTable.HeaderCell>
-                        )}
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Mint Address</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">
-                            {display === 'detail' ? 'Total Balance' : 'Balance'}
-                        </BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>
-                    {orderedMints.slice(0, visibleCount).map(mintAddress => {
-                        const token = holdings.get(mintAddress);
-                        return token ? (
-                            <TokenRow
-                                key={mintAddress}
-                                mintAddress={mintAddress}
-                                showAccountAddress={display === 'detail'}
-                                token={token}
-                                tokenInfo={tokenInfos.get(mintAddress)}
-                            />
-                        ) : null;
-                    })}
-                </BaseTable.Body>
-            </BaseTable>
-            <TokensCardFooter
-                loadMore={() => setVisibleCount(count => count + HOLDINGS_LOAD_MORE_COUNT)}
-                totalCount={orderedMints.length}
-                visibleCount={visibleCount}
-            />
-        </Card>
+    const rows: TokenRowData[] = orderedMints
+        .slice(0, visibleCount)
+        .map(mintAddress => {
+            const token = holdings.get(mintAddress);
+            return token ? { mintAddress, token, tokenInfo: tokenInfos.get(mintAddress) } : null;
+        })
+        .filter((row): row is TokenRowData => row !== null);
+
+    const columns: GridTableColumn<TokenRowData>[] = [
+        {
+            cellClassName: 'justify-center p-0',
+            header: 'Logo',
+            render: ({ tokenInfo }) => (
+                <ProxiedImage
+                    alt="Token icon"
+                    className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
+                    height={16}
+                    uri={tokenInfo?.logoURI ?? undefined}
+                    width={16}
+                />
+            ),
+        },
+        {
+            header: 'Mint Address',
+            render: ({ mintAddress, tokenInfo }) => (
+                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
+            ),
+        },
+        {
+            header: isDetail ? 'Total Balance' : 'Balance',
+            render: ({ token, tokenInfo }) => (
+                <>
+                    {token.amount} {tokenInfo?.symbol}
+                    <ScaledUiAmountMultiplierTooltip
+                        rawAmount={new BigNumber(token.rawAmount).shiftedBy(-(token.decimals || 0)).toString()}
+                        scaledUiAmountMultiplier={token.scaledUiAmountMultiplier}
+                    />
+                </>
+            ),
+        },
+    ];
+
+    if (isDetail) {
+        columns.splice(1, 0, {
+            header: 'Account Address',
+            render: ({ token }) => <Address pubkey={new PublicKey(token.pubkey)} link />,
+        });
+    }
+
+    const gridTemplate = isDetail ? 'grid-cols-[auto_1fr_1fr_1fr]' : 'grid-cols-[auto_1fr_1fr]';
+
+    return (
+        <GridTableCard
+            title="Token Holdings"
+            ariaLabel="Token holdings"
+            actions={<DisplayDropdown display={display} />}
+            gridTemplate={gridTemplate}
+            columns={columns}
+            rows={rows}
+            getRowKey={({ mintAddress }) => mintAddress}
+            footer={
+                <TokensCardFooter
+                    loadMore={() => setVisibleCount(count => count + HOLDINGS_LOAD_MORE_COUNT)}
+                    totalCount={orderedMints.length}
+                    visibleCount={visibleCount}
+                />
+            }
+        />
     );
 }
+
+type TokenRowData = {
+    mintAddress: string;
+    token: MappedToken;
+    tokenInfo: TokenInfo | undefined;
+};
 
 type MappedToken = {
     amount: string;
@@ -180,44 +210,6 @@ function aggregateByMint(tokens: TokenInfoWithPubkey[]): Map<string, MappedToken
     return byMint;
 }
 
-type TokenRowProps = {
-    mintAddress: string;
-    showAccountAddress: boolean;
-    token: MappedToken;
-    tokenInfo: TokenInfo | undefined;
-};
-
-function TokenRow({ mintAddress, showAccountAddress, token, tokenInfo }: TokenRowProps) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell className="w-px p-0 text-center">
-                <ProxiedImage
-                    alt="Token icon"
-                    className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
-                    height={16}
-                    uri={tokenInfo?.logoURI ?? undefined}
-                    width={16}
-                />
-            </BaseTable.Cell>
-            {showAccountAddress && (
-                <BaseTable.Cell>
-                    <Address pubkey={new PublicKey(token.pubkey)} link />
-                </BaseTable.Cell>
-            )}
-            <BaseTable.Cell>
-                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
-            </BaseTable.Cell>
-            <BaseTable.Cell>
-                {token.amount} {tokenInfo?.symbol}
-                <ScaledUiAmountMultiplierTooltip
-                    rawAmount={new BigNumber(token.rawAmount).shiftedBy(-(token.decimals || 0)).toString()}
-                    scaledUiAmountMultiplier={token.scaledUiAmountMultiplier}
-                />
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
 function TokensCardFooter({
     loadMore,
     totalCount,
@@ -232,11 +224,11 @@ function TokensCardFooter({
     }
 
     return (
-        <CardFooter ui="dashkit">
+        <div className="mt-2 w-full">
             <Button ui="dashkit" variant="primary" className="w-full" onClick={loadMore}>
                 Load More ({visibleCount} of {totalCount})
             </Button>
-        </CardFooter>
+        </div>
     );
 }
 
