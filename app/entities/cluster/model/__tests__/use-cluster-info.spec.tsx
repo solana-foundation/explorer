@@ -196,6 +196,28 @@ describe('useEpochInfo', () => {
             vi.useRealTimers();
         }
     });
+
+    it('should refetch on the given refreshInterval', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        try {
+            rpc.getEpochInfo
+                .mockReturnValueOnce({ send: () => Promise.resolve(EPOCH_INFO) })
+                .mockReturnValue({ send: () => Promise.resolve(EPOCH_INFO_LATER) });
+
+            const { result } = renderHook(() => useEpochInfo({ refreshInterval: 30_000 }), {
+                wrapper: makeWrapper(connectedState),
+            });
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+            await act(() => vi.advanceTimersByTimeAsync(30_000));
+
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
 });
 
 describe('useFirstAvailableBlock', () => {
@@ -226,6 +248,25 @@ describe('useClusterInfo', () => {
         expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
         expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
+    });
+
+    it('should poll epoch info but not the schedule when given a refreshInterval', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        try {
+            const { result } = renderHook(() => useClusterInfo({ refreshInterval: 30_000 }), {
+                wrapper: makeWrapper(connectedState),
+            });
+            await waitForHook(() => expect(result.current).toEqual(EXPECTED_INFO));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+            expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+
+            await act(() => vi.advanceTimersByTimeAsync(30_000));
+
+            await waitForHook(() => expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2));
+            expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('should stay undefined until both epoch values load', async () => {

@@ -15,7 +15,7 @@ import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
-import { ClusterInfo, useCluster, useClusterInfo } from '@/app/providers/cluster';
+import { ClusterInfo, EPOCH_INFO_REFRESH_MS, useCluster, useClusterInfo } from '@/app/providers/cluster';
 import { type KeyValueRowInput, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
@@ -81,7 +81,12 @@ const BaseFeatureCard = ({
     isPending?: boolean;
 }) => {
     const { cluster } = useCluster();
-    const clusterInfo = useClusterInfo({ enabled: cluster !== Cluster.Custom });
+    // A pending feature needs the epoch to tick so the countdown stays live and the account refreshes
+    // when the epoch rolls over; an already-activated one reads the epoch once.
+    const clusterInfo = useClusterInfo({
+        enabled: cluster !== Cluster.Custom,
+        refreshInterval: isPending ? EPOCH_INFO_REFRESH_MS : undefined,
+    });
     const refresh = useRefreshAccount();
     const currentEpoch = clusterInfo?.epochInfo.epoch;
     const refreshedForEpoch = useRef<bigint | undefined>(undefined);

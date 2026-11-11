@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 
 import { FeatureAccountSection } from '@/app/components/account/FeatureAccountSection';
 import type { Account } from '@/app/providers/accounts';
-import { useCluster, useClusterInfo } from '@/app/providers/cluster';
+import { EPOCH_INFO_REFRESH_MS, useCluster, useClusterInfo } from '@/app/providers/cluster';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@/app/utils/parseFeatureAccount';
 
@@ -18,6 +18,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('@/app/providers/cluster', () => ({
+    EPOCH_INFO_REFRESH_MS: 30_000,
     useCluster: vi.fn(() => ({ cluster: Cluster.Devnet })),
     useClusterInfo: vi.fn(() => CLUSTER_INFO),
 }));
@@ -101,12 +102,23 @@ describe('FeatureAccountSection', () => {
         expect(refreshAccount).not.toHaveBeenCalled();
     });
 
+    it('should poll the epoch for a pending feature but not an activated one', () => {
+        render(<FeatureAccountSection account={featureAccount({ activated: false })} />);
+        expect(useClusterInfo).toHaveBeenCalledWith(
+            expect.objectContaining({ refreshInterval: EPOCH_INFO_REFRESH_MS }),
+        );
+
+        vi.mocked(useClusterInfo).mockClear();
+        render(<FeatureAccountSection account={featureAccount({ activated: true })} />);
+        expect(useClusterInfo).toHaveBeenCalledWith(expect.objectContaining({ refreshInterval: undefined }));
+    });
+
     it('should not poll cluster info on a custom cluster', () => {
         vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Custom } as ReturnType<typeof useCluster>);
 
         render(<FeatureAccountSection account={featureAccount({ activated: false })} />);
 
-        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
+        expect(useClusterInfo).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
         expect(refreshAccount).not.toHaveBeenCalled();
     });
 });
