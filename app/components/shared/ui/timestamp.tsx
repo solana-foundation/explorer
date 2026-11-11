@@ -186,8 +186,9 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                     <time
                         dateTime={dateTime}
                         className={cn(
+                            !children && 'tabular-nums',
                             !children && effective === 'relative'
-                                ? 'inline-block min-w-[6.25rem] text-right tabular-nums'
+                                ? 'inline-block min-w-[6.25rem] text-right'
                                 : 'min-w-0',
                         )}
                     >
