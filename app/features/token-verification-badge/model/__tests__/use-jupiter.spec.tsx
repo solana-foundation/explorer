@@ -13,7 +13,6 @@ const MINT = gen.address(1);
 const mocks = vi.hoisted(() => ({ cluster: 0 }));
 
 vi.mock('@/app/providers/cluster', () => ({ useCluster: () => ({ cluster: mocks.cluster }) }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
 const fetchMock = vi.fn();
 

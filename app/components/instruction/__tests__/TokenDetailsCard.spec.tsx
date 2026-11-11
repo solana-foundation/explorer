@@ -38,7 +38,7 @@ import {
     renderWithProviders,
 } from '@/app/__tests__/card-harness';
 import { connectedWithGenesisHash } from '@/app/__tests__/swr-hook';
-import { stubTokenInfoApi } from '@/app/__tests__/token-label';
+import { stubTokenInfoRoute } from '@/app/__tests__/token-info-route';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
@@ -144,7 +144,7 @@ describe('TokenDetailsCard', () => {
         const actualClient = await vi.importActual<typeof import('@entities/token-info')>('@entities/token-info');
         vi.mocked(useCluster).mockReturnValue(connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET));
         vi.mocked(useUnbatchedTokenInfo).mockImplementation(actualClient.useUnbatchedTokenInfo);
-        stubTokenInfoApi([USDC]);
+        stubTokenInfoRoute([USDC]);
         vi.mocked(useTokenAccountInfo).mockReturnValue({ mint: MINT } as ReturnType<typeof useTokenAccountInfo>);
         vi.mocked(useMintAccountInfo).mockReturnValue({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>);
 

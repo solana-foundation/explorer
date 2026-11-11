@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TokenInfoHttpError } from '@/app/entities/token-info';
 import type { TokenInfo } from '@/app/entities/token-info/server';
@@ -96,6 +96,30 @@ describe('GET /api/token-info/[mintAddress]', () => {
             expect(response.status).toBe(200);
             expect(await response.json()).toEqual({ content: [] });
             expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('a redacted mint', () => {
+        beforeEach(async () => {
+            const actual =
+                await vi.importActual<typeof import('@entities/token-info/server')>('@entities/token-info/server');
+            mocks.getTokenInfos.mockImplementation(actual.getTokenInfos);
+            vi.stubEnv('JUPITER_API_KEY', 'test-key');
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT);
+            vi.stubGlobal('fetch', vi.fn());
+        });
+
+        afterEach(() => {
+            vi.unstubAllEnvs();
+            vi.unstubAllGlobals();
+        });
+
+        it('should return an empty list without a Jupiter request', async () => {
+            const response = await get(`cluster=${Cluster.MainnetBeta}`);
+
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({ content: [] });
+            expect(fetch).not.toHaveBeenCalled();
         });
     });
 

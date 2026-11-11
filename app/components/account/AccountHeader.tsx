@@ -2,6 +2,7 @@ import { CompressedNftAccountHeader } from '@components/account/CompressedNftCar
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { useDasImage } from '@entities/digital-asset';
 import { isMetaplexNFT } from '@entities/nft';
+import { isRedactedTokenAddress, type TokenInfo } from '@entities/token-info';
 import { STAKE_PROGRAM_LABEL } from '@explorer/parsers';
 import { NftokenAccountHeader, parseNftokenAccount } from '@features/nftoken';
 import {
@@ -22,7 +23,6 @@ import { dasImageAddress } from '@/app/components/account/das-image-address';
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
 import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
-import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function AccountHeader({
     address,
@@ -32,7 +32,7 @@ export function AccountHeader({
 }: {
     address: string;
     account?: Account;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
     isTokenInfoLoading: boolean;
 }) {
     const mintInfo = useMintAccountInfo(address);
@@ -111,7 +111,7 @@ function TokenMintHeader({
     parsedData,
 }: {
     address: string;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
     mintInfo?: MintAccountInfo;
     parsedData?: TokenProgramData;
 }): JSX.Element {
@@ -145,7 +145,7 @@ function TokenMintHeader({
             </>
         );
     }
-    // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
+    // Fall back to token info when there is stub metadata (blank uri), updatable by default by the mint authority
     else if (!parsedData?.nftData?.metadata.uri && tokenInfo) {
         return defaultCard;
     } else if (parsedData?.nftData) {

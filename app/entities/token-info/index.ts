@@ -6,9 +6,11 @@ export {
 } from './api/fetch-token-infos-from-api';
 export { deriveScaledUiAmountMultiplier } from './lib/derive-scaled-ui-multiplier';
 export { TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors';
+export { isRedactedTokenAddress } from './lib/is-redacted-token-address';
 export { orderMintsByVerification } from './lib/order-mints-by-verification';
 export { getChainId } from '@entities/chain-id/@x/token-info';
 export type { TokenInfo } from './lib/types';
+export { useMintTokenInfo } from './model/use-mint-token-info';
 export { useTokenInfo } from './model/use-token-info';
 export { getTokenInfosSwrKey, useTokenInfos } from './model/use-token-infos';
 export { useUnbatchedTokenInfo } from './model/use-unbatched-token-info';

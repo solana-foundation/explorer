@@ -12,6 +12,7 @@ import { getTokenInfo, getTokenInfos } from '../fetch-token-infos-from-jupiter';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
+const MINT_C = gen.address(3);
 
 const fetchMock = vi.fn();
 
@@ -46,7 +47,7 @@ describe('getTokenInfos', () => {
 
             await getTokenInfos([MINT_A], Cluster.MainnetBeta);
 
-            expect(fetchMock.mock.calls[0][1].next).toEqual({ revalidate: expect.any(Number) });
+            expect(fetchMock.mock.calls[0][1].next.revalidate).toBeGreaterThan(0);
         });
 
         it('should pass the signal to fetch', async () => {
@@ -98,6 +99,48 @@ describe('getTokenInfos', () => {
 
             expect(result).toEqual({ error: new Error('JUPITER_API_KEY is not configured'), kind: 'unavailable' });
             expect(fetchMock).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('a redacted mint', () => {
+        it('should answer nothing listed without a request when every mint is redacted', async () => {
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+
+            expect(await getTokenInfos([MINT_A], Cluster.MainnetBeta)).toEqual(resolved([]));
+            expect(fetchMock).not.toHaveBeenCalled();
+        });
+
+        it('should search Jupiter for the other mints and leave the redacted one out', async () => {
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+            respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
+
+            const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
+
+            expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('query')).toBe(MINT_B);
+            expect(result).toEqual(resolved([tokenInfo(MINT_B)]));
+        });
+
+        it.each([
+            ['unset', undefined],
+            ['empty', ''],
+        ])('should search Jupiter for every mint when NEXT_PUBLIC_BAD_TOKENS is %s', async (_, badTokens) => {
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', badTokens);
+            respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
+
+            const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
+
+            expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('query')).toBe(`${MINT_A},${MINT_B}`);
+            expect(result).toEqual(resolved([tokenInfo(MINT_A), tokenInfo(MINT_B)]));
+        });
+
+        it('should match a redacted mint that has spaces around it in the list', async () => {
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', ` ${MINT_C} , ${MINT_A} `);
+            respond(200, [jupiterToken(MINT_B)]);
+
+            const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
+
+            expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('query')).toBe(MINT_B);
+            expect(result).toEqual(resolved([tokenInfo(MINT_B)]));
         });
     });
 

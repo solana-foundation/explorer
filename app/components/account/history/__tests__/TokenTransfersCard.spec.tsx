@@ -2,14 +2,13 @@ import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { buildParsedTransaction, buildTokenTransferCheckedIx } from '@features/receipt/model/__fixtures__/builders';
-import type { PublicKey } from '@solana/web3.js';
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ClusterContext, connectedWithGenesisHash, swrWrapper } from '@/app/__tests__/swr-hook';
-import { LABEL_CLUSTER, readLabelAfterFailedCardRequest, stubTokenInfoApi } from '@/app/__tests__/token-label';
+import { stubTokenInfoRoute } from '@/app/__tests__/token-info-route';
 
 import { TokenTransfersCard } from '../TokenTransfersCard';
 
@@ -29,13 +28,6 @@ vi.mock('@providers/accounts/tokens', async importOriginal => ({
 vi.mock('@features/transaction-history/model/use-fetch-account-history', () => ({
     useFetchAccountHistory: () => vi.fn(),
 }));
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
-}));
-vi.mock('@components/common/Signature', () => ({
-    Signature: ({ signature }: { signature: string }) => <span>{signature}</span>,
-}));
-vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', () => ({ default: () => null }));
 
 const [MINT, AUTHORITY, SOURCE, DESTINATION] = Array.from({ length: 4 }, (_, n) => gen.publicKey(n + 1));
 const USDC = { ...tokenInfo(MINT.toBase58()), symbol: 'USDC' };
@@ -64,7 +56,7 @@ const HISTORY = mockAccountHistory({
 
 describe('TokenTransfersCard', () => {
     beforeEach(() => {
-        stubTokenInfoApi([USDC]);
+        stubTokenInfoRoute([USDC]);
     });
 
     afterEach(() => {
@@ -77,12 +69,5 @@ describe('TokenTransfersCard', () => {
         render(<TokenTransfersCard address={MINT.toBase58()} />, { wrapper: swrWrapper() });
 
         expect(await screen.findByText('1.5 USDC')).toBeInTheDocument();
-    });
-
-    it('should keep the token label that the batch provider stored when the card request fails', async () => {
-        mock.cluster = LABEL_CLUSTER;
-        const label = await readLabelAfterFailedCardRequest(<TokenTransfersCard address={MINT.toBase58()} />, USDC);
-
-        expect(label).toHaveTextContent('USDC');
     });
 });

@@ -1,5 +1,6 @@
 import { useRefreshAccount } from '@entities/account';
 import { GENESIS_HASHES } from '@entities/chain-id';
+import type { TokenInfo } from '@entities/token-info';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
@@ -10,13 +11,11 @@ import { useState } from 'react';
 import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { FullTokenInfo } from '@/app/utils/token-info';
-
 import AddressLayout from '../layout';
 
 const mock = vi.hoisted(() => ({
     entry: undefined as CacheEntry<Account> | undefined,
-    fetchFullTokenInfo: vi.fn(),
+    lookupTokenInfo: vi.fn(),
 }));
 
 vi.mock('next/navigation');
@@ -34,9 +33,9 @@ vi.mock('@providers/cluster', () => ({
         url: 'https://api.mainnet-beta.solana.com',
     }),
 }));
-vi.mock('@/app/utils/token-info', async importOriginal => ({
-    ...(await importOriginal<typeof import('@/app/utils/token-info')>()),
-    fetchFullTokenInfo: mock.fetchFullTokenInfo,
+vi.mock('@entities/token-info/api/fetch-token-infos-from-api', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/token-info/api/fetch-token-infos-from-api')>()),
+    lookupTokenInfo: mock.lookupTokenInfo,
 }));
 vi.mock('@/app/utils/url', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/utils/url')>()),
@@ -52,7 +51,7 @@ vi.mock('@/app/features/subscriptions', async importOriginal => ({
     useIsEventAuthority: () => false,
 }));
 vi.mock('@components/Header', () => ({
-    Header: ({ isTokenInfoLoading, tokenInfo }: { isTokenInfoLoading: boolean; tokenInfo?: FullTokenInfo }) => (
+    Header: ({ isTokenInfoLoading, tokenInfo }: { isTokenInfoLoading: boolean; tokenInfo?: TokenInfo }) => (
         <h1>{isTokenInfoLoading ? 'header loading' : (tokenInfo?.name ?? 'header without token info')}</h1>
     ),
 }));
@@ -63,8 +62,8 @@ vi.mock('@/app/shared/ui/navigation-tabs', () => ({ NavigationTabLink: () => nul
 describe('AddressLayout', () => {
     beforeEach(() => {
         mock.entry = undefined;
-        mock.fetchFullTokenInfo.mockReset();
-        mock.fetchFullTokenInfo.mockResolvedValue(TOKEN_INFO);
+        mock.lookupTokenInfo.mockReset();
+        mock.lookupTokenInfo.mockResolvedValue({ kind: 'listed', token: TOKEN_INFO });
     });
 
     it('should keep the page mounted while a refresh fetches the account', async () => {
@@ -96,7 +95,7 @@ describe('AddressLayout', () => {
     });
 
     it('should show the loading card while the first token-info request runs', async () => {
-        mock.fetchFullTokenInfo.mockReturnValueOnce(new Promise(() => {}));
+        mock.lookupTokenInfo.mockReturnValueOnce(new Promise(() => {}));
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         render(page());
 
@@ -117,7 +116,7 @@ describe('AddressLayout', () => {
     });
 
     it('should keep the page mounted while a refresh refetches a token without token info', async () => {
-        mock.fetchFullTokenInfo.mockResolvedValueOnce(undefined).mockReturnValueOnce(new Promise(() => {}));
+        mock.lookupTokenInfo.mockResolvedValueOnce({ kind: 'not-listed' }).mockReturnValueOnce(new Promise(() => {}));
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         const { rerender } = render(page());
         await userEvent.click(await screen.findByRole('button', { name: 'clicks: 0' }));
@@ -126,15 +125,13 @@ describe('AddressLayout', () => {
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetching };
         rerender(page());
 
-        await waitFor(() => expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(2));
         expect(screen.getByRole('button', { name: 'clicks: 1' })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
     });
 
     it('should keep the page mounted while a refresh refetches token info that failed to load', async () => {
-        mock.fetchFullTokenInfo
-            .mockRejectedValueOnce(new Error('fetch failed'))
-            .mockReturnValueOnce(new Promise(() => {}));
+        mock.lookupTokenInfo.mockResolvedValueOnce({ kind: 'unavailable' }).mockReturnValueOnce(new Promise(() => {}));
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         const { rerender } = render(page());
         await userEvent.click(await screen.findByRole('button', { name: 'clicks: 0' }));
@@ -143,35 +140,37 @@ describe('AddressLayout', () => {
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetching };
         rerender(page());
 
-        await waitFor(() => expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(2));
         expect(screen.getByRole('button', { name: 'clicks: 1' })).toBeInTheDocument();
     });
 
     it('should keep the token info in the header when a refresh of it fails', async () => {
-        mock.fetchFullTokenInfo.mockResolvedValueOnce(TOKEN_INFO).mockRejectedValueOnce(new Error('fetch failed'));
+        mock.lookupTokenInfo
+            .mockResolvedValueOnce({ kind: 'listed', token: TOKEN_INFO })
+            .mockResolvedValueOnce({ kind: 'unavailable' });
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         render(page());
         expect(await screen.findByRole('heading', { name: 'USD Coin' })).toBeInTheDocument();
 
         await userEvent.click(screen.getByRole('button', { name: 'refresh' }));
 
-        await waitFor(() => expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(2));
         expect(screen.getByRole('heading', { name: 'USD Coin' })).toBeInTheDocument();
     });
 
     it('should not retry a failed token-info request', async () => {
-        mock.fetchFullTokenInfo.mockRejectedValueOnce(new Error('fetch failed'));
+        mock.lookupTokenInfo.mockResolvedValueOnce({ kind: 'unavailable' });
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         render(page());
         expect(await screen.findByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
 
         await act(() => new Promise(resolve => setTimeout(resolve, 100)));
 
-        expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(1);
+        expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(1);
     });
 
     it('should refetch failed token info when the page mounts again', async () => {
-        mock.fetchFullTokenInfo.mockRejectedValueOnce(new Error('fetch failed'));
+        mock.lookupTokenInfo.mockResolvedValueOnce({ kind: 'unavailable' });
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         const { rerender } = render(page());
         expect(await screen.findByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
@@ -183,7 +182,7 @@ describe('AddressLayout', () => {
     });
 
     it('should not refetch missing token info when the page mounts again', async () => {
-        mock.fetchFullTokenInfo.mockResolvedValueOnce(undefined);
+        mock.lookupTokenInfo.mockResolvedValueOnce({ kind: 'not-listed' });
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         const { rerender } = render(page());
         expect(await screen.findByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
@@ -192,7 +191,7 @@ describe('AddressLayout', () => {
         rerender(page());
         await act(() => new Promise(resolve => setTimeout(resolve, 100)));
 
-        expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(1);
+        expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(1);
         expect(screen.getByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
     });
 });
@@ -220,12 +219,13 @@ const ACCOUNT: Account = {
     space: 82,
 };
 
-const TOKEN_INFO: FullTokenInfo = {
+const TOKEN_INFO: TokenInfo = {
     address: ADDRESS,
-    chainId: 101,
     decimals: 6,
+    logoURI: null,
     name: 'USD Coin',
     symbol: 'USDC',
+    verified: true,
 };
 
 function page({ mounted = true } = {}) {

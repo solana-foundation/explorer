@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '@/app/entities/token-info';
@@ -17,6 +17,7 @@ const MINT_C = gen.address(3);
 const mocks = vi.hoisted(() => ({
     getTokenInfos: vi.fn(),
     getTokenInfosFromMetaplex: vi.fn(),
+    safeFetchAllMetadata: vi.fn(),
 }));
 
 // The Jupiter lookup and the Metaplex fallback each have their own spec. The route is the transport
@@ -30,6 +31,11 @@ vi.mock('@entities/token-info/server', async () => {
         getTokenInfosFromMetaplex: mocks.getTokenInfosFromMetaplex,
     };
 });
+
+vi.mock('@metaplex-foundation/mpl-token-metadata', async importOriginal => ({
+    ...(await importOriginal<typeof import('@metaplex-foundation/mpl-token-metadata')>()),
+    safeFetchAllMetadata: mocks.safeFetchAllMetadata,
+}));
 
 function token(address: string, overrides: Partial<TokenInfo> = {}): TokenInfo {
     return {
@@ -267,6 +273,37 @@ describe('POST /api/token-info', () => {
 
         const config = mocks.getTokenInfos.mock.calls[0][3];
         expect(config.signal).toBeInstanceOf(AbortSignal);
+    });
+
+    describe('a redacted mint', () => {
+        // Both sources run for real, because the route hides a redacted mint only when each of them drops it.
+        beforeEach(async () => {
+            const actual =
+                await vi.importActual<typeof import('@entities/token-info/server')>('@entities/token-info/server');
+            mocks.getTokenInfos.mockImplementation(actual.getTokenInfos);
+            mocks.getTokenInfosFromMetaplex.mockImplementation(actual.getTokenInfosFromMetaplex);
+            vi.stubEnv('JUPITER_API_KEY', 'test-key');
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+            vi.stubGlobal('fetch', vi.fn());
+        });
+
+        afterEach(() => {
+            vi.unstubAllEnvs();
+            vi.unstubAllGlobals();
+        });
+
+        it('should answer an empty list without an RPC read when the caller opts in to the on-chain fallback', async () => {
+            const { POST } = await importRoute();
+            const res = await POST(
+                createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta, includeOnChainFallback: true }),
+            );
+
+            expect(res.status).toBe(200);
+            expect(await res.json()).toEqual({ content: [] });
+            expect(fetch).not.toHaveBeenCalled();
+            // The assertion reads the call count, because a failure message that prints the Umi argument throws.
+            expect(mocks.safeFetchAllMetadata.mock.calls.length).toBe(0);
+        });
     });
 
     describe('when the Jupiter lookup fails', () => {

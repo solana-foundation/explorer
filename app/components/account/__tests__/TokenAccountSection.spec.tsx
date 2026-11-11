@@ -3,13 +3,12 @@ import { GENESIS_HASHES } from '@entities/chain-id';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { Account } from '@providers/accounts';
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
-import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ClusterContext, connectedWithGenesisHash, swrWrapper } from '@/app/__tests__/swr-hook';
-import { LABEL_CLUSTER, readLabelAfterFailedCardRequest, stubTokenInfoApi } from '@/app/__tests__/token-label';
+import { stubTokenInfoRoute } from '@/app/__tests__/token-info-route';
 
 import { TokenAccountSection } from '../TokenAccountSection';
 
@@ -27,13 +26,10 @@ vi.mock('@entities/account', async importOriginal => ({
     useAccountFetching: () => false,
     useRefreshAccount: () => vi.fn(),
 }));
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
-}));
 
 describe('TokenAccountSection', () => {
     beforeEach(() => {
-        stubTokenInfoApi([USDC]);
+        stubTokenInfoRoute([USDC]);
     });
 
     afterEach(() => {
@@ -46,16 +42,6 @@ describe('TokenAccountSection', () => {
         render(<TokenAccountSection account={ACCOUNT} tokenAccount={TOKEN_ACCOUNT} />, { wrapper: swrWrapper() });
 
         expect(await screen.findByText('Token balance (USDC)')).toBeInTheDocument();
-    });
-
-    it('should keep the token label that the batch provider stored when the card request fails', async () => {
-        mock.cluster = LABEL_CLUSTER;
-        const label = await readLabelAfterFailedCardRequest(
-            <TokenAccountSection account={ACCOUNT} tokenAccount={TOKEN_ACCOUNT} />,
-            USDC,
-        );
-
-        expect(label).toHaveTextContent('USDC');
     });
 });
 

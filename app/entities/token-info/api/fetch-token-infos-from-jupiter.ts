@@ -8,6 +8,7 @@ import { array, type Infer, is } from 'superstruct';
 import { fetchUpstream } from '@/app/shared/lib/http-utils';
 
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../lib/errors';
+import { isRedactedTokenAddress } from '../lib/is-redacted-token-address';
 import { jupiterListsTokensOn } from '../lib/jupiter-lists-tokens-on';
 import { JUPITER_TOKENS_SEARCH_URL, JupiterTokenStruct } from '../lib/jupiter-token';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../lib/request-limit';
@@ -22,14 +23,15 @@ export async function getTokenInfos(
     genesisHash?: string,
     config?: { signal?: AbortSignal },
 ): Promise<TokenInfosResult> {
-    if (addresses.length === 0) return NOTHING_LISTED;
+    const unredacted = addresses.filter(address => !isRedactedTokenAddress(address));
+    if (unredacted.length === 0) return NOTHING_LISTED;
     if (!jupiterListsTokensOn(getChainId(cluster, genesisHash))) return NOTHING_LISTED;
 
     const apiKey = process.env.JUPITER_API_KEY;
     if (!apiKey) return { error: new Error('JUPITER_API_KEY is not configured'), kind: 'unavailable' };
 
     const results = await Promise.all(
-        chunk(addresses, TOKEN_INFO_REQUEST_LIMIT).map(mints =>
+        chunk(unredacted, TOKEN_INFO_REQUEST_LIMIT).map(mints =>
             fetchTokenInfosFromJupiter({ apiKey, mints, signal: config?.signal }),
         ),
     );

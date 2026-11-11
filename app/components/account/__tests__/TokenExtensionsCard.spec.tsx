@@ -9,7 +9,7 @@ import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ClusterContext, connectedWithGenesisHash, swrWrapper } from '@/app/__tests__/swr-hook';
-import { LABEL_CLUSTER, readLabelAfterFailedCardRequest, stubTokenInfoApi } from '@/app/__tests__/token-label';
+import { stubTokenInfoRoute } from '@/app/__tests__/token-info-route';
 
 import { TokenExtensionsCard } from '../TokenExtensionsCard';
 
@@ -34,7 +34,7 @@ describe('TokenExtensionsCard', () => {
     beforeEach(() => {
         mock.cluster = connectedWithGenesisHash(Cluster.MainnetBeta, GENESIS_HASHES.MAINNET);
         mock.entry = undefined;
-        stubTokenInfoApi([USDC]);
+        stubTokenInfoRoute([USDC]);
     });
 
     afterEach(() => {
@@ -62,16 +62,6 @@ describe('TokenExtensionsCard', () => {
         renderCard();
 
         expect(await screen.findByText('USDC')).toBeInTheDocument();
-    });
-
-    it('should keep the token label that the batch provider stored when the card request fails', async () => {
-        mock.cluster = LABEL_CLUSTER;
-        const label = await readLabelAfterFailedCardRequest(
-            <TokenExtensionsCard address={MINT} decimals={6} extensions={[]} />,
-            USDC,
-        );
-
-        expect(label).toHaveTextContent('USDC');
     });
 });
 

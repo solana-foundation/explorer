@@ -14,7 +14,7 @@ import { create } from 'superstruct';
 import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { Logger } from '@/app/shared/lib/logger';
 import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
-import { getCurrentTokenScaledUiAmountMultiplier } from '@/app/utils/token-info';
+import { getCurrentTokenScaledUiAmountMultiplier } from '@/app/utils/token-extension';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 export type TokenInfoWithPubkey = {
