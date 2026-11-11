@@ -4,10 +4,10 @@ import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { renderHook } from '@testing-library/react';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type ClusterContext, clusterContext, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import { type ClusterContext, connectedWithGenesisHash, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
 import { buildParsedTransaction, buildTokenTransferCheckedIx } from '../__fixtures__/builders';
 import { useReceiptResult } from '../use-receipt-result';
@@ -29,7 +29,7 @@ const MINT = gen.publicKey();
 
 describe('useReceiptResult', () => {
     beforeEach(() => {
-        mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET);
         mocks.isReceiptEnabled = true;
         vi.stubGlobal(
             'fetch',
@@ -69,14 +69,14 @@ describe('useReceiptResult', () => {
                 content: [{ ...tokenInfo(MINT.toBase58()), symbol: symbolByGenesisHash[genesisHash] }],
             });
         });
-        mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.DEVNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.DEVNET);
         const tx = tokenTransfer();
         const { rerender, result } = renderHook(() => useReceiptResult(SIGNATURE, tx), {
             wrapper: swrWrapper(),
         });
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'DEVUSDC' } }));
 
-        mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET);
         rerender();
 
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'USDC' } }));
@@ -89,7 +89,7 @@ describe('useReceiptResult', () => {
         });
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Custom' } }));
 
-        mocks.cluster = connectedTo(Cluster.MainnetBeta, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.MainnetBeta, GENESIS_HASHES.MAINNET);
         rerender();
 
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Mainnet Beta' } }));
@@ -131,15 +131,6 @@ describe('useReceiptResult', () => {
         expect(fetch).not.toHaveBeenCalled();
     });
 });
-
-const RPC_URL = 'http://localhost:8899';
-
-function connectedTo(cluster: Cluster, genesisHash: string): ClusterContext {
-    return {
-        ...clusterContext({ cluster, connectableUrl: RPC_URL, status: ClusterStatus.Connected, url: RPC_URL }),
-        genesisHash,
-    };
-}
 
 function tokenTransfer(mint = MINT.toBase58()): TransactionWithMeta {
     const [authority, source, destination, receiver] = [

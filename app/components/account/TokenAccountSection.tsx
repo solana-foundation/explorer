@@ -3,7 +3,7 @@ import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { useUnbatchedTokenInfo } from '@entities/token-info';
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData } from '@providers/accounts';
@@ -44,10 +44,9 @@ import {
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { create } from 'superstruct';
-import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
@@ -304,18 +303,12 @@ function NonFungibleTokenMintAccountCard({
     );
 }
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
-}
-
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useRefreshAccount();
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
-
-    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
+    const { tokenInfo } = useUnbatchedTokenInfo({ cluster, genesisHash, mint: info.mint.toBase58() });
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
     const accountExtensions = info.extensions?.slice();
     accountExtensions?.sort(cmpExtension);

@@ -6,6 +6,6 @@ export { TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors'
 export { orderMintsByVerification } from './lib/order-mints-by-verification';
 export { getChainId } from '@entities/chain-id/@x/token-info';
 export type { FetchConfig, TokenInfo } from './lib/types';
-export { TokenInfoBatchProvider, useTokenInfoBatch } from './model/token-info-batch-provider';
 export { useTokenInfo } from './model/use-token-info';
-// `getTokenInfosSwrKey` / `useTokenInfos` are on `client.ts`: this barrel stays server-reachable.
+export { getTokenInfosSwrKey, useTokenInfos } from './model/use-token-infos';
+export { useUnbatchedTokenInfo } from './model/use-unbatched-token-info';

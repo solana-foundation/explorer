@@ -35,7 +35,10 @@ vi.mock('@providers/cluster', async importOriginal => {
 // Only the bulk lookup is stubbed. `orderMintsByVerification` and `deriveScaledUiAmountMultiplier`
 // stay real, so these specs exercise the actual tiering rather than a re-statement of it.
 const { useTokenInfosMock } = vi.hoisted(() => ({ useTokenInfosMock: vi.fn() }));
-vi.mock('@entities/token-info/client', () => ({ useTokenInfos: useTokenInfosMock }));
+vi.mock('@entities/token-info', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/token-info')>()),
+    useTokenInfos: useTokenInfosMock,
+}));
 
 // Stub Address so we can assert props without dragging in nickname/visibility/cluster-path machinery.
 vi.mock('@components/common/Address', () => ({

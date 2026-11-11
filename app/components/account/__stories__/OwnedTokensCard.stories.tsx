@@ -1,7 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { ChainId } from '@entities/chain-id';
-import { type TokenInfo } from '@entities/token-info';
-import { getTokenInfosSwrKey } from '@entities/token-info/client';
+import { getTokenInfosSwrKey, type TokenInfo } from '@entities/token-info';
 import {
     DispatchContext as TokensDispatch,
     type State as TokensState,

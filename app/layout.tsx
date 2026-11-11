@@ -14,7 +14,7 @@ import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
 import { SearchBar } from '@/app/components/SearchBarLoader';
-import { TokenInfoBatchProvider } from '@/app/entities/token-info';
+import { TokenInfoBatchProvider } from '@/app/entities/token-info/server';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { rubikFont } from '@/app/styles';

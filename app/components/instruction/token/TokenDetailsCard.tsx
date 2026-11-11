@@ -9,18 +9,16 @@ import {
     type InstructionNode,
     type RawInstructionNode,
 } from '@entities/instruction-card';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { useUnbatchedTokenInfo } from '@entities/token-info';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { type AccountMeta, PublicKey } from '@solana/web3.js';
 import { capitalizeFirstLetter, normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, is, Struct } from 'superstruct';
-import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
-import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
 
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
@@ -78,11 +76,8 @@ function TokenInstructionCard({
         }
     }, [fetchAccountInfo, mintAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { cluster, url } = useCluster();
-    const { data: tokenDetails } = useSWR(
-        mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
-        fetchTokenInfo,
-    );
+    const { cluster, genesisHash } = useCluster();
+    const { tokenInfo: tokenDetails } = useUnbatchedTokenInfo({ cluster, genesisHash, mint: mintAddress });
     const decimals =
         'tokenAmount' in info && is(info.tokenAmount, TokenAmountUi) ? info.tokenAmount.decimals : mintInfo?.decimals;
     const tokenSymbol = mintAddress && tokenDetails ? tokenDetails.symbol : '';
@@ -117,10 +112,6 @@ function TokenInstructionCard({
 /** A numeric field also holds a string, so only the declared type marks a field as text. */
 function declaredStringFields(struct: Struct<TokenInfo, Record<string, Struct<unknown>>>): ReadonlySet<string> {
     return new Set(Object.keys(struct.schema).filter(key => struct.schema[key].type === 'string'));
-}
-
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
 }
 
 /** An instruction without `amount` needs no mint, so it looks up no account. */

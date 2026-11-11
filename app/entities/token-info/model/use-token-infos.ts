@@ -20,10 +20,6 @@ export function getTokenInfosSwrKey(mints: readonly string[], chainId: ChainId) 
     return ['token-infos', mints.join(','), chainId] as const;
 }
 
-/**
- * For callers that must know every mint before they can render anything. Use the
- * singular `useTokenInfo` for one mint.
- */
 export function useTokenInfos(mints: readonly string[], cluster: Cluster, genesisHash?: string): UseTokenInfosResult {
     // The chain id, not the cluster and genesis hash it came from: the hash resolves a render late
     // and does not change the answer on the named clusters, so keying on it would refetch the whole

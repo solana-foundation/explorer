@@ -6,7 +6,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { useUnbatchedTokenInfo } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
@@ -21,7 +21,6 @@ import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
 import { create } from 'superstruct';
-import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { RefreshButton } from '@/app/components/shared/ui/refresh-button';
@@ -50,10 +49,6 @@ type TransferData = {
     units: string;
 };
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
-}
-
 function AmountCell({
     amountString,
     tokenAddress,
@@ -80,14 +75,13 @@ function AmountCell({
 }
 
 export function TokenTransfersCard({ address }: { address: string }) {
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(toAddress(address), true, true);
     const loadMore = () => fetchAccountHistory(toAddress(address), true);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
-    const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
+    const { isLoading: tokenInfoLoading, tokenInfo } = useUnbatchedTokenInfo({ cluster, genesisHash, mint: address });
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {
