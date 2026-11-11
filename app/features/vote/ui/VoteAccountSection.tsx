@@ -5,8 +5,8 @@ import { SolBalance } from '@components/common/SolBalance';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { displayTimestamp } from '@utils/date';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { type KeyValueRowInput, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 import { VoteAccount } from '../lib/validators';
@@ -35,8 +35,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
         },
         {
             label: 'Last Timestamp',
-            value: displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000),
-            valueClassName: 'font-mono',
+            value: <Timestamp unixTimestamp={voteAccount.info.lastTimestamp.timestamp} />,
         },
         { label: 'Commission', value: `${voteAccount.info.commission}%` },
         voteAccount.info.blsPubkeyCompressed && {

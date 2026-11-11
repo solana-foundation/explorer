@@ -4,7 +4,6 @@ import { Slot } from '@components/common/Slot';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { displayTimestamp, unixTimestampToMs } from '@utils/date';
 import {
     SysvarAccount,
     SysvarClockAccount,
@@ -19,6 +18,7 @@ import {
 } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 export function SysvarAccountSection({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarAccount }) {
@@ -196,8 +196,7 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
     const rows: KeyValueRow[] = [
         {
             label: 'Timestamp',
-            value: displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp)),
-            valueClassName: 'font-mono',
+            value: <Timestamp unixTimestamp={sysvarAccount.info.unixTimestamp} />,
         },
         { label: 'Epoch', value: <Epoch epoch={sysvarAccount.info.epoch} link /> },
         { label: 'Leader Schedule Epoch', value: <Epoch epoch={sysvarAccount.info.leaderScheduleEpoch} link /> },

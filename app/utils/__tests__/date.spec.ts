@@ -138,6 +138,12 @@ describe('displayTimestampRelative', () => {
         expect(displayTimestampRelative(NOW - 200, NOW)).toBe('just now');
     });
 
+    it('should render a few seconds of elapsed time with the second value', () => {
+        expect(displayTimestampRelative(NOW - SECOND, NOW)).toBe('1 second ago');
+        expect(displayTimestampRelative(NOW - 2 * SECOND, NOW)).toBe('2 seconds ago');
+        expect(displayTimestampRelative(NOW + 2 * SECOND, NOW)).toBe('in 2 seconds');
+    });
+
     it('should return an empty string for non-finite inputs', () => {
         expect(displayTimestampRelative(NaN, NOW)).toBe('');
         expect(displayTimestampRelative(NOW, Infinity)).toBe('');
