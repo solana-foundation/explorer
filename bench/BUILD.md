@@ -44,10 +44,10 @@
 | Dynamic | `/api/supply` | — | — |
 | Dynamic | `/api/token-image/[mintAddress]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
+| Dynamic | `/api/token-info/[mintAddress]` | — | — |
 | Dynamic | `/api/token-market-data/[address]` | — | — |
 | Dynamic | `/api/token-price/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
-| Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
 | Dynamic | `/block/[slot]` | 260 kB | 560 kB |
 | Dynamic | `/block/[slot]/accounts` | 250 kB | 560 kB |

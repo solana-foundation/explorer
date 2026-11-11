@@ -1,6 +1,5 @@
-// Configuration for the token-info route. Note: the Next.js route segment config
-// (`maxDuration`) stays in route.ts — Next only reads those as literal exports of
-// the route module, not via re-export.
+// Configuration for the token-info routes. Each route file declares its own `maxDuration`,
+// because Next reads route segment config only as a literal route export.
 
 import { TOKEN_INFO_REQUEST_LIMIT } from '@entities/token-info/server';
 

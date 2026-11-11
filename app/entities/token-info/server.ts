@@ -4,7 +4,7 @@ export { JUPITER_TOKENS_SEARCH_URL, JupiterTokenStruct } from './lib/jupiter-tok
 export { getTokenInfosFromMetaplex } from './api/fetch-token-metaplex';
 export { getTokenInfo, getTokenInfos } from './api/fetch-token-infos-from-jupiter';
 export { createAbortSignal } from './lib/create-abort-signal';
-export { isTransientError } from './lib/errors';
+export { isTransientError, TokenInfoHttpError } from './lib/errors';
 export { isValidCluster } from './lib/is-valid-cluster';
 export { TOKEN_INFO_REQUEST_LIMIT } from './lib/request-limit';
 export type { TokenInfo } from './lib/types';

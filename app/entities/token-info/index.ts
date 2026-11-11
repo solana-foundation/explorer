@@ -1,4 +1,9 @@
-export { fetchTokenInfoFromApi, fetchTokenInfosFromApi, getTokenInfoSwrKey } from './api/fetch-token-infos-from-api';
+export {
+    fetchTokenInfoFromApi,
+    fetchTokenInfosFromApi,
+    getTokenInfoSwrKey,
+    lookupTokenInfo,
+} from './api/fetch-token-infos-from-api';
 export { deriveScaledUiAmountMultiplier } from './lib/derive-scaled-ui-multiplier';
 export { TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors';
 export { orderMintsByVerification } from './lib/order-mints-by-verification';

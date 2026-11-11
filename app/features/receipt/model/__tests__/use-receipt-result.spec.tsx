@@ -48,13 +48,8 @@ describe('useReceiptResult', () => {
         });
 
         await waitForHook(() => expect(result.current.data).toMatchObject({ kind: 'ok', receipt: { symbol: 'USDC' } }));
-        expect(sentBodies()).toEqual([
-            {
-                addresses: [MINT.toBase58()],
-                cluster: Cluster.Custom,
-                genesisHash: GENESIS_HASHES.MAINNET,
-                includeOnChainFallback: false,
-            },
+        expect(sentUrls()).toEqual([
+            `/api/token-info/${MINT.toBase58()}?cluster=${Cluster.Custom}&genesisHash=${GENESIS_HASHES.MAINNET}`,
         ]);
     });
 
@@ -155,6 +150,6 @@ function tokenTransfer(mint = MINT.toBase58()): TransactionWithMeta {
     });
 }
 
-function sentBodies(): Record<string, unknown>[] {
-    return vi.mocked(fetch).mock.calls.map(([, init]) => JSON.parse(String(init?.body)));
+function sentUrls(): string[] {
+    return vi.mocked(fetch).mock.calls.map(([input]) => String(input));
 }

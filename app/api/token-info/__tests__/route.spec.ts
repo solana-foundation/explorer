@@ -139,6 +139,16 @@ describe('POST /api/token-info', () => {
         expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.MainnetBeta, undefined, expect.anything());
     });
 
+    it('should answer without a Cache-Control header', async () => {
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
+
+        const { POST } = await importRoute();
+        const res = await POST(createRequest({ address: MINT_A, cluster: Cluster.MainnetBeta }));
+
+        expect(res.status).toBe(200);
+        expect(res.headers.get('Cache-Control')).toBeNull();
+    });
+
     it('should resolve several addresses in one request', async () => {
         mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A), token(MINT_B)]));
 
@@ -275,28 +285,47 @@ describe('POST /api/token-info', () => {
             expect(Logger.error).toHaveBeenCalled();
         });
 
-        it('should warn without reporting to Sentry when Jupiter is rate limited', async () => {
+        it('should answer 429 and report the rate limit to Sentry when Jupiter is rate limited', async () => {
             failUpstream(new TokenInfoHttpError({ status: 429, statusText: 'Too Many Requests' }));
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(429);
+            expect(await res.json()).toEqual({ error: 'Token info rate limited' });
+            expect(Logger.error).not.toHaveBeenCalled();
+            expect(Logger.warn).toHaveBeenCalledTimes(1);
+            expect(Logger.warn).toHaveBeenCalledWith(
+                '[api:token-info] Jupiter rate limit exceeded',
+                expect.objectContaining({ sentry: true }),
+            );
+        });
+
+        it.each([
+            ['a 500', new TokenInfoHttpError({ status: 500, statusText: 'Internal Server Error' }), 'HTTP 500'],
+            ['a timeout', new DOMException('The operation timed out.', 'TimeoutError'), 'timed out'],
+        ])('should answer 503 and report %s to Sentry as a warning', async (_, error, upstreamError) => {
+            failUpstream(error);
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
 
             expect(res.status).toBe(503);
             expect(Logger.error).not.toHaveBeenCalled();
-            expect(Logger.warn).toHaveBeenCalledTimes(1);
-            expect(Logger.warn).toHaveBeenCalledWith(
-                '[api:token-info] Token lookup unavailable',
-                expect.not.objectContaining({ sentry: expect.anything() }),
-            );
+            expect(Logger.warn).toHaveBeenCalledWith('[api:token-info] Token lookup unavailable', {
+                sentry: true,
+                sentryExtras: expect.objectContaining({ upstreamError: expect.stringContaining(upstreamError) }),
+            });
         });
 
-        it.each([401, 500])('should answer 503 when Jupiter answers %i', async status => {
-            failUpstream(new TokenInfoHttpError({ status, statusText: 'nope' }));
+        it('should answer 503 and report a 401 to Sentry as an error', async () => {
+            failUpstream(new TokenInfoHttpError({ status: 401, statusText: 'Unauthorized' }));
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
 
             expect(res.status).toBe(503);
+            expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ sentry: true }));
         });
 
         it('should report an invalid Jupiter response to Sentry', async () => {

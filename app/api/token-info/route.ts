@@ -1,20 +1,10 @@
-import {
-    createAbortSignal,
-    getChainId,
-    getTokenInfos,
-    getTokenInfosFromMetaplex,
-    isTransientError,
-    isValidCluster,
-    type TokenInfo,
-} from '@entities/token-info/server';
+import { isValidCluster } from '@entities/token-info/server';
 import { isAddress } from '@solana/kit';
-import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 import { array, boolean, type Infer, is, number, optional, refine, string, type } from 'superstruct';
 
-import { Logger } from '@/app/shared/lib/logger';
-
 import { MAX_ADDRESSES } from './config';
+import { invalidRequest, lookupTokenInfos, upstreamRateLimited, upstreamUnavailable } from './lookup-token-infos';
 
 // Platform backstop. One invocation is the Jupiter lookup, then the on-chain fallback's
 // chunked RPC reads, then the off-chain logo reads — already bounded as a group by
@@ -62,52 +52,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ content: [] });
     }
 
-    // Allow to resolve chainId with genesisHash as the request does not use Connection instance
-    // For requests that use Connection, Custom cluster should be disabled
-    const result = await getTokenInfos(addresses, cluster, genesisHash, {
-        // Bounds the lookup well below `maxDuration`, so the on-chain fallback still has time to run.
-        signal: createAbortSignal(),
+    const lookup = await lookupTokenInfos({
+        addresses,
+        cluster,
+        genesisHash,
+        includeOnChainFallback: includeOnChainFallback === true,
     });
-
-    if (result.kind === 'unavailable') {
-        reportUnavailable(result.error, {
-            addressCount: addresses.length,
-            chainId: getChainId(cluster, genesisHash),
-            cluster,
-        });
-        return upstreamUnavailable();
-    }
-
-    if (result.malformed > 0) {
-        Logger.warn('[api:token-info] Token lookup dropped malformed tokens', {
-            sentry: true,
-            sentryExtras: { addressCount: addresses.length, cluster, malformed: result.malformed },
-        });
-    }
-
-    // Opt-in, so a caller that needs no on-chain metadata does not wait for the RPC reads.
-    const tokens =
-        includeOnChainFallback === true ? await withMetaplexFallback(result.tokens, addresses, cluster) : result.tokens;
+    if (lookup.kind === 'rate-limited') return upstreamRateLimited();
+    if (lookup.kind === 'unavailable') return upstreamUnavailable();
 
     // `content` is always an array; single-address callers read `content[0]`.
-    return NextResponse.json({ content: tokens });
-}
-
-function reportUnavailable(error: unknown, extras: Record<string, unknown>) {
-    const message = '[api:token-info] Token lookup unavailable';
-    if (isTransientError(error)) {
-        Logger.warn(message, { error, ...extras });
-        return;
-    }
-    Logger.error(new Error(message, { cause: error }), { sentry: true, sentryExtras: extras });
-}
-
-function invalidRequest() {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
-}
-
-function upstreamUnavailable() {
-    return NextResponse.json({ error: 'Token info unavailable' }, { status: 503 });
+    return NextResponse.json({ content: lookup.tokens });
 }
 
 /**
@@ -124,35 +79,4 @@ function distinctAddresses({ address, addresses }: RequestBody): string[] | unde
     // accounts, and a repeated mint costs one lookup rather than a slot against the limit.
     const unique = Array.from(new Set(requested));
     return unique.length > MAX_ADDRESSES ? undefined : unique;
-}
-
-/**
- * Fills in the mints with no token info by reading their on-chain Metaplex
- * metadata. The fallback is best-effort: a failure here still returns the
- * listed tokens.
- */
-async function withMetaplexFallback(listed: TokenInfo[], addresses: string[], cluster: Cluster): Promise<TokenInfo[]> {
-    const found = new Set(listed.map(token => token.address));
-    const missing = addresses.filter(address => !found.has(address));
-    if (missing.length === 0) return listed;
-
-    // Resolved server-side on purpose: forwarding the browser's RPC URL would let any caller
-    // point this route at an arbitrary host. Only the browser knows a custom cluster's endpoint,
-    // so a custom cluster gets no on-chain fallback.
-    if (cluster === Cluster.Custom) return listed;
-
-    // `!rpcEndpoint` still guards a `*_RPC_URL` env var set to `""`, which survives the `??`
-    // fallback in `serverClusterUrl`.
-    const rpcEndpoint = serverClusterUrl(cluster);
-    if (!rpcEndpoint) return listed;
-
-    try {
-        const onChain = await getTokenInfosFromMetaplex(missing, rpcEndpoint, {
-            onError: error => Logger.warn('[api:token-info] Metaplex lookup failed', { error }),
-        });
-        return [...listed, ...onChain];
-    } catch (error) {
-        Logger.warn('[api:token-info] Metaplex fallback failed', { error });
-        return listed;
-    }
 }

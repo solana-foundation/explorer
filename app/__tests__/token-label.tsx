@@ -12,11 +12,20 @@ import { connectedWithGenesisHash } from '@/app/__tests__/swr-hook';
 export function stubTokenInfoApi(tokens: TokenInfo[]): void {
     vi.stubGlobal(
         'fetch',
-        vi.fn(async (_url: string, init: RequestInit) => {
-            const { addresses } = JSON.parse(String(init.body)) as { addresses: string[] };
+        vi.fn(async (url: string, init: RequestInit) => {
+            const addresses = requestedMints(url, init);
             return Response.json({ content: tokens.filter(token => addresses.includes(token.address)) });
         }),
     );
+}
+
+function requestedMints(url: string, init: RequestInit): string[] {
+    if (init.method === 'POST') {
+        const { addresses } = JSON.parse(String(init.body)) as { addresses: string[] };
+        return addresses;
+    }
+    const { pathname } = new URL(url, 'http://localhost');
+    return [decodeURIComponent(pathname.slice(pathname.lastIndexOf('/') + 1))];
 }
 
 export const LABEL_CLUSTER = connectedWithGenesisHash(Cluster.MainnetBeta, GENESIS_HASHES.MAINNET);
