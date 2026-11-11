@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { type AnchorIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { PublicKey } from '@solana/web3.js';
@@ -37,22 +38,35 @@ describe('ProgramMultisigCard', () => {
     });
 
     it('should show the upgrade authority as the multisig vault', () => {
-        const vault = '8jj7zJgdr5bDndc7evM74FMGwzLPmd4u4QxNzFi1BMai';
+        const vault = gen.publicKey(1);
         vi.mocked(useSquadsMultisigLookup).mockReturnValue({
-            data: { isSquad: true, multisig: '7qipzLR9j1JcvdxE1XJEFgvoyFmgBpgw5hMdHBMPcJtM', version: 'v4' },
+            data: { isSquad: true, multisig: gen.address(2), version: 'v4' },
         } as ReturnType<typeof useSquadsMultisigLookup>);
 
         render(
             <ProgramMultisigCard
                 data={{
                     ...PROGRAM_DATA,
-                    programData: { authority: new PublicKey(vault), data: ['', 'base64'], slot: 0 },
+                    programData: { authority: vault, data: ['', 'base64'], slot: 0 },
                 }}
             />,
         );
 
         expect(screen.getByText('Multisig Vault')).toBeInTheDocument();
-        expect(screen.getByText(vault)).toBeInTheDocument();
+        expect(screen.getByText(vault.toBase58())).toBeInTheDocument();
+    });
+
+    it('should not show a multisig vault when the upgrade authority does not belong to a Squads multisig', () => {
+        render(
+            <ProgramMultisigCard
+                data={{
+                    ...PROGRAM_DATA,
+                    programData: { authority: gen.publicKey(1), data: ['', 'base64'], slot: 0 },
+                }}
+            />,
+        );
+
+        expect(screen.queryByText('Multisig Vault')).not.toBeInTheDocument();
     });
 
     it('should decode the multisig with the IDL from the Anchor IDL account over the PMP IDL', () => {
