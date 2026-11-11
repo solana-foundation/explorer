@@ -78,6 +78,12 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                         label: 'Multisig Account',
                         value: <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />,
                     },
+                    // Only a vault can sign for a multisig, so a Squads upgrade authority is always one of its vaults
+                    squadMapInfo?.isSquad &&
+                        programAuthority && {
+                            label: 'Multisig Vault',
+                            value: <Address pubkey={programAuthority} link />,
+                        },
                     {
                         label: 'Multisig Approval Threshold',
                         value: squadInfo ? (
