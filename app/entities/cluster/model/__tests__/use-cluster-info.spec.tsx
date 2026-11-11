@@ -177,7 +177,7 @@ describe('useEpochInfo', () => {
         errorSpy.mockRestore();
     });
 
-    it('should refetch on the refresh interval without a focus event', async () => {
+    it('should not refetch on a timer', async () => {
         vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
         try {
             rpc.getEpochInfo
@@ -188,10 +188,10 @@ describe('useEpochInfo', () => {
             await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
             expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
 
-            await act(() => vi.advanceTimersByTimeAsync(30_000));
+            await act(() => vi.advanceTimersByTimeAsync(120_000));
 
-            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
-            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+            expect(result.current).toEqual(EPOCH_INFO);
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
         } finally {
             vi.useRealTimers();
         }

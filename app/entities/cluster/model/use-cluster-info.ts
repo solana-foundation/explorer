@@ -19,29 +19,27 @@ export type ClusterQueryResult<T> = {
 };
 
 type Options = { enabled?: boolean };
-type QueryOptions = Options & { refreshInterval?: number };
-
-const EPOCH_INFO_REFRESH_MS = 30_000;
+type QueryOptions = Options & { immutable?: boolean };
 
 export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
     return useEpochScheduleResult(options).data;
 }
 
 export function useEpochScheduleResult(options: Options = {}): ClusterQueryResult<ClusterInfo['epochSchedule']> {
-    return useClusterQuery('epoch-schedule', fetchEpochSchedule, options);
+    return useClusterQuery('epoch-schedule', fetchEpochSchedule, { ...options, immutable: true });
 }
 
-/** Refetches on mount, focus, reconnect and on an interval, so the returned value changes while a page stays open. */
+/** Refetches on mount, focus and reconnect — but not on a timer — so an open page picks up a new epoch without polling the RPC. */
 export function useEpochInfo(options: Options = {}): EpochInfo | undefined {
     return useEpochInfoResult(options).data;
 }
 
 function useEpochInfoResult(options: Options = {}): ClusterQueryResult<EpochInfo> {
-    return useClusterQuery('epoch-info', fetchEpochInfo, { ...options, refreshInterval: EPOCH_INFO_REFRESH_MS });
+    return useClusterQuery('epoch-info', fetchEpochInfo, options);
 }
 
 export function useFirstAvailableBlock(options: Options = {}): bigint | undefined {
-    return useClusterQuery('first-available-block', fetchFirstAvailableBlock, options).data;
+    return useClusterQuery('first-available-block', fetchFirstAvailableBlock, { ...options, immutable: true }).data;
 }
 
 export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
@@ -57,15 +55,14 @@ export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
 function useClusterQuery<T>(
     name: string,
     fetcher: (url: string) => Promise<T>,
-    { enabled = true, refreshInterval }: QueryOptions = {},
+    { enabled = true, immutable: isImmutable = false }: QueryOptions = {},
 ): ClusterQueryResult<T> {
     const { url, status } = useCluster();
     const shouldFetch = enabled && status === ClusterStatus.Connected && Boolean(url);
     const { data, error, isLoading } = useSWR(shouldFetch ? [name, url] : undefined, () => fetcher(url), {
         errorRetryCount: 3,
         onError: err => Logger.error(err, { query: name }),
-        refreshInterval,
-        use: refreshInterval !== undefined ? [] : [immutable],
+        use: isImmutable ? [immutable] : [],
     });
 
     return { data, error, isLoading: shouldFetch && isLoading };
