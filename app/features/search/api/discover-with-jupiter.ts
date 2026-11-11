@@ -1,4 +1,5 @@
-import { array, boolean, is, nullable, number, optional, string, type } from 'superstruct';
+import { JUPITER_TOKENS_SEARCH_URL, JupiterTokenStruct } from '@entities/token-info/server';
+import { array, is } from 'superstruct';
 
 import { matchAbortError } from '@/app/shared/lib/errors';
 import { fetchUpstream } from '@/app/shared/lib/http-utils';
@@ -7,17 +8,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { getJupiterApiKey } from '../config';
 import type { DiscoveredToken } from './types';
 
-const JupiterTokenSchema = type({
-    decimals: optional(number()),
-    icon: optional(nullable(string())),
-    id: string(),
-    isVerified: optional(boolean()),
-    logoURI: optional(nullable(string())),
-    name: string(),
-    symbol: string(),
-});
-
-const JupiterSearchResponseSchema = array(JupiterTokenSchema);
+const JupiterSearchResponseSchema = array(JupiterTokenStruct);
 
 export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
     const jupiterApiKey = getJupiterApiKey();
@@ -27,7 +18,7 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
     }
 
     try {
-        const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(query)}`;
+        const url = `${JUPITER_TOKENS_SEARCH_URL}?query=${encodeURIComponent(query)}`;
         const response = await fetchUpstream(url, {
             headers: {
                 Accept: 'application/json',
@@ -55,7 +46,7 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
             address: item.id,
             decimals: item.decimals,
             isVerified: item.isVerified === true,
-            logoUri: item.icon ?? item.logoURI ?? undefined,
+            logoUri: item.icon ?? undefined,
             name: item.name,
             symbol: item.symbol,
         }));

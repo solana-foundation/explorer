@@ -59,22 +59,14 @@ describe('useReceiptResult', () => {
     });
 
     it('should build the receipt again when the genesis hash changes', async () => {
-        const symbolByGenesisHash: Record<string, string> = {
-            [GENESIS_HASHES.DEVNET]: 'DEVUSDC',
-            [GENESIS_HASHES.MAINNET]: 'USDC',
-        };
-        vi.mocked(fetch).mockImplementation(async (_input, init) => {
-            const { genesisHash } = JSON.parse(String(init?.body));
-            return Response.json({
-                content: [{ ...tokenInfo(MINT.toBase58()), symbol: symbolByGenesisHash[genesisHash] }],
-            });
-        });
         mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.DEVNET);
         const tx = tokenTransfer();
         const { rerender, result } = renderHook(() => useReceiptResult(SIGNATURE, tx), {
             wrapper: swrWrapper(),
         });
-        await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'DEVUSDC' } }));
+        await waitForHook(() => expect(result.current.data).toMatchObject({ kind: 'ok' }));
+        expect(result.current.data).toMatchObject({ receipt: { symbol: undefined } });
+        expect(fetch).not.toHaveBeenCalled();
 
         mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET);
         rerender();

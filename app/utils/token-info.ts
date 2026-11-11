@@ -65,7 +65,7 @@ export function isRedactedTokenAddress(address: string): boolean {
 
 /**
  * Get the full token info from a CDN with the legacy token list
- * The UTL SDK only returns the most common fields, we sometimes need eg extensions
+ * The token info API only returns the most common fields, we sometimes need eg extensions
  * @param address Public key of the token
  * @param cluster Cluster to fetch the token info for
  * @param genesisHash Genesis hash for cluster identification (required for the Custom cluster)

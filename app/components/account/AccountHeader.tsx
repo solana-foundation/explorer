@@ -64,7 +64,7 @@ export function AccountHeader({
         return <ProgramHeader address={address} />;
     }
 
-    // Stake accounts have a stable parsed type that doesn't depend on the token-info (UTL) fetch,
+    // Stake accounts have a stable parsed type that doesn't depend on the token-info fetch,
     // so resolve their header before the isTokenInfoLoading gate and render the correct title
     // ("Stake Account") instead of the generic "Account" fallback.
     if (parsedData?.program === STAKE_PROGRAM_LABEL) {

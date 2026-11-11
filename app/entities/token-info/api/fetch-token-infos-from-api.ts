@@ -5,6 +5,7 @@ import { array, is, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { jupiterListsTokensOn } from '../lib/jupiter-lists-tokens-on';
 import { type TokenInfo, TokenInfoStruct } from '../lib/types';
 
 export async function fetchTokenInfoFromApi(
@@ -41,6 +42,7 @@ export async function fetchTokenInfosFromApi({
     const chainId = getChainId(cluster, genesisHash);
     if (!chainId) return undefined;
     if (addresses.length === 0) return [];
+    if (!includeOnChainFallback && !jupiterListsTokensOn(chainId)) return [];
 
     try {
         const response = await fetch('/api/token-info', {

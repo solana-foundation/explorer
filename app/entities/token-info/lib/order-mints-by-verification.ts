@@ -3,7 +3,7 @@ import type { TokenInfo } from './types';
 /**
  * Holdings arrive from the RPC in arbitrary order and an account can hold thousands of
  * airdropped mints, so the first screen is otherwise random. A mint absent from
- * `tokenInfos` is one the unified token list does not carry, which includes any mint
+ * `tokenInfos` is one with no token info, which includes any mint
  * whose lookup failed. Nothing is dropped; junk sinks.
  */
 export function orderMintsByVerification(

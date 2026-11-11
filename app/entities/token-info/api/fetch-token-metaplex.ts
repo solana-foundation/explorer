@@ -178,12 +178,9 @@ async function fetchLogoUri(
 }
 
 /**
- * Resolves token info from on-chain Metaplex metadata. Use this for mints the
- * unified token list (UTL) API does not carry.
- *
- * This replaces the Metaplex fallback in `@solflare-wallet/utl-sdk`. Like the
- * SDK it returns only mints whose token standard is `Fungible`, and it marks
- * every result unverified because the data is not on a curated list.
+ * Resolves token info from on-chain Metaplex metadata. It returns only mints whose
+ * token standard is `Fungible`, and it marks every result unverified because the
+ * data is not on a curated list.
  */
 export async function getTokenInfosFromMetaplex(
     addresses: string[],

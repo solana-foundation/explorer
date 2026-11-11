@@ -110,7 +110,7 @@ function tokenInfo(address: string, verified: boolean) {
     return { address, decimals: 6, logoURI: null, name: `Token ${address.slice(0, 4)}`, symbol: 'TKN', verified };
 }
 
-/** The resolved lookup, settled. Pass the entries the UTL list is meant to know about. */
+/** The resolved lookup, settled. Pass the entries Jupiter lists. */
 function resolved(entries: ReturnType<typeof tokenInfo>[] = []) {
     return { isLoading: false, tokenInfos: new Map(entries.map(entry => [entry.address, entry])) };
 }

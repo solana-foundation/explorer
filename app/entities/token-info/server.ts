@@ -1,7 +1,8 @@
 import 'server-only';
 
+export { JUPITER_TOKENS_SEARCH_URL, JupiterTokenStruct } from './lib/jupiter-token';
 export { getTokenInfosFromMetaplex } from './api/fetch-token-metaplex';
-export { getTokenInfo, getTokenInfos } from './api/fetch-token-mints';
+export { getTokenInfo, getTokenInfos } from './api/fetch-token-infos-from-jupiter';
 export { createAbortSignal } from './lib/create-abort-signal';
 export { isTransientError } from './lib/errors';
 export { isValidCluster } from './lib/is-valid-cluster';

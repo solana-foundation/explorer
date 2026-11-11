@@ -61,6 +61,25 @@ describe('fetchTokenInfosFromApi', () => {
         expect(fetch).not.toHaveBeenCalled();
     });
 
+    it.each([
+        ['devnet', Cluster.Devnet, undefined],
+        ['testnet', Cluster.Testnet, undefined],
+        ['a Custom cluster with the devnet genesis hash', Cluster.Custom, GENESIS_HASHES.DEVNET],
+    ])('should resolve no tokens without a request on %s without the fallback', async (_, cluster, hash) => {
+        const offMainnetRequest = request({ cluster, genesisHash: hash, includeOnChainFallback: false });
+
+        await expect(fetchTokenInfosFromApi(offMainnetRequest)).resolves.toEqual([]);
+        expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('should request devnet tokens with the on-chain fallback', async () => {
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(MINT_A)] }));
+
+        const tokens = await fetchTokenInfosFromApi(request({ cluster: Cluster.Devnet, includeOnChainFallback: true }));
+
+        expect(tokens).toEqual([tokenInfo(MINT_A)]);
+    });
+
     it.each([404, 500])('should resolve undefined for a %i response', async status => {
         vi.mocked(fetch).mockResolvedValue(new Response(null, { status }));
 

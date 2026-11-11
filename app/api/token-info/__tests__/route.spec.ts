@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
     getTokenInfosFromMetaplex: vi.fn(),
 }));
 
-// The UTL list lookup and the Metaplex fallback each have their own spec. The route is the transport
+// The Jupiter lookup and the Metaplex fallback each have their own spec. The route is the transport
 // edge, so both are mocked here to exercise body parsing, the address cap, response shaping, and the
 // opt-in fallback policy. `isValidCluster` stays real so cluster handling is exercised end to end.
 vi.mock('@entities/token-info/server', async () => {
@@ -48,7 +48,7 @@ describe('POST /api/token-info', () => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'error').mockImplementation(() => {});
-        mocks.getTokenInfos.mockResolvedValue([]);
+        mocks.getTokenInfos.mockResolvedValue(resolved([]));
         mocks.getTokenInfosFromMetaplex.mockResolvedValue([]);
     });
 
@@ -129,7 +129,7 @@ describe('POST /api/token-info', () => {
     });
 
     it('should accept a single address and still answer with an array', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
 
         const { POST } = await importRoute();
         const res = await POST(createRequest({ address: MINT_A, cluster: Cluster.MainnetBeta }));
@@ -140,7 +140,7 @@ describe('POST /api/token-info', () => {
     });
 
     it('should resolve several addresses in one request', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A), token(MINT_B)]);
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A), token(MINT_B)]));
 
         const { POST } = await importRoute();
         const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
@@ -177,7 +177,7 @@ describe('POST /api/token-info', () => {
     });
 
     it('should not read on-chain metadata unless the caller opts in', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([]);
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([]));
 
         const { POST } = await importRoute();
         const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
@@ -186,8 +186,8 @@ describe('POST /api/token-info', () => {
         expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
     });
 
-    it('should read on-chain metadata only for mints the list is missing', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
+    it('should read on-chain metadata only for mints Jupiter does not list', async () => {
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
         mocks.getTokenInfosFromMetaplex.mockResolvedValueOnce([token(MINT_C, { verified: false })]);
 
         const { POST } = await importRoute();
@@ -209,8 +209,8 @@ describe('POST /api/token-info', () => {
         expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_C, { verified: false })] });
     });
 
-    it('should skip the on-chain lookup when the list already covers every mint', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A), token(MINT_B)]);
+    it('should skip the on-chain lookup when Jupiter lists every mint', async () => {
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A), token(MINT_B)]));
 
         const { POST } = await importRoute();
         await POST(
@@ -225,7 +225,7 @@ describe('POST /api/token-info', () => {
     });
 
     it('should still return the listed tokens when the on-chain lookup throws', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
+        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
         mocks.getTokenInfosFromMetaplex.mockRejectedValueOnce(new Error('rpc exploded'));
 
         const { POST } = await importRoute();
@@ -259,29 +259,24 @@ describe('POST /api/token-info', () => {
         expect(config.signal).toBeInstanceOf(AbortSignal);
     });
 
-    describe('when the upstream list lookup fails', () => {
-        // `getTokenInfos` answers `[]` for an outage and for a genuine all-not-found alike, and
-        // reports a partial drop through the same hook. Only the first may be cached as an answer.
-        function failUpstream(resolved: TokenInfo[] = [], error: unknown = new Error('upstream exploded')) {
-            mocks.getTokenInfos.mockImplementation(async (_addresses, _cluster, _genesisHash, config) => {
-                config.onError(error);
-                return resolved;
-            });
+    describe('when the Jupiter lookup fails', () => {
+        function failUpstream(error: unknown = new Error('upstream exploded')) {
+            mocks.getTokenInfos.mockResolvedValue({ error, kind: 'unavailable' });
         }
 
-        it('should answer 503 rather than an empty list when nothing resolved', async () => {
+        it('should answer 503 rather than an empty list', async () => {
             failUpstream();
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
 
             expect(res.status).toBe(503);
-            expect(await res.json()).toEqual({ error: 'Token list unavailable' });
+            expect(await res.json()).toEqual({ error: 'Token info unavailable' });
             expect(Logger.error).toHaveBeenCalled();
         });
 
-        it('should warn without reporting to Sentry when the list is rate limited', async () => {
-            failUpstream([], new TokenInfoHttpError({ status: 429, statusText: 'Too Many Requests' }));
+        it('should warn without reporting to Sentry when Jupiter is rate limited', async () => {
+            failUpstream(new TokenInfoHttpError({ status: 429, statusText: 'Too Many Requests' }));
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
@@ -290,13 +285,22 @@ describe('POST /api/token-info', () => {
             expect(Logger.error).not.toHaveBeenCalled();
             expect(Logger.warn).toHaveBeenCalledTimes(1);
             expect(Logger.warn).toHaveBeenCalledWith(
-                '[api:token-info] List lookup resolved nothing',
+                '[api:token-info] Token lookup unavailable',
                 expect.not.objectContaining({ sentry: expect.anything() }),
             );
         });
 
-        it('should report an invalid list response to Sentry', async () => {
-            failUpstream([], new TokenInfoInvalidResponseError());
+        it.each([401, 500])('should answer 503 when Jupiter answers %i', async status => {
+            failUpstream(new TokenInfoHttpError({ status, statusText: 'nope' }));
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(503);
+        });
+
+        it('should report an invalid Jupiter response to Sentry', async () => {
+            failUpstream(new TokenInfoInvalidResponseError());
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
@@ -306,7 +310,7 @@ describe('POST /api/token-info', () => {
             expect(Logger.warn).not.toHaveBeenCalled();
         });
 
-        it('should not run the on-chain fallback when the list lookup failed outright', async () => {
+        it('should not run the on-chain fallback', async () => {
             failUpstream();
 
             const { POST } = await importRoute();
@@ -320,28 +324,39 @@ describe('POST /api/token-info', () => {
 
             expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
         });
+    });
 
-        it('should still answer the tokens it did resolve when only some were dropped', async () => {
-            failUpstream([token(MINT_A)]);
+    describe('when Jupiter answers with malformed tokens', () => {
+        it('should answer the tokens it did resolve and warn about the rest', async () => {
+            mocks.getTokenInfos.mockResolvedValue(resolved([token(MINT_A)], 1));
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
 
             expect(res.status).toBe(200);
             expect(await res.json()).toEqual({ content: [token(MINT_A)] });
+            expect(Logger.warn).toHaveBeenCalledWith(
+                '[api:token-info] Token lookup dropped malformed tokens',
+                expect.objectContaining({ sentry: true }),
+            );
         });
 
-        it('should keep answering 200 for a genuine all-not-found, which reports no error', async () => {
-            mocks.getTokenInfos.mockResolvedValue([]);
+        it('should answer 200 without a warning for a mint that is not listed', async () => {
+            mocks.getTokenInfos.mockResolvedValue(resolved([]));
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
 
             expect(res.status).toBe(200);
             expect(await res.json()).toEqual({ content: [] });
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
     });
 });
+
+function resolved(tokens: TokenInfo[], malformed = 0) {
+    return { kind: 'resolved', malformed, tokens };
+}
 
 function createRequest(body: Record<string, unknown>) {
     return new Request('http://localhost:3000/api/token-info', {

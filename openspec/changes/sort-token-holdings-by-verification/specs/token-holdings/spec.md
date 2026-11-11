@@ -2,13 +2,13 @@
 
 ### Requirement: Token holdings SHALL be ordered by verification tier
 
-The Token Holdings card SHALL order deduplicated mints into three tiers, most trustworthy first: mints the unified token list (UTL) marks `verified`, then mints UTL knows but does not mark verified, then mints UTL does not know. The order MUST be stable — within a tier, mints keep the order the RPC returned them in — so the same holdings render the same way on every load. No mint is removed from the list by this ordering; every holding stays reachable through Load More.
+The Token Holdings card SHALL order deduplicated mints into three tiers, most trustworthy first: mints Jupiter marks `verified`, then mints Jupiter lists but does not mark verified, then mints Jupiter does not list. The order MUST be stable — within a tier, mints keep the order the RPC returned them in — so the same holdings render the same way on every load. No mint is removed from the list by this ordering; every holding stays reachable through Load More.
 
 #### Scenario: Verified holdings lead the list
 
 - **WHEN** an account holds mints across all three tiers
 - **THEN** the card SHALL render every `verified` mint before any known-but-unverified mint
-- **AND** every known-but-unverified mint before any mint unknown to UTL
+- **AND** every known-but-unverified mint before any mint Jupiter does not list
 
 #### Scenario: Ordering is stable within a tier
 
@@ -60,7 +60,7 @@ Metadata for the holdings list SHALL be requested through `POST /api/token-info`
 
 ### Requirement: Holdings SHALL fall back to RPC order when verification is unavailable
 
-Ordering MUST degrade rather than fail. When the metadata lookup fails, or when the active cluster has no curated UTL data, every mint SHALL be treated as unknown, which collapses the three tiers into one and leaves the list in RPC order — the order shipped today. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
+Ordering MUST degrade rather than fail. When the metadata lookup fails, or when Jupiter does not cover the active cluster, every mint SHALL be treated as unknown, which collapses the three tiers into one and leaves the list in RPC order — the order shipped today. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
 
 Degrading silently to the user is not the same as degrading silently to us. An outage MUST stay distinguishable from a genuine "none of these mints are listed": the route SHALL answer a failed lookup with an error status rather than an empty list, so the failure is reported and is not cached as though the list had spoken. A lookup that resolved some mints and dropped others is not an outage and SHALL still answer what it resolved. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
 
@@ -72,7 +72,7 @@ Degrading silently to the user is not the same as degrading silently to us. An o
 
 #### Scenario: An outage is not cached as an answer
 
-- **WHEN** the upstream list lookup reports an error and resolves no mints
+- **WHEN** the Jupiter lookup reports an error and resolves no mints
 - **THEN** the route SHALL answer an error status rather than `200` with an empty list
 - **AND** the failure SHALL be reported to error tracking
 
@@ -106,6 +106,6 @@ Degrading silently to the user is not the same as degrading silently to us. An o
 
 #### Scenario: Row renders for a mint with no metadata
 
-- **WHEN** a row is rendered for a mint UTL does not know
+- **WHEN** a row is rendered for a mint with no token info
 - **THEN** it SHALL render the mint address and balance
 - **AND** it SHALL omit the symbol and fall back to the placeholder logo

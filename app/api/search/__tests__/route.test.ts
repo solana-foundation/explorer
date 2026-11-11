@@ -152,7 +152,7 @@ describe('GET /api/search', () => {
 
     describe('DAS icon enrichment', () => {
         it('should enrich icon from DAS when logoUri is null', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: null })]);
+            mockFetch(200, [makeJupiterToken({ icon: null })]);
             getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
@@ -161,7 +161,7 @@ describe('GET /api/search', () => {
         });
 
         it('should prefer logoUri over DAS image when both present', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: 'https://original.com/sol.png' })]);
+            mockFetch(200, [makeJupiterToken({ icon: 'https://original.com/sol.png' })]);
             getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
@@ -170,7 +170,7 @@ describe('GET /api/search', () => {
         });
 
         it('should use undefined icon when DAS returns no asset and logoUri is absent', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: null })]);
+            mockFetch(200, [makeJupiterToken({ icon: null })]);
             getAssetBatchMock.mockResolvedValueOnce(undefined);
 
             const res = await GET(makeRequest('sol'));

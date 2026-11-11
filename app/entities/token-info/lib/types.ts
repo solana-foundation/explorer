@@ -10,9 +10,3 @@ export const TokenInfoStruct = type({
 });
 
 export type TokenInfo = Infer<typeof TokenInfoStruct>;
-
-export type FetchConfig = {
-    signal?: AbortSignal;
-    next?: NextFetchRequestConfig;
-    onError?: (error: unknown) => void;
-};
