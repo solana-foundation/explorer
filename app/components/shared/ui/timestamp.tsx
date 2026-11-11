@@ -175,8 +175,7 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                 <button
                     type="button"
                     className={cn(
-                        'inline-flex cursor-pointer items-start gap-1 border-0 bg-transparent p-0 text-left leading-snug',
-                        // Force our standard (non-mono) font and whole-word wrapping even inside a font-mono/break-all cell.
+                        'inline-flex cursor-pointer items-start gap-1 border-0 bg-transparent p-0 leading-snug [text-align:inherit]',
                         'break-normal font-[family-name:var(--explorer-default-font)]',
                         'text-neutral-200 hover:text-white',
                         focusRing,
@@ -197,7 +196,7 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                     <ChevronDown size={14} className="mt-0.5 shrink-0 text-neutral-500" />
                 </button>
             </PopoverTrigger>
-            <PopoverContent align="start" className="w-80 p-0">
+            <PopoverContent align="end" className="w-80 p-0">
                 {rows.map((row, index) => (
                     <TimestampRow
                         key={row.key}
