@@ -74,6 +74,14 @@ export async function fetchTokenInfosFromApi({
     }
 }
 
+export function getTokenInfoSwrKey(
+    address: string,
+    cluster: Cluster,
+    genesisHash?: string,
+): ['get-token-info', string, Cluster, string | undefined] {
+    return ['get-token-info', address, cluster, genesisHash];
+}
+
 const TokenInfoResponseStruct = type({ content: array() });
 
 function parseTokenInfos(entries: unknown[], cluster: Cluster): TokenInfo[] {
@@ -86,12 +94,4 @@ function parseTokenInfos(entries: unknown[], cluster: Cluster): TokenInfo[] {
         });
     }
     return tokens;
-}
-
-export function getTokenInfoSwrKey(
-    address: string,
-    cluster: Cluster,
-    genesisHash?: string,
-): ['get-token-info', string, Cluster, string | undefined] {
-    return ['get-token-info', address, cluster, genesisHash];
 }

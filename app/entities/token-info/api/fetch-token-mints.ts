@@ -8,27 +8,6 @@ import { UTL_API_BASE_URL } from '../env';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../lib/errors';
 import { type FetchConfig, type TokenInfo } from '../lib/types';
 
-/**
- * `decimals` and `logoURI` are optional as well as nullable: UTL omits the key
- * for some tokens, and a missing logo must not cost the whole token its name
- * and symbol.
- */
-const UtlTokenStruct = type({
-    address: string(),
-    decimals: optional(nullable(number())),
-    logoURI: optional(nullable(string())),
-    name: string(),
-    symbol: string(),
-    verified: optional(boolean()),
-});
-
-type UtlToken = Infer<typeof UtlTokenStruct>;
-
-function normalizeToken({ address, decimals, logoURI, name, symbol, verified }: UtlToken): TokenInfo {
-    // eslint-disable-next-line unicorn/no-null -- `TokenInfo` declares `decimals` and `logoURI` as `… | null`
-    return { address, decimals: decimals ?? null, logoURI: logoURI ?? null, name, symbol, verified: verified ?? false };
-}
-
 /** The response envelope. Entries stay `unknown` so one bad token can be dropped on its own. */
 const MintsResponseStruct = type({ content: array() });
 
@@ -91,4 +70,25 @@ export async function getTokenInfo(
 ): Promise<TokenInfo | undefined> {
     const tokens = await getTokenInfos([address], cluster, genesisHash, config);
     return tokens[0];
+}
+
+/**
+ * `decimals` and `logoURI` are optional as well as nullable: UTL omits the key
+ * for some tokens, and a missing logo must not cost the whole token its name
+ * and symbol.
+ */
+const UtlTokenStruct = type({
+    address: string(),
+    decimals: optional(nullable(number())),
+    logoURI: optional(nullable(string())),
+    name: string(),
+    symbol: string(),
+    verified: optional(boolean()),
+});
+
+type UtlToken = Infer<typeof UtlTokenStruct>;
+
+function normalizeToken({ address, decimals, logoURI, name, symbol, verified }: UtlToken): TokenInfo {
+    // eslint-disable-next-line unicorn/no-null -- `TokenInfo` declares `decimals` and `logoURI` as `… | null`
+    return { address, decimals: decimals ?? null, logoURI: logoURI ?? null, name, symbol, verified: verified ?? false };
 }
