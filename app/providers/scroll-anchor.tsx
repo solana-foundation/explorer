@@ -37,7 +37,9 @@ export const ScrollAnchorProvider =
                   const targetsByFragment = registeredScrollTargets.current;
                   // eslint-disable-next-line no-restricted-syntax -- strip leading hash from URL fragment
                   const fragment = window.location.hash.replace(/^#/, '');
-                  const targets = targetsByFragment[fragment];
+                  // The fragment comes from the URL; an own-property check keeps `#constructor` or
+                  // `#__proto__` from resolving to inherited members and crashing the root layout.
+                  const targets = Object.hasOwn(targetsByFragment, fragment) ? targetsByFragment[fragment] : undefined;
                   if (!targets) {
                       return;
                   }
