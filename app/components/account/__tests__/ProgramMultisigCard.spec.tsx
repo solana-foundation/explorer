@@ -1,12 +1,12 @@
 import { type AnchorIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { PublicKey } from '@solana/web3.js';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type UpgradeableLoaderAccountData } from '@/app/providers/accounts';
-import { useSquadsMultisig } from '@/app/providers/squadsMultisig';
+import { useSquadsMultisig, useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
 
@@ -20,7 +20,7 @@ vi.mock('@/app/entities/idl/model/use-program-idls', () => ({ useProgramIdls: ()
 vi.mock('@/app/providers/squadsMultisig', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/providers/squadsMultisig')>()),
     useSquadsMultisig: vi.fn(() => ({ data: undefined })),
-    useSquadsMultisigLookup: () => ({ data: null }),
+    useSquadsMultisigLookup: vi.fn(),
 }));
 
 const PROGRAM_DATA: UpgradeableLoaderAccountData = {
@@ -31,6 +31,28 @@ const PROGRAM_DATA: UpgradeableLoaderAccountData = {
 describe('ProgramMultisigCard', () => {
     beforeEach(() => {
         vi.mocked(useSquadsMultisig).mockClear();
+        vi.mocked(useSquadsMultisigLookup).mockReturnValue({ data: null } as ReturnType<
+            typeof useSquadsMultisigLookup
+        >);
+    });
+
+    it('should show the upgrade authority as the multisig vault', () => {
+        const vault = '8jj7zJgdr5bDndc7evM74FMGwzLPmd4u4QxNzFi1BMai';
+        vi.mocked(useSquadsMultisigLookup).mockReturnValue({
+            data: { isSquad: true, multisig: '7qipzLR9j1JcvdxE1XJEFgvoyFmgBpgw5hMdHBMPcJtM', version: 'v4' },
+        } as ReturnType<typeof useSquadsMultisigLookup>);
+
+        render(
+            <ProgramMultisigCard
+                data={{
+                    ...PROGRAM_DATA,
+                    programData: { authority: new PublicKey(vault), data: ['', 'base64'], slot: 0 },
+                }}
+            />,
+        );
+
+        expect(screen.getByText('Multisig Vault')).toBeInTheDocument();
+        expect(screen.getByText(vault)).toBeInTheDocument();
     });
 
     it('should decode the multisig with the IDL from the Anchor IDL account over the PMP IDL', () => {
