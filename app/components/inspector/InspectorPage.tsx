@@ -342,6 +342,8 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
             )}
             {message ? (
                 <LoadedView
+                    // A key resets card and simulation when switching between transactions in a batch.
+                    key={activeIndex}
                     transaction={{
                         message,
                         rawMessage: message.serialize(),
