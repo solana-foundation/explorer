@@ -32,7 +32,7 @@ type CountdownInput = {
 
 export function FeatureGatesView() {
     const { cluster } = useCluster();
-    const clusterInfo = useClusterInfo();
+    const clusterInfo = useClusterInfo({ enabled: cluster !== Cluster.Custom });
     // A custom cluster gets no table below, so its rate would be measured at the visitor's own node for
     // a countdown nothing renders.
     const msPerSlot = useSlotTime({ enabled: cluster !== Cluster.Custom });

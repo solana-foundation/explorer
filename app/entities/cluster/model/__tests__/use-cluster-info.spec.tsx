@@ -1,8 +1,17 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
+import type { SWRConfiguration } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import {
+    FAST_RETRY,
+    refocusTab,
+    settleRetries,
+    swrWrapper,
+    UNTHROTTLED_FOCUS,
+    waitForHook,
+} from '@/app/__tests__/swr-hook';
+import { Logger } from '@/app/shared/lib/logger';
 
 vi.mock('../../api/get-rpc', () => ({ getRpc: vi.fn() }));
 
@@ -13,6 +22,13 @@ import { type ClusterState, StateContext } from '../cluster-provider';
 import { useClusterInfo, useEpochInfo, useEpochSchedule, useFirstAvailableBlock } from '../use-cluster-info';
 
 const EPOCH_INFO = { absoluteSlot: 100n, blockHeight: 90n, epoch: 5n, slotIndex: 10n, slotsInEpoch: 432_000n };
+const EPOCH_INFO_LATER = {
+    absoluteSlot: 4100n,
+    blockHeight: 4000n,
+    epoch: 5n,
+    slotIndex: 4010n,
+    slotsInEpoch: 432_000n,
+};
 const EPOCH_SCHEDULE = {
     firstNormalEpoch: 0n,
     firstNormalSlot: 0n,
@@ -42,8 +58,8 @@ const connectedState: ClusterState = {
     status: ClusterStatus.Connected,
 };
 
-function makeWrapper(state: ClusterState) {
-    const SwrWrapper = swrWrapper({ dedupingInterval: 0 });
+function makeWrapper(state: ClusterState, config: SWRConfiguration = { dedupingInterval: 0 }) {
+    const SwrWrapper = swrWrapper(config);
     return function Wrapper({ children }: { children: ReactNode }) {
         return createElement(SwrWrapper, null, createElement(StateContext.Provider, { value: state }, children));
     };
@@ -84,6 +100,19 @@ describe('useEpochSchedule', () => {
         expect(result.current).toBeUndefined();
         expect(getRpc).not.toHaveBeenCalled();
     });
+
+    it('should not refetch on tab focus', async () => {
+        const { result } = renderHook(() => useEpochSchedule(), {
+            wrapper: makeWrapper(connectedState, UNTHROTTLED_FOCUS),
+        });
+
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_SCHEDULE));
+        expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+
+        await refocusTab();
+        await settleRetries();
+        expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+    });
 });
 
 describe('useEpochInfo', () => {
@@ -103,6 +132,91 @@ describe('useEpochInfo', () => {
 
         expect(result.current).toBeUndefined();
         expect(getRpc).not.toHaveBeenCalled();
+    });
+
+    it('should refetch on tab focus', async () => {
+        const { result } = renderHook(() => useEpochInfo(), {
+            wrapper: makeWrapper(connectedState, UNTHROTTLED_FOCUS),
+        });
+
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+        await refocusTab();
+        await waitForHook(() => expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2));
+    });
+
+    it('should refresh a stale cached value on remount', async () => {
+        const sharedCache = new Map();
+        const wrapper = makeWrapper(connectedState, { dedupingInterval: 0, provider: () => sharedCache });
+
+        const view = renderHook(() => useEpochInfo(), { wrapper });
+        await waitForHook(() => expect(view.result.current).toEqual(EPOCH_INFO));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+        view.unmount();
+
+        rpc.getEpochInfo.mockReturnValue({ send: () => Promise.resolve(EPOCH_INFO_LATER) });
+
+        const { result } = renderHook(() => useEpochInfo(), { wrapper });
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
+        expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+    });
+
+    it('should log the error when the epoch-info fetch fails', async () => {
+        const failure = new Error('rpc unreachable');
+        rpc.getEpochInfo.mockReturnValue({ send: () => Promise.reject(failure) });
+        const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => {});
+
+        renderHook(() => useEpochInfo(), {
+            wrapper: makeWrapper(connectedState, { dedupingInterval: 0, ...FAST_RETRY }),
+        });
+
+        await waitForHook(() => expect(errorSpy).toHaveBeenCalledWith(failure, { query: 'epoch-info' }));
+
+        await settleRetries();
+        errorSpy.mockRestore();
+    });
+
+    it('should not refetch on a timer', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        try {
+            rpc.getEpochInfo
+                .mockReturnValueOnce({ send: () => Promise.resolve(EPOCH_INFO) })
+                .mockReturnValue({ send: () => Promise.resolve(EPOCH_INFO_LATER) });
+
+            const { result } = renderHook(() => useEpochInfo(), { wrapper: makeWrapper(connectedState) });
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+            await act(() => vi.advanceTimersByTimeAsync(120_000));
+
+            expect(result.current).toEqual(EPOCH_INFO);
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('should refetch on the given refreshInterval', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        try {
+            rpc.getEpochInfo
+                .mockReturnValueOnce({ send: () => Promise.resolve(EPOCH_INFO) })
+                .mockReturnValue({ send: () => Promise.resolve(EPOCH_INFO_LATER) });
+
+            const { result } = renderHook(() => useEpochInfo({ refreshInterval: 30_000 }), {
+                wrapper: makeWrapper(connectedState),
+            });
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+
+            await act(() => vi.advanceTimersByTimeAsync(30_000));
+
+            await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO_LATER));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });
 
@@ -134,6 +248,25 @@ describe('useClusterInfo', () => {
         expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
         expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
+    });
+
+    it('should poll epoch info but not the schedule when given a refreshInterval', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        try {
+            const { result } = renderHook(() => useClusterInfo({ refreshInterval: 30_000 }), {
+                wrapper: makeWrapper(connectedState),
+            });
+            await waitForHook(() => expect(result.current).toEqual(EXPECTED_INFO));
+            expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
+            expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+
+            await act(() => vi.advanceTimersByTimeAsync(30_000));
+
+            await waitForHook(() => expect(rpc.getEpochInfo).toHaveBeenCalledTimes(2));
+            expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('should stay undefined until both epoch values load', async () => {
