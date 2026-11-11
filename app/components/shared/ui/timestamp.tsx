@@ -183,7 +183,14 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                         className,
                     )}
                 >
-                    <time dateTime={dateTime} className="min-w-0">
+                    <time
+                        dateTime={dateTime}
+                        className={cn(
+                            !children && effective === 'relative'
+                                ? 'inline-block min-w-[6.25rem] text-right tabular-nums'
+                                : 'min-w-0',
+                        )}
+                    >
                         {children ?? labels[effective]}
                     </time>
                     <ChevronDown size={14} className="mt-0.5 shrink-0 text-neutral-500" />
