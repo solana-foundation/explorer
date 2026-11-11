@@ -16,7 +16,8 @@ import {
     PublicKey,
     VersionedMessage,
 } from '@solana/web3.js';
-import { generated, getBatchTransactionPda, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
+// Type-only imports are erased at build, so they don't pull `@sqds/multisig` into the bundle.
+import type { generated } from '@sqds/multisig';
 import { ClusterStatus } from '@utils/cluster';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -28,6 +29,7 @@ import { trustedInnerInstructions } from '@/app/entities/transaction-data';
 import { useSimulation } from '@/app/features/instruction-simulation/model/use-simulation';
 import { generateTokenBalanceRows, TokenBalancesCardInner } from '@/app/features/transaction';
 import { useCluster } from '@/app/providers/cluster';
+import { SQUADS_V4_ADDRESS } from '@/app/providers/squadsMultisig';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
@@ -55,11 +57,9 @@ import { TransactionSignatures } from './SignaturesCard';
 const BASE58_ENCODER = getBase58Encoder();
 const BASE58_DECODER = getBase58Decoder();
 
-const { Batch, VaultBatchTransaction, VaultTransaction, batchDiscriminator } = generated;
-
 // Convert a Squads VaultTransactionMessage (shared by VaultTransaction and the inner
 // transactions of a Batch) into a web3.js VersionedMessage the inspector can render.
-export function vaultMessageToVersionedMessage(message: typeof VaultTransaction.prototype.message): VersionedMessage {
+export function vaultMessageToVersionedMessage(message: generated.VaultTransactionMessage): VersionedMessage {
     return new MessageV0({
         addressTableLookups: message.addressTableLookups.map(x => ({
             ...x,
@@ -248,9 +248,12 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
         if (!accountInfo) {
             throw new Error('Account not found');
         }
-        if (accountInfo.owner.toString() !== SQUADS_V4_PROGRAM_ADDRESS.toString()) {
+        if (accountInfo.owner.toBase58() !== SQUADS_V4_ADDRESS) {
             throw new Error(`Account ${account} is not a valid Squads transaction account`);
         }
+
+        const squads = await import('@sqds/multisig');
+        const { Batch, VaultBatchTransaction, VaultTransaction, batchDiscriminator } = squads.generated;
 
         // The account discriminator (first 8 bytes) distinguishes a Batch — which holds
         // many inner transactions — from a single VaultTransaction.
@@ -267,7 +270,7 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
             const results = await Promise.all(
                 Array.from({ length: batch.size }, async (_unused, i) => {
                     try {
-                        const [pda] = getBatchTransactionPda({
+                        const [pda] = squads.getBatchTransactionPda({
                             batchIndex,
                             multisigPda: batch.multisig,
                             transactionIndex: i + 1,
