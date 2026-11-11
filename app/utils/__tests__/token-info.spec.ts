@@ -34,7 +34,7 @@ describe('getFullTokenInfo', () => {
         await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toBeUndefined();
     });
 
-    it('should resolve a UTL entry without its verified field', async () => {
+    it('should resolve the route entry with the chain id and without the verified flag', async () => {
         stubResponses({
             legacyTokens: [],
             tokenInfoRoute: { content: [tokenInfo(MINT.toBase58(), true)], ok: true, status: 200 },
@@ -46,7 +46,6 @@ describe('getFullTokenInfo', () => {
             decimals: 6,
             name: MINT.toBase58(),
             symbol: MINT.toBase58(),
-            tags: [],
         });
     });
 });
