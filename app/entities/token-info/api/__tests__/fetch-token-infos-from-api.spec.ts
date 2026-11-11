@@ -4,7 +4,10 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { tokenInfo } from '../../__fixtures__/token-info';
+import { type TokenInfo } from '../../lib/types';
 import { fetchTokenInfoFromApi, fetchTokenInfosFromApi } from '../fetch-token-infos-from-api';
 
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
@@ -19,6 +22,7 @@ describe('fetchTokenInfosFromApi', () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+        vi.clearAllMocks();
     });
 
     it('should post the addresses to the token info route and resolve its content', async () => {
@@ -70,10 +74,60 @@ describe('fetchTokenInfosFromApi', () => {
         ['a number', 42],
         ['null', null],
         ['a bare array', [tokenInfo(MINT_A)]],
-    ])('should resolve undefined for a 200 body that is %s', async (_, body) => {
+    ])('should warn and resolve undefined for a 200 body that is %s', async (_, body) => {
         vi.mocked(fetch).mockResolvedValue(Response.json(body));
 
         await expect(fetchTokenInfosFromApi(request())).resolves.toBeUndefined();
+        expect(Logger.warn).toHaveBeenCalledWith(
+            '[token-info] Token info response was not a token array',
+            expect.anything(),
+        );
+        expect(Logger.error).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['null', null],
+        ['a string', MINT_A],
+        ['an array', [tokenInfo(MINT_A)]],
+        ['an entry with no address', withoutField('address')],
+        ['an entry with no decimals', withoutField('decimals')],
+        ['an entry with no logoURI', withoutField('logoURI')],
+        ['an entry with no name', withoutField('name')],
+        ['an entry with no symbol', withoutField('symbol')],
+        ['an entry with no verified flag', withoutField('verified')],
+        ['an entry with a null verified flag', { ...tokenInfo(MINT_A), verified: null }],
+        ['an entry with string decimals', { ...tokenInfo(MINT_A), decimals: '6' }],
+        ['an entry with a numeric symbol', { ...tokenInfo(MINT_A), symbol: 1 }],
+    ])('should drop %s, resolve the other entries and log the count', async (_, malformed) => {
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [malformed, tokenInfo(MINT_B, true)] }));
+
+        await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([tokenInfo(MINT_B, true)]);
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
+            sentry: 'always',
+            sentryExtras: { cluster: Cluster.MainnetBeta, malformed: 1, total: 2 },
+        });
+    });
+
+    it('should resolve no tokens and log the count once when every entry is malformed', async () => {
+        vi.mocked(fetch).mockResolvedValue(
+            Response.json({ content: [withoutField('verified'), withoutField('name')] }),
+        );
+
+        await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([]);
+        expect(Logger.warn).toHaveBeenCalledTimes(1);
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
+            sentry: 'always',
+            sentryExtras: { cluster: Cluster.MainnetBeta, malformed: 2, total: 2 },
+        });
+    });
+
+    it('should keep an entry with a logo URI and an entry with null decimals', async () => {
+        const withLogo = { ...tokenInfo(MINT_A), logoURI: 'https://example.com/logo.png' };
+        const withoutDecimals = { ...tokenInfo(MINT_B), decimals: null };
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [withLogo, withoutDecimals] }));
+
+        await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([withLogo, withoutDecimals]);
+        expect(Logger.warn).not.toHaveBeenCalled();
     });
 
     it('should resolve undefined for a 200 body that is not JSON', async () => {
@@ -143,6 +197,10 @@ function request(overrides: Partial<Request> = {}): Request {
         includeOnChainFallback: false,
         ...overrides,
     };
+}
+
+function withoutField(field: keyof TokenInfo): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(tokenInfo(MINT_A)).filter(([key]) => key !== field));
 }
 
 function sentRequest(): { body: unknown; method: string | undefined; url: string } {

@@ -32,7 +32,6 @@ export type FullTokenInfo = {
     readonly decimals: number;
     readonly symbol: string;
     readonly logoURI?: string;
-    readonly tags?: string[];
     readonly extensions?: TokenExtensions;
 };
 
@@ -109,20 +108,14 @@ export async function getFullTokenInfo(
         if (sdkTokenInfos === undefined) throw new Error('[utils:token-info] Token info request failed');
         return undefined;
     }
-    // Merge the fields, prioritising the sdk ones which are more up to date
-    let tags: string[] = [];
-    if (sdkTokenInfo.tags) tags = Array.from(sdkTokenInfo.tags);
-    else if (legacyCdnTokenInfo?.tags) tags = legacyCdnTokenInfo.tags;
-
     return {
         address: sdkTokenInfo.address,
         chainId,
         decimals: sdkTokenInfo.decimals ?? 0,
-        extensions: legacyCdnTokenInfo?.extensions || (sdkTokenInfo as { extensions?: TokenExtensions })?.extensions,
+        extensions: legacyCdnTokenInfo?.extensions,
         logoURI: sdkTokenInfo.logoURI ?? undefined,
         name: sdkTokenInfo.name,
         symbol: sdkTokenInfo.symbol,
-        tags,
     };
 }
 

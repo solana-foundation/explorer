@@ -133,9 +133,6 @@ function resolveMetadataUri(uri: string): string {
  * `fetchResource` in process rather than requesting `/api/metadata/proxy` over HTTP. Same
  * hardening — per-hop private-IP rejection, protocol and redirect validation, size cap — with
  * no round trip, and nothing derived from the incoming request's host.
- *
- * Resolves to `null`, not `undefined`, because `TokenInfo.logoURI` is `string | null` in the
- * UTL REST contract and this value is serialised straight into it.
  */
 async function fetchLogoUri(
     metadata: Metadata,
@@ -144,7 +141,7 @@ async function fetchLogoUri(
 ): Promise<string | null> {
     // Covers a mint with no `uri` at all, as well as one naming nothing readable.
     const uri = resolveMetadataUri(metadata.uri);
-    // eslint-disable-next-line unicorn/no-null -- `TokenInfo.logoURI` is `string | null` per the UTL contract
+    // eslint-disable-next-line unicorn/no-null -- `TokenInfo` requires a `logoURI` key, and JSON omits an `undefined` value
     if (!uri) return null;
 
     const timeout = Math.min(METAPLEX_TIMEOUT_MS, deadline - Date.now());

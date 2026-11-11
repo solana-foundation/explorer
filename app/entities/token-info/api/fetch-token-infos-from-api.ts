@@ -1,10 +1,11 @@
 import { getChainId } from '@entities/chain-id/@x/token-info';
 import { type PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
+import { array, is, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { type TokenInfo } from '../lib/types';
+import { type TokenInfo, TokenInfoStruct } from '../lib/types';
 
 export async function fetchTokenInfoFromApi(
     address: PublicKey,
@@ -57,13 +58,13 @@ export async function fetchTokenInfosFromApi({
             return undefined;
         }
 
-        const { content } = (await response.json()) as { content?: unknown };
-        if (!Array.isArray(content)) {
+        const body: unknown = await response.json();
+        if (!is(body, TokenInfoResponseStruct)) {
             Logger.warn('[token-info] Token info response was not a token array', { sentry: true });
             return undefined;
         }
 
-        return content as TokenInfo[];
+        return parseTokenInfos(body.content, cluster);
     } catch (error) {
         Logger.error(new Error('[token-info] Failed to fetch token info', { cause: error }), {
             sentry: true,
@@ -71,6 +72,20 @@ export async function fetchTokenInfosFromApi({
         });
         return undefined;
     }
+}
+
+const TokenInfoResponseStruct = type({ content: array() });
+
+function parseTokenInfos(entries: unknown[], cluster: Cluster): TokenInfo[] {
+    const tokens = entries.filter(entry => is(entry, TokenInfoStruct));
+    const malformed = entries.length - tokens.length;
+    if (malformed > 0) {
+        Logger.warn('[token-info] Dropped malformed token info entries', {
+            sentry: 'always',
+            sentryExtras: { cluster, malformed, total: entries.length },
+        });
+    }
+    return tokens;
 }
 
 export function getTokenInfoSwrKey(

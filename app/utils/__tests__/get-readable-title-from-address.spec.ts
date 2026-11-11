@@ -41,7 +41,7 @@ function props(cluster?: string) {
 }
 
 function tokenInfo(name: string) {
-    return { address: TOKEN_ADDRESS, decimals: 9, logoURI: null, name, symbol: 'SOL' };
+    return { address: TOKEN_ADDRESS, decimals: 9, logoURI: null, name, symbol: 'SOL', verified: false };
 }
 
 // A vanity address, so the truncated title asserts a literal `TK…11` instead of recomputing

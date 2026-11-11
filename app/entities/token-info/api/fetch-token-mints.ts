@@ -9,15 +9,11 @@ import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../lib/errors
 import { type FetchConfig, type TokenInfo } from '../lib/types';
 
 /**
- * The fields of a UTL `/v1/mints` token this app reads, with the types `TokenInfo`
- * declares. `type` ignores the rest (`chainId`, `tags`, `holders`, …), so an
- * upstream addition passes while a change to a rendered field does not.
- *
  * `decimals` and `logoURI` are optional as well as nullable: UTL omits the key
- * outright for some tokens, and a missing logo must not cost the whole token its
- * name and symbol. `normalizeToken` puts back the `null` `TokenInfo` declares.
+ * for some tokens, and a missing logo must not cost the whole token its name
+ * and symbol.
  */
-const TokenInfoStruct = type({
+const UtlTokenStruct = type({
     address: string(),
     decimals: optional(nullable(number())),
     logoURI: optional(nullable(string())),
@@ -26,16 +22,11 @@ const TokenInfoStruct = type({
     verified: optional(boolean()),
 });
 
-type UtlToken = Infer<typeof TokenInfoStruct>;
+type UtlToken = Infer<typeof UtlTokenStruct>;
 
-/**
- * Restores the keys UTL may omit to the `null` `TokenInfo` declares. Spreads the
- * token so the fields this app does not read (`tags`, `holders`, …) survive for
- * `getFullTokenInfo`, which merges them with the legacy CDN list.
- */
-function normalizeToken(token: UtlToken): TokenInfo {
-    // eslint-disable-next-line unicorn/no-null -- `decimals` and `logoURI` are `… | null` per the UTL contract
-    return { ...token, decimals: token.decimals ?? null, logoURI: token.logoURI ?? null };
+function normalizeToken({ address, decimals, logoURI, name, symbol, verified }: UtlToken): TokenInfo {
+    // eslint-disable-next-line unicorn/no-null -- `TokenInfo` declares `decimals` and `logoURI` as `… | null`
+    return { address, decimals: decimals ?? null, logoURI: logoURI ?? null, name, symbol, verified: verified ?? false };
 }
 
 /** The response envelope. Entries stay `unknown` so one bad token can be dropped on its own. */
@@ -76,9 +67,7 @@ export async function getTokenInfos(
 
         // Per token, not per batch: a single malformed entry must not blank every symbol in a
         // transaction. Drops are reported so upstream drift stays visible instead of silent.
-        const tokens = data.content
-            .filter((token): token is UtlToken => is(token, TokenInfoStruct))
-            .map(normalizeToken);
+        const tokens = data.content.filter(token => is(token, UtlTokenStruct)).map(normalizeToken);
         if (tokens.length !== data.content.length) {
             config?.onError?.(
                 new TokenInfoInvalidResponseError(
