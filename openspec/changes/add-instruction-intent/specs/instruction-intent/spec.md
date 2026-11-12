@@ -77,13 +77,13 @@ loaded SHALL show the failed state without Retry.
 #### Scenario: The raw transaction fetch fails
 
 - **WHEN** the raw transaction fetch fails
-- **THEN** every top-level and inner card whose Program Metadata IDL carries intent templates MUST show the failed
-  state without Retry
+- **THEN** every top-level and inner card of an RPC-parsed instruction whose Program Metadata IDL carries intent
+  templates MUST show the failed state without Retry
 
 #### Scenario: The transaction does not decode
 
 - **WHEN** the raw transaction loads but its instructions cannot be decoded
-- **THEN** the card MUST show the failed state without Retry
+- **THEN** the card of an RPC-parsed instruction MUST show the failed state without Retry
 
 ### Requirement: A withheld sentence falls back to the intent label
 
@@ -101,15 +101,15 @@ from the transaction's slot.
 Every top-level and inner instruction card SHALL show the intent of its own instruction. An inner card renders
 inside its parent card, and it MUST NOT show the parent's intent.
 
-#### Scenario: An inner card with its own provider
+#### Scenario: An inner card
 
-- **WHEN** an inner instruction card renders inside an `InstructionIntentProvider` with its own `innerIxIndex`
+- **WHEN** an inner instruction card renders inside its parent card
 - **THEN** the inner card MUST render the Intent button, and a click MUST open the inner card's intent row
 
-#### Scenario: An inner card inside only the parent's provider
+#### Scenario: An instruction the RPC did not parse
 
-- **WHEN** an inner instruction card renders inside the top-level card's `InstructionIntentProvider` only
-- **THEN** the inner card MUST NOT render the Intent button
+- **WHEN** the card's instruction is in byte form, as on every Inspector card
+- **THEN** the intent MUST be built from that instruction, without a wait for the raw transaction
 
 #### Scenario: The raw inner instruction belongs to another program
 

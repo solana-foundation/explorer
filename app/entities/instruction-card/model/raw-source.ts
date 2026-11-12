@@ -10,7 +10,7 @@ export type RawInstructions =
           status: 'fetched';
           /** `undefined` when the message cannot be decompiled. */
           instructions: readonly TransactionInstruction[] | undefined;
-          /** Keyed by the index of the top-level instruction that invoked them. `undefined` when they cannot be resolved. */
+          /** Keyed by the index of the top-level instruction that invoked them. */
           innerInstructions: ReadonlyMap<number, readonly (TransactionInstruction | undefined)[]> | undefined;
       };
 
@@ -31,7 +31,7 @@ export function rawSourceOf(node: InstructionNode, rawInstructions: RawInstructi
         node.childIndex === undefined
             ? rawInstructions.instructions?.[node.index]
             : rawInstructions.innerInstructions?.get(node.index)?.[node.childIndex];
-    // The page and the raw transaction list the instructions separately, so a mismatch must not show another program
+    // The parsed and the raw responses list instructions separately, so their positions can disagree
     return ix?.programId.equals(node.programId) ? { ix, kind: 'instruction' } : { kind: 'unavailable' };
 }
 

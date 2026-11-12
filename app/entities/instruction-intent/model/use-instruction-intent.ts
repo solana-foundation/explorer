@@ -26,14 +26,7 @@ const SWR_OPTIONS = { shouldRetryOnError: false } as const;
 const IDLE: InstructionIntentResult = { status: 'idle' };
 const LOADING: InstructionIntentResult = { status: 'loading' };
 
-/**
- * Resolves the intent state of one instruction card.
- * Checks whether program has idl with intent templates.
- * Checks whether instruction has intent.
- * Gets accounts required for the instruction intent, if necessary.
- * Compute intent sentence parts.
- * Everything is wrapped by statuses indicating the current state of the computation.
- */
+/** The intent state of one card. The account fetch and the computation start on the first open. */
 export function useInstructionIntent({
     programId,
     ixFetchResult,

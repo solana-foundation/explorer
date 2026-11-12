@@ -14,9 +14,7 @@ type InstructionIntentContextValue = {
 
 const InstructionIntentContext = createContext<InstructionIntentContextValue | undefined>(undefined);
 
-/**
- * The intent state of one instruction card, shared by the Intent button and its body Panel.
- */
+/** The intent state of one card, shared by its Intent button and its intent row. */
 export function InstructionIntentProvider({
     programId,
     ixFetchResult,

@@ -4,23 +4,19 @@ import type { Address } from '@solana/kit';
 import { getLastNodeFromPath, type RootNode, validateCodamaVersion } from 'codama';
 import { array, is, literal, optional, string, type } from 'superstruct';
 
-// Shows if intent is supported in a given IDL.
 export type IntentSupportStatus =
     { status: 'none' } | { status: 'unsupported' } | { status: 'supported'; root: RootNode };
 
 export type IntentSupportResult = { status: 'loading' } | { status: 'failed' } | IntentSupportStatus;
 
-// Fetched instruction, required for intent computation.
 export type InstructionFetchResult =
     { status: 'loading' } | { status: 'failed' } | { status: 'success'; instruction: KitInstruction };
 
-// A part of the computed intent sentence.
-// Codama returns plain intent string but Explorer needs to render <Addresses /> components.
+// Codama returns a plain string and we need parts to render an `<Address />` link.
 export type IntentSentencePart = { kind: 'text'; text: string } | { kind: 'address'; address: Address };
 
 export type IntentField = { label: string; value: string };
 
-// The computed intent for an instruction.
 export type InstructionIntent = {
     sentenceParts: readonly IntentSentencePart[];
     /** False when a template value could not be filled and the sentence is the short intent label. */
@@ -61,7 +57,7 @@ const UNAVAILABLE_TEXT: Record<IntentUnavailableReason, string> = {
     'no-metadata': "This program doesn't publish intent metadata.",
 };
 
-/** Whether a Program Metadata IDL can produce intents: a Codama root of a compatible version with a template. */
+/** A Codama root of a compatible version with at least one intent template. */
 export function checkIntentSupport(idl: unknown): IntentSupportStatus {
     if (!is(idl, RootNodeWithIntentShape)) return { status: 'none' };
 
@@ -79,7 +75,6 @@ export function checkIntentSupport(idl: unknown): IntentSupportStatus {
     return { root: idl as unknown as RootNode, status: 'supported' };
 }
 
-/** Parses an instruction against the root and keeps it only when its node publishes an intent template. */
 export function checkInstructionIntentExists(root: RootNode, instruction: KitInstruction): InstructionIntentExistence {
     try {
         const parsed = parseInstruction(root, instruction);
@@ -88,7 +83,7 @@ export function checkInstructionIntentExists(root: RootNode, instruction: KitIns
         }
         return { parsed, status: 'exists' };
     } catch {
-        // A published IDL is untrusted, and a malformed node throws while the parser walks the root
+        // A published IDL is untrusted, and a malformed node throws in the parser
         return { reason: 'malformed-metadata', status: 'unavailable' };
     }
 }
