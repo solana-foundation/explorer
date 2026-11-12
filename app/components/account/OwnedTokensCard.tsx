@@ -101,7 +101,8 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
 
     const columns: GridTableColumn<TokenRowData>[] = [
         {
-            cellClassName: 'justify-center p-0',
+            cell: { justify: 'center' },
+            cellClassName: 'p-0',
             header: 'Logo',
             render: ({ tokenInfo }) => (
                 <ProxiedImage

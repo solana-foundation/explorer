@@ -9,7 +9,7 @@ const COLUMNS: ReadonlyArray<GridTableColumn<{ entry: RecentBlockhashesEntry; in
         render: ({ index }) => index + 1,
     },
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Blockhash',
         render: ({ entry }) => entry.blockhash,
     },

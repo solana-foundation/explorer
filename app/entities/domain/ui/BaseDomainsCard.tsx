@@ -19,14 +19,15 @@ const GRID_TEMPLATE = 'grid-cols-[fit-content(clamp(200px,50%,400px))_1fr] md:gr
 
 const COLUMNS: ReadonlyArray<GridTableColumn<ValidDomain>> = [
     {
-        // A domain name is one spaceless token, so `break-all` is what lets it wrap; `min-w` sets the
-        // mobile floor and matches the md+ track width.
-        cellClassName: 'min-w-[clamp(120px,25%,240px)] break-all',
+        // A domain name is one spaceless token, so `break` (`break-all`) is what lets it wrap; `min-w` sets
+        // the mobile floor and matches the md+ track width.
+        cell: { wrap: 'break' },
+        cellClassName: 'min-w-[clamp(120px,25%,240px)]',
         header: 'Domain',
         render: domain => domain.name,
     },
     {
-        cellClassName: 'min-w-0 whitespace-nowrap',
+        cell: { shrink: true, wrap: 'nowrap' },
         header: 'Name Service Account',
         render: domain => <Address pubkey={domain.pubkey} link />,
     },

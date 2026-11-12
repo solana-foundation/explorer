@@ -7,12 +7,12 @@ import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table'
 
 const COLUMNS: ReadonlyArray<GridTableColumn<{ entry: PublicKey; index: number }>> = [
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Index',
         render: ({ index }) => index,
     },
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Address',
         render: ({ entry }) => <Address pubkey={entry} link />,
     },

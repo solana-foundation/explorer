@@ -6,22 +6,22 @@ import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table'
 
 const COLUMNS: ReadonlyArray<GridTableColumn<StakeHistoryEntry>> = [
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Epoch',
         render: entry => <Epoch epoch={entry.epoch} link />,
     },
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Effective (SOL)',
         render: entry => <SolBalance lamports={entry.stakeHistory.effective} />,
     },
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Activating (SOL)',
         render: entry => <SolBalance lamports={entry.stakeHistory.activating} />,
     },
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Deactivating (SOL)',
         render: entry => <SolBalance lamports={entry.stakeHistory.deactivating} />,
     },

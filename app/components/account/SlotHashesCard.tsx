@@ -7,14 +7,14 @@ import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table'
 
 const COLUMNS: ReadonlyArray<GridTableColumn<SlotHashEntry>> = [
     {
-        cellClassName: 'whitespace-nowrap font-mono',
+        cell: { font: 'mono', wrap: 'nowrap' },
         header: 'Slot',
         render: entry => <Slot slot={entry.slot} link />,
     },
     {
         // The hash wraps (`break-all`) instead of truncating or scrolling on phones; it still fits on one
-        // line on desktop. `min-w-0` lets the `1fr` track shrink below the hash width.
-        cellClassName: 'min-w-0 break-all font-mono',
+        // line on desktop. `shrink` (`min-w-0`) lets the `1fr` track shrink below the hash width.
+        cell: { font: 'mono', shrink: true, wrap: 'break' },
         header: 'Hash',
         render: entry => <TruncatedValue value={entry.hash} truncation={{ enabled: false }} alignItems="start" />,
     },

@@ -6,12 +6,12 @@ import { Vote, VoteAccount } from '../lib/validators';
 
 const COLUMNS: ReadonlyArray<GridTableColumn<Vote>> = [
     {
-        cellClassName: 'whitespace-nowrap font-mono',
+        cell: { font: 'mono', wrap: 'nowrap' },
         header: 'Slot',
         render: vote => <Slot slot={vote.slot} link />,
     },
     {
-        cellClassName: 'font-mono',
+        cell: { font: 'mono' },
         header: 'Confirmation Count',
         render: vote => vote.confirmationCount,
     },
