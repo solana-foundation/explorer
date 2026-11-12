@@ -371,3 +371,34 @@ describe('should render the account address column only in detail display', () =
         ).toEqual([TOKEN_ACCOUNT_B, MINT]);
     });
 });
+
+describe('should project holdings into the mobile stack', () => {
+    beforeEach(() => {
+        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
+        useSearchParamsMock.mockReturnValue(searchParams(null));
+        useAccountOwnedTokensMock.mockReturnValue(makeEntry());
+        useTokenInfosMock.mockReturnValue({
+            isLoading: false,
+            tokenInfos: new Map([
+                [MINT, { address: MINT, decimals: 6, logoURI: LOGO, name: 'USD Coin', symbol: 'USDC', verified: true }],
+            ]),
+        });
+    });
+
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
+    // `mobile="stack"` renders the desktop grid and the mobile stack together, so counting occurrences
+    // across both layouts shows the mobile projection without reaching into the DOM.
+    it('should inline the logo into the Mint field and drop the standalone Logo field on mobile', () => {
+        render(<OwnedTokensCard address={OWNER} />);
+
+        // The Logo column is hidden on mobile (desktop only) but the logo is inlined into the mobile Mint
+        // field, so exactly two logos render: one more than desktop-only, one fewer than a visible column.
+        expect(screen.getAllByTestId('token-logo').map(logo => logo.getAttribute('data-uri'))).toEqual([LOGO, LOGO]);
+        // The 'Logo' header is desktop-only; the mobile Mint field is labelled 'Mint' (not 'Mint Address').
+        expect(screen.getAllByText('Logo')).toHaveLength(1);
+        expect(screen.getByText('Mint')).toBeInTheDocument();
+    });
+});
