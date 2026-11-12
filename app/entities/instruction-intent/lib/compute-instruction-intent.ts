@@ -5,9 +5,6 @@ import type { RootNode } from 'codama';
 import type { InstructionIntent, IntentField, IntentSentencePart } from './intent';
 import { loadIntentSdk } from './load-intent-sdk';
 
-/**
- * Builds the intent of a parsed instruction from accounts fetched beforehand.
- */
 export async function computeInstructionIntent({
     root,
     parsed,

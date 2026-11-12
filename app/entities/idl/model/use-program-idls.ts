@@ -13,7 +13,7 @@ import { getOnChainIdls, type SourcedIdl } from './sourced-idl';
 export type ProgramIdls = {
     /** `undefined` while the on-chain IDLs load. */
     idls: readonly SourcedIdl[] | undefined;
-    /** The last fetch error. It stays set while SWR retries, so `idls` can be `undefined` or `[]` with it. */
+    /** Stays set while SWR retries, so `idls` can be `undefined` or `[]` with it. */
     error?: unknown;
 };
 

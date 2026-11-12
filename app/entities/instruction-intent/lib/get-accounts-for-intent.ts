@@ -4,7 +4,7 @@ import type { RootNode } from 'codama';
 
 import { loadIntentSdk } from './load-intent-sdk';
 
-/** The sorted addresses the intent of a parsed instruction reads, for example a mint for its decimals. */
+/** Sorted, so one address set maps to one account fetch. */
 export async function getAccountsForIntent(root: RootNode, parsed: ParsedInstruction): Promise<Address[]> {
     const { getRequiredAccountsForDisplay } = await loadIntentSdk();
     return [...getRequiredAccountsForDisplay(root, parsed)].sort();

@@ -32,7 +32,6 @@ export const AUTHORITY = address(gen.address(4));
 
 export const SYSTEM_ROOT = systemIdl as unknown as RootNode;
 export const TOKEN_ROOT = tokenIdl as unknown as RootNode;
-/** The Token root with every display node removed: a Codama IDL without intent templates. */
 export const TOKEN_ROOT_WITHOUT_DISPLAY: RootNode = {
     ...TOKEN_ROOT,
     program: {
@@ -41,12 +40,10 @@ export const TOKEN_ROOT_WITHOUT_DISPLAY: RootNode = {
     },
 };
 
-/** The `useProgramIdls` result for a program that publishes `idl` through Program Metadata. */
 export function programMetadataIdls(idl: unknown, standard: 'Anchor' | 'Codama' = 'Codama') {
     return { idls: [{ idl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard }] };
 }
 
-/** The root with the sentence template of one instruction replaced. */
 export function withIntentTemplate(root: RootNode, instructionName: string, interpolatedIntent: string): RootNode {
     return {
         ...root,

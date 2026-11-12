@@ -162,7 +162,7 @@ const buttonVariants = cva([], {
         },
         // Toggle-on ring; only meaningful when paired with `variant="black"` in `btn-group-toggle`.
         { active: true, class: 'shadow-[0_0_0_0.15rem_#33a382]', ui: 'dashkit' },
-        // Marks a control whose content is unavailable. `!` because every variant sets its own text colour.
+        // `!` because every variant sets its own text colour
         { class: 'border-dashed !text-neutral-400 hover:!text-neutral-200', dashed: true, ui: 'dashkit' },
     ],
     defaultVariants: {

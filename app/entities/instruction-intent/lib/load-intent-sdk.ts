@@ -7,7 +7,7 @@ export class IntentSdkLoadError extends Error {
     }
 }
 
-/** Loads the SDK on demand, so it stays out of the First Load JS of every page with an instruction card. */
+/** On demand, so the SDK stays out of the First Load JS of every page with an instruction card. */
 export async function loadIntentSdk() {
     try {
         return await import('@codama/dynamic-instructions');

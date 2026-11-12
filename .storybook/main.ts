@@ -55,7 +55,7 @@ const config: StorybookConfig = {
                         find: '@bundlr-network/client',
                         replacement: path.resolve(__dirname, './__mocks__/@bundlr-network/client.ts'),
                     },
-                    // The codegen entry imports `fs`, so the browser build of @codama/dynamic-client cannot link it
+                    // The codegen entry imports `fs`, which the browser build cannot link
                     {
                         find: '@codama/dynamic-address-resolution/codegen',
                         replacement: path.resolve(

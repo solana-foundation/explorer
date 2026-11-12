@@ -1,4 +1,4 @@
-// The browser build of `@codama/dynamic-client` calls these only in `generateClientTypes`, which no story uses.
+// Only `generateClientTypes` calls these, and no story uses it
 const unavailable = () => {
     throw new Error('@codama/dynamic-address-resolution/codegen is not available in the browser');
 };

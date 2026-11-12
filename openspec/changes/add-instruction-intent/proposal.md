@@ -48,6 +48,10 @@ Inner instructions come from the same response. `fetchRawTransaction` keeps `met
 the loaded addresses. The cards come from the parsed response and the bytes from the raw one, so a card whose raw
 instruction belongs to another program reads `failed` instead of showing a wrong intent.
 
+The intent takes the instruction from `InstructionSurface`, the data the Raw view shows: `node.ix` when the RPC did
+not parse it, else the raw form in `RawInstructions`. The Raw view uses web3.js, so `readRawInstructions` and
+`readRawInnerInstructions` convert the Kit instructions with `toLegacyInstruction`.
+
 ### Eager check, lazy fetch
 
 The IDL support check and the instruction parse run on render, so the Intent button is dashed before a click when
@@ -63,26 +67,30 @@ existence check, the account read, the computation.
 ### UI wiring
 
 The design puts the button in the card header and the intent row at the top of the card body. A per-card
-`InstructionIntentProvider` holds the open state and the result, and two consumers read it. Inner cards render
-inside their parent card, so each provider carries the `innerIxIndex` of its card and the consumers render only
-for the card with the same `innerIxIndex`.
+`InstructionIntentProvider` holds the open state and the result, and two consumers read it. The router
+`InstructionNodeCard` mounts the provider for every top-level and inner card, so each card reads its own provider.
 
 ## What Changes
 
 - Entity `app/entities/instruction-intent`: the support check, the existence check, the intent computation, the
   ui components.
 - Dependency `@codama/dynamic-instructions` 1.0.0.
-- `entities/idl` and `entities/cluster` gain `@x/instruction-intent`. `useProgramIdls` returns the fetch `error`.
+- `entities/idl` and `entities/cluster` gain `@x/instruction-intent`. `useProgramIdls` returns the fetch `error`, and
+  `isProgramMetadataSource` picks the Program Metadata IDL.
 - `Button` gains a `dashed` variant. `abbreviateAddress` is exported from `AddressLink`.
-- `entities/transaction-data` gains `getInstructionsFromRawTransaction` and `getInnerInstructionsFromRawTransaction`.
-  `RawTransaction.meta` keeps `loadedAddresses`.
-- Both `InstructionsSection` components mount a provider per top-level and per inner card. `BaseInstructionCard` and
-  `InspectorInstructionCard` place the button and the row.
+- `entities/transaction-data` gains `getInstructionsFromRawTransaction`, `getInnerInstructionsFromRawTransaction`,
+  `readRawInstructions`, and `readRawInnerInstructions`. `RawTransaction.meta` keeps `loadedAddresses`.
+- `@explorer/parsers/compat` gains `toLegacyInstruction`. `RawInstructions` gains the `failed` state and
+  `innerInstructions`.
+- `InstructionNodeCard` mounts a provider per top-level and per inner card. `BaseInstructionCard` places the button
+  and the row.
 
 ## Impact
 
 - Intents show only for programs whose Program Metadata IDL carries templates. Other cards show the dashed button.
 - First Load JS is unchanged on every route. The SDK (about 12 kB gzip) loads on the first Intent open.
+- The Raw view shows the accounts and data of RPC-parsed inner instructions and of RPC-parsed instructions in v1
+  transactions.
 - Accepted risk: account data is read when the page is viewed, not at the transaction's slot.
 - Accepted risk: a program can publish broken metadata. A throw from the parse, the account plan, or the
   computation is caught and shown as the `malformed-metadata` reason.

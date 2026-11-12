@@ -11,7 +11,6 @@ export function InstructionIntentRow() {
 
     return (
         <BaseTable.Row>
-            {/* The card table pins edge-cell padding with higher-specificity selectors, and the panel sets its own */}
             <BaseTable.Cell colSpan={3} className="!p-0">
                 <InstructionIntentPanel id={intent.panelId} intent={intent.result} />
             </BaseTable.Cell>
