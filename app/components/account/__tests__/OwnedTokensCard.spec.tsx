@@ -112,10 +112,11 @@ function resolved(entries: ReturnType<typeof tokenInfo>[] = []) {
     return { isLoading: false, tokenInfos: new Map(entries.map(entry => [entry.address, entry])) };
 }
 
-// GridTable renders the desktop grid (role="table") and a label-stacked mobile copy at once, so every
-// value appears twice in jsdom. Scope row/content assertions to the desktop table.
+// GridTable renders the desktop grid (role="table") and a label-stacked mobile copy (also role="table")
+// at once, so every value appears twice in jsdom. Scope row/content assertions to the desktop table,
+// which renders first.
 function grid() {
-    return within(screen.getByRole('table'));
+    return within(screen.getAllByRole('table')[0]);
 }
 
 /**
