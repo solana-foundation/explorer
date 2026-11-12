@@ -289,6 +289,20 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         /* eslint-enable testing-library/no-node-access */
     });
 
+    test('should show an intent button on the top-level card and on every inner card', async () => {
+        renderSection(buildMessage(), INNER_INSTRUCTIONS);
+
+        expect(await screen.findByText(/Inner Instructions/i)).toBeInTheDocument();
+        expect(screen.getAllByTestId('instruction-intent-trigger')).toHaveLength(5);
+    });
+
+    test('should show no intent button on a child it cannot decompile', async () => {
+        renderSection(buildMessage(), INNER_WITH_BAD_ACCOUNT);
+
+        expect(await screen.findByText(/Could not display instruction #1\.2, please report/i)).toBeInTheDocument();
+        expect(screen.getAllByTestId('instruction-intent-trigger')).toHaveLength(3);
+    });
+
     test('should render the curated card when an IDL also decodes the instruction', async () => {
         vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'anchor' } as never);
 

@@ -26,6 +26,7 @@ export type { InstructionArg } from './model/args';
 export type { InstructionEvent } from './model/events';
 export { instructionDataOf, toInstructionNode, toRawInstructionNode } from './model/node';
 export type { InstructionNode, RawInstructionNode } from './model/node';
+export { parsedInstructionOf, rawSourceOf } from './model/raw-source';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';
 export type { InstructionSurface } from './model/surface';
 export { ArgRows } from './ui/ArgRows';

@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/app/__tests__/card-harness';
 import { invariant } from '@/app/shared/lib/invariant';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { toInstructionNode } from '../model/node';
 import type { RawInstructions } from '../model/raw-source';
@@ -41,7 +42,6 @@ describe('TxInstructionSurface', () => {
     it.each([
         ['before a fetch', undefined],
         ['while a fetch runs', { status: FetchStatus.Fetching }],
-        ['after a failed fetch', { status: FetchStatus.FetchFailed }],
     ])('should offer a fetch of the signature %s', (_, details) => {
         rawDetails = details;
 
@@ -52,16 +52,39 @@ describe('TxInstructionSurface', () => {
         expect(fetchRaw).toHaveBeenCalledWith(SIGNATURE);
     });
 
+    it('should offer a retry of the signature after a failed fetch', () => {
+        rawDetails = { status: FetchStatus.FetchFailed };
+
+        const rawInstructions = readRawInstructions();
+        invariant(rawInstructions?.status === 'failed', 'the surface reports the failed fetch');
+        rawInstructions.fetch();
+
+        expect(fetchRaw).toHaveBeenCalledWith(SIGNATURE);
+    });
+
     it('should hold the fetched instructions', () => {
         rawDetails = { data: { raw: { transaction: { instructions: [WIRE_IX] } } }, status: FetchStatus.Fetched };
 
-        expect(readRawInstructions()).toEqual({ instructions: [WIRE_IX], status: 'fetched' });
+        expect(readRawInstructions()).toEqual({
+            innerInstructions: new Map(),
+            instructions: [WIRE_IX],
+            status: 'fetched',
+        });
     });
 
     it('should hold no instructions for a fetched transaction that cannot be decompiled', () => {
-        rawDetails = { data: { raw: { transaction: undefined } }, status: FetchStatus.Fetched };
+        const logError = vi.spyOn(Logger, 'error').mockImplementation(() => {});
+        rawDetails = {
+            data: { raw: { messageBytes: new Uint8Array([0x81]), signatures: [], version: 1 } },
+            status: FetchStatus.Fetched,
+        };
 
-        expect(readRawInstructions()).toEqual({ instructions: undefined, status: 'fetched' });
+        expect(readRawInstructions()).toEqual({
+            innerInstructions: new Map(),
+            instructions: undefined,
+            status: 'fetched',
+        });
+        logError.mockRestore();
     });
 
     it('should throw outside an instruction surface', () => {

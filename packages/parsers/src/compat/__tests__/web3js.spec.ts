@@ -3,7 +3,7 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { gen } from '../../__tests__/gen.js';
-import { toKitAddress, toKitInstruction, toLegacyPublicKey } from '../index.js';
+import { toKitAddress, toKitInstruction, toLegacyInstruction, toLegacyPublicKey } from '../index.js';
 
 const PROGRAM_ID = new PublicKey(gen.tokenProgram);
 const KEYS = [
@@ -44,6 +44,18 @@ describe('toKitInstruction', () => {
             AccountRole.READONLY,
         ]);
         expect(kitIx.accounts.map(account => account.address)).toEqual(KEYS.map(key => key.pubkey.toBase58()));
+    });
+});
+
+describe('toLegacyInstruction', () => {
+    it('should map every kit account role back onto signer/writable flags', () => {
+        const ix = new TransactionInstruction({ data: Buffer.from([1, 2]), keys: KEYS, programId: PROGRAM_ID });
+
+        const legacyIx = toLegacyInstruction(toKitInstruction(ix));
+
+        expect(legacyIx.programId.equals(PROGRAM_ID)).toBe(true);
+        expect(legacyIx.data).toEqual(Buffer.from([1, 2]));
+        expect(legacyIx.keys).toEqual(KEYS);
     });
 });
 

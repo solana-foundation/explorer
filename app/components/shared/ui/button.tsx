@@ -162,15 +162,19 @@ const buttonVariants = cva([], {
         },
         // Toggle-on ring; only meaningful when paired with `variant="black"` in `btn-group-toggle`.
         { active: true, class: 'shadow-[0_0_0_0.15rem_#33a382]', ui: 'dashkit' },
+        // `!` because every variant sets its own text colour
+        { class: 'border-dashed !text-neutral-400 hover:!text-neutral-200', dashed: true, ui: 'dashkit' },
     ],
     defaultVariants: {
         active: false,
+        dashed: false,
         size: 'default',
         ui: 'tw',
         variant: 'default',
     },
     variants: {
         active: { false: '', true: '' },
+        dashed: { false: '', true: '' },
         size: { compact: '', default: '', icon: '', inline: '', lg: '', sm: '', tile: '', toolbar: '' },
         ui: { dashkit: '', tw: '' },
         variant: {
@@ -202,9 +206,15 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, active, size, ui, variant, asChild = false, ...props }, ref) => {
+    ({ className, active, dashed, size, ui, variant, asChild = false, ...props }, ref) => {
         const Comp = asChild ? Slot : 'button';
-        return <Comp className={cn(buttonVariants({ active, size, ui, variant }), className)} ref={ref} {...props} />;
+        return (
+            <Comp
+                className={cn(buttonVariants({ active, dashed, size, ui, variant }), className)}
+                ref={ref}
+                {...props}
+            />
+        );
     },
 );
 Button.displayName = 'Button';

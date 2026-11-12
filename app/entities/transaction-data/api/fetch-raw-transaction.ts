@@ -60,6 +60,10 @@ export async function fetchRawTransaction(
                               programIdIndex,
                           })),
                       })) ?? undefined,
+                  loadedAddresses: meta.loadedAddresses && {
+                      readonly: [...meta.loadedAddresses.readonly],
+                      writable: [...meta.loadedAddresses.writable],
+                  },
                   postBalances: meta.postBalances.map(Number),
                   preBalances: meta.preBalances.map(Number),
               }
