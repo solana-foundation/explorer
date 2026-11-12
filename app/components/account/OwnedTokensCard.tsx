@@ -104,18 +104,18 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
             cell: { justify: 'center' },
             cellClassName: 'p-0',
             header: 'Logo',
-            render: ({ tokenInfo }) => (
-                <ProxiedImage
-                    alt="Token icon"
-                    className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
-                    height={16}
-                    uri={tokenInfo?.logoURI ?? undefined}
-                    width={16}
-                />
-            ),
+            hideOnMobile: true,
+            render: ({ tokenInfo }) => <TokenLogo tokenInfo={tokenInfo} />,
         },
         {
             header: 'Mint Address',
+            mobileLabel: 'Mint',
+            mobileRender: ({ mintAddress, tokenInfo }) => (
+                <div className="flex min-w-0 items-center gap-2">
+                    <TokenLogo tokenInfo={tokenInfo} />
+                    <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
+                </div>
+            ),
             render: ({ mintAddress, tokenInfo }) => (
                 <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
             ),
@@ -152,6 +152,7 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
             columns={columns}
             rows={rows}
             getRowKey={({ mintAddress }) => mintAddress}
+            mobile="stack"
             footer={
                 <TokensCardFooter
                     loadMore={() => setVisibleCount(count => count + HOLDINGS_LOAD_MORE_COUNT)}
@@ -176,6 +177,18 @@ type MappedToken = {
     rawAmount: string;
     scaledUiAmountMultiplier: string;
 };
+
+function TokenLogo({ tokenInfo }: { tokenInfo: TokenInfo | undefined }) {
+    return (
+        <ProxiedImage
+            alt="Token icon"
+            className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
+            height={16}
+            uri={tokenInfo?.logoURI ?? undefined}
+            width={16}
+        />
+    );
+}
 
 /** Insertion order is RPC order, which the verification tiering preserves within a tier. */
 function aggregateByMint(tokens: TokenInfoWithPubkey[]): Map<string, MappedToken> {

@@ -13,7 +13,7 @@ import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { HistoryCardFooter } from '@shared/ui/HistoryCard';
+import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
 import { address as toAddress } from '@solana/kit';
 import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -284,11 +284,13 @@ export function TokenTransfersCard({ address }: { address: string }) {
             columns={columns}
             empty={null}
             footer={
-                <HistoryCardFooter
-                    fetching={fetching}
-                    foundOldest={history.data.foundOldest}
-                    loadMore={() => loadMore()}
-                />
+                <div className="mt-2 w-full">
+                    <HistoryCardFooterContent
+                        fetching={fetching}
+                        foundOldest={history.data.foundOldest}
+                        loadMore={() => loadMore()}
+                    />
+                </div>
             }
             getRowKey={transferData => transferData.signature + transferData.index + (transferData.childIndex || '')}
             gridTemplate={gridTemplate}

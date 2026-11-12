@@ -11,9 +11,13 @@ export type GridTableColumn<T> = {
     header: ReactNode;
     // Falls back to `header` when the row stacks into labelled fields below `md` (see `mobile="stack"`).
     mobileLabel?: ReactNode;
+    // Dropped from the stacked layout, e.g. a column whose content is folded into another field on mobile.
+    hideOnMobile?: boolean;
     cell?: CellVariants;
     cellClassName?: string;
     render: (row: T) => ReactNode;
+    // Overrides `render` in the stacked layout, e.g. to inline a hidden column's content.
+    mobileRender?: (row: T) => ReactNode;
 };
 
 export type GridTableProps<T> = {
@@ -109,14 +113,18 @@ export function GridTable<T>({
                             key={getRowKey(row, rowIndex)}
                             className="flex flex-col gap-1 border-t border-solid border-outer-space-800 px-3 py-3 first:border-t-0"
                         >
-                            {columns.map((column, index) => (
-                                <div key={index} className="flex items-start gap-2">
-                                    <span className="w-[clamp(6rem,35%,11rem)] shrink-0 text-outer-space-300">
-                                        {column.mobileLabel ?? column.header}
-                                    </span>
-                                    <div className="min-w-0 flex-1">{column.render(row)}</div>
-                                </div>
-                            ))}
+                            {columns
+                                .filter(column => !column.hideOnMobile)
+                                .map((column, index) => (
+                                    <div key={index} className="flex items-start gap-2">
+                                        <span className="w-[clamp(6rem,35%,11rem)] shrink-0 text-outer-space-300">
+                                            {column.mobileLabel ?? column.header}
+                                        </span>
+                                        <div className="min-w-0 flex-1">
+                                            {(column.mobileRender ?? column.render)(row)}
+                                        </div>
+                                    </div>
+                                ))}
                         </div>
                     ))
                 ) : (
