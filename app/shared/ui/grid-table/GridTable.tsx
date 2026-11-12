@@ -9,6 +9,8 @@ type CellVariants = Omit<VariantProps<typeof cellVariants>, 'role'>;
 
 export type GridTableColumn<T> = {
     header: ReactNode;
+    // Falls back to `header` when the row stacks into labelled fields below `md` (see `mobile="stack"`).
+    mobileLabel?: ReactNode;
     cell?: CellVariants;
     cellClassName?: string;
     render: (row: T) => ReactNode;
@@ -22,6 +24,9 @@ export type GridTableProps<T> = {
     getRowKey: (row: T, index: number) => React.Key;
     empty?: ReactNode;
     className?: string;
+    // `grid` (default) keeps the single grid on every breakpoint. `stack` drops each row into labelled
+    // fields below `md` so tables too wide for a phone reflow instead of scrolling horizontally.
+    mobile?: 'grid' | 'stack';
 };
 
 const cellVariants = cva('flex px-3 py-2.5', {
@@ -46,9 +51,16 @@ export function GridTable<T>({
     getRowKey,
     empty = 'No data',
     className,
+    mobile = 'grid',
 }: GridTableProps<T>) {
-    return (
-        <div className={cn('w-full overflow-x-auto text-sm text-white', className)}>
+    const grid = (
+        <div
+            className={cn(
+                'w-full overflow-x-auto text-sm text-white',
+                mobile === 'stack' && 'hidden md:block',
+                className,
+            )}
+        >
             <div role="table" aria-label={ariaLabel} className={cn('grid min-w-full', gridTemplate)}>
                 <div role="row" className="contents">
                     {columns.map((column, index) => (
@@ -83,6 +95,35 @@ export function GridTable<T>({
                 )}
             </div>
         </div>
+    );
+
+    if (mobile !== 'stack') return grid;
+
+    return (
+        <>
+            {grid}
+            <div className="text-sm text-white md:hidden">
+                {rows.length > 0 ? (
+                    rows.map((row, rowIndex) => (
+                        <div
+                            key={getRowKey(row, rowIndex)}
+                            className="flex flex-col gap-1 border-t border-solid border-outer-space-800 px-3 py-3 first:border-t-0"
+                        >
+                            {columns.map((column, index) => (
+                                <div key={index} className="flex items-start gap-2">
+                                    <span className="w-[clamp(6rem,35%,11rem)] shrink-0 text-outer-space-300">
+                                        {column.mobileLabel ?? column.header}
+                                    </span>
+                                    <div className="min-w-0 flex-1">{column.render(row)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ))
+                ) : (
+                    <div className="px-3 py-3 text-center text-outer-space-300">{empty}</div>
+                )}
+            </div>
+        </>
     );
 }
 

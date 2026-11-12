@@ -111,6 +111,7 @@ export function RewardsCard({ address }: { address: string }) {
             getRowKey={reward => reward.epoch}
             empty={`No rewards issued between epochs ${lowestFetchedEpoch} and ${highestFetchedEpoch}`}
             footer={footer}
+            mobile="stack"
         />
     );
 }

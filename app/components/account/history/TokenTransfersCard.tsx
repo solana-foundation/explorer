@@ -13,7 +13,7 @@ import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { HistoryCardFooter, HistoryCardHeader } from '@shared/ui/HistoryCard';
+import { HistoryCardFooter } from '@shared/ui/HistoryCard';
 import { address as toAddress } from '@solana/kit';
 import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -24,10 +24,10 @@ import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { RefreshButton } from '@/app/components/shared/ui/refresh-button';
 import { Logger } from '@/app/shared/lib/logger';
 import { RelativeTime } from '@/app/shared/RelativeTime';
-import { Card } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 import { getTransactionRows } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -54,55 +54,28 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
     return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
 }
 
-function TransferRow({
-    data,
-    hasTimestamps,
+function AmountCell({
+    amountString,
     tokenAddress,
+    units,
 }: {
-    data: TransferData;
-    hasTimestamps: boolean;
-    tokenAddress: string | undefined;
+    amountString: string;
+    tokenAddress: string;
+    units: string;
 }) {
-    const { signature, blockTime, statusText, statusClass, transfer, index, childIndex, amountString, units } = data;
     const [amountWithScaledUiAmountMultiplier, scaledUiAmountMultiplier] = useScaledUiAmountForMint(
         tokenAddress,
         amountString,
     );
 
     return (
-        <BaseTable.Row key={signature + index + (childIndex || '')}>
-            <BaseTable.Cell>
-                <Signature signature={signature} link />
-            </BaseTable.Cell>
-
-            {hasTimestamps && (
-                <BaseTable.Cell className="text-dk-gray-700">
-                    {blockTime && <RelativeTime date={blockTime * 1000} />}
-                </BaseTable.Cell>
-            )}
-
-            <BaseTable.Cell>
-                <Address pubkey={transfer.source} link />
-            </BaseTable.Cell>
-
-            <BaseTable.Cell>
-                <Address pubkey={transfer.destination} link />
-            </BaseTable.Cell>
-
-            <BaseTable.Cell>
-                {amountWithScaledUiAmountMultiplier} {units}
-                <ScaledUiAmountMultiplierTooltip
-                    rawAmount={amountString}
-                    scaledUiAmountMultiplier={scaledUiAmountMultiplier}
-                />
-            </BaseTable.Cell>
-
-            <BaseTable.Cell>
-                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
-                    {statusText}
-                </Badge>
-            </BaseTable.Cell>
-        </BaseTable.Row>
+        <>
+            {amountWithScaledUiAmountMultiplier} {units}
+            <ScaledUiAmountMultiplierTooltip
+                rawAmount={amountString}
+                scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+            />
+        </>
     );
 }
 
@@ -247,39 +220,82 @@ export function TokenTransfersCard({ address }: { address: string }) {
     }
 
     const fetching = history.status === FetchStatus.Fetching;
+    const tokenAddress = pubkey.toBase58();
+
+    const columns: GridTableColumn<TransferData>[] = [
+        {
+            cell: { wrap: 'nowrap' },
+            header: 'Transaction Signature',
+            render: ({ signature }) => <Signature signature={signature} link />,
+        },
+        {
+            cell: { wrap: 'nowrap' },
+            header: 'Source',
+            render: ({ transfer }) => <Address pubkey={transfer.source} link />,
+        },
+        {
+            cell: { wrap: 'nowrap' },
+            header: 'Destination',
+            render: ({ transfer }) => <Address pubkey={transfer.destination} link />,
+        },
+        {
+            cell: { wrap: 'nowrap' },
+            header: 'Amount',
+            render: ({ amountString, units }) => (
+                <AmountCell amountString={amountString} tokenAddress={tokenAddress} units={units} />
+            ),
+        },
+        {
+            cell: { wrap: 'nowrap' },
+            header: 'Result',
+            render: ({ statusClass, statusText }) => (
+                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                    {statusText}
+                </Badge>
+            ),
+        },
+    ];
+
+    if (hasTimestamps) {
+        columns.splice(1, 0, {
+            cell: { wrap: 'nowrap' },
+            cellClassName: 'text-dk-gray-700',
+            header: 'Age',
+            render: ({ blockTime }) => (blockTime ? <RelativeTime date={blockTime * 1000} /> : null),
+        });
+    }
+
+    const gridTemplate = hasTimestamps
+        ? 'grid-cols-[auto_auto_auto_auto_auto_auto]'
+        : 'grid-cols-[auto_auto_auto_auto_auto]';
+
     return (
-        <Card ui="dashkit">
-            <HistoryCardHeader
-                fetching={fetching}
-                failed={history.status === FetchStatus.FetchFailed}
-                refresh={() => refresh()}
-                title="Token Transfers"
-                analyticsSection="token_transfers_header"
-            />
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
-                        {hasTimestamps && <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>}
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Source</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Destination</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Amount</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>
-                    {allTransfers.map(transferData => (
-                        <TransferRow
-                            key={transferData.signature + transferData.index + (transferData.childIndex || '')}
-                            data={transferData}
-                            hasTimestamps={hasTimestamps}
-                            tokenAddress={pubkey.toBase58()}
-                        />
-                    ))}
-                </BaseTable.Body>
-            </BaseTable>
-            <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </Card>
+        <GridTableCard
+            actions={
+                <RefreshButton
+                    analyticsSection="token_transfers_header"
+                    failed={history.status === FetchStatus.FetchFailed}
+                    fetching={fetching}
+                    onClick={() => refresh()}
+                />
+            }
+            ariaLabel="Token transfers"
+            collapsible={false}
+            columns={columns}
+            empty={null}
+            footer={
+                <HistoryCardFooter
+                    fetching={fetching}
+                    foundOldest={history.data.foundOldest}
+                    loadMore={() => loadMore()}
+                />
+            }
+            getRowKey={transferData => transferData.signature + transferData.index + (transferData.childIndex || '')}
+            gridTemplate={gridTemplate}
+            mobile="stack"
+            rows={allTransfers}
+            title="Token Transfers"
+        />
     );
 }
 

@@ -31,6 +31,7 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
             rows={rows}
             getRowKey={({ index }) => index}
             empty="No blockhashes found"
+            mobile="stack"
         />
     );
 }

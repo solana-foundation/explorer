@@ -37,6 +37,7 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
             rows={sysvarAccount.info}
             getRowKey={entry => entry.epoch}
             empty="No stake history found"
+            mobile="stack"
         />
     );
 }

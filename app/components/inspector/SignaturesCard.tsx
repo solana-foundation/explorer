@@ -1,6 +1,5 @@
 import { Address } from '@components/common/Address';
 import { Signature } from '@components/common/Signature';
-import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import {
     getBase58Encoder,
     getPublicKeyFromAddress,
@@ -14,11 +13,49 @@ import React from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
-import { BaseTable } from '@/app/shared/ui/Table';
-
-import { CARD_TABLE_HEADER } from './inspector-table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 const BASE58_ENCODER = getBase58Encoder();
+
+type SignatureRow = {
+    index: number;
+    pending: boolean;
+    signature: string | undefined;
+    signer: PublicKey;
+    verified: boolean | undefined;
+};
+
+const COLUMNS: ReadonlyArray<GridTableColumn<SignatureRow>> = [
+    {
+        cellClassName: 'text-outer-space-300',
+        header: '#',
+        render: row => row.index + 1,
+    },
+    {
+        header: 'Signature',
+        render: row => (
+            <div className="flex flex-col gap-1">
+                <div>{row.signature ? <Signature signature={row.signature} /> : 'Missing Signature'}</div>
+                <div>{renderValidity(row.signature, row.verified, row.pending)}</div>
+            </div>
+        ),
+    },
+    {
+        header: 'Signer',
+        render: row => (
+            <div className="flex flex-col gap-1">
+                <Address pubkey={row.signer} link />
+                {row.index === 0 && (
+                    <div>
+                        <Badge ui="dashkit" variant="info" className="mr-[3px]">
+                            Fee Payer
+                        </Badge>
+                    </div>
+                )}
+            </div>
+        ),
+    },
+];
 
 async function verifySignatures(
     signatures: (string | undefined)[],
@@ -73,33 +110,25 @@ export function TransactionSignatures({
             ? verification.results
             : undefined;
 
-    const signatureRows = signatures.map((signature, index) => {
-        const publicKey = message.staticAccountKeys[index];
-
-        const props = {
-            index,
-            pending: verificationResults === undefined,
-            signature,
-            signer: publicKey,
-            verified: verificationResults?.[index],
-        };
-
-        return <SignatureRow key={index} {...props} />;
-    });
+    const rows: SignatureRow[] = signatures.map((signature, index) => ({
+        index,
+        pending: verificationResults === undefined,
+        signature,
+        signer: message.staticAccountKeys[index],
+        verified: verificationResults?.[index],
+    }));
 
     return (
-        <CollapsibleSection title="Signatures">
-            <BaseTable ui="dashkit" variant="card" density="dense" nowrap className={CARD_TABLE_HEADER}>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-px text-outer-space-300">#</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-outer-space-300">Signature</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-outer-space-300">Signer</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>{signatureRows}</BaseTable.Body>
-            </BaseTable>
-        </CollapsibleSection>
+        <GridTableCard
+            title="Signatures"
+            ariaLabel="Signatures"
+            gridTemplate="grid-cols-[auto_1fr_1fr]"
+            columns={COLUMNS}
+            rows={rows}
+            getRowKey={row => row.index}
+            empty="No signatures found"
+            mobile="stack"
+        />
     );
 }
 
@@ -119,45 +148,5 @@ function renderValidity(
         <Badge ui="dashkit" variant="warning" className="mr-[3px]">
             Invalid
         </Badge>
-    );
-}
-
-function SignatureRow({
-    signature,
-    signer,
-    verified,
-    pending,
-    index,
-}: {
-    signature: string | undefined;
-    signer: PublicKey;
-    verified?: boolean;
-    pending: boolean;
-    index: number;
-}) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>
-                <span className="text-outer-space-300">{index + 1}</span>
-            </BaseTable.Cell>
-            <BaseTable.Cell>
-                <div className="flex flex-col gap-1">
-                    <div>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</div>
-                    <div>{renderValidity(signature, verified, pending)}</div>
-                </div>
-            </BaseTable.Cell>
-            <BaseTable.Cell>
-                <div className="flex flex-col gap-1">
-                    <Address pubkey={signer} link />
-                    {index === 0 && (
-                        <div>
-                            <Badge ui="dashkit" variant="info" className="mr-[3px]">
-                                Fee Payer
-                            </Badge>
-                        </div>
-                    )}
-                </div>
-            </BaseTable.Cell>
-        </BaseTable.Row>
     );
 }
