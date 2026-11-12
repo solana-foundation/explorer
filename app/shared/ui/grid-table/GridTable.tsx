@@ -106,21 +106,25 @@ export function GridTable<T>({
     return (
         <>
             {grid}
-            <div className="text-sm text-white md:hidden">
+            <div role="table" aria-label={ariaLabel} className="text-sm text-white md:hidden">
                 {rows.length > 0 ? (
                     rows.map((row, rowIndex) => (
                         <div
                             key={getRowKey(row, rowIndex)}
+                            role="row"
                             className="flex flex-col gap-1 border-t border-solid border-outer-space-800 px-3 py-3 first:border-t-0"
                         >
                             {columns
                                 .filter(column => !column.hideOnMobile)
                                 .map((column, index) => (
                                     <div key={index} className="flex items-start gap-2">
-                                        <span className="w-[clamp(6rem,35%,11rem)] shrink-0 text-outer-space-300">
+                                        <span
+                                            role="rowheader"
+                                            className="w-[clamp(6rem,35%,11rem)] shrink-0 text-outer-space-300"
+                                        >
                                             {column.mobileLabel ?? column.header}
                                         </span>
-                                        <div className="min-w-0 flex-1">
+                                        <div role="cell" className="min-w-0 flex-1">
                                             {(column.mobileRender ?? column.render)(row)}
                                         </div>
                                     </div>
@@ -128,7 +132,11 @@ export function GridTable<T>({
                         </div>
                     ))
                 ) : (
-                    <div className="px-3 py-3 text-center text-outer-space-300">{empty}</div>
+                    <div role="row" className="contents">
+                        <div role="cell" className="px-3 py-3 text-center text-outer-space-300">
+                            {empty}
+                        </div>
+                    </div>
                 )}
             </div>
         </>

@@ -49,6 +49,17 @@ describe('GridTable mobile="stack"', () => {
         expect(screen.getByText('d-mobile')).toBeInTheDocument();
     });
 
+    it('should expose table semantics on the mobile stack layout', () => {
+        renderStack();
+
+        // Both the desktop grid and the mobile stack carry role="table" with the shared aria-label.
+        expect(screen.getAllByRole('table', { name: 'Example' })).toHaveLength(2);
+
+        // Mobile fields keep the label->value relationship as rowheader/cell pairs.
+        const labels = screen.getAllByRole('rowheader');
+        expect(labels.map(el => el.textContent)).toEqual(['A', 'C-mobile', 'D']);
+    });
+
     it('should render the empty node in both layouts', () => {
         renderStack([], 'Nothing here');
 
