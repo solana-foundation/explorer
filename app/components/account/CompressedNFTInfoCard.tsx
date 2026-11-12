@@ -60,10 +60,10 @@ export function DasCompressionInfoCard({
     const rows: KeyValueRow[] = [
         { label: 'Concurrent Merkle Tree', value: <Address pubkey={treeAddress} link raw /> },
         {
-            label: <>Current Tree Root {getVerifiedProofPill(proofVerified)}</>,
-            value: <Address pubkey={root} raw />,
+            label: 'Current Tree Root',
+            value: <ValueWithBadge value={<Address pubkey={root} raw />} badge={getVerifiedProofPill(proofVerified)} />,
         },
-        { label: <>Proof Size {getProofSizePill(proofSize)}</>, value: proofSize },
+        { label: 'Proof Size', value: <ValueWithBadge value={proofSize} badge={getProofSizePill(proofSize)} /> },
         { label: 'Leaf Number', value: compressedInfo.leaf_id },
         { label: 'Sequence Number of Last Update', value: compressedInfo.seq },
         { label: 'Compressed Nft Hash', value: <Address pubkey={new PublicKey(compressedInfo.asset_hash)} raw /> },
@@ -78,40 +78,43 @@ export function DasCompressionInfoCard({
     );
 }
 
-function getVerifiedProofPill(verified: boolean) {
+// Mirrors the badge cell of the transaction AccountsCard: the badge wraps onto its own line
+// under the value, and the wrapper collapses when there is no badge.
+function ValueWithBadge({ value, badge }: { value: React.ReactNode; badge: React.ReactNode }) {
     return (
-        <div className="ml-1.5 inline-flex items-center">
-            {verified ? (
-                <Badge ui="dashkit" variant="dark" tone="solid">
-                    Proof Verified
-                </Badge>
-            ) : (
-                <Badge ui="dashkit" variant="danger">
-                    Proof Not Verified
-                </Badge>
-            )}
+        <div className="min-w-0 flex-1">
+            <div className="min-w-0">{value}</div>
+            <span className="mb-0.5 mt-1 inline-flex flex-wrap gap-1 empty:hidden">{badge}</span>
         </div>
+    );
+}
+
+function getVerifiedProofPill(verified: boolean) {
+    return verified ? (
+        <Badge ui="dashkit" variant="success">
+            Proof Verified
+        </Badge>
+    ) : (
+        <Badge ui="dashkit" variant="danger">
+            Proof Not Verified
+        </Badge>
     );
 }
 
 function getProofSizePill(proofSize: number) {
     if (proofSize === 0) {
         return (
-            <div className="ml-1.5 inline-flex items-center">
-                <Badge ui="dashkit" variant="dark" tone="solid">
-                    No Proof Required
-                </Badge>
-            </div>
+            <Badge ui="dashkit" variant="success">
+                No Proof Required
+            </Badge>
         );
     }
     if (proofSize > 8) {
         return (
-            <div className="ml-1.5 inline-flex items-center">
-                <Badge ui="dashkit" variant="danger">
-                    Composability Hazard
-                </Badge>
-            </div>
+            <Badge ui="dashkit" variant="danger">
+                Composability Hazard
+            </Badge>
         );
     }
-    return <div />;
+    return undefined;
 }
