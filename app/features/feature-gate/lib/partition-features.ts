@@ -2,7 +2,8 @@ import { FEATURE_GATES, type FeatureInfoType } from '@entities/feature-gate';
 
 import { Cluster } from '@/app/utils/cluster';
 
-export type ClusterActivation = { cluster: Cluster; epoch: number };
+// Activations are only ever read for the real clusters in `OTHER_CLUSTERS`, so the cluster is never `Custom`.
+export type ClusterActivation = { cluster: Exclude<Cluster, Cluster.Custom>; epoch: number };
 export type SimdEntry = { simd: string; link: string };
 
 type EnrichedBase = Omit<FeatureInfoType, 'simds' | 'simd_link'> & {
@@ -18,7 +19,7 @@ export type FeaturePartition = {
     upcoming: UpcomingFeature[];
 };
 
-const OTHER_CLUSTERS: Partial<Record<Cluster, Cluster[]>> = {
+const OTHER_CLUSTERS: Partial<Record<Cluster, Exclude<Cluster, Cluster.Custom>[]>> = {
     [Cluster.Devnet]: [Cluster.MainnetBeta, Cluster.Testnet],
     [Cluster.MainnetBeta]: [Cluster.Devnet, Cluster.Testnet],
     [Cluster.Testnet]: [Cluster.MainnetBeta, Cluster.Devnet],

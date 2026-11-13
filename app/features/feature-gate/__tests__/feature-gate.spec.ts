@@ -49,11 +49,22 @@ describe('fetchFeatureGateInformation', () => {
         vi.clearAllMocks();
     });
 
-    it('should handle unexpected error while fetching, but react as there was no data', async () => {
-        await expect(fetchFeatureGateInformation()).resolves.toEqual(['No data']);
+    it('should return no proposals when the feature has no SIMD link', async () => {
+        await expect(fetchFeatureGateInformation()).resolves.toEqual([]);
+    });
 
+    it('should mark a proposal unavailable on a fetch error, keeping its link', async () => {
         mockRejectOnce(new Error('Network Error'));
-        await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual(['No data']);
+        await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual([
+            { status: 'unavailable', url: FEATURE.simd_link[0] },
+        ]);
+    });
+
+    it('should mark a proposal unavailable on a non-ok response, keeping its link', async () => {
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 404 });
+        await expect(fetchFeatureGateInformation(FEATURE)).resolves.toEqual([
+            { status: 'unavailable', url: FEATURE.simd_link[0] },
+        ]);
     });
 
     it('should return feature info', async () => {
@@ -61,6 +72,6 @@ describe('fetchFeatureGateInformation', () => {
         const data = await fetchFeatureGateInformation(FEATURE);
 
         expect(fetchMock).toHaveBeenCalledWith(getLink(FEATURE.simd_link[0]), { method: 'GET' });
-        expect(data).toEqual(['# Summary']);
+        expect(data).toEqual([{ markdown: '# Summary', status: 'ok' }]);
     });
 });
