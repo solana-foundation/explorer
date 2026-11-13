@@ -12,7 +12,7 @@ import { TOKEN_INFO_REQUEST_LIMIT } from '../lib/request-limit';
 import { type TokenInfo } from '../lib/types';
 import { searchJupiterTokens } from './search-jupiter-tokens';
 
-type TokenInfosResult =
+export type TokenInfosResult =
     { kind: 'resolved'; tokens: TokenInfo[]; malformed: number } | { kind: 'unavailable'; error: unknown };
 
 export async function getTokenInfos(

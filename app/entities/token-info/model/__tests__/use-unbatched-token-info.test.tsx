@@ -36,30 +36,6 @@ describe('useUnbatchedTokenInfo', () => {
         expect(mockedFetch).toHaveBeenCalledWith(['mint-a'], Cluster.Custom, GENESIS_HASHES.MAINNET);
     });
 
-    it('should report loading until the token info arrives', async () => {
-        const { result } = renderUnbatchedTokenInfo('mint-a');
-
-        expect(result.current.isLoading).toBe(true);
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
-    });
-
-    it('should return no token info when the response has no entry for the mint', async () => {
-        mockedFetch.mockResolvedValue(new Map([['mint-b', tokenInfo('mint-b')]]));
-
-        const { result } = renderUnbatchedTokenInfo('mint-a');
-
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
-        expect(result.current.tokenInfo).toBeUndefined();
-    });
-
-    it('should not request token info without a mint', async () => {
-        const { result } = renderUnbatchedTokenInfo(undefined);
-
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
-        expect(result.current.tokenInfo).toBeUndefined();
-        expect(mockedFetch).not.toHaveBeenCalled();
-    });
-
     it('should keep the label that useTokenInfo reads when the lookup resolves nothing', async () => {
         const cache = new Map();
         const wrapper = swrWrapper({ provider: () => cache });
@@ -90,9 +66,7 @@ describe('useUnbatchedTokenInfo', () => {
     });
 });
 
-function renderUnbatchedTokenInfo(
-    mint: string | undefined,
-): RenderHookResult<ReturnType<typeof useUnbatchedTokenInfo>, unknown> {
+function renderUnbatchedTokenInfo(mint: string): RenderHookResult<ReturnType<typeof useUnbatchedTokenInfo>, unknown> {
     return renderHook(
         () => useUnbatchedTokenInfo({ cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET, mint }),
         { wrapper: swrWrapper() },

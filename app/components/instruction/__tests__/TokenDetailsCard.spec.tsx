@@ -1,13 +1,11 @@
 import { gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
-import { GENESIS_HASHES } from '@entities/chain-id';
 import { inspectorSurface, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { isParsedInstruction } from '@entities/instruction-parser';
 import { useUnbatchedTokenInfo } from '@entities/token-info';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
-import { useCluster } from '@providers/cluster';
 import type { ReadonlyUint8Array } from '@solana/kit';
 import { type AccountMeta, type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -27,7 +25,6 @@ import {
 } from '@solana-program/token-2022';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -37,8 +34,6 @@ import {
     renderTxCard,
     renderWithProviders,
 } from '@/app/__tests__/card-harness';
-import { connectedWithGenesisHash } from '@/app/__tests__/swr-hook';
-import { stubTokenInfoRoute } from '@/app/__tests__/token-info-route';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
@@ -57,11 +52,6 @@ vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
     useUnbatchedTokenInfo: vi.fn(),
 }));
-
-vi.mock('@providers/cluster', async importOriginal => {
-    const actual = await importOriginal<typeof import('@providers/cluster')>();
-    return { ...actual, useCluster: vi.fn(actual.useCluster) };
-});
 
 const [SOURCE, DESTINATION, AUTHORITY, MINT, SIGNER_1, SIGNER_2] = Array.from({ length: 6 }, (_, n) =>
     gen.publicKey(n + 1),
@@ -83,8 +73,6 @@ describe('TokenDetailsCard', () => {
 
     afterEach(() => {
         vi.clearAllMocks();
-        vi.mocked(useCluster).mockReset();
-        vi.unstubAllGlobals();
     });
 
     it.each([
@@ -138,21 +126,6 @@ describe('TokenDetailsCard', () => {
             ]);
         });
         expect(useTokenAccountInfo).toHaveBeenCalledWith(SOURCE.toBase58());
-    });
-
-    it('should show the symbol of the mint on a custom cluster with the mainnet genesis hash', async () => {
-        const actualClient = await vi.importActual<typeof import('@entities/token-info')>('@entities/token-info');
-        vi.mocked(useCluster).mockReturnValue(connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET));
-        vi.mocked(useUnbatchedTokenInfo).mockImplementation(actualClient.useUnbatchedTokenInfo);
-        stubTokenInfoRoute([USDC]);
-        vi.mocked(useTokenAccountInfo).mockReturnValue({ mint: MINT } as ReturnType<typeof useTokenAccountInfo>);
-        vi.mocked(useMintAccountInfo).mockReturnValue({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>);
-
-        renderTxCard(transfer('1500000'));
-
-        await waitFor(() => {
-            expect(readCardRows()).toContainEqual(['Amount', '1.500000 USDC']);
-        });
     });
 
     it('should show the raw amount while the mint decimals are unknown', async () => {

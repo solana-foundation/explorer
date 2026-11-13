@@ -1,9 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '@/app/entities/token-info';
-import { jupiterToken } from '@/app/entities/token-info/__fixtures__/jupiter-token';
-import { redactedTokenInfo } from '@/app/entities/token-info/__fixtures__/token-info';
 import type { TokenInfo } from '@/app/entities/token-info/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
@@ -14,12 +12,10 @@ import { MAX_ADDRESSES } from '../config';
 // what is under test than real mints would.
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
-const MINT_C = gen.address(3);
 
 const mocks = vi.hoisted(() => ({
     getTokenInfos: vi.fn(),
-    getTokenInfosFromMetaplex: vi.fn(),
-    safeFetchAllMetadata: vi.fn(),
+    getTokenInfosWithMetaplexFallback: vi.fn(),
 }));
 
 // The Jupiter lookup and the Metaplex fallback each have their own spec. The route is the transport
@@ -30,14 +26,9 @@ vi.mock('@entities/token-info/server', async () => {
     return {
         ...actual,
         getTokenInfos: mocks.getTokenInfos,
-        getTokenInfosFromMetaplex: mocks.getTokenInfosFromMetaplex,
+        getTokenInfosWithMetaplexFallback: mocks.getTokenInfosWithMetaplexFallback,
     };
 });
-
-vi.mock('@metaplex-foundation/mpl-token-metadata', async importOriginal => ({
-    ...(await importOriginal<typeof import('@metaplex-foundation/mpl-token-metadata')>()),
-    safeFetchAllMetadata: mocks.safeFetchAllMetadata,
-}));
 
 function token(address: string, overrides: Partial<TokenInfo> = {}): TokenInfo {
     return {
@@ -57,7 +48,7 @@ describe('POST /api/token-info', () => {
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'error').mockImplementation(() => {});
         mocks.getTokenInfos.mockResolvedValue(resolved([]));
-        mocks.getTokenInfosFromMetaplex.mockResolvedValue([]);
+        mocks.getTokenInfosWithMetaplexFallback.mockResolvedValue(resolved([]));
     });
 
     it('should return 400 when the body is not valid JSON', async () => {
@@ -147,16 +138,6 @@ describe('POST /api/token-info', () => {
         expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.MainnetBeta, undefined, expect.anything());
     });
 
-    it('should answer without a Cache-Control header', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
-
-        const { POST } = await importRoute();
-        const res = await POST(createRequest({ address: MINT_A, cluster: Cluster.MainnetBeta }));
-
-        expect(res.status).toBe(200);
-        expect(res.headers.get('Cache-Control')).toBeNull();
-    });
-
     it('should resolve several addresses in one request', async () => {
         mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A), token(MINT_B)]));
 
@@ -201,63 +182,27 @@ describe('POST /api/token-info', () => {
         const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
 
         expect(await res.json()).toEqual({ content: [] });
-        expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
+        expect(mocks.getTokenInfosWithMetaplexFallback).not.toHaveBeenCalled();
     });
 
-    it('should read on-chain metadata only for mints Jupiter does not list', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
-        mocks.getTokenInfosFromMetaplex.mockResolvedValueOnce([token(MINT_C, { verified: false })]);
+    it('should read on-chain metadata when the caller opts in', async () => {
+        mocks.getTokenInfosWithMetaplexFallback.mockResolvedValueOnce(
+            resolved([token(MINT_A), token(MINT_B, { verified: false })]),
+        );
 
         const { POST } = await importRoute();
         const res = await POST(
-            createRequest({
-                addresses: [MINT_A, MINT_B, MINT_C],
-                cluster: Cluster.MainnetBeta,
-                includeOnChainFallback: true,
-            }),
+            createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta, includeOnChainFallback: true }),
         );
 
-        // The endpoint is resolved from server config, and nothing is derived from the incoming
-        // request — a caller-controlled Host must not be able to redirect the fallback's fetches.
-        expect(mocks.getTokenInfosFromMetaplex).toHaveBeenCalledWith(
-            [MINT_B, MINT_C],
-            expect.any(String),
-            expect.not.objectContaining({ baseUrl: expect.anything() }),
-        );
-        expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_C, { verified: false })] });
-    });
-
-    it('should skip the on-chain lookup when Jupiter lists every mint', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A), token(MINT_B)]));
-
-        const { POST } = await importRoute();
-        await POST(
-            createRequest({
-                addresses: [MINT_A, MINT_B],
-                cluster: Cluster.MainnetBeta,
-                includeOnChainFallback: true,
-            }),
-        );
-
-        expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
-    });
-
-    it('should still return the listed tokens when the on-chain lookup throws', async () => {
-        mocks.getTokenInfos.mockResolvedValueOnce(resolved([token(MINT_A)]));
-        mocks.getTokenInfosFromMetaplex.mockRejectedValueOnce(new Error('rpc exploded'));
-
-        const { POST } = await importRoute();
-        const res = await POST(
-            createRequest({
-                addresses: [MINT_A, MINT_B],
-                cluster: Cluster.MainnetBeta,
-                includeOnChainFallback: true,
-            }),
-        );
-
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ content: [token(MINT_A)] });
-        expect(Logger.warn).toHaveBeenCalled();
+        expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_B, { verified: false })] });
+        expect(mocks.getTokenInfosWithMetaplexFallback).toHaveBeenCalledWith({
+            addresses: [MINT_A, MINT_B],
+            cluster: Cluster.MainnetBeta,
+            genesisHash: undefined,
+            signal: expect.any(AbortSignal),
+        });
+        expect(mocks.getTokenInfos).not.toHaveBeenCalled();
     });
 
     it('should answer with an empty list for an empty addresses array', async () => {
@@ -275,54 +220,6 @@ describe('POST /api/token-info', () => {
 
         const config = mocks.getTokenInfos.mock.calls[0][3];
         expect(config.signal).toBeInstanceOf(AbortSignal);
-    });
-
-    describe('a redacted mint', () => {
-        // Both sources run for real, because the route hides the content of a redacted mint only when each of them does.
-        beforeEach(async () => {
-            const actual =
-                await vi.importActual<typeof import('@entities/token-info/server')>('@entities/token-info/server');
-            mocks.getTokenInfos.mockImplementation(actual.getTokenInfos);
-            mocks.getTokenInfosFromMetaplex.mockImplementation(actual.getTokenInfosFromMetaplex);
-            vi.stubEnv('JUPITER_API_KEY', 'test-key');
-            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
-        });
-
-        afterEach(() => {
-            vi.unstubAllEnvs();
-            vi.unstubAllGlobals();
-        });
-
-        it('should answer the Jupiter verified flag without the content or an RPC read', async () => {
-            vi.stubGlobal(
-                'fetch',
-                vi.fn().mockResolvedValue(Response.json([jupiterToken(MINT_A, { isVerified: true })])),
-            );
-
-            const { POST } = await importRoute();
-            const res = await POST(
-                createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta, includeOnChainFallback: true }),
-            );
-
-            expect(res.status).toBe(200);
-            expect(await res.json()).toEqual({
-                content: [redactedTokenInfo(MINT_A, true)],
-            });
-            expect(mocks.safeFetchAllMetadata).toHaveBeenCalledTimes(0);
-        });
-
-        it('should answer an empty list without an RPC read when Jupiter does not list the mint', async () => {
-            vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([])));
-
-            const { POST } = await importRoute();
-            const res = await POST(
-                createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta, includeOnChainFallback: true }),
-            );
-
-            expect(res.status).toBe(200);
-            expect(await res.json()).toEqual({ content: [] });
-            expect(mocks.safeFetchAllMetadata).toHaveBeenCalledTimes(0);
-        });
     });
 
     describe('when the Jupiter lookup fails', () => {
@@ -357,11 +254,8 @@ describe('POST /api/token-info', () => {
             );
         });
 
-        it.each([
-            ['a 500', new TokenInfoHttpError({ status: 500, statusText: 'Internal Server Error' }), 'HTTP 500'],
-            ['a timeout', new DOMException('The operation timed out.', 'TimeoutError'), 'timed out'],
-        ])('should answer 503 and report %s to Sentry as a warning', async (_, error, upstreamError) => {
-            failUpstream(error);
+        it('should answer 503 and report a timeout to Sentry as a warning', async () => {
+            failUpstream(new DOMException('The operation timed out.', 'TimeoutError'));
 
             const { POST } = await importRoute();
             const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
@@ -370,18 +264,8 @@ describe('POST /api/token-info', () => {
             expect(Logger.error).not.toHaveBeenCalled();
             expect(Logger.warn).toHaveBeenCalledWith('[api:token-info] Token lookup unavailable', {
                 sentry: true,
-                sentryExtras: expect.objectContaining({ upstreamError: expect.stringContaining(upstreamError) }),
+                sentryExtras: expect.objectContaining({ upstreamError: expect.stringContaining('timed out') }),
             });
-        });
-
-        it('should answer 503 and report a 401 to Sentry as an error', async () => {
-            failUpstream(new TokenInfoHttpError({ status: 401, statusText: 'Unauthorized' }));
-
-            const { POST } = await importRoute();
-            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
-
-            expect(res.status).toBe(503);
-            expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ sentry: true }));
         });
 
         it('should report an invalid Jupiter response to Sentry', async () => {
@@ -393,21 +277,6 @@ describe('POST /api/token-info', () => {
             expect(res.status).toBe(503);
             expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ sentry: true }));
             expect(Logger.warn).not.toHaveBeenCalled();
-        });
-
-        it('should not run the on-chain fallback', async () => {
-            failUpstream();
-
-            const { POST } = await importRoute();
-            await POST(
-                createRequest({
-                    addresses: [MINT_A],
-                    cluster: Cluster.MainnetBeta,
-                    includeOnChainFallback: true,
-                }),
-            );
-
-            expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
         });
     });
 

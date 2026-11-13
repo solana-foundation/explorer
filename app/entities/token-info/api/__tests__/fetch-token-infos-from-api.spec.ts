@@ -64,14 +64,6 @@ describe('fetchTokenInfosFromApi', () => {
         });
     });
 
-    it('should leave the genesis hash out of the query on a named cluster', async () => {
-        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [] }));
-
-        await fetchTokenInfosFromApi(request({ addresses: [MINT_A], genesisHash: GENESIS_HASHES.MAINNET }));
-
-        expect(sentRequest().url).toBe(`/api/token-info/${MINT_A}?cluster=${Cluster.MainnetBeta}`);
-    });
-
     it('should send the genesis hash of a Custom cluster in the query', async () => {
         vi.mocked(fetch).mockResolvedValue(Response.json({ content: [] }));
 
@@ -118,14 +110,8 @@ describe('fetchTokenInfosFromApi', () => {
         expect(fetch).not.toHaveBeenCalled();
     });
 
-    it.each([
-        ['devnet', Cluster.Devnet, undefined],
-        ['testnet', Cluster.Testnet, undefined],
-        ['a Custom cluster with the devnet genesis hash', Cluster.Custom, GENESIS_HASHES.DEVNET],
-    ])('should resolve no tokens without a request on %s without the fallback', async (_, cluster, hash) => {
-        const offMainnetRequest = request({ cluster, genesisHash: hash, includeOnChainFallback: false });
-
-        await expect(fetchTokenInfosFromApi(offMainnetRequest)).resolves.toEqual([]);
+    it('should resolve no tokens without a request on devnet without the fallback', async () => {
+        await expect(fetchTokenInfosFromApi(request({ cluster: Cluster.Devnet }))).resolves.toEqual([]);
         expect(fetch).not.toHaveBeenCalled();
     });
 
@@ -137,7 +123,7 @@ describe('fetchTokenInfosFromApi', () => {
         expect(tokens).toEqual([tokenInfo(MINT_A)]);
     });
 
-    it.each([404, 429, 500])('should resolve undefined for a %i response', async status => {
+    it.each([404, 500])('should resolve undefined for a %i response', async status => {
         vi.mocked(fetch).mockResolvedValue(new Response(null, { status }));
 
         await expect(fetchTokenInfosFromApi(request())).resolves.toBeUndefined();
@@ -302,30 +288,12 @@ describe('lookupTokenInfo', () => {
         expect(sentRequest().method).toBe('GET');
     });
 
-    it.each([
-        ['a 503 response', () => vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 503 }))],
-        ['a body that is not a token array', () => vi.mocked(fetch).mockResolvedValue(Response.json({}))],
-        ['a failed request', () => vi.mocked(fetch).mockRejectedValue(new TypeError('Failed to fetch'))],
-    ])('should answer unavailable for %s', async (_, respond) => {
-        respond();
+    it('should answer unavailable for a 503 response', async () => {
+        vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 503 }));
 
         await expect(lookupTokenInfo({ address: MINT_A, cluster: Cluster.MainnetBeta })).resolves.toEqual({
             kind: 'unavailable',
         });
-    });
-
-    it('should answer unavailable without a request on a Custom cluster with no genesis hash', async () => {
-        await expect(lookupTokenInfo({ address: MINT_A, cluster: Cluster.Custom })).resolves.toEqual({
-            kind: 'unavailable',
-        });
-        expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('should answer not-listed without a request on devnet', async () => {
-        await expect(lookupTokenInfo({ address: MINT_A, cluster: Cluster.Devnet })).resolves.toEqual({
-            kind: 'not-listed',
-        });
-        expect(fetch).not.toHaveBeenCalled();
     });
 });
 

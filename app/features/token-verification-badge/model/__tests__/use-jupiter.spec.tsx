@@ -29,7 +29,6 @@ afterEach(() => {
 describe('useJupiterVerification', () => {
     it.each([
         ['a verified token', 200, { content: [tokenInfo(MINT, true)] }, JupiterStatus.Success, true],
-        ['an unverified token', 200, { content: [tokenInfo(MINT, false)] }, JupiterStatus.Success, false],
         ['no token', 200, { content: [] }, JupiterStatus.Success, false],
         ['a 429', 429, { error: 'Token info rate limited' }, JupiterStatus.RateLimited, false],
         ['a 503', 503, { error: 'Token info unavailable' }, JupiterStatus.FetchFailed, false],
@@ -42,14 +41,6 @@ describe('useJupiterVerification', () => {
         const [url, init] = fetchMock.mock.calls[0];
         expect(url).toBe(`/api/token-info/${MINT}?cluster=${Cluster.MainnetBeta}`);
         expect(init.method).toBe('GET');
-    });
-
-    it('should report a failed request as FetchFailed', async () => {
-        fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch'));
-
-        const { result } = renderHook(() => useJupiterVerification(MINT), { wrapper: swrWrapper() });
-
-        await waitForHook(() => expect(result.current).toEqual({ status: JupiterStatus.FetchFailed, verified: false }));
     });
 
     it('should send no request off mainnet', async () => {

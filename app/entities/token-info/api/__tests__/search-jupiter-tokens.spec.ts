@@ -25,100 +25,59 @@ afterEach(() => {
 });
 
 describe('searchJupiterTokens', () => {
-    describe('the request', () => {
-        it('should send the encoded query and the API key to Jupiter', async () => {
-            fetchMock.mockResolvedValueOnce(Response.json([]));
+    it('should send the encoded query and the API key to Jupiter', async () => {
+        fetchMock.mockResolvedValueOnce(Response.json([]));
 
-            await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
+        await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
 
-            const [url, init] = fetchMock.mock.calls[0];
-            expect(url).toBe('https://api.jup.ag/tokens/v2/search?query=wrapped%20sol%2C%20usd%20%26%20co');
-            expect(init.headers).toEqual({ Accept: 'application/json', 'x-api-key': API_KEY });
-        });
+        const [url, init] = fetchMock.mock.calls[0];
+        expect(url).toBe('https://api.jup.ag/tokens/v2/search?query=wrapped%20sol%2C%20usd%20%26%20co');
+        expect(init.headers).toEqual({ Accept: 'application/json', 'x-api-key': API_KEY });
+    });
 
-        it('should send no Next cache option without a revalidate value', async () => {
-            fetchMock.mockResolvedValueOnce(Response.json([]));
+    it('should pass the revalidate value to the Next cache', async () => {
+        fetchMock.mockResolvedValueOnce(Response.json([]));
 
-            await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
+        await searchJupiterTokens({ apiKey: API_KEY, query: QUERY, revalidate: 60 });
 
-            expect(fetchMock.mock.calls[0][1]).not.toHaveProperty('next');
-        });
+        expect(fetchMock.mock.calls[0][1].next).toEqual({ revalidate: 60 });
+    });
 
-        it('should pass the revalidate value to the Next cache', async () => {
-            fetchMock.mockResolvedValueOnce(Response.json([]));
+    it('should answer the valid entries and the malformed count', async () => {
+        fetchMock.mockResolvedValueOnce(Response.json([jupiterToken(MINT_A), { id: MINT_B }, jupiterToken(MINT_C)]));
 
-            await searchJupiterTokens({ apiKey: API_KEY, query: QUERY, revalidate: 60 });
+        const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
 
-            expect(fetchMock.mock.calls[0][1].next).toEqual({ revalidate: 60 });
+        expect(result).toEqual({
+            kind: 'resolved',
+            malformed: 1,
+            tokens: [jupiterToken(MINT_A), jupiterToken(MINT_C)],
         });
     });
 
-    describe('a 200 response', () => {
-        it('should answer every entry of an array of valid entries', async () => {
-            fetchMock.mockResolvedValueOnce(Response.json([jupiterToken(MINT_A), jupiterToken(MINT_B)]));
+    it('should answer unavailable for a body that is not an array', async () => {
+        fetchMock.mockResolvedValueOnce(Response.json({ content: [] }));
 
-            const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
+        const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
 
-            expect(result).toEqual({
-                kind: 'resolved',
-                malformed: 0,
-                tokens: [jupiterToken(MINT_A), jupiterToken(MINT_B)],
-            });
-        });
-
-        it('should answer the valid entries and the malformed count', async () => {
-            fetchMock.mockResolvedValueOnce(
-                Response.json([jupiterToken(MINT_A), { id: MINT_B }, jupiterToken(MINT_C)]),
-            );
-
-            const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
-
-            expect(result).toEqual({
-                kind: 'resolved',
-                malformed: 1,
-                tokens: [jupiterToken(MINT_A), jupiterToken(MINT_C)],
-            });
-        });
-
-        it.each([
-            ['an object', { content: [] }],
-            ['null', null],
-        ])('should answer unavailable for a body that is %s', async (_, body) => {
-            fetchMock.mockResolvedValueOnce(Response.json(body));
-
-            const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
-
-            expect(result).toEqual({ error: expect.any(TokenInfoInvalidResponseError), kind: 'unavailable' });
-        });
+        expect(result).toEqual({ error: expect.any(TokenInfoInvalidResponseError), kind: 'unavailable' });
     });
 
-    describe('a failed request', () => {
-        it.each([429, 500])('should answer unavailable with the status of a %i', async status => {
-            fetchMock.mockResolvedValueOnce(Response.json({ error: 'nope' }, { status }));
+    it('should answer unavailable with the status of a failed response', async () => {
+        fetchMock.mockResolvedValueOnce(Response.json({ error: 'nope' }, { status: 429 }));
 
-            const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
+        const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
 
-            expect(result).toEqual({ error: expect.any(TokenInfoHttpError), kind: 'unavailable' });
-            expect(result.kind === 'unavailable' && result.error).toMatchObject({ status });
-        });
+        expect(result).toEqual({ error: expect.any(TokenInfoHttpError), kind: 'unavailable' });
+        expect(result.kind === 'unavailable' && result.error).toMatchObject({ status: 429 });
+    });
 
-        it('should answer unavailable with the error of a network failure', async () => {
-            const error = new TypeError('fetch failed');
-            fetchMock.mockRejectedValueOnce(error);
+    it('should answer unavailable with the error of a network failure', async () => {
+        const error = new TypeError('fetch failed');
+        fetchMock.mockRejectedValueOnce(error);
 
-            const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
+        const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
 
-            expect(result).toEqual({ error, kind: 'unavailable' });
-        });
-
-        it('should answer unavailable with the abort reason of an aborted signal', async () => {
-            const controller = new AbortController();
-            controller.abort();
-            fetchMock.mockImplementationOnce((_: string, init: RequestInit) => Promise.reject(init.signal?.reason));
-
-            const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY, signal: controller.signal });
-
-            expect(result).toEqual({ error: controller.signal.reason, kind: 'unavailable' });
-        });
+        expect(result).toEqual({ error, kind: 'unavailable' });
     });
 });

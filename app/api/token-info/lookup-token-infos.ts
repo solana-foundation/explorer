@@ -2,12 +2,12 @@ import {
     createAbortSignal,
     getChainId,
     getTokenInfos,
-    getTokenInfosFromMetaplex,
+    getTokenInfosWithMetaplexFallback,
     isTransientError,
     type TokenInfo,
     TokenInfoHttpError,
 } from '@entities/token-info/server';
-import { Cluster, serverClusterUrl } from '@utils/cluster';
+import { Cluster } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -25,12 +25,12 @@ export async function lookupTokenInfos({
     genesisHash: string | undefined;
     includeOnChainFallback: boolean;
 }): Promise<TokenInfosLookup> {
-    // Allow to resolve chainId with genesisHash as the request does not use Connection instance
-    // For requests that use Connection, Custom cluster should be disabled
-    const result = await getTokenInfos(addresses, cluster, genesisHash, {
-        // Bounds the lookup well below `maxDuration`, so the on-chain fallback still has time to run.
-        signal: createAbortSignal(),
-    });
+    // Bounds the Jupiter lookup well below `maxDuration`, so the on-chain fallback still has time to run.
+    const signal = createAbortSignal();
+    // The fallback is opt-in, so a caller that needs no on-chain metadata does not wait for the RPC reads.
+    const result = includeOnChainFallback
+        ? await getTokenInfosWithMetaplexFallback({ addresses, cluster, genesisHash, signal })
+        : await getTokenInfos(addresses, cluster, genesisHash, { signal });
 
     if (result.kind === 'unavailable') {
         reportUnavailable(result.error, {
@@ -48,12 +48,7 @@ export async function lookupTokenInfos({
         });
     }
 
-    // Opt-in, so a caller that needs no on-chain metadata does not wait for the RPC reads.
-    const tokens = includeOnChainFallback
-        ? await withMetaplexFallback(result.tokens, addresses, cluster)
-        : result.tokens;
-
-    return { kind: 'resolved', tokens };
+    return { kind: 'resolved', tokens: result.tokens };
 }
 
 export function invalidRequest(): NextResponse {
@@ -86,35 +81,4 @@ function reportUnavailable(error: unknown, extras: Record<string, unknown>): voi
 
 function isRateLimited(error: unknown): boolean {
     return error instanceof TokenInfoHttpError && error.status === 429;
-}
-
-/**
- * Fills in the mints with no token info by reading their on-chain Metaplex
- * metadata. The fallback is best-effort: a failure here still returns the
- * listed tokens.
- */
-async function withMetaplexFallback(listed: TokenInfo[], addresses: string[], cluster: Cluster): Promise<TokenInfo[]> {
-    const found = new Set(listed.map(token => token.address));
-    const missing = addresses.filter(address => !found.has(address));
-    if (missing.length === 0) return listed;
-
-    // Resolved server-side on purpose: forwarding the browser's RPC URL would let any caller
-    // point this route at an arbitrary host. Only the browser knows a custom cluster's endpoint,
-    // so a custom cluster gets no on-chain fallback.
-    if (cluster === Cluster.Custom) return listed;
-
-    // `!rpcEndpoint` still guards a `*_RPC_URL` env var set to `""`, which survives the `??`
-    // fallback in `serverClusterUrl`.
-    const rpcEndpoint = serverClusterUrl(cluster);
-    if (!rpcEndpoint) return listed;
-
-    try {
-        const onChain = await getTokenInfosFromMetaplex(missing, rpcEndpoint, {
-            onError: error => Logger.warn('[api:token-info] Metaplex lookup failed', { error }),
-        });
-        return [...listed, ...onChain];
-    } catch (error) {
-        Logger.warn('[api:token-info] Metaplex fallback failed', { error });
-        return listed;
-    }
 }

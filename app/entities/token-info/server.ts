@@ -1,7 +1,7 @@
 import 'server-only';
 
-export { getTokenInfosFromMetaplex } from './api/fetch-token-metaplex';
 export { getTokenInfo, getTokenInfos } from './api/fetch-token-infos-from-jupiter';
+export { getTokenInfosWithMetaplexFallback } from './api/get-token-infos-with-metaplex-fallback';
 export { searchJupiterTokens } from './api/search-jupiter-tokens';
 export { createAbortSignal } from './lib/create-abort-signal';
 export { isTransientError, TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors';

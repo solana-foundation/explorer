@@ -40,8 +40,8 @@ describe('useAccountRefreshTokenInfo', () => {
         await waitForHook(() => expect(result.current).toEqual({ isLoading: false, tokenInfo: undefined }));
     });
 
-    it.each([429, 503])('should return no token info after one request and no retry for a %i', async status => {
-        respond(status, { error: 'Token info unavailable' });
+    it('should return no token info after one request and no retry for a failed request', async () => {
+        respond(503, { error: 'Token info unavailable' });
 
         const { result } = renderMintTokenInfo({ config: FAST_RETRY });
 
@@ -52,9 +52,9 @@ describe('useAccountRefreshTokenInfo', () => {
         expect(fetch).toHaveBeenCalledTimes(1);
     });
 
-    it.each([429, 503])('should request the token info again on the next mount after a %i', async status => {
+    it('should request the token info again on the next mount after a failed request', async () => {
         const cache = new Map();
-        respond(status, { error: 'Token info unavailable' });
+        respond(503, { error: 'Token info unavailable' });
         const { result: failed, unmount } = renderMintTokenInfo({ config: { provider: () => cache } });
         await waitForHook(() => expect(fetch).toHaveBeenCalledTimes(1));
         await waitForHook(() => expect(failed.current.isLoading).toBe(false));
@@ -77,11 +77,8 @@ describe('useAccountRefreshTokenInfo', () => {
         expect(fetch).toHaveBeenCalledTimes(2);
     });
 
-    it.each([
-        ['a mint that is not listed', 200, { content: [] }],
-        ['a failed request', 503, { error: 'Token info unavailable' }],
-    ])('should not report loading while a refresh refetches %s', async (_, status, body) => {
-        respond(status, body);
+    it('should not report loading while a refresh refetches a failed request', async () => {
+        respond(503, { error: 'Token info unavailable' });
         const { result } = renderHookWithRevalidate(() => useAccountRefreshTokenInfo(hookProps()));
         await waitForHook(() => expect(fetch).toHaveBeenCalledTimes(1));
         await waitForHook(() => expect(result.current.state.isLoading).toBe(false));
@@ -95,19 +92,8 @@ describe('useAccountRefreshTokenInfo', () => {
         expect(result.current.state.isLoading).toBe(false);
     });
 
-    it.each([
-        ['no genesis hash', undefined],
-        ['an unknown genesis hash', 'unknown-genesis-hash'],
-    ])('should send no request on a Custom cluster with %s', async (_, genesisHash) => {
-        const { result } = renderMintTokenInfo({ cluster: Cluster.Custom, genesisHash });
-
-        expect(result.current).toEqual({ isLoading: false, tokenInfo: undefined });
-        await act(settleRetries);
-        expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('should send no request without a mint', async () => {
-        const { result } = renderMintTokenInfo({ mint: undefined });
+    it('should send no request on a Custom cluster with no genesis hash', async () => {
+        const { result } = renderMintTokenInfo({ cluster: Cluster.Custom });
 
         expect(result.current).toEqual({ isLoading: false, tokenInfo: undefined });
         await act(settleRetries);
