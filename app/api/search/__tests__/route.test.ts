@@ -233,6 +233,41 @@ describe('GET /api/search', () => {
         });
     });
 
+    describe('NEXT_PUBLIC_BAD_TOKENS', () => {
+        const BAD_TOKEN_MINT = gen.address(1);
+
+        beforeEach(() => {
+            process.env.NEXT_PUBLIC_BAD_TOKENS = BAD_TOKEN_MINT;
+        });
+
+        it('should drop a bad mint from the results and from the DAS request', async () => {
+            mockFetch(200, [makeJupiterToken({ id: BAD_TOKEN_MINT }), makeJupiterToken()]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens.map((t: { tokenAddress: string }) => t.tokenAddress)).toEqual([VALID_ADDRESS]);
+            expect(getAssetBatchMock).toHaveBeenCalledWith(
+                [VALID_ADDRESS],
+                expect.any(String),
+                expect.any(AbortSignal),
+            );
+        });
+
+        it('should return 20 good mints when Jupiter lists a bad mint first', async () => {
+            const goodAddresses = Array.from({ length: 20 }, (_, i) => gen.address(i + 2));
+            mockFetch(200, [
+                makeJupiterToken({ id: BAD_TOKEN_MINT }),
+                ...goodAddresses.map(id => makeJupiterToken({ id })),
+            ]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens.map((t: { tokenAddress: string }) => t.tokenAddress)).toEqual(goodAddresses);
+        });
+    });
+
     describe('cluster routing', () => {
         it('should return 400 for unknown cluster slug', async () => {
             const res = await GET(new Request(`http://localhost/api/search?q=sol-${++testSeq}&cluster=bogus`));
