@@ -19,6 +19,7 @@ export type MinimalMultisigInfo =
     | { version: 'v3'; multisig: { threshold: number; keys: Array<PublicKey> } };
 
 const SQUADS_MAP_URL = 'https://4fnetmviidiqkjzenwxe66vgoa0soerr.lambda-url.us-east-1.on.aws/isSquadV2';
+const SQUADS_MAP_TIMEOUT_MS = 5_000;
 
 // Squads Multisig reverse map info is only available on mainnet
 export function useSquadsMultisigLookup(programAuthority: PublicKey | null | undefined, cluster: Cluster) {
@@ -29,7 +30,9 @@ export function useSquadsMultisigLookup(programAuthority: PublicKey | null | und
                 return null;
             }
             try {
-                const response = await fetch(`${SQUADS_MAP_URL}/${programIdString}`);
+                const response = await fetch(`${SQUADS_MAP_URL}/${programIdString}`, {
+                    signal: AbortSignal.timeout(SQUADS_MAP_TIMEOUT_MS),
+                });
                 const data = await response.json();
                 return 'error' in data ? null : (data as SquadsMultisigMapInfo);
             } catch (error) {

@@ -18,7 +18,7 @@ import {
     UpgradeableLoaderAccount,
 } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ProgramSecurityTXTBadge } from '@/app/features/security-txt/ui/SecurityTXTBadge';
@@ -74,7 +74,6 @@ export function UpgradeableProgramSection({
 }) {
     const refresh = useRefreshAccount();
     const { cluster } = useCluster();
-    const { data: squadMapInfo } = useSquadsMultisigLookup(programData?.authority, cluster);
 
     const label = addressLabel(account.pubkey.toBase58(), cluster);
 
@@ -131,8 +130,11 @@ export function UpgradeableProgramSection({
                                     <span className="min-w-0">
                                         <Address pubkey={programData.authority} link />
                                     </span>
-                                    {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad && (
-                                        <MultisigBadge pubkey={account.pubkey} />
+                                    {cluster == Cluster.MainnetBeta && (
+                                        // The Squads lookup suspends. A slow lookup must not hide the whole page.
+                                        <Suspense fallback={null}>
+                                            <MultisigBadge authority={programData.authority} pubkey={account.pubkey} />
+                                        </Suspense>
                                     )}
                                 </div>
                             ),
@@ -143,8 +145,11 @@ export function UpgradeableProgramSection({
     );
 }
 
-function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
+function MultisigBadge({ authority, pubkey }: { authority: PublicKey; pubkey: PublicKey }) {
+    const { cluster } = useCluster();
+    const { data: squadMapInfo } = useSquadsMultisigLookup(authority, cluster);
     const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
+    if (!squadMapInfo?.isSquad) return null;
     return (
         <Badge ui="tw" tone="soft" variant="success" className="shrink-0" asChild>
             <Link href={programMultisigTabPath}>Program Multisig</Link>
