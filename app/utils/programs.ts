@@ -85,9 +85,9 @@ export enum PROGRAM_NAMES {
     SUBSCRIPTIONS_PROGRAM = 'Subscriptions Program',
 }
 
-const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
+const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.Mainnet];
 
-const LIVE_CLUSTERS = [Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
+const LIVE_CLUSTERS = [Cluster.Devnet, Cluster.Testnet, Cluster.Mainnet];
 
 export const LOADER_IDS: { [key: string]: string } = {
     BPFLoader1111111111111111111111111111111111: 'BPF Loader',
@@ -112,11 +112,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.SYSTEM,
     },
     '22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG': {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
         name: PROGRAM_NAMES.SAS_PROGRAM,
     },
     '27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv': {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.RAYDIUM_LP_2,
     },
     '2rHhojZ7hpu1zA91nvZmT8TqWWvMcKmmNBCr2mKTtMq4': {
@@ -128,7 +128,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
     [SERUM_DEX_V1_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: SERUM_DEX_V1_PROGRAM_LABEL,
     },
     [MANGO_PROGRAM_IDS.devnet]: {
@@ -136,7 +136,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: MANGO_V3_PROGRAM_LABEL,
     },
     '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
     },
     [PYTH_ORACLE_PROGRAM_IDS.testnet]: {
@@ -144,11 +144,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     '9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP': {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.ORCA_SWAP_2,
     },
     [SERUM_DEX_V3_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: SERUM_DEX_V3_PROGRAM_LABEL,
     },
     // spl
@@ -168,7 +168,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.COMPUTE_BUDGET,
     },
     [SERUM_DEX_V1B_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: SERUM_DEX_V1_PROGRAM_LABEL,
     },
     [MANGO_PROGRAM_IDS.testnet]: {
@@ -184,19 +184,19 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
     De1egAFMkMWZSN5rYXRj9CAdheBamobVNubTsi9avR44: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
         name: PROGRAM_NAMES.SUBSCRIPTIONS_PROGRAM,
     },
     DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.ORCA_SWAP_1,
     },
     DtmE9D2CSB4L5D6A15mraeEjrGMm6auWVzgaD8hK2tZM: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.SWITCHBOARD,
     },
     [SERUM_DEX_V2_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: SERUM_DEX_V2_PROGRAM_LABEL,
     },
     Ed25519SigVerify111111111111111111111111111: {
@@ -204,7 +204,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.ED25519,
     },
     EhhTKczWMGQt46ynNeRX1WfeagwwJd7ufHvCDjRxjo5Q: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.RAYDIUM_STAKING,
     },
     Feat1YXHhH6t1juaWF74WLcfv4XoNocjXA6sPWHNgAse: {
@@ -216,15 +216,15 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.FEATURE_GATE,
     },
     [PYTH_ORACLE_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [Cluster.Devnet, Cluster.Mainnet],
         name: PROGRAM_NAMES.CHAINLINK_DATA_STREAMS_VERIFIER,
     },
     HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [Cluster.Devnet, Cluster.Mainnet],
         name: PROGRAM_NAMES.CHAINLINK_STORE,
     },
     KeccakSecp256k11111111111111111111111111111: {
@@ -232,7 +232,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.SECP256K1,
     },
     L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.LIGHTHOUSE_PROGRAM,
     },
     LendZqTs7gn5CTSJU1jWKhKuVpjJGom45nnwPb2AMTi: {
@@ -240,7 +240,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.LENDING,
     },
     MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.MARINADE,
     },
     Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo: {
@@ -256,7 +256,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.PROGRAM_METADATA,
     },
     RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.RAYDIUM_LP_1,
     },
     SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy: {
@@ -272,7 +272,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.SWAP,
     },
     SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
         name: PROGRAM_NAMES.ZK_LIGHT_SYSTEM_PROGRAM,
     },
     TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: {
@@ -284,7 +284,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.TOKEN_2022,
     },
     VRFzZoJdhFWL8rkvu87LpKM3RbcVezpMEc6X5GVDr7y: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [Cluster.Devnet, Cluster.Mainnet],
         name: PROGRAM_NAMES.ORAO_VRF_2,
     },
     Vote111111111111111111111111111111111111111: {
@@ -292,11 +292,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.VOTE,
     },
     WnFt12ZrnzZrFZkt2xsNsaNWoQribnuQ5B5FrDbwDhD: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.WORMHOLE_NFT,
     },
     WormT3McKhFJ2RkiGpdw9GKvNCrB2aB54gb2uV9MfQC: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.WORMHOLE,
     },
     [ZK_ELGAMAL_PROOF_PROGRAM_ID]: {
@@ -304,15 +304,15 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.ZK_ELGAMAL_PROOF,
     },
     cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
         name: PROGRAM_NAMES.ZK_COMPRESSED_TOKEN_PROGRAM,
     },
     cjg3oHmg9uuPsP8D6g29NWvhySJkdYdAo9D25PRbKXJ: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [Cluster.Devnet, Cluster.Mainnet],
         name: PROGRAM_NAMES.CHAINLINK_ORACLE,
     },
     cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [Cluster.Devnet, Cluster.Mainnet],
         name: PROGRAM_NAMES.ACCOUNT_COMPRESSION,
     },
     cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ: {
@@ -324,7 +324,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.NFT_CANDY_MACHINE,
     },
     compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
         name: PROGRAM_NAMES.ZK_ACCOUNT_COMPRESSION_PROGRAM,
     },
     [PYTH_ORACLE_PROGRAM_IDS.devnet]: {
@@ -332,7 +332,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     [MANGO_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: MANGO_V3_PROGRAM_LABEL,
     },
     metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
@@ -344,11 +344,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.NAME,
     },
     oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.ORE,
     },
     [OPEN_BOOK_PROGRAM_IDS.mainnet]: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: OPENBOOK_DEX_PROGRAM_LABEL,
     },
     vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJtmZ58rPsn: {
@@ -356,11 +356,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.TOKEN_VAULT,
     },
     worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
     wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [Cluster.Mainnet],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
 };

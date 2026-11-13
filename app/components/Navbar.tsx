@@ -43,21 +43,23 @@ export function Navbar({ children }: INavbarProps) {
 
     return (
         <nav className={cn('py-3', BAR_CLASSES)}>
+            {/* Under 329px the logo, three controls and 16px gutters don't fit, so both gutters drop to 8px. */}
             <div
                 className={cn(
-                    'relative flex items-center gap-1.5 xs:gap-2',
-                    'lg:grid lg:grid-cols-[minmax(112px,1fr)_minmax(0,720px)_1fr] lg:gap-4',
+                    'relative flex items-center gap-1.5 xs:gap-2 [@media(max-width:328px)]:px-2',
+                    'lg:grid lg:grid-cols-[minmax(max-content,1fr)_minmax(0,720px)_1fr] lg:gap-4',
                     GUTTER_CLASSES,
                 )}
             >
-                <BrandLockup />
+                {/* The margin plus the row gap keeps the search at least 20px (sm), 32px (md) or 64px (lg) from the logo. */}
+                <BrandLockup className="sm:mr-3 md:mr-6 lg:mr-12" />
 
                 <div className="contents lg:flex lg:min-w-0 lg:items-center lg:gap-2">
                     <NavSearch
                         open={searchOpened}
                         onOpenChange={onSearchOpenChange}
                         dockClassName="sm:ml-auto sm:max-w-[720px] lg:ml-0 lg:max-w-none"
-                        restClassName="left-[calc(100%-184px)] right-[146px] xs:left-[calc(100%-239px)] xs:right-[201px]"
+                        restClassName="left-[calc(100%-184px)] right-[146px] [@media(max-width:328px)]:left-[calc(100%-176px)] [@media(max-width:328px)]:right-[138px] xs:left-[calc(100%-228px)] xs:right-[190px]"
                         slotRef={slotRef}
                     >
                         {children}
@@ -69,7 +71,7 @@ export function Navbar({ children }: INavbarProps) {
                             align="end"
                             open={clusterOpened}
                             onOpenChange={onClusterOpenChange}
-                            className="w-[80px] xs:w-[131px] sm:w-[142px] md:w-[170px]"
+                            className="w-[80px] xs:w-[120px] sm:w-[142px] md:w-[170px]"
                         />
                     </div>
                 </div>

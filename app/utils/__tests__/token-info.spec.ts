@@ -19,19 +19,19 @@ describe('getFullTokenInfo', () => {
     it('should reject when the token info request fails and the legacy list has no entry', async () => {
         stubResponses({ legacyTokens: [], tokenInfoRoute: { ok: false, status: 503 } });
 
-        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).rejects.toThrow('Token info request failed');
+        await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).rejects.toThrow('Token info request failed');
     });
 
     it('should resolve the legacy list entry when the token info request fails', async () => {
         stubResponses({ legacyTokens: [LEGACY_TOKEN], tokenInfoRoute: { ok: false, status: 503 } });
 
-        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toEqual(LEGACY_TOKEN);
+        await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).resolves.toEqual(LEGACY_TOKEN);
     });
 
     it('should resolve undefined when the token info route does not list the mint', async () => {
         stubResponses({ legacyTokens: [], tokenInfoRoute: { content: [], ok: true, status: 200 } });
 
-        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toBeUndefined();
+        await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).resolves.toBeUndefined();
     });
 
     it('should resolve the route entry with the chain id and without the verified flag', async () => {
@@ -40,7 +40,7 @@ describe('getFullTokenInfo', () => {
             tokenInfoRoute: { content: [tokenInfo(MINT.toBase58(), true)], ok: true, status: 200 },
         });
 
-        await expect(getFullTokenInfo(MINT, Cluster.MainnetBeta)).resolves.toEqual({
+        await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).resolves.toEqual({
             address: MINT.toBase58(),
             chainId: 101,
             decimals: 6,

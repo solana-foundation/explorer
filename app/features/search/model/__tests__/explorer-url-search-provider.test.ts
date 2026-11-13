@@ -21,7 +21,7 @@ describe('explorerUrlSearchProvider', () => {
                 label: 'External Explorer',
                 options: [
                     {
-                        cluster: Cluster.MainnetBeta,
+                        cluster: Cluster.Mainnet,
                         label: 'solscan.io — Account',
                         pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                         type: 'address',

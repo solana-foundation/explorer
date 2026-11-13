@@ -22,7 +22,7 @@ describe('getAccountOpenGraph', () => {
     });
 
     it('should omit the cluster param on mainnet', () => {
-        expect(getAccountOpenGraph(ADDRESS, Cluster.MainnetBeta)).toMatchObject({
+        expect(getAccountOpenGraph(ADDRESS, Cluster.Mainnet)).toMatchObject({
             images: [{ url: `${BASE_URL}/og/account/${ADDRESS}` }],
             url: `${BASE_URL}/address/${ADDRESS}`,
         });
@@ -44,7 +44,7 @@ describe('getAccountOpenGraph', () => {
 
     it('should build the canonical page url with and without a cluster', () => {
         expect(getAccountPageUrl(ADDRESS)).toBe(`${BASE_URL}/address/${ADDRESS}`);
-        expect(getAccountPageUrl(ADDRESS, Cluster.MainnetBeta)).toBe(`${BASE_URL}/address/${ADDRESS}`);
+        expect(getAccountPageUrl(ADDRESS, Cluster.Mainnet)).toBe(`${BASE_URL}/address/${ADDRESS}`);
         expect(getAccountPageUrl(ADDRESS, Cluster.Devnet)).toBe(`${BASE_URL}/address/${ADDRESS}?cluster=devnet`);
     });
 });

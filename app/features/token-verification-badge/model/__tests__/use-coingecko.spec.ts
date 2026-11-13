@@ -87,7 +87,7 @@ describe('fetchCoinGeckoVerification', () => {
 describe('useCoinGeckoVerification', () => {
     beforeEach(() => {
         fetchSpy = vi.spyOn(globalThis, 'fetch');
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta } as ReturnType<typeof useCluster>);
+        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Mainnet } as ReturnType<typeof useCluster>);
         vi.mocked(useTabVisibility).mockReturnValue({ visible: true });
     });
 
@@ -118,9 +118,9 @@ describe('useCoinGeckoVerification', () => {
     });
 
     it.each([
-        ['not enabled', { cluster: Cluster.MainnetBeta, enabled: false, visible: true }],
+        ['not enabled', { cluster: Cluster.Mainnet, enabled: false, visible: true }],
         ['non-mainnet cluster', { cluster: Cluster.Devnet, enabled: true, visible: true }],
-        ['tab not visible', { cluster: Cluster.MainnetBeta, enabled: true, visible: false }],
+        ['tab not visible', { cluster: Cluster.Mainnet, enabled: true, visible: false }],
     ])('should not fetch when %s', (_label, { cluster, enabled, visible }) => {
         vi.mocked(useCluster).mockReturnValue({ cluster } as ReturnType<typeof useCluster>);
         vi.mocked(useTabVisibility).mockReturnValue({ visible });

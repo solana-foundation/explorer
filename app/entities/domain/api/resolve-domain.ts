@@ -11,7 +11,7 @@ const base64Encoder = getBase64Encoder();
 // until an actual RPC call is made. Safe to create per-request in a short-lived API route handler.
 export async function resolveDomain(
     domain: string,
-    rpc: Rpc<GetAccountInfoApi> = createSolanaRpc(serverClusterUrl(Cluster.MainnetBeta)),
+    rpc: Rpc<GetAccountInfoApi> = createSolanaRpc(serverClusterUrl(Cluster.Mainnet)),
 ): Promise<ResolvedDomainInfo> {
     // SNS/ANS registries store names hashed in lowercase; mixed-case input must be normalized.
     const normalized = domain.toLowerCase();

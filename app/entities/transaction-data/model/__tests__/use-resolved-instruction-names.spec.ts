@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { useProgramIdlNames } = vi.hoisted(() => ({ useProgramIdlNames: vi.fn() }));
 vi.mock('@entities/idl/@x/transaction-data', () => ({ useProgramIdlNames }));
-vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.MainnetBeta, url: MAINNET_URL }) }));
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.Mainnet, url: MAINNET_URL }) }));
 
 import type { InstructionSummary, NamedInstruction } from '../../lib/types';
 import { useResolvedInstructionNames, useResolvedSummaryNames } from '../use-resolved-instruction-names';
@@ -47,7 +47,7 @@ describe('useResolvedInstructionNames', () => {
     it('should fetch IDLs only for the programs of rows that are still unnamed', () => {
         renderHook(() => useResolvedInstructionNames([unnamed(JUPITER, 1), named('Transfer'), unnamed(WHIRLPOOL, 1)]));
 
-        expect(useProgramIdlNames).toHaveBeenCalledWith([JUPITER, WHIRLPOOL], Cluster.MainnetBeta, MAINNET_URL);
+        expect(useProgramIdlNames).toHaveBeenCalledWith([JUPITER, WHIRLPOOL], Cluster.Mainnet, MAINNET_URL);
     });
 });
 
@@ -56,7 +56,7 @@ describe('useResolvedSummaryNames', () => {
         const { result } = renderHook(() => useResolvedSummaryNames(undefined));
 
         expect(result.current).toBeUndefined();
-        expect(useProgramIdlNames).toHaveBeenCalledWith([], Cluster.MainnetBeta, MAINNET_URL);
+        expect(useProgramIdlNames).toHaveBeenCalledWith([], Cluster.Mainnet, MAINNET_URL);
     });
 
     it('should replace the sentinel and drop nameLookup once a row is named', () => {
@@ -74,7 +74,7 @@ describe('useResolvedSummaryNames', () => {
             useResolvedSummaryNames([unnamedSummary(JUPITER, 1), { name: 'Transfer', programName: 'System Program' }]),
         );
 
-        expect(useProgramIdlNames).toHaveBeenCalledWith([JUPITER], Cluster.MainnetBeta, MAINNET_URL);
+        expect(useProgramIdlNames).toHaveBeenCalledWith([JUPITER], Cluster.Mainnet, MAINNET_URL);
     });
 });
 

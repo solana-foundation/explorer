@@ -24,6 +24,6 @@ export function getTxOgImageUrl(signature: string, cluster?: ServerCluster): str
 }
 
 function clusterQuery(cluster: ServerCluster | undefined): string {
-    if (cluster === undefined || cluster === Cluster.MainnetBeta) return '';
+    if (cluster === undefined || cluster === Cluster.Mainnet) return '';
     return `?cluster=${clusterSlug(cluster)}`;
 }

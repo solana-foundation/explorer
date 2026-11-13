@@ -93,7 +93,7 @@ describe('fetchTokenMarketData', () => {
 describe('useTokenMarketData', () => {
     beforeEach(() => {
         fetchSpy = vi.spyOn(globalThis, 'fetch');
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta } as ReturnType<typeof useCluster>);
+        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Mainnet } as ReturnType<typeof useCluster>);
         vi.mocked(useTabVisibility).mockReturnValue({ visible: true });
     });
     afterEach(() => vi.restoreAllMocks());
@@ -115,9 +115,9 @@ describe('useTokenMarketData', () => {
     });
 
     it.each([
-        ['not a token mint', { cluster: Cluster.MainnetBeta, isTokenMint: false, visible: true }],
+        ['not a token mint', { cluster: Cluster.Mainnet, isTokenMint: false, visible: true }],
         ['non-mainnet', { cluster: Cluster.Devnet, isTokenMint: true, visible: true }],
-        ['tab hidden', { cluster: Cluster.MainnetBeta, isTokenMint: true, visible: false }],
+        ['tab hidden', { cluster: Cluster.Mainnet, isTokenMint: true, visible: false }],
     ])('should not fetch when %s', (_l, { cluster, isTokenMint, visible }) => {
         vi.mocked(useCluster).mockReturnValue({ cluster } as ReturnType<typeof useCluster>);
         vi.mocked(useTabVisibility).mockReturnValue({ visible });

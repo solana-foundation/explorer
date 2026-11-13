@@ -112,7 +112,7 @@ export function AnchorProgramName({
     cluster?: Cluster;
 }) {
     const { program } = useAnchorProgram({
-        cluster: cluster ?? Cluster.MainnetBeta,
+        cluster: cluster ?? Cluster.Mainnet,
         programAddress: programId.toString(),
         select: getAnchorIdls,
         url,

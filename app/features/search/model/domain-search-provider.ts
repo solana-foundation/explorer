@@ -14,7 +14,7 @@ export const domainSearchProvider: SearchProvider = {
     name: 'domain',
     priority: 30,
     async search(query: string, ctx: SearchContext): Promise<SearchOptions[]> {
-        if (ctx.cluster !== Cluster.MainnetBeta || !is(query, Domain)) {
+        if (ctx.cluster !== Cluster.Mainnet || !is(query, Domain)) {
             return [];
         }
 

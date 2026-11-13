@@ -127,7 +127,7 @@ function loadMoreButton() {
 
 describe('should render OwnedTokensCard from a single bulk lookup', () => {
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
+        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useAccountOwnedTokensMock.mockReturnValue(makeEntry());
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useTokenInfosMock.mockReturnValue(resolved());
@@ -151,7 +151,7 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
         const logo = screen.getByTestId('token-logo');
         expect(logo.getAttribute('data-uri')).toBe(LOGO);
         // The card resolves every held mint in one call, so rows fetch nothing themselves.
-        expect(useTokenInfosMock).toHaveBeenCalledWith([MINT], Cluster.MainnetBeta, 'genesis');
+        expect(useTokenInfosMock).toHaveBeenCalledWith([MINT], Cluster.Mainnet, 'genesis');
         // Symbol comes from the lookup, rendered next to the amount in the balance cell.
         expect(screen.getByText('USDC', { exact: false })).toBeInTheDocument();
         // Mint Address is labeled from the already-resolved info (tokenLabelInfo), so it fetches nothing.
@@ -228,7 +228,7 @@ describe('should order holdings by verification tier', () => {
     }
 
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
+        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useAccountOwnedTokensMock.mockReturnValue(heldInWorstOrder());
     });
@@ -277,7 +277,7 @@ describe('should page the ordered holdings', () => {
     const verifiedMints = allMints.slice(-5);
 
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
+        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useAccountOwnedTokensMock.mockReturnValue(
             makeEntryWith(allMints.map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint))),
@@ -318,7 +318,7 @@ describe('should page the ordered holdings', () => {
 
 describe('should render the account address column only in detail display', () => {
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
+        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useTokenInfosMock.mockReturnValue(resolved());
         useAccountOwnedTokensMock.mockReturnValue(makeEntry());
     });

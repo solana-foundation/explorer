@@ -47,14 +47,14 @@ describe('parseCompositeSignature - version independence', () => {
 describe('buildCompositeSignature', () => {
     it.each([
         {
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             expected: SIG,
             name: 'mainnet without version',
             signature: SIG,
             version: undefined,
         },
         {
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             expected: `${SIG}-1`,
             name: 'mainnet with version',
             signature: SIG,

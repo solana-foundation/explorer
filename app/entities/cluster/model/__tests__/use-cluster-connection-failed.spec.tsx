@@ -36,7 +36,7 @@ describe('useClusterConnectionFailed', () => {
 });
 
 function makeWrapper(status: ClusterStatus) {
-    const selection = clusterSelection(Cluster.MainnetBeta);
+    const selection = clusterSelection(Cluster.Mainnet);
     const state: ClusterState = { connectableUrl: toConnectableUrl(clusterUrl(selection)), selection, status };
     return function Wrapper({ children }: { children: ReactNode }) {
         return createElement(StateContext.Provider, { value: state }, children);

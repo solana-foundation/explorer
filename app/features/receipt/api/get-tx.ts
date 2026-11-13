@@ -6,7 +6,7 @@ import { Cluster, clusterSlug, type ServerCluster, serverClusterUrl } from '@/ap
 
 import { ReceiptError } from './errors';
 
-const CLUSTERS: readonly ServerCluster[] = [Cluster.MainnetBeta];
+const CLUSTERS: readonly ServerCluster[] = [Cluster.Mainnet];
 
 export type ApiData = {
     cluster: Cluster;

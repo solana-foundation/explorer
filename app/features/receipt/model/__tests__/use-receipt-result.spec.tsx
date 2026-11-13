@@ -89,10 +89,10 @@ describe('useReceiptResult', () => {
         });
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Custom' } }));
 
-        mocks.cluster = connectedTo(Cluster.MainnetBeta, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedTo(Cluster.Mainnet, GENESIS_HASHES.MAINNET);
         rerender();
 
-        await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Mainnet Beta' } }));
+        await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Mainnet' } }));
     });
 
     it('should build the receipt when the transaction arrives after mount', async () => {

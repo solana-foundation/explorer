@@ -14,7 +14,7 @@ export function ClusterSelector() {
         setClusterModalShow(true);
     };
 
-    const showMainnetWarning = cluster === Cluster.MainnetBeta;
+    const showMainnetWarning = cluster === Cluster.Mainnet;
 
     return (
         <BaseClusterSelector

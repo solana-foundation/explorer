@@ -1,6 +1,6 @@
 import { Cluster, CLUSTERS, serverClusterUrl } from './cluster';
 
-// Parse a cluster from a numeric query-param string (e.g. "0" → Cluster.MainnetBeta).
+// Parse a cluster from a numeric query-param string (e.g. "0" → Cluster.Mainnet).
 // Avoids `n in Cluster` checks, which depend on the enum's reverse mapping and behave
 // inconsistently across build targets. The round-trip equality guards against `Number()`
 // silently coercing empty / whitespace / leading-zero inputs (e.g. "" → 0).

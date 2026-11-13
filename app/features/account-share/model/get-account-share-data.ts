@@ -45,7 +45,7 @@ export type AccountShareResult = { kind: 'ok'; data: AccountShareData } | { kind
 const NAME_PAD = 6;
 
 export async function getAccountShareData(address: string, cluster?: ServerCluster): Promise<AccountShareResult> {
-    const resolved = cluster ?? Cluster.MainnetBeta;
+    const resolved = cluster ?? Cluster.Mainnet;
     const rpcUrl = serverClusterUrl(resolved);
 
     try {

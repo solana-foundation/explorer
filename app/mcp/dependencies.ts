@@ -62,7 +62,7 @@ const logger: EntityInspectorConfig['logger'] = {
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet),
-        'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.MainnetBeta),
+        'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.Mainnet),
         testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || serverClusterUrl(Cluster.Testnet),
     };
 }

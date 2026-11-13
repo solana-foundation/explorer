@@ -51,7 +51,7 @@ export function StakeAccountSection({
     stakeAccountType: StakeAccountType;
     activation?: StakeActivationData;
 }) {
-    // Price is only fetched on Mainnet Beta (the hook returns undefined elsewhere), so USD values
+    // Price is only fetched on Mainnet (the hook returns undefined elsewhere), so USD values
     // simply don't render on other clusters.
     const priceResult = useTokenPrice(NATIVE_MINT_ADDRESS);
     const solPrice = priceResult?.status === PriceStatus.Success ? priceResult.price : null;
