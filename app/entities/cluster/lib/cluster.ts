@@ -15,7 +15,9 @@ export enum Cluster {
 
 export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
 
-export function clusterSlug(cluster: Cluster): string {
+type ClusterSlug = 'mainnet-beta' | 'testnet' | 'devnet' | 'custom';
+
+export function clusterSlug(cluster: Cluster): ClusterSlug {
     switch (cluster) {
         case Cluster.MainnetBeta:
             return 'mainnet-beta';

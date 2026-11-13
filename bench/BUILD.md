@@ -2,9 +2,9 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 130 kB | 430 kB |
+| Static | `/` | 120 kB | 430 kB |
 | Static | `/_not-found` | 0 B | 310 kB |
-| Dynamic | `/address/[address]` | 530 kB | 840 kB |
+| Dynamic | `/address/[address]` | 540 kB | 840 kB |
 | Dynamic | `/address/[address]/account-data` | 540 kB | 850 kB |
 | Dynamic | `/address/[address]/anchor-account` | 500 kB | 810 kB |
 | Dynamic | `/address/[address]/attestation` | 500 kB | 810 kB |
@@ -49,14 +49,14 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 260 kB | 560 kB |
-| Dynamic | `/block/[slot]/accounts` | 250 kB | 560 kB |
-| Dynamic | `/block/[slot]/programs` | 250 kB | 560 kB |
-| Dynamic | `/block/[slot]/rewards` | 250 kB | 550 kB |
+| Dynamic | `/block/[slot]` | 260 kB | 570 kB |
+| Dynamic | `/block/[slot]/accounts` | 250 kB | 550 kB |
+| Dynamic | `/block/[slot]/programs` | 250 kB | 550 kB |
+| Dynamic | `/block/[slot]/rewards` | 250 kB | 560 kB |
 | Dynamic | `/epoch/[epoch]` | 20 kB | 330 kB |
 | Static | `/feature-gates` | 50 kB | 350 kB |
 | Dynamic | `/mcp` | — | — |
-| Static | `/mcp/start` | 20 kB | 340 kB |
+| Static | `/mcp/start` | 30 kB | 340 kB |
 | Dynamic | `/og/account/[address]` | — | — |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
@@ -64,6 +64,6 @@
 | Static | `/opengraph-image.png` | — | — |
 | Dynamic | `/robots.txt` | — | — |
 | Static | `/tos` | 10 kB | 320 kB |
-| Dynamic | `/tx/[signature]` | 560 kB | 870 kB |
-| Dynamic | `/tx/[signature]/inspect` | 560 kB | 860 kB |
-| Static | `/tx/inspector` | 560 kB | 860 kB |
+| Dynamic | `/tx/[signature]` | 560 kB | 860 kB |
+| Dynamic | `/tx/[signature]/inspect` | 560 kB | 870 kB |
+| Static | `/tx/inspector` | 560 kB | 870 kB |
