@@ -30,10 +30,7 @@ const buttonVariants = cva([], {
         { class: 'h-9 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'default', ui: 'tw' },
         { class: 'h-7 w-7 gap-2 rounded [&_svg]:size-3', size: 'icon', ui: 'tw' },
         { class: 'h-10 gap-2 rounded px-8 [&_svg]:size-3', size: 'lg', ui: 'tw' },
-        // The icon takes 2px less room than it draws (`-mx-px`): a card header's buttons hide their label on
-        // mobile, and the bare 12px icon in the 8px paddings and 1px borders would make them 30px wide by 28px high.
-        // With the label shown, the icon sits 1px nearer the edge.
-        { class: 'h-7 gap-2 rounded px-2 text-xs [&_svg]:-mx-px [&_svg]:size-3', size: 'sm', ui: 'tw' },
+        { class: 'h-7 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'sm', ui: 'tw' },
         // Toolbar action row (pairs with variant="quiet"): tighter box than `sm` so a bare
         // label + icon sits close to its neighbours without a fill to separate them.
         { class: 'h-7 gap-1.5 rounded px-0 text-sm font-normal [&_svg]:size-4', size: 'toolbar', ui: 'tw' },

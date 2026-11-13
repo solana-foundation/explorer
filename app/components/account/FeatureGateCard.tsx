@@ -11,9 +11,8 @@ export function FeatureGateCard({ children }: { children: ReactNode }) {
     return (
         // `pb-10`: the room under the page's last block, as the transaction page leaves under its instructions.
         <CollapsibleSection title="Feature Information" className="" sectionClassName="pb-10">
-            {/* Surface matched to `BaseDomainsCard`: `className=""` above leaves the surface to this card.
-                BaseCard uses `cnPrefixed` (tailwind-merge), so these override the tw variant's defaults. Below `md`
-                the text takes the key-value rows' padding, so it lines up with the Overview card above. */}
+            {/* The surface lives here (the section above passes `className=""`); `ROW_PADDING` below `md` lines the
+                proposal up with the Overview card's key-value rows. */}
             <Card
                 variant="tight"
                 className={`rounded-lg border-outer-space-800 bg-outer-space-900 ${ROW_PADDING} md:p-6`}

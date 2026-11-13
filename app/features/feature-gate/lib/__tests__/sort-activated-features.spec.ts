@@ -24,10 +24,14 @@ describe('sortActivatedFeatures', () => {
 });
 
 describe('isSortDirection', () => {
-    it('should accept only asc and desc', () => {
-        expect(isSortDirection('asc')).toBe(true);
-        expect(isSortDirection('desc')).toBe(true);
-        expect(isSortDirection('newest')).toBe(false);
-        expect(isSortDirection(undefined)).toBe(false);
+    // `null` is the negative row because `URLSearchParams.get` returns it, the same branch `undefined` takes.
+    it.each([
+        ['asc', true],
+        ['desc', true],
+        ['newest', false],
+        [null, false],
+        [undefined, false],
+    ])('should treat %s as %s', (value, expected) => {
+        expect(isSortDirection(value)).toBe(expected);
     });
 });

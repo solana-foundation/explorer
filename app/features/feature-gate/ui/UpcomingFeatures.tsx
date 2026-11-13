@@ -7,10 +7,10 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { LINK_CLASS_NAME } from '@/app/shared/ui/link-class-name';
 
 import { filterUpcomingForCluster } from '../lib/filter-upcoming-features';
 import { partitionFeatures, type UpcomingFeature } from '../lib/partition-features';
-import { LINK_CLASS_NAME } from './ClusterEpoch';
 import { FeatureGateTable, OtherActivationsCell } from './FeatureGateTable';
 
 export function UpcomingFeatures() {
@@ -25,7 +25,7 @@ export function UpcomingFeatures() {
     const features = filterUpcomingForCluster(upcoming, cluster);
 
     const header = (
-        <div className="flex flex-col gap-1.5 border-0 border-b border-solid border-outer-space-800 px-3 py-3 md:flex-row md:items-baseline md:justify-between">
+        <div className="flex flex-col gap-1.5 border-0 border-solid border-outer-space-800 px-3 py-3 md:flex-row md:items-baseline md:justify-between lg:border-b">
             <span className="font-medium text-white">
                 <span className="mr-2">🚀</span>
                 Upcoming {clusterName(cluster)} Features
@@ -42,7 +42,7 @@ export function UpcomingFeatures() {
             features={features}
             cluster={cluster}
             secondColumn={{
-                header: 'Activation',
+                header: 'Activated elsewhere',
                 render: feature => <OtherActivationsCell activations={feature.otherActivations} />,
             }}
             header={header}

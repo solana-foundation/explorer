@@ -21,7 +21,7 @@ describe('FeatureGateMarkdown', () => {
 
     it('should open an external link in a new tab without an opener', () => {
         render(
-            <FeatureGateMarkdown>
+            <FeatureGateMarkdown baseUrl={SIMD_URL}>
                 {'See [the audit](https://github.com/anza-xyz/security-audits).'}
             </FeatureGateMarkdown>,
         );
@@ -33,12 +33,26 @@ describe('FeatureGateMarkdown', () => {
     });
 
     it('should keep an in-page anchor in the same tab and point it at the heading', () => {
-        render(<FeatureGateMarkdown>{['See [Notes](#notes).', '', '## Notes'].join('\n')}</FeatureGateMarkdown>);
+        render(
+            <FeatureGateMarkdown baseUrl={SIMD_URL}>
+                {['See [Notes](#notes).', '', '## Notes'].join('\n')}
+            </FeatureGateMarkdown>,
+        );
 
         const link = screen.getByRole('link', { name: 'Notes' });
         expect(link).toHaveAttribute('href', '#notes');
         expect(link).not.toHaveAttribute('target');
         expect(screen.getByRole('heading', { level: 2, name: 'Notes' })).toHaveAttribute('id', 'notes');
+    });
+
+    it('should suffix a repeated heading id so each in-page anchor is unique', () => {
+        render(
+            <FeatureGateMarkdown baseUrl={SIMD_URL}>{['## Example', '', '## Example'].join('\n')}</FeatureGateMarkdown>,
+        );
+
+        const [first, second] = screen.getAllByRole('heading', { level: 2, name: 'Example' });
+        expect(first).toHaveAttribute('id', 'example');
+        expect(second).toHaveAttribute('id', 'example-1');
     });
 
     it('should resolve a link to a sibling proposal against the proposal URL', () => {

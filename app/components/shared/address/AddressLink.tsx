@@ -8,6 +8,7 @@ import { Check, Copy, XCircle } from 'react-feather';
 
 import { cn } from '@/app/components/shared/utils';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
+import { LINK_CLASS_NAME } from '@/app/shared/ui/link-class-name';
 import { useClusterPath } from '@/app/utils/url';
 
 type Truncate = { head: number; tail: number };
@@ -27,10 +28,9 @@ export function AddressLink({ address, truncate, className, 'aria-label': ariaLa
     return (
         <span className={cn('inline-flex items-center gap-1.5 font-mono text-dk-sm', className)}>
             <CopyButton text={address} />
-            {/* The app's link colours (styles.css `a` / `a:hover`), so an address hovers like any other link. */}
             <Link
                 href={href}
-                className="text-dk-primary-dark hover:text-dark-accent-hover"
+                className={LINK_CLASS_NAME}
                 aria-label={ariaLabel ?? `Open address ${address}`}
                 title={truncate ? address : undefined}
             >

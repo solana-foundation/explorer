@@ -2,7 +2,7 @@
 
 import { useSlotTime } from '@entities/slot-time';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { type ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/ui/collapsible-section';
 import { useCluster, useClusterInfo } from '@/app/providers/cluster';
@@ -48,6 +48,8 @@ export function FeatureGatesView() {
     const msPerSlot = useSlotTime({ enabled: cluster !== Cluster.Custom });
     const { activated, upcoming } = useMemo(() => partitionFeatures(cluster), [cluster]);
     const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+    // Each cluster's Upcoming list opens folded; without this a switch after "Show more" keeps the next one open.
+    useEffect(() => setShowAllUpcoming(false), [cluster]);
     const [sortDirection, toggleSortDirection] = useSortDirection();
     const sortedActivated = useMemo(() => sortActivatedFeatures(activated, sortDirection), [activated, sortDirection]);
 
@@ -91,6 +93,11 @@ export function FeatureGatesView() {
 
             <PageSections>
                 {nothingToShow && <EmptyStateCard>No feature gates on {clusterName(cluster)}.</EmptyStateCard>}
+                {upcoming.length === 0 && cluster === Cluster.Testnet && !nothingToShow && (
+                    <p className="m-0 text-sm text-outer-space-300">
+                        New features activate on testnet first, so this list is usually empty here.
+                    </p>
+                )}
                 {upcoming.length > 0 && (
                     <CollapsibleSection
                         title={<SectionTitle count={upcoming.length}>Upcoming</SectionTitle>}
@@ -101,7 +108,7 @@ export function FeatureGatesView() {
                             features={visibleUpcoming}
                             cluster={cluster}
                             secondColumn={{
-                                header: 'Activation',
+                                header: 'Activated elsewhere',
                                 render: feature => <OtherActivationsCell activations={feature.otherActivations} />,
                             }}
                             footer={upcomingFooter}
@@ -174,7 +181,7 @@ function ActivationCell({
     epoch,
     countdownInput,
 }: {
-    cluster: Cluster;
+    cluster: Exclude<Cluster, Cluster.Custom>;
     epoch: number;
     countdownInput: CountdownInput | undefined;
 }) {

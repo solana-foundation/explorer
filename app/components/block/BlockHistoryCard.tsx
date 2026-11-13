@@ -47,6 +47,7 @@ import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { Input } from '@/app/components/shared/ui/input';
 import { invariant } from '@/app/shared/lib/invariant';
+import { isSortDirection } from '@/app/shared/lib/sort-direction';
 import { DataListCard } from '@/app/shared/ui/DataListCard';
 import { SortIndicator } from '@/app/shared/ui/SortIndicator';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
@@ -87,7 +88,7 @@ const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; directi
     const sort = query.get('sort');
     const mode: SortMode = isSortMode(sort) ? sort : 'index';
     const dir = query.get('dir');
-    const direction: SortDirection = dir === 'asc' || dir === 'desc' ? dir : DEFAULT_DIRECTION[mode];
+    const direction: SortDirection = isSortDirection(dir) ? dir : DEFAULT_DIRECTION[mode];
     return { direction, mode };
 };
 
@@ -448,7 +449,7 @@ function BlockHistoryGrid({
                             <span className="inline-flex items-center gap-2">
                                 {header.label}
                                 {sortKey !== undefined && (
-                                    <SortIndicator active={active} direction={active ? sortDirection : 'desc'} />
+                                    <SortIndicator direction={active ? sortDirection : undefined} />
                                 )}
                             </span>
                         </div>

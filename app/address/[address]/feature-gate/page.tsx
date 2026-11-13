@@ -26,11 +26,36 @@ export default async function FeatureGatePage(props: Props) {
     const { address } = await props.params;
 
     const feature = getFeatureInfo(address);
-    const data = await fetchFeatureGateInformation(feature);
+    const [proposal] = await fetchFeatureGateInformation(feature);
 
     return (
         <FeatureGateCard>
-            <FeatureGateMarkdown baseUrl={feature?.simd_link?.[0]}>{data[0]}</FeatureGateMarkdown>
+            {proposal?.status === 'ok' ? (
+                <FeatureGateMarkdown baseUrl={feature?.simd_link?.[0]}>{proposal.markdown}</FeatureGateMarkdown>
+            ) : (
+                <ProposalUnavailable url={proposal?.url ?? feature?.simd_link?.[0]} />
+            )}
         </FeatureGateCard>
+    );
+}
+
+function ProposalUnavailable({ url }: { url?: string }) {
+    return (
+        <p className="m-0 text-sm text-outer-space-300">
+            Proposal text unavailable
+            {url && (
+                <>
+                    {'. '}
+                    <a
+                        href={url}
+                        className="text-dark-accent hover:text-dark-accent-hover"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        View the proposal on GitHub
+                    </a>
+                </>
+            )}
+        </p>
     );
 }

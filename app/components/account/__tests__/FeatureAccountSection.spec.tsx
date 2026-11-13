@@ -60,6 +60,7 @@ describe('FeatureAccountSection', () => {
     it('should name the cluster by slug in the pending activation epoch link', () => {
         render(<FeatureAccountSection account={featureAccount({ activated: false })} />);
 
+        expect(screen.getByText('Pending activation on Devnet')).toBeInTheDocument();
         expect(screen.getByRole('link', { name: '4' })).toHaveAttribute('href', '/epoch/4?cluster=devnet');
     });
 

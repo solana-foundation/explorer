@@ -49,23 +49,20 @@ export function FeatureGateTable<T extends FeatureRow>({
     return (
         <Card variant="tight" className={CARD_SURFACE}>
             {header}
-            {/* One markup for both layouts. Below `lg` every feature is a card of bare values with no labels: the
-                SIMDs on top, then the title, the description and the epochs; the whole card opens the feature, and
-                the key and the column header are hidden. From `lg` it is a CSS grid built from `div`s, as in
-                `BaseDomainsCard`, with ARIA table roles for assistive tech. The three columns after the title have fixed widths, so the Upcoming and Activated tables (and the home
-                block) line up column for column: 11rem holds "Mainnet Beta: 1009", 6.5rem one SIMD badge, 8.5rem the shortened key with its copy button. */}
+            {/* Fixed track widths so the Upcoming and Activated tables and `UpcomingFeatures` align column for
+                column; a stack of cards below `lg`, an ARIA grid from `lg`. */}
             <div
                 role="table"
                 className="flex w-full flex-col gap-2 text-sm text-white lg:grid lg:grid-cols-[minmax(0,1fr)_11rem_6.5rem_8.5rem] lg:gap-0"
             >
-                <div role="row" className={rowVariants({ role: 'header' })}>
-                    <div role="columnheader" className={cellVariants({ column: 'title', role: 'header' })}>
+                <div role="row" className={rowVariants({ part: 'header' })}>
+                    <div role="columnheader" className={cellVariants({ column: 'title', part: 'header' })}>
                         Feature
                     </div>
                     <div
                         role="columnheader"
                         aria-sort={secondColumn.sort && ARIA_SORT[secondColumn.sort.direction]}
-                        className={cellVariants({ role: 'header' })}
+                        className={cellVariants({ part: 'header' })}
                     >
                         {secondColumn.sort ? (
                             <button
@@ -74,16 +71,16 @@ export function FeatureGateTable<T extends FeatureRow>({
                                 className="inline-flex items-center gap-2 border-0 bg-transparent p-0 uppercase text-white"
                             >
                                 {secondColumn.header}
-                                <SortIndicator active direction={secondColumn.sort.direction} />
+                                <SortIndicator direction={secondColumn.sort.direction} />
                             </button>
                         ) : (
                             secondColumn.header
                         )}
                     </div>
-                    <div role="columnheader" className={cellVariants({ role: 'header' })}>
+                    <div role="columnheader" className={cellVariants({ part: 'header' })}>
                         SIMDs
                     </div>
-                    <div role="columnheader" className={cellVariants({ role: 'header' })}>
+                    <div role="columnheader" className={cellVariants({ part: 'header' })}>
                         Key
                     </div>
                 </div>
@@ -120,6 +117,8 @@ export function ShowMoreButton({ hiddenCount, onClick }: { hiddenCount: number; 
 
 /** The epochs a feature activated at on the other clusters: the cluster muted, its epoch a link. */
 export function OtherActivationsCell({ activations }: { activations: ClusterActivation[] }) {
+    // No wrapper when empty, so the cell's `empty:hidden` drops the gap on the mobile card, as `SimdLinks` does.
+    if (activations.length === 0) return undefined;
     return (
         // In a line on the mobile card, one cluster per line in the desktop column.
         <div className="flex flex-wrap gap-x-3 gap-y-0.5 whitespace-nowrap lg:flex-col">
@@ -150,7 +149,8 @@ const CARD_SURFACE =
 // `subgrid`.
 const rowVariants = cva('', {
     variants: {
-        role: {
+        // `part`, not `role`: these elements already carry the ARIA `role` attribute, so the word is kept for that.
+        part: {
             body: cn(
                 'relative flex flex-wrap items-start gap-x-4 gap-y-2 rounded-lg border border-solid border-outer-space-800 bg-outer-space-900 p-3',
                 'lg:col-span-full lg:grid lg:grid-cols-subgrid lg:gap-0 lg:rounded-none lg:border-0 lg:border-t lg:bg-transparent lg:p-0',
@@ -160,30 +160,31 @@ const rowVariants = cva('', {
     },
 });
 
-// Cell paddings apply from `lg` only: below it the card owns the padding. They follow the token-extensions list
-// (HOO-935): 14px (`py-3.5`) around the 24px-high 16px title; the other cells' 20px lines start 2px lower so their
-// first line sits level with the title's.
+// Cell paddings apply from `lg` only; below it the card owns the padding. The non-title cells start a little
+// lower than the title so their first line sits level with it.
 const cellVariants = cva('min-w-0', {
     compoundVariants: [
-        { class: 'flex-col items-start', column: ['title', 'default', 'simd', 'key'], role: 'body' },
+        { class: 'flex-col items-start', column: ['title', 'activation', 'simd', 'key'], part: 'body' },
         // The epochs take the address link's 13px, so they read at the size of the key beside them.
-        { class: 'text-dk-sm', column: 'default', role: 'body' },
-        { class: 'lg:py-3.5', column: 'title', role: 'body' },
-        { class: 'lg:pb-3.5 lg:pt-4', column: ['default', 'simd', 'key'], role: 'body' },
+        { class: 'text-dk-sm', column: 'activation', part: 'body' },
+        { class: 'lg:py-3.5', column: 'title', part: 'body' },
+        { class: 'lg:pb-3.5 lg:pt-4', column: ['activation', 'simd', 'key'], part: 'body' },
     ],
-    defaultVariants: { column: 'default', role: 'body' },
+    defaultVariants: { column: 'activation', part: 'body' },
     variants: {
         column: {
-            // An empty cell (a feature with no SIMDs) leaves no gap in the card's wrapped line; from `lg` it holds
-            // its column.
-            default: cn('flex empty:hidden lg:px-3 lg:empty:flex', CARD_CONTROL),
+            // The Activation column. Empty for an upcoming feature with no activations elsewhere: no gap on the
+            // wrapped card, holds its column from `lg`.
+            activation: cn('flex empty:hidden lg:px-3 lg:empty:flex', CARD_CONTROL),
             // The key is left to the feature's page on mobile.
             key: 'hidden lg:flex lg:px-3',
-            // The SIMDs head the mobile card; the full-width title after them starts the next line.
+            // The SIMDs head the mobile card; the full-width title after them starts the next line. Empty for a
+            // feature with no SIMDs: no gap on the wrapped card, holds its column from `lg`.
             simd: cn('order-first flex empty:hidden lg:order-none lg:px-3 lg:empty:flex', CARD_CONTROL),
             title: 'flex w-full [overflow-wrap:anywhere] lg:w-auto lg:px-3',
         },
-        role: {
+        // `part`, not `role`: these elements already carry the ARIA `role` attribute, so the word is kept for that.
+        part: {
             body: '',
             header: 'items-center whitespace-nowrap py-2.5 text-xs uppercase text-outer-space-300',
         },
@@ -200,7 +201,7 @@ function FeatureRowView<T extends FeatureRow>({
     secondColumn: SecondColumn<T>;
 }) {
     return (
-        <div role="row" className={rowVariants({ role: 'body' })}>
+        <div role="row" className={rowVariants({ part: 'body' })}>
             <div role="cell" className={cellVariants({ column: 'title' })}>
                 {/* The token-extensions name: 16px on a 24px line, regular weight. Below `lg` the link stretches over
                     its card through `::after`, so a tap anywhere on the card opens the feature; the other links in

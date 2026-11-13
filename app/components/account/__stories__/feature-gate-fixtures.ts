@@ -1,6 +1,7 @@
-// SIMD-0266 (feature `ptokFjwyJtrwCa9Kgo9xoDS59V4QccBGEaRFnRPnSdP`) verbatim, from
-// https://github.com/solana-foundation/solana-improvement-documents/blob/0434aab3b2c6b596f607194bee44e94088ff2591/proposals/0266-efficient-token-program.md
-// Picked for what stresses a 375px layout: a 24-row table, a code block and a nested list. Like every proposal, it opens with YAML frontmatter.
+// SIMD-0266 (feature `ptokFjwyJtrwCa9Kgo9xoDS59V4QccBGEaRFnRPnSdP`) from
+// https://github.com/solana-foundation/solana-improvement-documents/blob/0434aab3b2c6b596f607194bee44e94088ff2591/proposals/0266-efficient-token-program.md,
+// verbatim but for the source's stray trailing ```` fence, dropped so no empty code block renders.
+// Exercises a long table, a code block, a nested list and YAML frontmatter.
 export const SIMD_0266_MARKDOWN = [
     '---',
     'simd: "0266"',
@@ -225,7 +226,6 @@ export const SIMD_0266_MARKDOWN = [
     'Fully backwards compatible, no changes are required for users of the program.',
     'Note that we are proposing omitting instruction name logs',
     '(e.g., "Instruction: &#60;name&#62;") .',
-    '````',
 ].join('\n');
 
 // The proposal's own GitHub URL, as `feature-gates.json` stores it in `simd_link`.

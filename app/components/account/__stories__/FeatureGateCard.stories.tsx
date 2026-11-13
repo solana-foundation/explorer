@@ -19,7 +19,7 @@ const meta: Meta<typeof FeatureGateCard> = {
                     '',
                     '- [CollapsibleSection](?path=/docs/components-shared-collapsiblesection--docs) — the shared collapsible wrapper: a `<section aria-labelledby>` with the "Feature Information" heading lifted out above the surface, a `Collapse`/`Expand` toggle, and the height animation. Passed `className=""` so the surface comes from the `<Card>` below.',
                     '- [Button](?path=/docs/components-shared-button--docs) (`variant="outline" size="sm"`) — the collapse/expand toggle inside `CollapsibleSection`.',
-                    '- [Card](?path=/docs/components-shared-card-basecard--docs) — the surface holding the proposal: a Tailwind `variant="tight"` card with 16px padding below `md`, 24px from `md`.',
+                    '- [Card](?path=/docs/components-shared-card-basecard--docs) — the surface holding the proposal: a Tailwind `variant="tight"` card padded with `ROW_PADDING` below `md`, `p-6` from `md`.',
                     '- `FeatureGateMarkdown` — renders the proposal with `react-markdown` (`remark-gfm`, `remark-frontmatter`): headings h1–h6, paragraphs, nested lists, links, inline code, code blocks, quotes, tables and rules. Code blocks and tables scroll sideways inside themselves; long links and hashes wrap.',
                     '- [BaseTable](?path=/docs/components-shared-table-basetable--docs) (`density="dense" head="subtle"`) — every markdown table, inside a bordered wrapper that scrolls a wide table within the card.',
                 ].join('\n'),
@@ -45,9 +45,10 @@ export const Default: Story = {
     },
 };
 
-// `fetchFeatureGateInformation` returns this text when the feature has no SIMD or GitHub does not answer.
-export const NoData: Story = {
+// What the tab shows when the feature has no SIMD or GitHub does not answer: the page renders this in place
+// of the proposal markdown.
+export const Unavailable: Story = {
     args: {
-        children: <FeatureGateMarkdown>No data</FeatureGateMarkdown>,
+        children: <p className="m-0 text-sm text-outer-space-300">Proposal text unavailable</p>,
     },
 };

@@ -8,10 +8,10 @@ import { SWRConfig, unstable_serialize } from 'swr';
 
 import { FeatureGatesView } from '../FeatureGatesView';
 
-// The mock cluster's default epoch (520) predates every mainnet activation in the feature list, which would give each
-// one a countdown; these stories set the current epoch themselves. The slot time is seeded too, so an epoch
-// still ahead shows its countdown without a network call. Revalidation is off so the seeded epoch stands: epoch
-// info is no longer immutable (it polls to stay live), and a refetch would replace the mocked epoch.
+// These stories set the current epoch themselves: the mock cluster's default predates every mainnet activation,
+// which would give each one a countdown. The slot time is seeded so an epoch still ahead shows its countdown
+// without a network call, and revalidation is off so a poll does not replace the seeded epoch (epoch info polls
+// to stay live).
 function atEpoch(epoch: bigint): Decorator {
     return function AtEpoch(Story) {
         return (

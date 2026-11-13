@@ -7,7 +7,8 @@ export const UPCOMING_PREVIEW_SIZE = 4;
 export function previewUpcomingFeatures<T>(features: readonly T[], showAll: boolean) {
     if (showAll || features.length <= UPCOMING_FULL_LIST_LIMIT) return { hiddenCount: 0, visible: [...features] };
     return {
-        hiddenCount: features.length - UPCOMING_PREVIEW_SIZE,
+        // Never negative, so "Show N more" stays right even if the preview size ever exceeds the full-list limit.
+        hiddenCount: Math.max(0, features.length - UPCOMING_PREVIEW_SIZE),
         visible: features.slice(0, UPCOMING_PREVIEW_SIZE),
     };
 }

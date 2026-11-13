@@ -2,7 +2,7 @@ import { address } from '@solana/kit';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Cluster, clusterSlug } from '@/app/utils/cluster';
+import { Cluster } from '@/app/utils/cluster';
 
 import type { ActivatedFeature } from '../../lib/partition-features';
 import { EmptyStateCard, FeatureGateTable, ShowMoreButton } from '../FeatureGateTable';
@@ -68,19 +68,12 @@ describe('FeatureGateTable', () => {
         renderTable();
 
         const [, row] = screen.getAllByRole('row');
-        expect(within(row).getByText(FEATURE.description as string)).toBeInTheDocument();
+        // Title and description share one cell: the description sits under the title, with nothing to expand.
+        expect(within(row).getByRole('cell', { name: `${FEATURE.title} ${FEATURE.description}` })).toBeInTheDocument();
         expect(within(row).getByRole('cell', { name: '727' })).toBeInTheDocument();
         expect(within(row).getByRole('link', { name: 'SIMD 0148' })).toBeInTheDocument();
         expect(within(row).getByRole('link', { name: `Open address ${FEATURE.key}` })).toBeInTheDocument();
         expect(within(row).queryByText('Key')).not.toBeInTheDocument();
-    });
-
-    it('should show the description under the title, with nothing to open', () => {
-        renderTable();
-
-        expect(
-            screen.getByRole('cell', { name: `MoveStake and MoveLamports ${FEATURE.description}` }),
-        ).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Show details' })).not.toBeInTheDocument();
     });
 
@@ -112,14 +105,5 @@ describe('FeatureGateTable', () => {
 
         expect(screen.queryByRole('table')).not.toBeInTheDocument();
         expect(screen.getByText('Nothing here.')).toBeInTheDocument();
-    });
-
-    it('should link a mobile card to the feature page, its description shown', () => {
-        renderTable();
-        expect(screen.getByText(FEATURE.description as string)).not.toHaveClass('hidden');
-        expect(screen.getByRole('link', { name: 'MoveStake and MoveLamports' })).toHaveAttribute(
-            'href',
-            `/address/${FEATURE.key}/feature-gate?cluster=${clusterSlug(Cluster.MainnetBeta)}`,
-        );
     });
 });

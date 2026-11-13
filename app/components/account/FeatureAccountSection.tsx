@@ -120,8 +120,6 @@ const BaseFeatureCard = ({
                     {featureInfo.simds.map((simd, index) => (
                         <li key={index}>
                             {simd && featureInfo.simd_link[index] ? (
-                                // The icon sits as in the NFT header's "View original" link (HOO-929): 12px,
-                                // centred on the text, 4px after it.
                                 <ExternalLink
                                     href={featureInfo.simd_link[index]}
                                     className="inline-flex items-center gap-1"
@@ -243,12 +241,16 @@ function ClusterActivationEpochAtCluster({
 }) {
     if (cluster === Cluster.Custom) return null;
 
-    if (activatedAt !== null && clusterInfo?.epochSchedule) {
+    // Active or pending, but the cluster epoch data has not arrived (still loading, or the RPC failed): say so
+    // rather than a bare dash, which next to an "Active" status would read as "not activated".
+    if (activatedAt !== null) {
+        if (!clusterInfo?.epochSchedule) return <ActivationUnavailable />;
         const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(activatedAt));
         return <ClusterEpoch cluster={cluster} epoch={epoch} />;
     }
 
-    if (isPending && clusterInfo?.epochInfo) {
+    if (isPending) {
+        if (!clusterInfo?.epochInfo) return <ActivationUnavailable />;
         const nextEpoch = clusterInfo.epochInfo.epoch + 1n;
         const remainingSlots = clusterInfo.epochInfo.slotsInEpoch - clusterInfo.epochInfo.slotIndex;
         return (
@@ -259,5 +261,13 @@ function ClusterActivationEpochAtCluster({
         );
     }
 
-    return <span className="text-outer-space-300">—</span>;
+    return (
+        <span className="text-outer-space-300" aria-label="Not activated on this cluster">
+            —
+        </span>
+    );
+}
+
+function ActivationUnavailable() {
+    return <span className="text-outer-space-300">Unavailable</span>;
 }
