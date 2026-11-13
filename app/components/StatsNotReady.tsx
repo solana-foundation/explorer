@@ -4,7 +4,6 @@ import React from 'react';
 import { RefreshCw } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { CardBody } from '@/app/shared/ui/Card';
 
 const CLUSTER_STATS_TIMEOUT = 5000;
 
@@ -26,27 +25,26 @@ export function StatsNotReady({ error }: { error: boolean }) {
 
     if (error || !active) {
         return (
-            <CardBody ui="dashkit" className="text-center">
-                There was a problem loading cluster stats.{' '}
+            <div className="flex flex-wrap items-center justify-center gap-3 p-6 text-center text-sm">
+                There was a problem loading cluster stats.
                 <Button
-                    ui="dashkit"
-                    variant="white"
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                         retry();
                     }}
                 >
-                    <RefreshCw className="mr-1.5 align-text-top" size={13} />
+                    <RefreshCw />
                     Try Again
                 </Button>
-            </CardBody>
+            </div>
         );
     }
 
     return (
-        <CardBody ui="dashkit" className="text-center">
-            <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
+        <div className="flex items-center justify-center gap-2 p-6 text-sm text-outer-space-300">
+            <span className="spinner-grow spinner-grow-sm shrink-0" />
             Loading
-        </CardBody>
+        </div>
     );
 }
