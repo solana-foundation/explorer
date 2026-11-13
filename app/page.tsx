@@ -2,8 +2,8 @@
 
 import { Epoch } from '@components/common/Epoch';
 import { Slot } from '@components/common/Slot';
-import { TableCardBody } from '@components/common/TableCardBody';
-import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
+import { LiveTransactionStatsCard, STATS_LABEL_WIDTH } from '@components/LiveTransactionStatsCard';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { AlpenglowCard } from '@features/alpenglow';
 import { UpcomingFeatures } from '@features/feature-gate';
@@ -20,7 +20,7 @@ import { percentage } from '@utils/math';
 import React from 'react';
 
 import { Timestamp } from '@/app/components/shared/ui/timestamp';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import { DeveloperResources } from './components/DeveloperResources';
@@ -29,16 +29,14 @@ import { StakingSection } from './components/StakingSection';
 export default function Page() {
     return (
         <StatsProvider>
-            <PageContainer className="mt-4">
+            {/* The top padding doubles the transaction page's; the bottom one adds to the root layout's 24px so the last
+                section ends 80px above the footer, as on the other pages. */}
+            <PageContainer className="flex flex-col gap-9 pb-14 pt-6 lg:pt-10">
                 <StakingSection />
 
-                <div className="flex flex-col lg:flex-row lg:gap-6">
-                    <div className="w-full lg:w-1/2">
-                        <StatsCardBody />
-                    </div>
-                    <div className="w-full lg:w-1/2">
-                        <LiveTransactionStatsCard />
-                    </div>
+                <div className="grid gap-x-6 gap-y-9 md:grid-cols-2">
+                    <StatsCardBody />
+                    <LiveTransactionStatsCard />
                 </div>
 
                 <AlpenglowCard />
@@ -52,8 +50,6 @@ export default function Page() {
 }
 
 function StatsCardBody() {
-    const dashboardInfo = useDashboardInfo();
-    const performanceInfo = usePerformanceInfo();
     const { setActive } = useStatsProvider();
     const { cluster } = useCluster();
 
@@ -61,6 +57,17 @@ function StatsCardBody() {
         setActive(true);
         return () => setActive(false);
     }, [setActive, cluster]);
+
+    return (
+        <CollapsibleSection title="Live Cluster Stats" collapsible={false} fill>
+            <ClusterStatsRows />
+        </CollapsibleSection>
+    );
+}
+
+function ClusterStatsRows() {
+    const dashboardInfo = useDashboardInfo();
+    const performanceInfo = usePerformanceInfo();
 
     if (performanceInfo.status !== ClusterStatsStatus.Ready || dashboardInfo.status !== ClusterStatsStatus.Ready) {
         const error =
@@ -75,60 +82,38 @@ function StatsCardBody() {
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
-        <Card ui="dashkit" flex="grow" className="mb-3 md:mb-6">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h4" ui="dashkit">
-                    Live Cluster Stats
-                </CardTitle>
-            </CardHeader>
-            <TableCardBody layout="expanded" className="[&_td:first-child]:!w-2/5 md:[&_td:first-child]:!w-auto">
-                <tr>
-                    <td className="w-full">Slot</td>
-                    <td className="text-right font-mono">
-                        <Slot slot={absoluteSlot} link />
-                    </td>
-                </tr>
-                {blockHeight !== undefined && (
-                    <tr>
-                        <td className="w-full">Block height</td>
-                        <td className="text-right font-mono">
-                            <Slot slot={blockHeight} />
-                        </td>
-                    </tr>
-                )}
-                {blockTime && (
-                    <tr>
-                        <td className="w-full">Cluster time</td>
-                        <td className="text-right font-mono">
-                            <Timestamp unixTimestamp={Math.floor(blockTime / 1000)} />
-                        </td>
-                    </tr>
-                )}
-                {msPerSlot_1min !== undefined && (
-                    <tr>
-                        <td className="w-full">Slot time (1min average)</td>
-                        <td className="text-right font-mono">{msPerSlot_1min}ms</td>
-                    </tr>
-                )}
-                <tr>
-                    <td className="w-full">Slot time (1hr average)</td>
-                    <td className="text-right font-mono">{msPerSlot_1h}ms</td>
-                </tr>
-                <tr>
-                    <td className="w-full">Epoch</td>
-                    <td className="text-right font-mono">
-                        <Epoch epoch={epochInfo.epoch} link />
-                    </td>
-                </tr>
-                <tr>
-                    <td className="w-full">Epoch progress</td>
-                    <td className="text-right font-mono">{epochProgress}</td>
-                </tr>
-                <tr>
-                    <td className="w-full">Epoch time remaining (approx.)</td>
-                    <td className="text-right font-mono">~{epochTimeRemaining}</td>
-                </tr>
-            </TableCardBody>
-        </Card>
+        <>
+            <KeyValue label="Slot" labelWidth={STATS_LABEL_WIDTH}>
+                <Slot slot={absoluteSlot} link />
+            </KeyValue>
+            {blockHeight !== undefined && (
+                <KeyValue label="Block height" labelWidth={STATS_LABEL_WIDTH}>
+                    <Slot slot={blockHeight} />
+                </KeyValue>
+            )}
+            {blockTime && (
+                <KeyValue label="Cluster time" labelWidth={STATS_LABEL_WIDTH}>
+                    {/* The stats provider keeps block time in milliseconds; Timestamp takes seconds. */}
+                    <Timestamp unixTimestamp={Math.floor(blockTime / 1000)} />
+                </KeyValue>
+            )}
+            {msPerSlot_1min !== undefined && (
+                <KeyValue label="Slot time (1min average)" labelWidth={STATS_LABEL_WIDTH}>
+                    <TextValue mono={false}>{msPerSlot_1min}ms</TextValue>
+                </KeyValue>
+            )}
+            <KeyValue label="Slot time (1hr average)" labelWidth={STATS_LABEL_WIDTH}>
+                <TextValue mono={false}>{msPerSlot_1h}ms</TextValue>
+            </KeyValue>
+            <KeyValue label="Epoch" labelWidth={STATS_LABEL_WIDTH}>
+                <Epoch epoch={epochInfo.epoch} link />
+            </KeyValue>
+            <KeyValue label="Epoch progress" labelWidth={STATS_LABEL_WIDTH}>
+                <TextValue mono={false}>{epochProgress}</TextValue>
+            </KeyValue>
+            <KeyValue label="Epoch time remaining (approx.)" labelWidth={STATS_LABEL_WIDTH}>
+                <TextValue mono={false}>~{epochTimeRemaining}</TextValue>
+            </KeyValue>
+        </>
     );
 }

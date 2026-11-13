@@ -72,3 +72,21 @@ export const WithId: Story = {
         expect(section).toHaveAttribute('id', 'accounts');
     },
 };
+
+// The home page's stats row: two sections side by side, the shorter card stretched to the taller one.
+export const FillInGrid: Story = {
+    play: async ({ canvasElement }) => {
+        const [short, tall] = Array.from(canvasElement.querySelectorAll('section')).map(
+            section => section.lastElementChild?.getBoundingClientRect().height,
+        );
+        expect(short).toBe(tall);
+    },
+    render: args => (
+        <div className="grid grid-cols-2 gap-x-6">
+            <CollapsibleSection {...args} collapsible={false} fill />
+            <CollapsibleSection {...args} collapsible={false} fill title="Taller section">
+                <div style={{ color: '#ccc', height: '200px', padding: '16px' }}>Taller content.</div>
+            </CollapsibleSection>
+        </div>
+    ),
+};
