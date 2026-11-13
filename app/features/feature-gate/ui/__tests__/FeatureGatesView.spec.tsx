@@ -1,6 +1,6 @@
 import { useSlotTime } from '@entities/slot-time';
-import { render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCluster, useClusterInfo } from '@/app/providers/cluster';
@@ -8,8 +8,9 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { FeatureGatesView } from '../FeatureGatesView';
 
-const { partitionFeatures } = vi.hoisted(() => ({
+const { partitionFeatures, push } = vi.hoisted(() => ({
     partitionFeatures: vi.fn(() => ({ activated: [], upcoming: [] })),
+    push: vi.fn(),
 }));
 
 vi.mock('@/app/providers/cluster', () => ({
@@ -21,56 +22,91 @@ vi.mock('@entities/slot-time', () => ({
     useSlotTime: vi.fn(() => undefined),
 }));
 
-vi.mock('../../lib/partition-features', () => ({ partitionFeatures }));
-
-type TableProps = {
-    features: unknown[];
-    secondColumn: { render: (feature: unknown) => ReactNode };
-};
-
-vi.mock('../FeatureGateTable', () => ({
-    EmptyStateCard: () => null,
-    FeatureGateTable: ({ features, secondColumn }: TableProps) =>
-        features.map((feature, index) => <div key={index}>{secondColumn.render(feature)}</div>),
+vi.mock('next/navigation', () => ({
+    usePathname: vi.fn(() => '/feature-gates'),
+    useRouter: vi.fn(() => ({ push })),
+    useSearchParams: vi.fn(() => new URLSearchParams()),
 }));
 
+vi.mock('../../lib/partition-features', () => ({ partitionFeatures }));
+
+type SecondColumn = { sort?: { direction: string; onToggle: () => void } };
+
+// `useSearchParams` is typed to return the read-only variant; the test seeds a plain one.
+const searchParams = (init?: string) => new URLSearchParams(init) as unknown as ReturnType<typeof useSearchParams>;
+
+// Only the Activated table carries `sort`; render a toggle for it so the sort-URL wiring can be exercised.
+vi.mock('../FeatureGateTable', () => ({
+    EmptyStateCard: () => null,
+    FeatureGateTable: ({ secondColumn }: { secondColumn: SecondColumn }) =>
+        secondColumn.sort ? <button onClick={secondColumn.sort.onToggle}>sort</button> : null,
+    OtherActivationsCell: () => null,
+    ShowMoreButton: () => null,
+}));
+
+const withActivated = () =>
+    partitionFeatures.mockReturnValue({ activated: [{ clusterActivationEpoch: 10 }], upcoming: [] } as ReturnType<
+        typeof partitionFeatures
+    >);
+
+beforeEach(() => {
+    vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta } as ReturnType<typeof useCluster>);
+    partitionFeatures.mockReturnValue({ activated: [], upcoming: [] });
+    vi.mocked(useClusterInfo).mockReturnValue(undefined);
+    vi.mocked(useSlotTime).mockReturnValue(undefined);
+    vi.mocked(usePathname).mockReturnValue('/feature-gates');
+    vi.mocked(useSearchParams).mockReturnValue(searchParams());
+    push.mockClear();
+});
+
 describe('FeatureGatesView', () => {
-    beforeEach(() => {
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta } as ReturnType<typeof useCluster>);
-        partitionFeatures.mockReturnValue({ activated: [], upcoming: [] });
-        vi.mocked(useClusterInfo).mockReturnValue(undefined);
-        vi.mocked(useSlotTime).mockReturnValue(undefined);
+    describe('polling gate', () => {
+        it('should enable the epoch and slot-time queries on a standard cluster', () => {
+            render(<FeatureGatesView />);
+
+            expect(useClusterInfo).toHaveBeenCalledWith({ enabled: true });
+            expect(useSlotTime).toHaveBeenCalledWith({ enabled: true });
+        });
+
+        it('should defer both queries on a custom cluster, showing the custom-cluster card', () => {
+            vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Custom } as ReturnType<typeof useCluster>);
+
+            render(<FeatureGatesView />);
+
+            expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
+            expect(useSlotTime).toHaveBeenCalledWith({ enabled: false });
+            expect(screen.getByText('Custom cluster')).toBeInTheDocument();
+        });
     });
 
-    it('should poll cluster info and slot time on a standard cluster', () => {
-        render(<FeatureGatesView />);
+    describe('sort direction in the URL', () => {
+        it('should write a dir param when toggling off the default', () => {
+            withActivated();
+            render(<FeatureGatesView />);
 
-        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: true });
-        expect(useSlotTime).toHaveBeenCalledWith({ enabled: true });
-    });
+            fireEvent.click(screen.getByRole('button', { name: 'sort' }));
 
-    it('should not poll cluster info or slot time on a custom cluster', () => {
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Custom } as ReturnType<typeof useCluster>);
+            expect(push).toHaveBeenCalledWith('/feature-gates?dir=asc', { scroll: false });
+        });
 
-        render(<FeatureGatesView />);
+        it('should drop the dir param when toggling back to the default', () => {
+            withActivated();
+            vi.mocked(useSearchParams).mockReturnValue(searchParams('dir=asc'));
+            render(<FeatureGatesView />);
 
-        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
-        expect(useSlotTime).toHaveBeenCalledWith({ enabled: false });
-    });
+            fireEvent.click(screen.getByRole('button', { name: 'sort' }));
 
-    it('should render a countdown when cluster info and slot time are both available', () => {
-        partitionFeatures.mockReturnValue({
-            activated: [{ clusterActivationEpoch: 10 }],
-            upcoming: [],
-        } as unknown as ReturnType<typeof partitionFeatures>);
-        vi.mocked(useClusterInfo).mockReturnValue({
-            epochInfo: { epoch: 5n, slotIndex: 0n, slotsInEpoch: 100n },
-            epochSchedule: { slotsPerEpoch: 100n },
-        } as ReturnType<typeof useClusterInfo>);
-        vi.mocked(useSlotTime).mockReturnValue(400);
+            expect(push).toHaveBeenCalledWith('/feature-gates', { scroll: false });
+        });
 
-        render(<FeatureGatesView />);
+        it('should preserve other params when the sort changes', () => {
+            withActivated();
+            vi.mocked(useSearchParams).mockReturnValue(searchParams('cluster=devnet'));
+            render(<FeatureGatesView />);
 
-        expect(screen.getByText(content => content.startsWith('in ~'))).toBeInTheDocument();
+            fireEvent.click(screen.getByRole('button', { name: 'sort' }));
+
+            expect(push).toHaveBeenCalledWith('/feature-gates?cluster=devnet&dir=asc', { scroll: false });
+        });
     });
 });

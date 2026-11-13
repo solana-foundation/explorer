@@ -1,13 +1,10 @@
 import { FeatureGateCard } from '@components/account/FeatureGateCard';
+import { FeatureGateMarkdown } from '@components/account/FeatureGateMarkdown';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
-import ReactMarkdown from 'react-markdown';
-import remarkFrontmatter from 'remark-frontmatter';
-import remarkGFM from 'remark-gfm';
 
 import { getFeatureInfo } from '@/app/entities/feature-gate/server';
 import { fetchFeatureGateInformation, getFeatureGateOpenGraph } from '@/app/features/feature-gate/server';
-import { BaseTable } from '@/app/shared/ui/Table';
 
 type Props = Readonly<{
     params: Promise<{
@@ -33,17 +30,7 @@ export default async function FeatureGatePage(props: Props) {
 
     return (
         <FeatureGateCard>
-            <ReactMarkdown
-                remarkPlugins={[remarkGFM, remarkFrontmatter]}
-                components={{
-                    h2: ({ children }) => <h2 className="mb-2 mt-5 text-gray-300">{children}</h2>,
-                    li: ({ children }) => <li className="mb-1 text-gray-400">{children}</li>,
-                    p: ({ children }) => <p className="mb-4 mt-0 text-gray-400">{children}</p>,
-                    table: ({ children }) => <BaseTable ui="dashkit">{children}</BaseTable>,
-                }}
-            >
-                {data[0]}
-            </ReactMarkdown>
+            <FeatureGateMarkdown baseUrl={feature?.simd_link?.[0]}>{data[0]}</FeatureGateMarkdown>
         </FeatureGateCard>
     );
 }

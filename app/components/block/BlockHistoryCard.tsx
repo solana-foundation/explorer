@@ -48,6 +48,7 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/comp
 import { Input } from '@/app/components/shared/ui/input';
 import { invariant } from '@/app/shared/lib/invariant';
 import { DataListCard } from '@/app/shared/ui/DataListCard';
+import { SortIndicator } from '@/app/shared/ui/SortIndicator';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 const PAGE_SIZE = 25;
@@ -380,27 +381,6 @@ function isFailed(tx: Pick<TransactionWithInvocations, 'meta' | 'signature'>): b
 // One shared formatter instance — constructing `Intl.NumberFormat` per call is needlessly expensive.
 const NUMBER_FORMAT = new Intl.NumberFormat('en-US');
 const numberFmt = (n: number | bigint) => NUMBER_FORMAT.format(n);
-
-// A dim up/down chevron pair marking a sortable header; the arrow for the active direction lights up
-// white. Absolutely positioned in an `h-4`/`w-1` box so the taller glyph stack doesn't grow the row.
-function SortIndicator({ active, direction }: { active: boolean; direction: 'asc' | 'desc' }) {
-    return (
-        <span className="relative inline-block h-4 w-1">
-            <span className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center leading-none">
-                <ChevronUp
-                    size={11}
-                    strokeWidth={2.5}
-                    className={active && direction === 'asc' ? 'text-white' : 'text-outer-space-300'}
-                />
-                <ChevronDown
-                    size={11}
-                    strokeWidth={2.5}
-                    className={cn('-mt-1', active && direction === 'desc' ? 'text-white' : 'text-outer-space-300')}
-                />
-            </span>
-        </span>
-    );
-}
 
 // A CSS grid on md+, stacked labelled rows below md. Sortable numeric headers push the sort through
 // `onSort` (the URL-param mechanism).
