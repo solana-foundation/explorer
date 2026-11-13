@@ -4,6 +4,7 @@ import {
     readComputeUnitLimitFromInstruction,
     type ScheduleCluster,
 } from '../programs/compute-budget/index.js';
+import { getV1ResourceLimits } from './resource-limits.js';
 import type { ParsedTransaction } from './types.js';
 
 export type RequestedComputeUnits = {
@@ -21,10 +22,10 @@ export function getRequestedComputeUnits(
     context: { cluster: ScheduleCluster; epoch: bigint | undefined },
 ): RequestedComputeUnits {
     if (transaction.version === 1) {
-        const declared = transaction.config?.computeUnitLimit;
-        return declared === undefined
-            ? { source: 'fallback', value: 0 }
-            : { source: 'declared', value: Math.min(declared, MAX_COMPUTE_UNITS) };
+        return {
+            source: transaction.config?.computeUnitLimit === undefined ? 'fallback' : 'declared',
+            value: getV1ResourceLimits(transaction).computeUnitLimit,
+        };
     }
 
     let total = 0;
