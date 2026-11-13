@@ -29,7 +29,7 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@solana/kit": "8.3.0"
+        "@solana/kit": "8.6.0"
     },
     "devDependencies": {
         "typescript": "catalog:tooling",
