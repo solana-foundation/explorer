@@ -1,61 +1,43 @@
 import { Epoch } from '@components/common/Epoch';
 import { SolBalance } from '@components/common/SolBalance';
 import type { StakeHistoryEntry, SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
-import React from 'react';
 
-import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
+
+const COLUMNS: ReadonlyArray<GridTableColumn<StakeHistoryEntry>> = [
+    {
+        cell: { font: 'mono' },
+        header: 'Epoch',
+        render: entry => <Epoch epoch={entry.epoch} link />,
+    },
+    {
+        cell: { font: 'mono' },
+        header: 'Effective (SOL)',
+        render: entry => <SolBalance lamports={entry.stakeHistory.effective} />,
+    },
+    {
+        cell: { font: 'mono' },
+        header: 'Activating (SOL)',
+        render: entry => <SolBalance lamports={entry.stakeHistory.activating} />,
+    },
+    {
+        cell: { font: 'mono' },
+        header: 'Deactivating (SOL)',
+        render: entry => <SolBalance lamports={entry.stakeHistory.deactivating} />,
+    },
+];
 
 export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStakeHistoryAccount }) {
-    const stakeHistory = sysvarAccount.info;
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit">
-                    Stake History
-                </CardTitle>
-            </CardHeader>
-
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Effective (SOL)</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Activating (SOL)</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Deactivating (SOL)</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>
-                    {stakeHistory.map(entry => (
-                        <HistoryEntryRow key={entry.epoch} entry={entry} />
-                    ))}
-                </BaseTable.Body>
-            </BaseTable>
-
-            {stakeHistory.length === 0 && (
-                <CardFooter ui="dashkit">
-                    <div className="text-center text-dk-gray-700">No stake history found</div>
-                </CardFooter>
-            )}
-        </Card>
-    );
-}
-
-function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell className="w-px font-mono">
-                <Epoch epoch={entry.epoch} link />
-            </BaseTable.Cell>
-            <BaseTable.Cell className="font-mono">
-                <SolBalance lamports={entry.stakeHistory.effective} />
-            </BaseTable.Cell>
-            <BaseTable.Cell className="font-mono">
-                <SolBalance lamports={entry.stakeHistory.activating} />
-            </BaseTable.Cell>
-            <BaseTable.Cell className="font-mono">
-                <SolBalance lamports={entry.stakeHistory.deactivating} />
-            </BaseTable.Cell>
-        </BaseTable.Row>
+        <GridTableCard
+            title="Stake History"
+            ariaLabel="Stake history"
+            gridTemplate="grid-cols-[auto_1fr_1fr_1fr]"
+            columns={COLUMNS}
+            rows={sysvarAccount.info}
+            getRowKey={entry => entry.epoch}
+            empty="No stake history found"
+            mobile="stack"
+        />
     );
 }

@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -112,12 +112,21 @@ function resolved(entries: ReturnType<typeof tokenInfo>[] = []) {
     return { isLoading: false, tokenInfos: new Map(entries.map(entry => [entry.address, entry])) };
 }
 
+// GridTable renders the desktop grid (role="table") and a label-stacked mobile copy (also role="table")
+// at once, so every value appears twice in jsdom. Scope row/content assertions to the desktop table,
+// which renders first.
+function grid() {
+    return within(screen.getAllByRole('table')[0]);
+}
+
 /**
  * Mints in the order they are on screen. Summary display only — detail display renders an
  * account Address ahead of the mint on every row, so this would return both.
  */
 function visibleMints() {
-    return screen.getAllByTestId('address').map(node => node.textContent);
+    return grid()
+        .getAllByTestId('address')
+        .map(node => node.textContent);
 }
 
 /** Undefined once every holding is on screen, since the footer renders nothing then. */
@@ -148,14 +157,14 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
         render(<OwnedTokensCard address={OWNER} />);
 
         // Logo column always rendered, with the resolved uri.
-        const logo = screen.getByTestId('token-logo');
+        const logo = grid().getByTestId('token-logo');
         expect(logo.getAttribute('data-uri')).toBe(LOGO);
         // The card resolves every held mint in one call, so rows fetch nothing themselves.
         expect(useTokenInfosMock).toHaveBeenCalledWith([MINT], Cluster.MainnetBeta, 'genesis');
         // Symbol comes from the lookup, rendered next to the amount in the balance cell.
-        expect(screen.getByText('USDC', { exact: false })).toBeInTheDocument();
+        expect(grid().getByText('USDC', { exact: false })).toBeInTheDocument();
         // Mint Address is labeled from the already-resolved info (tokenLabelInfo), so it fetches nothing.
-        const address = screen.getByTestId('address');
+        const address = grid().getByTestId('address');
         expect(address.getAttribute('data-fetch-label')).toBe('false');
         expect(address.getAttribute('data-has-token-label-info')).toBe('true');
     });
@@ -164,7 +173,7 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
         render(<OwnedTokensCard address={OWNER} />);
 
         // The logo cell is present and the uri is empty, so ProxiedImage shows its Solana fallback.
-        const logo = screen.getByTestId('token-logo');
+        const logo = grid().getByTestId('token-logo');
         expect(logo.getAttribute('data-uri')).toBe('');
         // No symbol text when info is missing.
         expect(screen.queryByText('USDC')).not.toBeInTheDocument();
@@ -189,7 +198,7 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        const tooltip = screen.getByTestId('scaled-tooltip');
+        const tooltip = grid().getByTestId('scaled-tooltip');
         expect(tooltip.getAttribute('data-multiplier')).toBe('2');
         expect(tooltip.getAttribute('data-raw-amount')).toBe('9007199254.740993');
     });
@@ -199,8 +208,8 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        expect(screen.getByText('8')).toBeInTheDocument();
-        const tooltip = screen.getByTestId('scaled-tooltip');
+        expect(grid().getByText('8')).toBeInTheDocument();
+        const tooltip = grid().getByTestId('scaled-tooltip');
         expect(tooltip.getAttribute('data-multiplier')).toBe('2');
         expect(tooltip.getAttribute('data-raw-amount')).toBe('4');
     });
@@ -211,8 +220,8 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        expect(screen.getByText('8')).toBeInTheDocument();
-        const tooltip = screen.getByTestId('scaled-tooltip');
+        expect(grid().getByText('8')).toBeInTheDocument();
+        const tooltip = grid().getByTestId('scaled-tooltip');
         expect(tooltip.getAttribute('data-multiplier')).toBe('2');
         expect(tooltip.getAttribute('data-raw-amount')).toBe('4');
     });
@@ -332,8 +341,12 @@ describe('should render the account address column only in detail display', () =
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        expect(screen.getByText('Account Address')).toBeInTheDocument();
-        expect(screen.getAllByTestId('address').map(node => node.textContent)).toEqual([TOKEN_ACCOUNT_A, MINT]);
+        expect(grid().getByText('Account Address')).toBeInTheDocument();
+        expect(
+            grid()
+                .getAllByTestId('address')
+                .map(node => node.textContent),
+        ).toEqual([TOKEN_ACCOUNT_A, MINT]);
     });
 
     it('should omit the account address in summary display', () => {
@@ -352,6 +365,41 @@ describe('should render the account address column only in detail display', () =
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        expect(screen.getAllByTestId('address').map(node => node.textContent)).toEqual([TOKEN_ACCOUNT_B, MINT]);
+        expect(
+            grid()
+                .getAllByTestId('address')
+                .map(node => node.textContent),
+        ).toEqual([TOKEN_ACCOUNT_B, MINT]);
+    });
+});
+
+describe('should project holdings into the mobile stack', () => {
+    beforeEach(() => {
+        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis', url: 'http://rpc' });
+        useSearchParamsMock.mockReturnValue(searchParams(null));
+        useAccountOwnedTokensMock.mockReturnValue(makeEntry());
+        useTokenInfosMock.mockReturnValue({
+            isLoading: false,
+            tokenInfos: new Map([
+                [MINT, { address: MINT, decimals: 6, logoURI: LOGO, name: 'USD Coin', symbol: 'USDC', verified: true }],
+            ]),
+        });
+    });
+
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
+    // `mobile="stack"` renders the desktop grid and the mobile stack together, so counting occurrences
+    // across both layouts shows the mobile projection without reaching into the DOM.
+    it('should inline the logo into the Mint field and drop the standalone Logo field on mobile', () => {
+        render(<OwnedTokensCard address={OWNER} />);
+
+        // The Logo column is hidden on mobile (desktop only) but the logo is inlined into the mobile Mint
+        // field, so exactly two logos render: one more than desktop-only, one fewer than a visible column.
+        expect(screen.getAllByTestId('token-logo').map(logo => logo.getAttribute('data-uri'))).toEqual([LOGO, LOGO]);
+        // The 'Logo' header is desktop-only; the mobile Mint field is labelled 'Mint' (not 'Mint Address').
+        expect(screen.getAllByText('Logo')).toHaveLength(1);
+        expect(screen.getByText('Mint')).toBeInTheDocument();
     });
 });

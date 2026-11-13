@@ -1,44 +1,55 @@
 import { Badge } from '@components/shared/ui/badge';
 import type { FormattedIdl, InstructionAccountData } from '@entities/idl';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTable, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 import { BaseIdlDoc, IdlDocTooltip } from './BaseIdlDoc';
 import { BaseIdlStructFields } from './BaseIdlFields';
 import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
-type IxAccountsData = NonNullable<FormattedIdl['instructions']>[0]['accounts'];
-type IxArgsData = NonNullable<FormattedIdl['instructions']>[0]['args'];
+type InstructionRow = NonNullable<FormattedIdl['instructions']>[number];
+type IxAccountsData = InstructionRow['accounts'];
+type IxArgsData = InstructionRow['args'];
+
+const COLUMNS: ReadonlyArray<GridTableColumn<InstructionRow>> = [
+    {
+        cell: { font: 'mono', wrap: 'nowrap' },
+        cellClassName: 'text-xs',
+        header: <span className="text-neutral-500">Name</span>,
+        render: ix => (
+            <div>
+                <HighlightNode className="rounded py-0.5">{ix.name}</HighlightNode>
+                <BaseIdlDoc docs={ix.docs} />
+            </div>
+        ),
+    },
+    {
+        cell: { font: 'mono', wrap: 'nowrap' },
+        cellClassName: 'text-xs',
+        header: <span className="text-neutral-500">Arguments</span>,
+        render: ix => <IdlInstructionArguments data={ix.args} />,
+    },
+    {
+        cell: { font: 'mono', wrap: 'nowrap' },
+        cellClassName: 'text-xs',
+        header: <span className="text-neutral-500">Accounts</span>,
+        render: ix => <IdlInstructionAccounts data={ix.accounts} />,
+    },
+];
 
 export function BaseIdlInstructions({ data }: FormattedIdlDataView<'instructions'>) {
     if (!data) return null;
     return (
-        <BaseTable ui="dashkit" variant="card" nowrap>
-            <BaseTable.Head>
-                <BaseTable.Row>
-                    <BaseTable.HeaderCell className="text-neutral-500">Name</BaseTable.HeaderCell>
-                    <BaseTable.HeaderCell className="text-neutral-500">Arguments</BaseTable.HeaderCell>
-                    <BaseTable.HeaderCell className="text-neutral-500">Accounts</BaseTable.HeaderCell>
-                </BaseTable.Row>
-            </BaseTable.Head>
-            <BaseTable.Body className="font-mono text-xs">
-                {data.map(ix => (
-                    <BaseTable.Row key={ix.name}>
-                        <BaseTable.Cell>
-                            <HighlightNode className="rounded py-0.5">{ix.name}</HighlightNode>
-                            <BaseIdlDoc docs={ix.docs} />
-                        </BaseTable.Cell>
-                        <BaseTable.Cell>
-                            <IdlInstructionArguments data={ix.args} />
-                        </BaseTable.Cell>
-                        <BaseTable.Cell>
-                            <IdlInstructionAccounts data={ix.accounts} />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                ))}
-            </BaseTable.Body>
-        </BaseTable>
+        <GridTable
+            ariaLabel="IDL instructions"
+            gridTemplate="grid-cols-[auto_1fr_1fr]"
+            columns={COLUMNS}
+            rows={data}
+            getRowKey={ix => ix.name}
+            empty={null}
+            mobile="stack"
+        />
     );
 }
 

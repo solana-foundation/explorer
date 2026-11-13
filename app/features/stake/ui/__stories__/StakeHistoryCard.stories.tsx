@@ -64,6 +64,7 @@ export const Empty: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('No stake history found')).toBeInTheDocument();
+        // GridTable mobile="stack" renders the empty message in both the desktop and mobile layouts.
+        expect(canvas.getAllByText('No stake history found').length).toBeGreaterThan(0);
     },
 };

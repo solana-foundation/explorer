@@ -79,11 +79,12 @@ export const WithResults: Story = {
         value: 'token',
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        // The results panel renders in a Radix portal outside canvasElement, so scope to the document body.
+        const body = within(canvasElement.ownerDocument.body);
 
-        expect(canvas.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
-        expect(canvas.getByText('Token A')).toBeInTheDocument();
-        expect(canvas.getByText('Token B')).toBeInTheDocument();
+        expect(body.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
+        expect(body.getByText('Token A')).toBeInTheDocument();
+        expect(body.getByText('Token B')).toBeInTheDocument();
     },
 };
 
@@ -94,10 +95,10 @@ export const Loading: Story = {
         value: 'loading query',
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const body = within(canvasElement.ownerDocument.body);
 
-        expect(canvas.getByText('Searching...')).toBeInTheDocument();
-        expect(canvas.queryByText('No results found')).not.toBeInTheDocument();
+        expect(body.getByText('Searching...')).toBeInTheDocument();
+        expect(body.queryByText('No results found')).not.toBeInTheDocument();
     },
 };
 
@@ -108,10 +109,10 @@ export const NoResults: Story = {
         value: 'xyz123',
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const body = within(canvasElement.ownerDocument.body);
 
-        expect(canvas.getByText('No results found')).toBeInTheDocument();
-        expect(canvas.queryByText('Searching...')).not.toBeInTheDocument();
+        expect(body.getByText('No results found')).toBeInTheDocument();
+        expect(body.queryByText('Searching...')).not.toBeInTheDocument();
     },
 };
 
@@ -122,9 +123,9 @@ export const SelectResult: Story = {
         value: 'token',
     },
     play: async ({ canvasElement, args }) => {
-        const canvas = within(canvasElement);
+        const body = within(canvasElement.ownerDocument.body);
 
-        const item = canvas.getByText('Token A');
+        const item = body.getByText('Token A');
         expect(item).toBeInTheDocument();
 
         await userEvent.click(item);
@@ -166,14 +167,14 @@ export const MultipleGroups: Story = {
         value: 'sol',
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const body = within(canvasElement.ownerDocument.body);
 
-        expect(canvas.getByText('Accounts', { selector: 'span' })).toBeInTheDocument();
-        expect(canvas.getByText('Programs', { selector: 'span' })).toBeInTheDocument();
-        expect(canvas.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
-        expect(canvas.getByText('Solana Foundation')).toBeInTheDocument();
-        expect(canvas.getByText('Solana Token Program')).toBeInTheDocument();
-        expect(canvas.getByText('Wrapped SOL')).toBeInTheDocument();
+        expect(body.getByText('Accounts', { selector: 'span' })).toBeInTheDocument();
+        expect(body.getByText('Programs', { selector: 'span' })).toBeInTheDocument();
+        expect(body.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
+        expect(body.getByText('Solana Foundation')).toBeInTheDocument();
+        expect(body.getByText('Solana Token Program')).toBeInTheDocument();
+        expect(body.getByText('Wrapped SOL')).toBeInTheDocument();
     },
 };
 
@@ -216,12 +217,12 @@ export const WithIconsAndBadges: Story = {
     },
     name: 'With Icons and Badges',
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const body = within(canvasElement.ownerDocument.body);
 
-        expect(canvas.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
-        expect(canvas.getByText('Programs', { selector: 'span' })).toBeInTheDocument();
-        expect(canvas.getByText('USDC - USD Coin')).toBeInTheDocument();
-        expect(canvas.getByText('USDT - Tether USD')).toBeInTheDocument();
-        expect(canvas.getByText('Token Program')).toBeInTheDocument();
+        expect(body.getByText('Tokens', { selector: 'span' })).toBeInTheDocument();
+        expect(body.getByText('Programs', { selector: 'span' })).toBeInTheDocument();
+        expect(body.getByText('USDC - USD Coin')).toBeInTheDocument();
+        expect(body.getByText('USDT - Tether USD')).toBeInTheDocument();
+        expect(body.getByText('Token Program')).toBeInTheDocument();
     },
 };

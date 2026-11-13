@@ -162,7 +162,9 @@ export const WithLogos: Story = {
     // Symbol and logo can only come from resolved metadata, so this fails if the seeded entry stops
     // matching the key the card looks up.
     play: async ({ canvasElement }) => {
-        await expect(await within(canvasElement).findByText('1234.56 USDC')).toBeInTheDocument();
+        // GridTable mobile="stack" renders the balance in both the desktop and mobile layouts.
+        const balances = await within(canvasElement).findAllByText('1234.56 USDC');
+        expect(balances.length).toBeGreaterThan(0);
         await expect(canvasElement.querySelector('img')).toHaveAttribute('src', usdcTokenInfo.logoURI);
     },
 };
