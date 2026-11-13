@@ -1,7 +1,7 @@
 import type { GetTransactionApi, Rpc, Signature } from '@solana/kit';
 import { describe, expectTypeOf, it } from 'vitest';
 
-import type { ParsedTransaction, RpcParsedInstruction, RpcTransactionResponse } from '../types.js';
+import type { ParsedTransaction, RpcParsedInstruction, RpcTransactionResponse, TransactionConfig } from '../types.js';
 
 declare const rpc: Rpc<GetTransactionApi>;
 declare const signature: Signature;
@@ -22,6 +22,12 @@ describe('ParsedTransaction', () => {
         expectTypeOf<ParsedTransactionOf<'legacy'>>().not.toHaveProperty('unmatchedLookupTableIndexes');
         expectTypeOf<ParsedTransactionOf<1>>().not.toHaveProperty('unmatchedLookupTableAddresses');
         expectTypeOf<ParsedTransactionOf<1>>().not.toHaveProperty('unmatchedLookupTableIndexes');
+    });
+
+    it('should carry an optional config on the v1 arm only', () => {
+        expectTypeOf<ParsedTransactionOf<1>>().toHaveProperty('config').toEqualTypeOf<TransactionConfig | undefined>();
+        expectTypeOf<ParsedTransactionOf<0>>().not.toHaveProperty('config');
+        expectTypeOf<ParsedTransactionOf<'legacy'>>().not.toHaveProperty('config');
     });
 });
 
