@@ -16,9 +16,7 @@ import {
     parseRequestUnitsInstruction,
     parseSetComputeUnitLimitInstruction,
 } from '@solana-program/compute-budget';
-import type { Cluster } from '@utils/cluster';
-
-import { toScheduleCluster } from './cluster';
+import { type Cluster, clusterSlug } from '@utils/cluster';
 
 const BASE58_ENCODER = getBase58Encoder();
 
@@ -33,7 +31,7 @@ export function getReservedComputeUnits({
     cluster: Cluster;
 }): number {
     return getPackageReservedComputeUnits({
-        cluster: toScheduleCluster(cluster),
+        cluster: clusterSlug(cluster),
         epoch,
         // A cast, not address(): doesn't need validating, and a throw would break render for no gain.
         programAddress: programId as Address,
