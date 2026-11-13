@@ -18,6 +18,9 @@ const ALIGN_SEARCH_PANEL =
 
 const FILL_SEARCH_HEIGHT = '[&>div]:h-full [&_[cmdk-root]]:h-full [&_[data-search-frame]]:!h-full';
 
+// Keep in step with the frame's duration-300.
+const SLIDE_MS = 300;
+
 export interface NavSearchProps {
     children: ReactNode;
     dockClassName?: string;
@@ -31,10 +34,25 @@ export function NavSearch({ children, dockClassName, onOpenChange, open, restCla
     const fieldRef = useRef<HTMLDivElement>(null);
     const toggleRef = useRef<HTMLButtonElement>(null);
     const wasOpen = useRef(false);
-    const [slotInsets, setSlotInsets] = useState<{ left: number; right: number } | undefined>(undefined);
+    const [slotInsets, setSlotInsets] = useState<{ right: number; width: number } | undefined>(undefined);
     const [focused, setFocused] = useState(false);
     const [ringVisible, setRingVisible] = useState(false);
     const [hasText, setHasText] = useState(false);
+    // left/right animate only for SLIDE_MS after `open` flips. Animating them on every change made the
+    // button trail the window edge while the window resized. Set during render, so the transition is
+    // already on in the same style change that moves the field.
+    const [sliding, setSliding] = useState(false);
+    const [prevOpen, setPrevOpen] = useState(open);
+    if (open !== prevOpen) {
+        setPrevOpen(open);
+        setSliding(true);
+    }
+
+    useEffect(() => {
+        if (!sliding) return;
+        const timer = setTimeout(() => setSliding(false), SLIDE_MS);
+        return () => clearTimeout(timer);
+    }, [open, sliding]);
 
     useEffect(() => {
         if (focused) {
@@ -49,8 +67,14 @@ export function NavSearch({ children, dockClassName, onOpenChange, open, restCla
         const slot = slotRef?.current;
         const row = slot?.offsetParent;
         if (!slot || !(row instanceof HTMLElement)) return;
-        const measure = () =>
-            setSlotInsets({ left: slot.offsetLeft, right: row.clientWidth - slot.offsetLeft - slot.offsetWidth });
+        const measure = () => {
+            // The slot is hidden from sm up; keep the last real position for when the window narrows again.
+            if (!slot.offsetParent) return;
+            setSlotInsets({
+                right: row.clientWidth - slot.offsetLeft - slot.offsetWidth,
+                width: slot.offsetWidth,
+            });
+        };
         measure();
         const observer = new ResizeObserver(measure);
         observer.observe(row);
@@ -58,6 +82,7 @@ export function NavSearch({ children, dockClassName, onOpenChange, open, restCla
         return () => observer.disconnect();
     }, [slotRef]);
 
+    const borderMs = focused ? 100 : 400;
     const litRule: React.CSSProperties | undefined =
         open || ringVisible
             ? {
@@ -70,8 +95,8 @@ export function NavSearch({ children, dockClassName, onOpenChange, open, restCla
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: '100% 100%, 100% 100%',
                   borderColor: focused ? 'transparent' : undefined,
-                  transitionDuration: focused ? '300ms, 300ms, 100ms' : '300ms, 300ms, 400ms',
-                  transitionProperty: 'left, right, border-color',
+                  transitionDuration: sliding ? `${SLIDE_MS}ms, ${SLIDE_MS}ms, ${borderMs}ms` : `${borderMs}ms`,
+                  transitionProperty: sliding ? 'left, right, border-color' : 'border-color',
               }
             : undefined;
 
@@ -136,16 +161,30 @@ export function NavSearch({ children, dockClassName, onOpenChange, open, restCla
             }}
             style={{
                 ...litRule,
-                ...(!open && slotInsets ? { left: slotInsets.left, right: slotInsets.right } : undefined),
+                // Fed to classes, not set as left/right, so sm:inset-auto still docks the field once the window widens.
+                // Anchored to the right like the slot, so the button keeps up with a window resize between measurements.
+                ...(slotInsets
+                    ? ({
+                          '--slot-left': `calc(100% - ${slotInsets.right + slotInsets.width}px)`,
+                          '--slot-right': `${slotInsets.right}px`,
+                      } as React.CSSProperties)
+                    : undefined),
             }}
             className={cn(
                 'absolute bottom-0 top-0 z-10 flex items-center overflow-hidden',
-                'transition-[left,right,background-color,border-color] duration-300 ease-out motion-reduce:transition-none',
+                sliding
+                    ? 'transition-[left,right,background-color,border-color]'
+                    : 'transition-[background-color,border-color]',
+                'duration-300 ease-out motion-reduce:transition-none',
                 slotRef && !slotInsets && !restClassName && 'invisible',
                 frameClasses,
                 'sm:relative sm:inset-auto sm:h-[38px] sm:min-w-0 sm:flex-1 sm:bg-heavy-metal-800',
                 dockClassName,
-                open ? 'left-4 right-4 lg:left-6 lg:right-6' : restClassName,
+                open
+                    ? 'left-4 right-4 lg:left-6 lg:right-6 [@media(max-width:328px)]:left-2 [@media(max-width:328px)]:right-2'
+                    : slotInsets
+                      ? 'left-[var(--slot-left)] right-[var(--slot-right)]'
+                      : restClassName,
             )}
         >
             <div
