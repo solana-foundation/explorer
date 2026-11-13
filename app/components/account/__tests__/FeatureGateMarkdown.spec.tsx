@@ -55,6 +55,16 @@ describe('FeatureGateMarkdown', () => {
         expect(second).toHaveAttribute('id', 'example-1');
     });
 
+    it.each([
+        ['## Motivation and Rationale', 'motivation-and-rationale'],
+        ["## What's new?", 'whats-new'],
+        ['## The `foo` function', 'the-foo-function'],
+    ])('should slug %s to a GitHub-style heading id', (markdown, id) => {
+        render(<FeatureGateMarkdown baseUrl={SIMD_URL}>{markdown}</FeatureGateMarkdown>);
+
+        expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute('id', id);
+    });
+
     it('should resolve a link to a sibling proposal against the proposal URL', () => {
         render(
             <FeatureGateMarkdown baseUrl={SIMD_URL}>

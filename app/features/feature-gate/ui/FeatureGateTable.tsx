@@ -165,7 +165,7 @@ const rowVariants = cva('', {
 const cellVariants = cva('min-w-0', {
     compoundVariants: [
         { class: 'flex-col items-start', column: ['title', 'activation', 'simd', 'key'], part: 'body' },
-        // The epochs take the address link's 13px, so they read at the size of the key beside them.
+        // Match the Key column's type size so the epoch and key read alike.
         { class: 'text-dk-sm', column: 'activation', part: 'body' },
         { class: 'lg:py-3.5', column: 'title', part: 'body' },
         { class: 'lg:pb-3.5 lg:pt-4', column: ['activation', 'simd', 'key'], part: 'body' },
