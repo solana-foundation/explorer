@@ -17,6 +17,7 @@ import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
 // Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and pako.
 import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
+import { isRedactedTokenAddress, type TokenInfo, useAccountRefreshTokenInfo } from '@entities/token-info';
 import { NFTOKEN_ADDRESS } from '@explorer/decoder-nftoken/program-ids';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
@@ -54,7 +55,6 @@ import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { redirect, RedirectType } from 'next/navigation';
 import React, { PropsWithChildren, Suspense, use } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import useSWRImmutable from 'swr/immutable';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
@@ -73,13 +73,6 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
 import { PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
-import {
-    fetchFullTokenInfo,
-    FullTokenInfo,
-    FullTokenInfoSwrKey,
-    getFullTokenInfoSwrKey,
-    isRedactedTokenAddress,
-} from '@/app/utils/token-info';
 import { useBuildClusterPath, useClusterPath } from '@/app/utils/url';
 
 import { AccountDataTab } from './AccountDataTab';
@@ -163,21 +156,17 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
 
     const infoParsed = info?.data?.data.parsed;
 
-    const shouldFetchTokenInfo = infoParsed && isTokenProgramData(infoParsed) && pubkey;
-    const {
-        data: fullTokenInfo,
-        error: fullTokenInfoError,
-        isLoading: isFullTokenInfoLoading,
-    } = useSWRImmutable(
-        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, genesisHash) : null,
-        fetchFullTokenInfoOrNull,
-        // The token-info request logs each failure, so a refresh or a remount retries it instead of SWR.
-        { shouldRetryOnError: false },
-    );
-    const tokenInfo = fullTokenInfo ?? undefined;
+    const shouldFetchTokenInfo =
+        infoParsed && isTokenProgramData(infoParsed) && pubkey && !isRedactedTokenAddress(address);
+    const { isLoading: isMintTokenInfoLoading, tokenInfo } = useAccountRefreshTokenInfo({
+        cluster,
+        genesisHash,
+        mint: shouldFetchTokenInfo ? address : undefined,
+        url,
+    });
 
     const isAccountLoading = !info || isFetchingWithoutData(info);
-    const isTokenInfoLoading = isAccountLoading || (isFullTokenInfoLoading && fullTokenInfoError === undefined);
+    const isTokenInfoLoading = isAccountLoading || isMintTokenInfoLoading;
 
     // Fetch account on load. `info` is in the deps so the fetch re-arms if the cache entry is
     // cleared from under us (e.g. a dev-mode segment remount wiping provider state mid-fetch).
@@ -212,11 +201,6 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     );
 }
 
-// SWR sets `isLoading` while a request runs and `data` is `undefined`, so a missing token info caches `null` instead.
-async function fetchFullTokenInfoOrNull(key: FullTokenInfoSwrKey) {
-    return (await fetchFullTokenInfo(key)) ?? null;
-}
-
 export default function AddressLayout(props: Props) {
     const params = use(props.params);
 
@@ -241,7 +225,7 @@ function DetailsSections({
     notification: React.ReactNode;
     pubkey: PublicKey;
     info?: CacheEntry<Account>;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
     isTokenInfoLoading: boolean;
 }) {
     const refreshAccount = useRefreshAccount();
@@ -290,7 +274,7 @@ function DetailsSections({
     );
 }
 
-function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: FullTokenInfo }) {
+function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: TokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
     const addressPath = useClusterPath({ pathname: `/address/${account.pubkey.toBase58()}` });

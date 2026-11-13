@@ -2,9 +2,8 @@ import { ERiskLevel } from '../model/use-rugcheck';
 
 /**
  * Deliberately slim: verification checks must work even when token metadata
- * is unavailable (e.g. the token isn't in the UTL registry). Using the full
- * FullTokenInfo here would make the entire badge no-op whenever the metadata
- * lookup fails, hiding valid Jupiter/RugCheck results.
+ * is unavailable. Using `TokenInfo` here would make the entire badge no-op
+ * whenever the metadata lookup fails, hiding valid Jupiter/RugCheck results.
  */
 export type VerificationTarget = {
     address: string;

@@ -51,6 +51,15 @@ export async function refocusTab() {
 // no longer publishes, and types the endpoint as a plain string instead of the branded one.
 export type ClusterContext = ReturnType<typeof useCluster>;
 
+export function connectedWithGenesisHash(cluster: Cluster, genesisHash: string): ClusterContext {
+    return {
+        ...clusterContext({ cluster, connectableUrl: RPC_URL, status: ClusterStatus.Connected, url: RPC_URL }),
+        genesisHash,
+    };
+}
+
+const RPC_URL = 'http://localhost:8899';
+
 export function clusterContext({
     cluster,
     connectableUrl,

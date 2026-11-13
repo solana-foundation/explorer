@@ -4,15 +4,14 @@ export const TokenInfoStruct = type({
     address: string(),
     decimals: nullable(number()),
     logoURI: nullable(string()),
-    name: string(),
-    symbol: string(),
+    name: nullable(string()),
+    symbol: nullable(string()),
     verified: boolean(),
 });
 
 export type TokenInfo = Infer<typeof TokenInfoStruct>;
 
-export type FetchConfig = {
-    signal?: AbortSignal;
-    next?: NextFetchRequestConfig;
-    onError?: (error: unknown) => void;
+export type TokenInfoResult = {
+    isLoading: boolean;
+    tokenInfo: TokenInfo | undefined;
 };

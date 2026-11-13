@@ -152,7 +152,7 @@ describe('GET /api/search', () => {
 
     describe('DAS icon enrichment', () => {
         it('should enrich icon from DAS when logoUri is null', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: null })]);
+            mockFetch(200, [makeJupiterToken({ icon: null })]);
             getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
@@ -161,7 +161,7 @@ describe('GET /api/search', () => {
         });
 
         it('should prefer logoUri over DAS image when both present', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: 'https://original.com/sol.png' })]);
+            mockFetch(200, [makeJupiterToken({ icon: 'https://original.com/sol.png' })]);
             getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
@@ -170,7 +170,7 @@ describe('GET /api/search', () => {
         });
 
         it('should use undefined icon when DAS returns no asset and logoUri is absent', async () => {
-            mockFetch(200, [makeJupiterToken({ logoURI: null })]);
+            mockFetch(200, [makeJupiterToken({ icon: null })]);
             getAssetBatchMock.mockResolvedValueOnce(undefined);
 
             const res = await GET(makeRequest('sol'));
@@ -230,6 +230,41 @@ describe('GET /api/search', () => {
             const data = await res.json();
 
             expect(data.results.tokens).toEqual([]);
+        });
+    });
+
+    describe('NEXT_PUBLIC_BAD_TOKENS', () => {
+        const BAD_TOKEN_MINT = gen.address(1);
+
+        beforeEach(() => {
+            process.env.NEXT_PUBLIC_BAD_TOKENS = BAD_TOKEN_MINT;
+        });
+
+        it('should drop a bad mint from the results and from the DAS request', async () => {
+            mockFetch(200, [makeJupiterToken({ id: BAD_TOKEN_MINT }), makeJupiterToken()]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens.map((t: { tokenAddress: string }) => t.tokenAddress)).toEqual([VALID_ADDRESS]);
+            expect(getAssetBatchMock).toHaveBeenCalledWith(
+                [VALID_ADDRESS],
+                expect.any(String),
+                expect.any(AbortSignal),
+            );
+        });
+
+        it('should return 20 good mints when Jupiter lists a bad mint first', async () => {
+            const goodAddresses = Array.from({ length: 20 }, (_, i) => gen.address(i + 2));
+            mockFetch(200, [
+                makeJupiterToken({ id: BAD_TOKEN_MINT }),
+                ...goodAddresses.map(id => makeJupiterToken({ id })),
+            ]);
+
+            const res = await GET(makeRequest('sol'));
+            const data = await res.json();
+
+            expect(data.results.tokens.map((t: { tokenAddress: string }) => t.tokenAddress)).toEqual(goodAddresses);
         });
     });
 

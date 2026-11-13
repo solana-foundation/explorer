@@ -1,14 +1,10 @@
-import { boolean, is, type } from 'superstruct';
+import { lookupTokenInfo } from '@entities/token-info';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
 
 import { TOKEN_VERIFICATION_SWR_CONFIG } from './token-verification-cache';
-
-const JupiterResultSchema = type({
-    verified: boolean(),
-});
 
 export enum JupiterStatus {
     Success,
@@ -33,25 +29,16 @@ function getJupiterSwrKey(cluster: Cluster, mintAddress?: string): JupiterSwrKey
 }
 
 async function fetchJupiterVerification([, mintAddress]: JupiterSwrKey): Promise<JupiterResult> {
-    try {
-        const response = await fetch(`/api/verification/jupiter/${mintAddress}`);
-
-        if (!response.ok) {
-            if (response.status === 429) {
-                return { status: JupiterStatus.RateLimited, verified: false };
-            }
+    const lookup = await lookupTokenInfo({ address: mintAddress, cluster: Cluster.MainnetBeta });
+    switch (lookup.kind) {
+        case 'listed':
+            return { status: JupiterStatus.Success, verified: lookup.token.verified };
+        case 'not-listed':
+            return { status: JupiterStatus.Success, verified: false };
+        case 'rate-limited':
+            return { status: JupiterStatus.RateLimited, verified: false };
+        case 'unavailable':
             return { status: JupiterStatus.FetchFailed, verified: false };
-        }
-
-        const data = await response.json();
-
-        if (!is(data, JupiterResultSchema)) {
-            return { status: JupiterStatus.FetchFailed, verified: false };
-        }
-
-        return { status: JupiterStatus.Success, verified: data.verified };
-    } catch {
-        return { status: JupiterStatus.FetchFailed, verified: false };
     }
 }
 

@@ -4,8 +4,12 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { cn } from '@components/shared/utils';
-import { deriveScaledUiAmountMultiplier, orderMintsByVerification, type TokenInfo } from '@entities/token-info';
-import { useTokenInfos } from '@entities/token-info/client';
+import {
+    deriveScaledUiAmountMultiplier,
+    orderMintsByVerification,
+    type TokenInfo,
+    useTokenInfos,
+} from '@entities/token-info';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';

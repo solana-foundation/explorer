@@ -1,6 +1,6 @@
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { MAX_SIZE, statusError } from '@/app/api/metadata/proxy';
@@ -87,6 +87,10 @@ describe('getTokenInfosFromMetaplex', () => {
         mocks.fetchResource.mockResolvedValue(jsonResource({}));
     });
 
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
     it('should not touch the network without addresses', async () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         await expect(getTokenInfosFromMetaplex([], RPC)).resolves.toEqual([]);
@@ -107,6 +111,15 @@ describe('getTokenInfosFromMetaplex', () => {
             [`${MINT_A}-pda`, 255],
             [`${MINT_B}-pda`, 255],
         ]);
+    });
+
+    it('should not read the metadata of a redacted mint', async () => {
+        vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await getTokenInfosFromMetaplex([MINT_A, MINT_B], RPC);
+
+        expect(mocks.safeFetchAllMetadata).toHaveBeenCalledWith({}, [[`${MINT_B}-pda`, 255]]);
     });
 
     it('should batch the metadata lookup so it stays under the getMultipleAccounts key limit', async () => {

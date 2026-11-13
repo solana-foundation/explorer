@@ -10,21 +10,21 @@ import { fetchTokenInfosFromApi } from './fetch-token-infos-from-api';
 // Bounds the fan-out: a whale address would otherwise put every chunk on the wire at once.
 const CHUNK_CONCURRENCY = 6;
 
-// Per chunk, and comfortably above the one upstream call the route makes for a chunk this size.
+// Per chunk, and comfortably above the timeout the route sets on its upstream calls.
 // The margin is for a cold start; the point is that a stalled chunk cannot hold the card forever.
 const CHUNK_TIMEOUT_MS = 15_000;
 
 /**
  * Resolves the whole list at once, because a mint cannot be ordered by verification
- * until its metadata is known. The on-chain fallback stays off: a mint the UTL list
- * does not carry is simply absent, and that absence is the answer callers need.
+ * until its metadata is known. The on-chain fallback stays off: a mint with no
+ * token info is absent, and that absence is the answer callers need.
  */
 export async function fetchTokenInfos(
     addresses: readonly string[],
     cluster: Cluster,
     genesisHash?: string,
 ): Promise<Map<string, TokenInfo>> {
-    // Sorted, because the upstream cache keys on the request body: the RPC returns an account's
+    // Sorted, because the upstream cache keys on the request URL: the RPC returns an account's
     // holdings in no guaranteed order, so without this the same holdings chunk differently for
     // each visitor and none of them hit the cache. The caller orders the rows itself.
     const unique = Array.from(new Set(addresses)).sort();

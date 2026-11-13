@@ -1,11 +1,7 @@
-// Configuration for the token-info route. Note: the Next.js route segment config
-// (`maxDuration`) stays in route.ts — Next only reads those as literal exports of
-// the route module, not via re-export.
+// Configuration for the token-info routes. Each route file declares its own `maxDuration`,
+// because Next reads route segment config only as a literal route export.
 
 import { TOKEN_INFO_REQUEST_LIMIT } from '@entities/token-info/server';
-
-/** How long a resolved token list stays fresh in the Next data cache. */
-export const CACHE_MAX_AGE = 3600; // 1 hour
 
 /**
  * Bounds one request, not the holdings list a page may show — the holdings card chunks a longer

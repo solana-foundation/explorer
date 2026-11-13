@@ -18,7 +18,7 @@ export class TokenInfoHttpError extends Error {
 }
 
 export class TokenInfoInvalidResponseError extends Error {
-    constructor(message: string = 'Invalid response: missing content', options?: ErrorOptions) {
+    constructor(message: string = 'Invalid response: not a token array', options?: ErrorOptions) {
         super(message, options);
         this.name = 'TokenInfoInvalidResponseError';
     }

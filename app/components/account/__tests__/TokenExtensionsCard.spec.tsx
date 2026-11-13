@@ -22,7 +22,7 @@ vi.mock('@entities/account', async importOriginal => ({
 }));
 vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
-    fetchTokenInfoFromApi: vi.fn(async () => undefined),
+    useUnbatchedTokenInfo: () => ({ isLoading: false, tokenInfo: undefined }),
 }));
 vi.mock('../TokenExtensionsSection', () => ({ TokenExtensionsSection: () => null }));
 

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TokenExtension } from '../../validators/accounts/token-extension';
-import { getCurrentTokenScaledUiAmountMultiplier } from '../token-info';
+import { getCurrentTokenScaledUiAmountMultiplier } from '../token-extension';
 
 const NOW_SECONDS = 1711486400; // March 27, 2024 00:00:00 UTC
 

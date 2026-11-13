@@ -2,7 +2,8 @@ import { gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import { inspectorSurface, InstructionSurfaceProvider, toInstructionNode } from '@entities/instruction-card';
 import { isParsedInstruction } from '@entities/instruction-parser';
-import { fetchTokenInfoFromApi } from '@entities/token-info';
+import { useUnbatchedTokenInfo } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import type { ReadonlyUint8Array } from '@solana/kit';
@@ -49,7 +50,7 @@ vi.mock('@providers/accounts', async importOriginal => ({
 
 vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
-    fetchTokenInfoFromApi: vi.fn(),
+    useUnbatchedTokenInfo: vi.fn(),
 }));
 
 const [SOURCE, DESTINATION, AUTHORITY, MINT, SIGNER_1, SIGNER_2] = Array.from({ length: 6 }, (_, n) =>
@@ -59,12 +60,15 @@ const PROGRAM_ROW: CardRow = ['Program', TOKEN_PROGRAM_ID.toBase58()];
 const PROGRAM_2022_ROW: CardRow = ['Program', TOKEN_2022_PROGRAM_ID.toBase58()];
 const ACCOUNT_HEADER = ['Account Name', 'Address'];
 const ARGUMENT_HEADER = ['Argument Name', 'Type', 'Value'];
+const USDC = { ...tokenInfo(MINT.toBase58()), symbol: 'USDC' };
+const NO_TOKEN_INFO: ReturnType<typeof useUnbatchedTokenInfo> = { isLoading: false, tokenInfo: undefined };
+const USDC_TOKEN_INFO: ReturnType<typeof useUnbatchedTokenInfo> = { isLoading: false, tokenInfo: USDC };
 
 describe('TokenDetailsCard', () => {
     beforeEach(() => {
         vi.mocked(useTokenAccountInfo).mockReturnValue(undefined);
         vi.mocked(useMintAccountInfo).mockReturnValue(undefined);
-        vi.mocked(fetchTokenInfoFromApi).mockResolvedValue(undefined);
+        vi.mocked(useUnbatchedTokenInfo).mockReturnValue(NO_TOKEN_INFO);
     });
 
     afterEach(() => {
@@ -105,8 +109,8 @@ describe('TokenDetailsCard', () => {
         vi.mocked(useMintAccountInfo).mockImplementation(mint =>
             mint === MINT.toBase58() ? ({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>) : undefined,
         );
-        vi.mocked(fetchTokenInfoFromApi).mockImplementation(async mint =>
-            mint.equals(MINT) ? ({ symbol: 'USDC' } as Awaited<ReturnType<typeof fetchTokenInfoFromApi>>) : undefined,
+        vi.mocked(useUnbatchedTokenInfo).mockImplementation(({ mint }) =>
+            mint === MINT.toBase58() ? USDC_TOKEN_INFO : NO_TOKEN_INFO,
         );
 
         renderTxCard(transfer('1500000'));
@@ -302,6 +306,7 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
     beforeEach(() => {
         vi.mocked(useTokenAccountInfo).mockReturnValue(undefined);
         vi.mocked(useMintAccountInfo).mockReturnValue(undefined);
+        vi.mocked(useUnbatchedTokenInfo).mockReturnValue(NO_TOKEN_INFO);
     });
 
     it.each([
@@ -452,9 +457,7 @@ describe('TokenDetailsCard with an instruction in byte form', () => {
     ])('should show the amount argument $amount as the instruction holds it', async ({ amount, shown }) => {
         vi.mocked(useTokenAccountInfo).mockReturnValue({ mint: MINT } as ReturnType<typeof useTokenAccountInfo>);
         vi.mocked(useMintAccountInfo).mockReturnValue({ decimals: 6 } as ReturnType<typeof useMintAccountInfo>);
-        vi.mocked(fetchTokenInfoFromApi).mockResolvedValue({ symbol: 'USDC' } as Awaited<
-            ReturnType<typeof fetchTokenInfoFromApi>
-        >);
+        vi.mocked(useUnbatchedTokenInfo).mockReturnValue(USDC_TOKEN_INFO);
         const data = getTransferInstructionDataEncoder().encode({ amount });
         renderTxCard(byteFormCard(data, [SOURCE, DESTINATION, AUTHORITY].map(readonlyKey), TOKEN_PROGRAM_ID));
 

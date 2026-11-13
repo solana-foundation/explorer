@@ -22,6 +22,7 @@ import { chunk } from '@/app/shared/lib/array';
 import { resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
 
+import { isRedactedTokenAddress } from '../lib/is-redacted-token-address';
 import type { TokenInfo } from '../lib/types';
 
 /**
@@ -178,24 +179,22 @@ async function fetchLogoUri(
 }
 
 /**
- * Resolves token info from on-chain Metaplex metadata. Use this for mints the
- * unified token list (UTL) API does not carry.
- *
- * This replaces the Metaplex fallback in `@solflare-wallet/utl-sdk`. Like the
- * SDK it returns only mints whose token standard is `Fungible`, and it marks
- * every result unverified because the data is not on a curated list.
+ * Resolves token info from on-chain Metaplex metadata. It returns only mints whose
+ * token standard is `Fungible`, and it marks every result unverified because the
+ * data is not on a curated list.
  */
 export async function getTokenInfosFromMetaplex(
     addresses: string[],
     rpcEndpoint: string,
     options: FetchTokenInfosMetaplexOptions = {},
 ): Promise<TokenInfo[]> {
-    if (addresses.length === 0 || !rpcEndpoint) return [];
+    const unredactedAddresses = addresses.filter(address => !isRedactedTokenAddress(address));
+    if (unredactedAddresses.length === 0 || !rpcEndpoint) return [];
 
     let fungible: Metadata[];
     try {
         const umi = getUmi(rpcEndpoint);
-        const pdas = addresses.map(address => findMetadataPda(umi, { mint: publicKey(address) }));
+        const pdas = unredactedAddresses.map(address => findMetadataPda(umi, { mint: publicKey(address) }));
 
         // Umi sends every key in a single `getMultipleAccounts` call, so batch here to stay under
         // the RPC limit. One failed batch must not lose the mints the others resolved.

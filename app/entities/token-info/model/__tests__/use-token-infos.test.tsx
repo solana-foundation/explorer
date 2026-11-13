@@ -4,7 +4,7 @@ import { Cluster } from '@utils/cluster';
 import { unstable_serialize } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import { refocusTab, settleRetries, swrWrapper, UNTHROTTLED_FOCUS, waitForHook } from '@/app/__tests__/swr-hook';
 
 import { tokenInfo } from '../../__fixtures__/token-info';
 import { fetchTokenInfos } from '../../api/fetch-token-infos';
@@ -102,6 +102,17 @@ describe('useTokenInfos', () => {
         await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender({ mints: ['mint-a', 'mint-b'] });
+
+        expect(mockedFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not refetch when the tab regains focus', async () => {
+        const mints = ['mint-a'];
+        renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper: swrWrapper(UNTHROTTLED_FOCUS) });
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+
+        await refocusTab();
+        await settleRetries();
 
         expect(mockedFetch).toHaveBeenCalledTimes(1);
     });
