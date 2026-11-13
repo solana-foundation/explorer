@@ -37,17 +37,32 @@ export const RUST_PRINT_LINE: Record<ExampleEncoding, string> = {
 /** The crate the print line needs. */
 export const RUST_ENCODING_CRATE: Record<ExampleEncoding, string> = { base58: 'bs58', base64: 'base64' };
 
-// `base64`'s free `encode` was removed in 0.22, so the print line goes through the `Engine` trait.
+// `base64`'s free `encode` is deprecated (since 0.21), so the print line goes through the `Engine` trait.
 const RUST_ENCODING_USE: Record<ExampleEncoding, string> = {
     base58: '',
     base64: 'use base64::{engine::general_purpose::STANDARD, Engine as _};\n',
 };
 
+// Crate versions this compiles against; `full` and `bincode` gate the transaction type and the system
+// instruction builders, so without those features the example does not build.
+const RUST_CARGO: Record<ExampleEncoding, string> = {
+    base58: `// Cargo.toml:
+//   solana-sdk = { version = "5", features = ["full"] }
+//   solana-system-interface = { version = "3", features = ["bincode"] }
+//   bs58 = "0.5"
+`,
+    base64: `// Cargo.toml:
+//   solana-sdk = { version = "5", features = ["full"] }
+//   solana-system-interface = { version = "3", features = ["bincode"] }
+//   base64 = "0.23"
+`,
+};
+
 export function rustExample(encoding: ExampleEncoding): CodeSample {
     const focus = RUST_PRINT_LINE[encoding];
     return {
-        // `transfer` moved out of `solana_sdk` into `solana-system-interface` by solana-sdk 5.0.
-        code: `${RUST_ENCODING_USE[encoding]}use solana_sdk::{hash::Hash, message::Message, pubkey, transaction::Transaction};
+        // `transfer` moved out of `solana_sdk` into `solana-system-interface` in solana-sdk 3.0.
+        code: `${RUST_CARGO[encoding]}${RUST_ENCODING_USE[encoding]}use solana_sdk::{hash::Hash, message::Message, pubkey, transaction::Transaction};
 use solana_system_interface::instruction::transfer;
 use std::str::FromStr;
 

@@ -21,7 +21,7 @@ const meta = {
                     '',
                     '## References',
                     '',
-                    '- [BaseCodeBlock](?path=/docs/shared-codeblock-basecodeblock--docs) — caption, divider and code surface; `children` carry the dimmed-and-underlined markup',
+                    '- [BaseCodeBlock](?path=/docs/shared-codeblock-basecodeblock--docs) — the `reference` variant renders a caption and a left-ruled code column; `code` carries the dimmed-and-underlined markup',
                 ].join('\n'),
             },
         },

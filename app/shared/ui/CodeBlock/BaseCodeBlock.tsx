@@ -66,8 +66,8 @@ export interface BaseCodeBlockProps
         Omit<VariantProps<typeof preVariants>, 'wrap' | 'variant'>,
         VariantProps<typeof rootVariants> {
     caption?: string;
-    children?: React.ReactNode;
-    code: string;
+    // The content to render. The plain string to copy lives in `CodeBlock`, which owns the copy control.
+    code: React.ReactNode;
     copyState?: CopyState;
     onCopy?: () => void;
     wrap?: 'nowrap' | 'wrap';
@@ -75,7 +75,6 @@ export interface BaseCodeBlockProps
 
 export function BaseCodeBlock({
     caption,
-    children,
     className,
     code,
     copyState = 'copy',
@@ -117,9 +116,7 @@ export function BaseCodeBlock({
             )}
 
             <pre className={preVariants({ variant, wrap })}>
-                <code className="bg-transparent p-0 font-mono text-xs leading-relaxed text-neutral-200">
-                    {children ?? code}
-                </code>
+                <code className="bg-transparent p-0 font-mono text-xs leading-relaxed text-neutral-200">{code}</code>
             </pre>
 
             {/* role="status" carries the polite live region; the button's own name change is not announced on its own. */}

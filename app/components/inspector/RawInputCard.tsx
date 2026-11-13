@@ -150,7 +150,6 @@ export function RawInput({
         }
     }, [currentSearchParams, router, currentPathname, setTransactionData]);
 
-    // The input is the only control on the empty inspector page, so it takes focus on mount.
     React.useEffect(() => {
         rawInput.current?.focus({ preventScroll: true });
     }, []);

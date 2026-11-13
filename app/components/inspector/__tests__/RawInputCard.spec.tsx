@@ -93,7 +93,6 @@ describe('RawInput', () => {
         }
     });
 
-    // `{}` inside JSX text is an empty expression, so the Rust format string must be written as `{'{}'}`.
     test('should print the Rust format placeholder in the instruction', () => {
         render(<RawInput setTransactionData={vi.fn()} />);
 

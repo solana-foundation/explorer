@@ -46,13 +46,12 @@ export const Json: Story = {
 export const Rendered: Story = {
     args: {
         caption: 'Terminal',
-        children: (
+        code: (
             <>
                 claude mcp add <span className="text-accent">--transport http</span> solana-explorer
                 https://explorer.solana.com/mcp
             </>
         ),
-        code: ADD_COMMAND,
         onCopy: fn(),
     },
 };

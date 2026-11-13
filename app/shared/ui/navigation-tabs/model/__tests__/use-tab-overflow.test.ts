@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { getVisibleTabsCount } from '../use-tab-overflow';
 
-// Tabs laid out left-to-right from the container's left edge, each `width` wide with no gap unless stated.
+// Tab right-edges laid out left-to-right from the container's left edge, each `width` wide and touching;
+// a column gap, when present, is passed separately as the `gap` argument to `getVisibleTabsCount`.
 function tabRects(widths: number[], { left = 0 } = {}) {
     let right = left;
     return widths.map(width => {

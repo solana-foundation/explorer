@@ -15,8 +15,11 @@ export function BaseCodeExample({
 }) {
     return (
         // The addresses are made up, so the sample has no copy control and its caption says it is illustrative.
-        <BaseCodeBlock caption={EXAMPLE_LABEL} code={code} variant="reference" wrap="wrap">
-            {code.split('\n').map((line, i) => (
+        <BaseCodeBlock
+            caption={EXAMPLE_LABEL}
+            variant="reference"
+            wrap="wrap"
+            code={code.split('\n').map((line, i) => (
                 // Lines of a fixed snippet never reorder, so the index is a stable key.
                 <span key={i} className="block" style={wrapIndentStyle(line)}>
                     {language === 'shell' && i === 0 && <span className="select-none opacity-40">$ </span>}
@@ -24,7 +27,7 @@ export function BaseCodeExample({
                     {line === '' ? ' ' : renderLine(line, focus)}
                 </span>
             ))}
-        </BaseCodeBlock>
+        />
     );
 }
 
