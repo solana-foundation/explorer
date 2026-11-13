@@ -182,21 +182,13 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                         className,
                     )}
                 >
-                    <time
-                        dateTime={dateTime}
-                        className={cn(
-                            !children && 'tabular-nums',
-                            !children && effective === 'relative'
-                                ? 'inline-block min-w-[6.25rem] text-right'
-                                : 'min-w-0',
-                        )}
-                    >
+                    <time dateTime={dateTime} className={cn('min-w-0', !children && 'tabular-nums')}>
                         {children ?? labels[effective]}
                     </time>
                     <ChevronDown size={14} className="mt-0.5 shrink-0 text-neutral-500" />
                 </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-0">
+            <PopoverContent align="start" className="w-80 p-0">
                 {rows.map((row, index) => (
                     <TimestampRow
                         key={row.key}

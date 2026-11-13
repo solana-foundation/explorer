@@ -93,7 +93,6 @@ function ClusterStatsRows() {
             )}
             {blockTime && (
                 <KeyValue label="Cluster time" labelWidth={STATS_LABEL_WIDTH}>
-                    {/* The stats provider keeps block time in milliseconds; Timestamp takes seconds. */}
                     <Timestamp unixTimestamp={Math.floor(blockTime / 1000)} />
                 </KeyValue>
             )}
