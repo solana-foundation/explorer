@@ -1,10 +1,13 @@
-import { type CompiledTransactionMessage, getCompiledTransactionMessageDecoder, getShortU16Encoder } from '@solana/kit';
+import {
+    type CompiledTransactionMessage,
+    getCompiledTransactionMessageDecoder,
+    getShortU16Encoder,
+    LEGACY_TRANSACTION_SIZE_LIMIT,
+    V1_TRANSACTION_SIZE_LIMIT,
+} from '@solana/kit';
 
 import type { ParsedTransaction } from './types.js';
 import { isV1MessageBytes } from './version.js';
-
-export const LEGACY_TRANSACTION_SIZE_LIMIT = 1232;
-export const V1_TRANSACTION_SIZE_LIMIT = 4096;
 
 const SIGNATURE_BYTES = 64;
 

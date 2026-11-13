@@ -101,12 +101,13 @@ helper `resolveStaticAccounts(staticKeys, header)` classifies the static keys.
 
 ## Reading the TransactionConfig
 
-Kit exports the mask predicates but not the value codec, hence the package owns this decoding, in
+`readTransactionConfig` decodes the config with kit's `decompileTransactionConfig`, in
 [`config.ts`](../../../packages/parsers/src/transaction/config.ts).
 
-- Mask bit order is the value order on the wire.
-- `readTransactionConfig` does not call kit's `decompileTransactionMessage`, which throws on an out-of-range
-  account index and costs a full message decompile per call.
+- `decompileTransactionConfig` accepts unknown mask bits and extra values. `readTransactionConfig` re-encodes the
+  result with `getTransactionConfigMask` and `getTransactionConfigValues` and rejects a mismatch.
+- A mask that declares more values than the message holds also throws `InvalidTransactionConfigError`, without
+  the field name.
 
 The RPC sends the same four limits under different names, and marks them nullable rather than optional. One
 adapter, `fromRpcTransactionConfig`, covers that.
