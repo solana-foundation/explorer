@@ -191,7 +191,7 @@ function Token22MintHeader({
 export function TokenMintHeaderCard({
     token,
 }: {
-    token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
+    token: { name?: string | null; logoURI?: string | undefined; symbol?: string | null };
 }) {
     return (
         <div className="-mx-3 flex flex-wrap items-center">

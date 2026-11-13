@@ -188,13 +188,13 @@ export async function getTokenInfosFromMetaplex(
     rpcEndpoint: string,
     options: FetchTokenInfosMetaplexOptions = {},
 ): Promise<TokenInfo[]> {
-    const unredacted = addresses.filter(address => !isRedactedTokenAddress(address));
-    if (unredacted.length === 0 || !rpcEndpoint) return [];
+    const unredactedAddresses = addresses.filter(address => !isRedactedTokenAddress(address));
+    if (unredactedAddresses.length === 0 || !rpcEndpoint) return [];
 
     let fungible: Metadata[];
     try {
         const umi = getUmi(rpcEndpoint);
-        const pdas = unredacted.map(address => findMetadataPda(umi, { mint: publicKey(address) }));
+        const pdas = unredactedAddresses.map(address => findMetadataPda(umi, { mint: publicKey(address) }));
 
         // Umi sends every key in a single `getMultipleAccounts` call, so batch here to stay under
         // the RPC limit. One failed batch must not lose the mints the others resolved.

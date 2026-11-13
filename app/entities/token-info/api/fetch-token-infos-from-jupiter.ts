@@ -21,15 +21,14 @@ export async function getTokenInfos(
     genesisHash?: string,
     config?: { signal?: AbortSignal },
 ): Promise<TokenInfosResult> {
-    const unredacted = addresses.filter(address => !isRedactedTokenAddress(address));
-    if (unredacted.length === 0) return NOTHING_LISTED;
+    if (addresses.length === 0) return NOTHING_LISTED;
     if (!jupiterListsTokensOn(getChainId(cluster, genesisHash))) return NOTHING_LISTED;
 
     const apiKey = process.env.JUPITER_API_KEY;
     if (!apiKey) return { error: new Error('JUPITER_API_KEY is not configured'), kind: 'unavailable' };
 
     const results = await Promise.all(
-        chunk(unredacted, TOKEN_INFO_REQUEST_LIMIT).map(mints =>
+        chunk(addresses, TOKEN_INFO_REQUEST_LIMIT).map(mints =>
             fetchTokenInfosFromJupiter({ apiKey, mints, signal: config?.signal }),
         ),
     );
@@ -85,9 +84,9 @@ async function fetchTokenInfosFromJupiter({
 }
 
 function toTokenInfo(token: JupiterToken): TokenInfo {
-    return {
+    const tokenInfo: TokenInfo = {
         address: token.id,
-        // eslint-disable-next-line unicorn/no-null -- `TokenInfo` declares `decimals` and `logoURI` as `… | null`
+        // eslint-disable-next-line unicorn/no-null -- `TokenInfo` declares `decimals`, `logoURI`, `name` and `symbol` as `… | null`
         decimals: token.decimals ?? null,
         // eslint-disable-next-line unicorn/no-null -- same as above
         logoURI: token.icon ?? null,
@@ -95,4 +94,8 @@ function toTokenInfo(token: JupiterToken): TokenInfo {
         symbol: token.symbol,
         verified: token.isVerified === true,
     };
+    return isRedactedTokenAddress(token.id) ? { ...tokenInfo, ...REDACTED_CONTENT } : tokenInfo;
 }
+
+// eslint-disable-next-line unicorn/no-null -- same as above
+const REDACTED_CONTENT = { logoURI: null, name: null, symbol: null };

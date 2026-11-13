@@ -280,7 +280,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         if (info.isNative) {
             setSymbol('SOL');
         } else {
-            setSymbol(tokenInfo?.symbol);
+            setSymbol(tokenInfo?.symbol ?? undefined);
         }
     }, [tokenInfo, info]);
 

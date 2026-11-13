@@ -8,12 +8,12 @@ import { FAST_RETRY, renderHookWithRevalidate, settleRetries, swrWrapper, waitFo
 import { isAccountRefreshKey } from '@/app/shared/lib/account-refresh-key';
 
 import { tokenInfo } from '../../__fixtures__/token-info';
-import { useMintTokenInfo } from '../use-mint-token-info';
+import { useAccountRefreshTokenInfo } from '../use-account-refresh-token-info';
 
 const MINT = gen.address(1);
 const RPC_URL = 'https://api.mainnet-beta.solana.com';
 
-describe('useMintTokenInfo', () => {
+describe('useAccountRefreshTokenInfo', () => {
     beforeEach(() => {
         vi.stubGlobal('fetch', vi.fn());
     });
@@ -69,7 +69,7 @@ describe('useMintTokenInfo', () => {
 
     it('should request the token info again when a refresh matches the account of the mint', async () => {
         respond(200, { content: [tokenInfo(MINT, true)] });
-        const { result } = renderHookWithRevalidate(() => useMintTokenInfo(hookProps()));
+        const { result } = renderHookWithRevalidate(() => useAccountRefreshTokenInfo(hookProps()));
         await waitForHook(() => expect(result.current.state.tokenInfo).toEqual(tokenInfo(MINT, true)));
 
         await act(() => result.current.revalidate(key => isAccountRefreshKey(key, RPC_URL, MINT)));
@@ -82,7 +82,7 @@ describe('useMintTokenInfo', () => {
         ['a failed request', 503, { error: 'Token info unavailable' }],
     ])('should not report loading while a refresh refetches %s', async (_, status, body) => {
         respond(status, body);
-        const { result } = renderHookWithRevalidate(() => useMintTokenInfo(hookProps()));
+        const { result } = renderHookWithRevalidate(() => useAccountRefreshTokenInfo(hookProps()));
         await waitForHook(() => expect(fetch).toHaveBeenCalledTimes(1));
         await waitForHook(() => expect(result.current.state.isLoading).toBe(false));
 
@@ -115,7 +115,7 @@ describe('useMintTokenInfo', () => {
     });
 });
 
-type HookProps = Parameters<typeof useMintTokenInfo>[0];
+type HookProps = Parameters<typeof useAccountRefreshTokenInfo>[0];
 
 function hookProps(overrides: Partial<HookProps> = {}): HookProps {
     return { cluster: Cluster.MainnetBeta, genesisHash: undefined, mint: MINT, url: RPC_URL, ...overrides };
@@ -125,10 +125,10 @@ function renderMintTokenInfo({
     config,
     ...overrides
 }: Partial<HookProps> & { config?: SWRConfiguration } = {}): RenderHookResult<
-    ReturnType<typeof useMintTokenInfo>,
+    ReturnType<typeof useAccountRefreshTokenInfo>,
     unknown
 > {
-    return renderHook(() => useMintTokenInfo(hookProps(overrides)), { wrapper: swrWrapper(config) });
+    return renderHook(() => useAccountRefreshTokenInfo(hookProps(overrides)), { wrapper: swrWrapper(config) });
 }
 
 function respond(status: number, body: unknown): void {

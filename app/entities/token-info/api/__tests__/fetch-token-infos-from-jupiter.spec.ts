@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { gen } from '@/app/__fixtures__/gen';
 
 import { jupiterToken } from '../../__fixtures__/jupiter-token';
-import { tokenInfo } from '../../__fixtures__/token-info';
+import { redactedTokenInfo, tokenInfo } from '../../__fixtures__/token-info';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../../lib/errors';
 import { JUPITER_TOKENS_SEARCH_URL } from '../../lib/jupiter-token';
 import type { TokenInfo } from '../../lib/types';
@@ -104,44 +104,44 @@ describe('getTokenInfos', () => {
     });
 
     describe('a redacted mint', () => {
-        it('should answer nothing listed without a request when every mint is redacted', async () => {
+        it('should keep the verified flag and drop the name, symbol and logo', async () => {
             vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+            respond(200, [jupiterToken(MINT_A, { icon: 'https://example.com/a.png', isVerified: true })]);
 
-            expect(await getTokenInfos([MINT_A], Cluster.MainnetBeta)).toEqual(resolved([]));
-            expect(fetchMock).not.toHaveBeenCalled();
+            expect(await getTokenInfos([MINT_A], Cluster.MainnetBeta)).toEqual(
+                resolved([redactedTokenInfo(MINT_A, true)]),
+            );
         });
 
-        it('should search Jupiter for the other mints and leave the redacted one out', async () => {
+        it('should search Jupiter for every mint and keep the content of the other mints', async () => {
             vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
-            respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
-
-            const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
-
-            expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('query')).toBe(MINT_B);
-            expect(result).toEqual(resolved([tokenInfo(MINT_B)]));
-        });
-
-        it.each([
-            ['unset', undefined],
-            ['empty', ''],
-        ])('should search Jupiter for every mint when NEXT_PUBLIC_BAD_TOKENS is %s', async (_, badTokens) => {
-            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', badTokens);
             respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
 
             const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
 
             expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('query')).toBe(`${MINT_A},${MINT_B}`);
+            expect(result).toEqual(resolved([redactedTokenInfo(MINT_A), tokenInfo(MINT_B)]));
+        });
+
+        it.each([
+            ['unset', undefined],
+            ['empty', ''],
+        ])('should keep the content of every mint when NEXT_PUBLIC_BAD_TOKENS is %s', async (_, badTokens) => {
+            vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', badTokens);
+            respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
+
+            const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
+
             expect(result).toEqual(resolved([tokenInfo(MINT_A), tokenInfo(MINT_B)]));
         });
 
         it('should match a redacted mint that has spaces around it in the list', async () => {
             vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', ` ${MINT_C} , ${MINT_A} `);
-            respond(200, [jupiterToken(MINT_B)]);
+            respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
 
             const result = await getTokenInfos([MINT_A, MINT_B], Cluster.MainnetBeta);
 
-            expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get('query')).toBe(MINT_B);
-            expect(result).toEqual(resolved([tokenInfo(MINT_B)]));
+            expect(result).toEqual(resolved([redactedTokenInfo(MINT_A), tokenInfo(MINT_B)]));
         });
     });
 
@@ -241,7 +241,7 @@ describe('getTokenInfos', () => {
             expect(result).toEqual(resolved([tokenInfo(MINT_A)], 1));
         });
 
-        it('should leave out a token for a mint that was not requested', async () => {
+        it('should drop a token for a mint that was not requested', async () => {
             respond(200, [jupiterToken(MINT_A), jupiterToken(MINT_B)]);
 
             const result = await getTokenInfos([MINT_A], Cluster.MainnetBeta);

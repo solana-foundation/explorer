@@ -7,14 +7,9 @@ import useSWRImmutable from 'swr/immutable';
 import { accountRefreshKey } from '@/app/shared/lib/account-refresh-key';
 
 import { lookupTokenInfo } from '../api/fetch-token-infos-from-api';
-import type { TokenInfo } from '../lib/types';
+import type { TokenInfo, TokenInfoResult } from '../lib/types';
 
-type UseMintTokenInfoResult = {
-    isLoading: boolean;
-    tokenInfo: TokenInfo | undefined;
-};
-
-export function useMintTokenInfo({
+export function useAccountRefreshTokenInfo({
     cluster,
     genesisHash,
     mint,
@@ -24,7 +19,7 @@ export function useMintTokenInfo({
     genesisHash: string | undefined;
     mint: string | undefined;
     url: string;
-}): UseMintTokenInfoResult {
+}): TokenInfoResult {
     // Without a chain id nothing can resolve, so skip the request.
     const key =
         mint && getChainId(cluster, genesisHash) ? getMintTokenInfoSwrKey(url, mint, cluster, genesisHash) : undefined;

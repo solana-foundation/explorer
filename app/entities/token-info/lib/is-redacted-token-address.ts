@@ -1,5 +1,5 @@
 // NEXT_PUBLIC_BAD_TOKENS lists mints with inappropriate content.
-// A token verification badge does not hide that content.
+// The explorer hides the name, symbol and logo of a mint on the list, and keeps its verified flag.
 export function isRedactedTokenAddress(address: string): boolean {
     return (
         process.env.NEXT_PUBLIC_BAD_TOKENS?.split(',')

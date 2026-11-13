@@ -68,7 +68,7 @@ export async function createTokenTransferReceipt(
             ...validated,
             logoURI: tokenInfo?.logoURI ?? undefined,
             memo: raw.memo,
-            symbol: tokenInfo?.symbol,
+            symbol: tokenInfo?.symbol ?? undefined,
             total,
             transfers,
             type: 'token',

@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { useState } from 'react';
 import { SWRConfig } from 'swr';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import AddressLayout from '../layout';
 
@@ -64,6 +64,10 @@ describe('AddressLayout', () => {
         mock.entry = undefined;
         mock.lookupTokenInfo.mockReset();
         mock.lookupTokenInfo.mockResolvedValue({ kind: 'listed', token: TOKEN_INFO });
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     it('should keep the page mounted while a refresh fetches the account', async () => {
@@ -192,6 +196,16 @@ describe('AddressLayout', () => {
         await act(() => new Promise(resolve => setTimeout(resolve, 100)));
 
         expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
+    });
+
+    it('should not request token info for a mint in NEXT_PUBLIC_BAD_TOKENS', async () => {
+        vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', ADDRESS);
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        render(page());
+
+        expect(await screen.findByRole('button', { name: 'clicks: 0' })).toBeInTheDocument();
+        expect(mock.lookupTokenInfo).toHaveBeenCalledTimes(0);
         expect(screen.getByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
     });
 });

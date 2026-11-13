@@ -86,7 +86,9 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
 
 type TokenSymbolsSwrKey = readonly ['token-balance-symbols', string, Cluster, string | undefined];
 
-async function fetchTokenSymbols([, mintKey, cluster, genesisHash]: TokenSymbolsSwrKey): Promise<Map<string, string>> {
+async function fetchTokenSymbols([, mintKey, cluster, genesisHash]: TokenSymbolsSwrKey): Promise<
+    Map<string, string | null>
+> {
     const mints = mintKey.split(',');
     const tokens = await fetchTokenInfosFromApi({
         addresses: mints,

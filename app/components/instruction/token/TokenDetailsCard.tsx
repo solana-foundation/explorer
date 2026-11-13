@@ -80,7 +80,7 @@ function TokenInstructionCard({
     const { tokenInfo: tokenDetails } = useUnbatchedTokenInfo({ cluster, genesisHash, mint: mintAddress });
     const decimals =
         'tokenAmount' in info && is(info.tokenAmount, TokenAmountUi) ? info.tokenAmount.decimals : mintInfo?.decimals;
-    const tokenSymbol = mintAddress && tokenDetails ? tokenDetails.symbol : '';
+    const tokenSymbol = mintAddress && tokenDetails ? (tokenDetails.symbol ?? '') : '';
     const token = mintAddress !== undefined && address('Token', new PublicKey(mintAddress), { tokenLabel: true });
 
     // The RPC lists no accounts of an instruction it parses, so only a raw instruction has account rows.

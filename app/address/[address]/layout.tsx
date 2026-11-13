@@ -17,7 +17,7 @@ import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
 // Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and pako.
 import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
-import { isRedactedTokenAddress, type TokenInfo, useMintTokenInfo } from '@entities/token-info';
+import { isRedactedTokenAddress, type TokenInfo, useAccountRefreshTokenInfo } from '@entities/token-info';
 import { NFTOKEN_ADDRESS } from '@explorer/decoder-nftoken/program-ids';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
@@ -156,8 +156,9 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
 
     const infoParsed = info?.data?.data.parsed;
 
-    const shouldFetchTokenInfo = infoParsed && isTokenProgramData(infoParsed) && pubkey;
-    const { isLoading: isMintTokenInfoLoading, tokenInfo } = useMintTokenInfo({
+    const shouldFetchTokenInfo =
+        infoParsed && isTokenProgramData(infoParsed) && pubkey && !isRedactedTokenAddress(address);
+    const { isLoading: isMintTokenInfoLoading, tokenInfo } = useAccountRefreshTokenInfo({
         cluster,
         genesisHash,
         mint: shouldFetchTokenInfo ? address : undefined,
