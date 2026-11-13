@@ -235,6 +235,10 @@ export function jsonResponse(version: TransactionVersion = 1): {
 } {
     const compiled = compiledMessageFor(version);
     const [feePayer, program] = compiled.staticAccounts;
+    const accounts =
+        compiled.version === 1
+            ? [...compiled.instructionPayloads[0].instructionAccountIndices]
+            : [...(compiled.instructions[0].accountIndices ?? [])];
 
     return {
         transaction: {
@@ -245,7 +249,7 @@ export function jsonResponse(version: TransactionVersion = 1): {
                     numReadonlyUnsignedAccounts: compiled.header.numReadonlyNonSignerAccounts,
                     numRequiredSignatures: compiled.header.numSignerAccounts,
                 },
-                instructions: [{ accounts: [0], data: INSTRUCTION_DATA_BASE58, programIdIndex: 1 }],
+                instructions: [{ accounts, data: INSTRUCTION_DATA_BASE58, programIdIndex: 1 }],
                 recentBlockhash: compiled.lifetimeToken,
             },
             signatures: [gen.signature(1)],

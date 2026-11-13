@@ -451,6 +451,55 @@ describe('fromRpcTransaction', () => {
         expect('addressTableLookups' in transaction).toBe(false);
     });
 
+    it('should report loaded addresses as unmatched when a v0 JSON response lists no lookup tables', () => {
+        const response = jsonResponse(0);
+        response.transaction.message.addressTableLookups = [];
+        const withMeta = { ...response, meta: { loadedAddresses: { readonly: [], writable: [gen.address(5)] } } };
+
+        expect(fromRpcTransaction(withMeta)).toMatchObject({
+            addressTableLookups: [],
+            unmatchedLookupTableAddresses: [gen.address(5)],
+            version: 0,
+        });
+    });
+
+    it('should not report loaded addresses as unmatched when a v0 JSON response omits the lookup tables', () => {
+        const response = jsonResponse(0);
+        const withMeta = { ...response, meta: { loadedAddresses: { readonly: [], writable: [gen.address(5)] } } };
+
+        const transaction = fromRpcTransaction(withMeta);
+
+        expect(hasUnmatchedLookupTables(transaction)).toBe(false);
+        expect('addressTableLookups' in transaction).toBe(false);
+    });
+
+    it('should reject a JSON response with an invalid account key', () => {
+        const response = jsonResponse(0);
+        const [, program] = response.transaction.message.accountKeys;
+        response.transaction.message.accountKeys = ['not-an-address', program];
+
+        expect(() => fromRpcTransaction(response)).toThrow('Expected base58-encoded address string');
+    });
+
+    it('should reject a v0 JSON response with an invalid lookup table address', () => {
+        const response = jsonResponse(0);
+        response.transaction.message.addressTableLookups = [
+            { accountKey: 'not-an-address', readonlyIndexes: [], writableIndexes: [] },
+        ];
+
+        expect(() => fromRpcTransaction(response)).toThrow('Expected base58-encoded address string');
+    });
+
+    it.each(['legacy', 0, 1] as const)(
+        'should parse a %s JSON response to the same value as its base64 wire response',
+        version => {
+            const response = jsonResponse(version);
+            if (version === 0) response.transaction.message.addressTableLookups = [];
+
+            expect(fromRpcTransaction(response)).toEqual(fromRpcTransaction(wireResponse(version, 'base64')));
+        },
+    );
+
     it('should count jsonParsed signers from the RPC signer flags', () => {
         const response = jsonParsedResponse(1);
         response.transaction.message.accountKeys = [
@@ -579,7 +628,9 @@ describe('fromRpcTransaction', () => {
         const accountCount = response.transaction.message.accountKeys.length;
         response.transaction.message.instructions = [{ accounts: [accountCount], data: '', programIdIndex: 1 }];
 
-        expect(() => fromRpcTransaction(response)).toThrow('index out of bounds');
+        expect(() => fromRpcTransaction(response)).toThrow(
+            `Could not find an account address at index ${accountCount}`,
+        );
     });
 
     it('should throw when the program index is out of range', () => {
@@ -587,7 +638,7 @@ describe('fromRpcTransaction', () => {
         const accountCount = response.transaction.message.accountKeys.length;
         response.transaction.message.instructions = [{ accounts: [0], data: '', programIdIndex: accountCount }];
 
-        expect(() => fromRpcTransaction(response)).toThrow('index out of bounds');
+        expect(() => fromRpcTransaction(response)).toThrow(`Could not find program address at index ${accountCount}`);
     });
 });
 

@@ -1,6 +1,7 @@
 import {
     address,
     type Address,
+    assertIsAddress,
     type Base58EncodedDataResponse,
     type Base64EncodedDataResponse,
     bytesEqual,
@@ -45,10 +46,24 @@ import type {
 const BASE58_DECODER = getBase58Decoder();
 const BASE58_ENCODER = getBase58Encoder();
 
+type KitJsonResponse = Parameters<typeof decodeTransactionFromRpcResponse>[0];
+
 export function fromCompiledMessage(
     message: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime,
     options: FromMessageOptions = {},
 ): ParsedTransaction {
+    const addressTableLookups =
+        message.version === 0 ? toCompiledAddressTableLookups(message.addressTableLookups) : undefined;
+    return parseCompiledMessage(message, { ...options, addressTableLookups });
+}
+
+function parseCompiledMessage(
+    message: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime,
+    options: FromMessageOptions & { addressTableLookups: readonly AddressTableLookup[] | undefined },
+): ParsedTransaction {
+    // `lookups` is `undefined` when the source did not report the tables, and always for legacy and v1.
+    // A compiled message itself cannot tell an absent list from an empty one.
+    const { addressTableLookups } = options;
     validateHeaderIntegrity(
         {
             numReadonlySignedAccounts: message.header.numReadonlySignerAccounts,
@@ -59,9 +74,8 @@ export function fromCompiledMessage(
     );
 
     const loadedAddresses = groupLoadedAddresses(options.loadedAddresses);
-    const lookups = message.version === 0 ? toCompiledAddressTableLookups(message.addressTableLookups) : [];
     const resolved = resolveAccounts({
-        addressTableLookups: message.version === 0 ? lookups : undefined,
+        addressTableLookups: options.addressTableLookups,
         header: message.header,
         loadedAddresses,
         staticKeys: message.staticAccounts,
@@ -82,7 +96,7 @@ export function fromCompiledMessage(
     return buildTransaction({
         config: readTransactionConfig(message),
         instructions,
-        lookups,
+        lookups: addressTableLookups,
         lifetimeSpecifier: message.lifetimeToken,
         resolved,
         signatures: options.signatures ?? [],
@@ -307,27 +321,9 @@ function validateHeaderIntegrity(header: RpcJsonTransaction['message']['header']
     }
 }
 
-function validateInstructionIndices(
-    instructions: RpcJsonTransaction['message']['instructions'],
-    accountKeyCount: number,
-): void {
-    for (const ix of instructions) {
-        if (
-            ix.programIdIndex < 0 ||
-            ix.programIdIndex >= accountKeyCount ||
-            ix.accounts.some(index => index < 0 || index >= accountKeyCount)
-        ) {
-            throw new Error(
-                `instruction index out of bounds (programIdIndex=${ix.programIdIndex}, ` +
-                    `accounts=[${ix.accounts.join(',')}], accountKeyCount=${accountKeyCount}).`,
-            );
-        }
-    }
-}
-
 /**
- * Normalize JSON header naming and validate early.
- * Fail at the parse boundary before account or instruction resolution.
+ * Decodes through kit's `json` path, which maps the fields without checks.
+ * The guards keep the behaviour that path does not have.
  */
 function fromJsonTransaction(
     transaction: RpcJsonTransaction,
@@ -335,40 +331,22 @@ function fromJsonTransaction(
     loadedAddresses: FromMessageOptions['loadedAddresses'],
 ): ParsedTransaction {
     const { message } = transaction;
-    const { accountKeys, header } = message;
 
-    validateHeaderIntegrity(header, accountKeys.length);
+    message.accountKeys.forEach(key => assertIsAddress(key));
+    // Read from the raw JSON, since kit's compiled message drops an empty list and so loses "not reported".
+    const addressTableLookups = version === 0 ? toRpcAddressTableLookups(message.addressTableLookups) : undefined;
 
-    const resolvedHeader = {
-        numReadonlyNonSignerAccounts: header.numReadonlyUnsignedAccounts,
-        numReadonlySignerAccounts: header.numReadonlySignedAccounts,
-        numSignerAccounts: header.numRequiredSignatures,
-    };
-    const lookups = version === 0 ? toRpcAddressTableLookups(message.addressTableLookups) : [];
-    const resolved = resolveAccounts({
-        addressTableLookups: version === 0 ? lookups : undefined,
-        header: resolvedHeader,
-        loadedAddresses: groupLoadedAddresses(loadedAddresses),
-        staticKeys: accountKeys.map(key => address(key)),
-        version,
-    });
+    // The JSON is the same at runtime. Only kit's branded types differ, and the checks above cover what kit skips.
+    // eslint-disable-next-line typescript/consistent-type-assertions -- plain RPC strings to kit's branded types
+    const kitResponse = { transaction, version } as unknown as KitJsonResponse;
+    const { compiledMessage } = tryRunDecode(() => decodeTransactionFromRpcResponse(kitResponse));
 
-    validateInstructionIndices(message.instructions, resolved.accounts.length);
-
-    const instructions = message.instructions.map(ix => ({
-        accounts: ix.accounts.map(index => resolved.accounts[index]),
-        data: new Uint8Array(BASE58_ENCODER.encode(ix.data)),
-        programAddress: resolved.accounts[ix.programIdIndex].address,
-    }));
-
-    return buildTransaction({
-        config: fromRpcTransactionConfig(message.transactionConfig),
-        instructions,
-        lookups,
-        lifetimeSpecifier: message.recentBlockhash,
-        resolved,
+    return parseCompiledMessage(compiledMessage, {
+        // kit returns empty lists for an absent `meta`, which reads as "the tables loaded nothing".
+        // The RPC value keeps "the tables were not resolved".
+        loadedAddresses,
+        addressTableLookups,
         signatures: [...transaction.signatures],
-        version,
     });
 }
 
