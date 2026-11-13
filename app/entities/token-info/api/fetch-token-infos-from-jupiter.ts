@@ -3,16 +3,14 @@ import 'server-only';
 import { getChainId } from '@entities/chain-id/@x/token-info';
 import { chunk } from '@shared/lib/array';
 import { Cluster } from '@utils/cluster';
-import { array, type Infer, is } from 'superstruct';
 
-import { fetchUpstream } from '@/app/shared/lib/http-utils';
-
-import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../lib/errors';
+import { TokenInfoInvalidResponseError } from '../lib/errors';
 import { isRedactedTokenAddress } from '../lib/is-redacted-token-address';
 import { jupiterListsTokensOn } from '../lib/jupiter-lists-tokens-on';
-import { JUPITER_TOKENS_SEARCH_URL, JupiterTokenStruct } from '../lib/jupiter-token';
+import { type JupiterToken } from '../lib/jupiter-token';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../lib/request-limit';
 import { type TokenInfo } from '../lib/types';
+import { searchJupiterTokens } from './search-jupiter-tokens';
 
 type TokenInfosResult =
     { kind: 'resolved'; tokens: TokenInfo[]; malformed: number } | { kind: 'unavailable'; error: unknown };
@@ -76,43 +74,14 @@ async function fetchTokenInfosFromJupiter({
     mints: string[];
     signal?: AbortSignal;
 }): Promise<TokenInfosResult> {
-    const url = new URL(JUPITER_TOKENS_SEARCH_URL);
-    url.searchParams.set('query', mints.join(','));
+    const result = await searchJupiterTokens({ apiKey, query: mints.join(','), revalidate: REVALIDATE_S, signal });
+    if (result.kind === 'unavailable') return result;
 
-    try {
-        const response = await fetchUpstream(url.toString(), {
-            headers: { Accept: 'application/json', 'x-api-key': apiKey },
-            next: { revalidate: REVALIDATE_S },
-            signal,
-        });
-
-        if (!response.ok) {
-            const error = new TokenInfoHttpError({ status: response.status, statusText: response.statusText });
-            return { error, kind: 'unavailable' };
-        }
-
-        const data: unknown = await response.json();
-        if (!is(data, array())) return { error: new TokenInfoInvalidResponseError(), kind: 'unavailable' };
-
-        return parseTokens(data, new Set(mints));
-    } catch (error) {
-        return { error, kind: 'unavailable' };
-    }
-}
-
-type JupiterToken = Infer<typeof JupiterTokenStruct>;
-
-function parseTokens(entries: unknown[], requested: ReadonlySet<string>): TokenInfosResult {
-    const tokens: TokenInfo[] = [];
-    let malformed = 0;
-    for (const entry of entries) {
-        if (!is(entry, JupiterTokenStruct)) {
-            malformed++;
-        } else if (requested.has(entry.id) && entry.name && entry.symbol) {
-            tokens.push(toTokenInfo(entry));
-        }
-    }
-    return { kind: 'resolved', malformed, tokens };
+    const requested = new Set(mints);
+    const tokens = result.tokens
+        .filter(token => requested.has(token.id) && token.name && token.symbol)
+        .map(toTokenInfo);
+    return { kind: 'resolved', malformed: result.malformed, tokens };
 }
 
 function toTokenInfo(token: JupiterToken): TokenInfo {

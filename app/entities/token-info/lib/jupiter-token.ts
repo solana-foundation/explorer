@@ -1,4 +1,4 @@
-import { boolean, nullable, number, optional, string, type } from 'superstruct';
+import { boolean, type Infer, nullable, number, optional, string, type } from 'superstruct';
 
 export const JUPITER_TOKENS_SEARCH_URL = 'https://api.jup.ag/tokens/v2/search';
 
@@ -10,3 +10,5 @@ export const JupiterTokenStruct = type({
     name: string(),
     symbol: string(),
 });
+
+export type JupiterToken = Infer<typeof JupiterTokenStruct>;

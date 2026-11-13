@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 
+import { jupiterToken } from '../../__fixtures__/jupiter-token';
 import { tokenInfo } from '../../__fixtures__/token-info';
 import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../../lib/errors';
 import { JUPITER_TOKENS_SEARCH_URL } from '../../lib/jupiter-token';
@@ -364,10 +365,6 @@ function respond(status: number, body: unknown) {
         status,
         statusText: `status ${status}`,
     });
-}
-
-function jupiterToken(id: string, overrides: Record<string, unknown> = {}) {
-    return { decimals: 6, icon: null, id, isVerified: false, name: id, symbol: id, ...overrides };
 }
 
 function resolved(tokens: TokenInfo[], malformed = 0) {
