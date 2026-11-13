@@ -98,7 +98,7 @@ describe('readTransactionConfig', () => {
 
         expect(() => readTransactionConfig(message)).toThrow(InvalidTransactionConfigError);
         expect(() => readTransactionConfig(message)).toThrow(
-            'Config value for computeUnitLimit is missing, expected u32.',
+            `Config values are fewer than the mask ${TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK} declares.`,
         );
     });
 

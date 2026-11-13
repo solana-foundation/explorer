@@ -1,80 +1,39 @@
 import {
+    type CompiledTransactionConfigValue,
     type CompiledTransactionMessage,
-    TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
-    TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK,
-    TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK,
-    TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK,
-    transactionConfigMaskHasComputeUnitLimit,
-    transactionConfigMaskHasHeapSize,
-    transactionConfigMaskHasLoadedAccountsDataSizeLimit,
-    transactionConfigMaskHasPriorityFee,
+    decompileTransactionConfig,
+    getTransactionConfigMask,
+    getTransactionConfigValues,
+    isSolanaError,
+    SOLANA_ERROR__TRANSACTION__INVALID_CONFIG_MASK_PRIORITY_FEE_BITS,
+    SOLANA_ERROR__TRANSACTION__INVALID_CONFIG_VALUE_KIND,
 } from '@solana/kit';
 
 import { InvalidTransactionConfigError } from './errors.js';
 import type { ParsedTransaction, RpcTransactionConfig, TransactionConfig } from './types.js';
 
-// Mask bit order is the value order on the wire.
-const CONFIG_FIELDS = [
-    ['priorityFeeLamports', 'u64', transactionConfigMaskHasPriorityFee],
-    ['computeUnitLimit', 'u32', transactionConfigMaskHasComputeUnitLimit],
-    ['loadedAccountsDataSizeLimit', 'u32', transactionConfigMaskHasLoadedAccountsDataSizeLimit],
-    ['heapSize', 'u32', transactionConfigMaskHasHeapSize],
-] as const;
-
-const KNOWN_CONFIG_MASK_BITS =
-    TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK |
-    TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK |
-    TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK |
-    TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK;
-
 /**
  * Returns `undefined` for a legacy or v0 message, and for a v1 message that sets no limits.
  * Throws `InvalidTransactionConfigError` when the mask sets an unknown bit or the config values do not match it.
- *
- * Deliberately not kit's `decompileTransactionMessage`, which throws on an out-of-range account index
- * and costs a full message decompile per call.
  */
 export function readTransactionConfig(message: CompiledTransactionMessage): TransactionConfig | undefined {
     if (message.version !== 1) return undefined;
-    if (hasUnknownBits(message.configMask)) {
-        throw new InvalidTransactionConfigError(`Invalid transaction config mask: ${message.configMask}.`);
+    const { configMask, configValues } = message;
+
+    const config = decompileConfig(configMask, configValues);
+
+    // `decompileTransactionConfig` accepts unknown mask bits and extra values. A round trip rejects both.
+    if (getTransactionConfigMask(config) !== configMask) {
+        throw new InvalidTransactionConfigError(`Invalid transaction config mask: ${configMask}.`);
     }
-
-    const config: TransactionConfig = {};
-    let valueIndex = 0;
-
-    for (const [field, kind, maskHasField] of CONFIG_FIELDS) {
-        let present: boolean;
-        try {
-            // The priority-fee predicate throws when only one of its two mask bits is set.
-            present = maskHasField(message.configMask);
-        } catch (error) {
-            throw new InvalidTransactionConfigError(`Invalid transaction config mask: ${message.configMask}.`, {
-                cause: error,
-            });
-        }
-        if (!present) continue;
-
-        const value = message.configValues[valueIndex++];
-        if (value?.kind !== kind) {
-            throw new InvalidTransactionConfigError(
-                `Config value for ${field} is ${value?.kind ?? 'missing'}, expected ${kind}.`,
-            );
-        }
-        Object.assign(config, { [field]: value.value });
-    }
-
-    if (valueIndex !== message.configValues.length) {
+    const declared = getTransactionConfigValues(config).length;
+    if (declared !== configValues.length) {
         throw new InvalidTransactionConfigError(
-            `Config value count ${message.configValues.length} does not match the mask, which declares ${valueIndex}.`,
+            `Config value count ${configValues.length} does not match the mask, which declares ${declared}.`,
         );
     }
 
-    return valueIndex > 0 ? config : undefined;
-}
-
-function hasUnknownBits(configMask: number): boolean {
-    return (configMask & ~KNOWN_CONFIG_MASK_BITS) !== 0;
+    return declared > 0 ? config : undefined;
 }
 
 const RPC_CONFIG_FIELDS = [
@@ -98,4 +57,27 @@ export function fromRpcTransactionConfig(config: RpcTransactionConfig | undefine
 
 export function getTransactionConfig(transaction: ParsedTransaction): TransactionConfig | undefined {
     return transaction.version === 1 ? transaction.config : undefined;
+}
+
+function decompileConfig(configMask: number, configValues: CompiledTransactionConfigValue[]): TransactionConfig {
+    try {
+        return decompileTransactionConfig(configMask, configValues);
+    } catch (error) {
+        if (isSolanaError(error, SOLANA_ERROR__TRANSACTION__INVALID_CONFIG_VALUE_KIND)) {
+            const { actualKind, configName, expectedKind } = error.context;
+            throw new InvalidTransactionConfigError(
+                `Config value for ${configName} is ${actualKind}, expected ${expectedKind}.`,
+                { cause: error },
+            );
+        }
+        if (isSolanaError(error, SOLANA_ERROR__TRANSACTION__INVALID_CONFIG_MASK_PRIORITY_FEE_BITS)) {
+            throw new InvalidTransactionConfigError(`Invalid transaction config mask: ${configMask}.`, {
+                cause: error,
+            });
+        }
+        // Reached when the mask declares more values than `configValues` holds.
+        throw new InvalidTransactionConfigError(`Config values are fewer than the mask ${configMask} declares.`, {
+            cause: error,
+        });
+    }
 }

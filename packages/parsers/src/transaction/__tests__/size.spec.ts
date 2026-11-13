@@ -1,17 +1,14 @@
 import {
     type CompiledTransactionMessage,
     getTransactionEncoder,
+    LEGACY_TRANSACTION_SIZE_LIMIT,
     type SignatureBytes,
     type Transaction,
+    V1_TRANSACTION_SIZE_LIMIT,
 } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
-import {
-    LEGACY_TRANSACTION_SIZE_LIMIT,
-    transactionSizeLimit,
-    transactionWireSize,
-    V1_TRANSACTION_SIZE_LIMIT,
-} from '../size.js';
+import { transactionSizeLimit, transactionWireSize } from '../size.js';
 import { legacyTransaction, transactionWithSigners, v0Transaction, v1Transaction } from './fixtures.js';
 
 type MessageParts = { compiled: CompiledTransactionMessage; messageBytes: Uint8Array };

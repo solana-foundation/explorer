@@ -18,12 +18,7 @@ export {
     MalformedTransactionError,
     UnsupportedTransactionVersionError,
 } from './errors.js';
-export {
-    LEGACY_TRANSACTION_SIZE_LIMIT,
-    transactionSizeLimit,
-    transactionWireSize,
-    V1_TRANSACTION_SIZE_LIMIT,
-} from './size.js';
+export { transactionSizeLimit, transactionWireSize } from './size.js';
 export { fromRpcTransactionConfig, getTransactionConfig, readTransactionConfig } from './config.js';
 export {
     LAMPORTS_PER_SIGNATURE,
