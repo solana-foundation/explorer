@@ -27,6 +27,11 @@ export const MultipleEntries: Story = {
     },
 };
 
+// The table's SIMDs column: one badge per line, so the column stays one badge wide.
+export const Stacked: Story = {
+    args: { ...MultipleEntries.args, layout: 'stack' },
+};
+
 export const Empty: Story = {
     args: {
         entries: [],

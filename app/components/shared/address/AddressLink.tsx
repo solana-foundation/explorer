@@ -27,9 +27,10 @@ export function AddressLink({ address, truncate, className, 'aria-label': ariaLa
     return (
         <span className={cn('inline-flex items-center gap-1.5 font-mono text-dk-sm', className)}>
             <CopyButton text={address} />
+            {/* The app's link colours (styles.css `a` / `a:hover`), so an address hovers like any other link. */}
             <Link
                 href={href}
-                className="text-dk-primary-dark hover:text-dark-accent"
+                className="text-dk-primary-dark hover:text-dark-accent-hover"
                 aria-label={ariaLabel ?? `Open address ${address}`}
                 title={truncate ? address : undefined}
             >
