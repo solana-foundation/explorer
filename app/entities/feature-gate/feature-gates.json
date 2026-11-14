@@ -2354,7 +2354,7 @@
     "simds": [
       "0599"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1081,
     "title": "SIMD-0599: Remove inactive stakes from stake delegations"
   },
   {
@@ -2434,5 +2434,31 @@
     ],
     "testnet_activation_epoch": null,
     "title": "SIMD-0433: Loader V3 Set Program Data to ELF Length"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
+    "devnet_activation_epoch": null,
+    "key": "rntD7invRBswCAdKtRsh1G4psKjrPdS3BKqtnA78C7N",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.3.0-rc.1"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "brooksprumo"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0437-incremental-rent-reduction.md"
+    ],
+    "simds": [
+      "0437"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0437-4: Set lamports per byte to 1322"
   }
 ]
