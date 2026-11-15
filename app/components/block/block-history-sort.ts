@@ -1,8 +1,11 @@
 // Pure sort model for the block transactions table, split out of BlockHistoryCard so the ordering and
 // the URL-param transitions can be unit-tested without rendering the component.
 
+import { type SortDirection } from '@/app/shared/lib/sort-direction';
+
+export { type SortDirection } from '@/app/shared/lib/sort-direction';
+
 export type SortMode = 'index' | 'compute' | 'txnCost' | 'fee' | 'reservedCUs';
-export type SortDirection = 'asc' | 'desc';
 
 // Each column's natural first-click direction — index reads low→high, the numeric columns high→low.
 export const DEFAULT_DIRECTION: Record<SortMode, SortDirection> = {

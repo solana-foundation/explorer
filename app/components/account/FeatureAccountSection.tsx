@@ -4,11 +4,10 @@ import { useRefreshAccount } from '@entities/account';
 import { type FeatureInfoType, getFeatureInfo } from '@entities/feature-gate';
 import { useSlotTime } from '@entities/slot-time';
 import { AccountCard } from '@features/account';
+import { ClusterEpoch } from '@features/feature-gate';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { parseFeatureAccount, useFeatureAccount } from '@utils/parseFeatureAccount';
-import { useBuildClusterPath } from '@utils/url';
-import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
@@ -103,21 +102,55 @@ const BaseFeatureCard = ({
         }
     }, [currentEpoch, isPending, refresh, account.pubkey]);
 
+    // The feature's identity first (address, title, description, SIMDs), then where it stands on this cluster.
     const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={new PublicKey(address)} raw /> },
+        featureInfo?.title && {
+            label: 'Title',
+            value: featureInfo.title,
+        },
+        featureInfo?.description && {
+            label: 'Description',
+            value: featureInfo?.description,
+        },
+        featureInfo && {
+            label: 'SIMDs',
+            value: (
+                <StackedList mono={false}>
+                    {featureInfo.simds.map((simd, index) => (
+                        <li key={index}>
+                            {simd && featureInfo.simd_link[index] ? (
+                                <ExternalLink
+                                    href={featureInfo.simd_link[index]}
+                                    className="inline-flex items-center gap-1"
+                                >
+                                    SIMD {simd}
+                                    <ExternalLinkIcon size={12} />
+                                </ExternalLink>
+                            ) : (
+                                <code>No link</code>
+                            )}
+                        </li>
+                    ))}
+                </StackedList>
+            ),
+        },
         {
-            label: 'Activated?',
+            // The token Extensions row's badge shape (12px type, `rounded-md`); `soft` keeps the dashkit status colours.
+            label: 'Status',
             value:
                 activatedAt !== null ? (
-                    <Badge ui="dashkit" variant="success" tone="solid">
-                        Active on {clusterName(cluster)}
+                    <Badge tone="soft" variant="success">
+                        Active
                     </Badge>
                 ) : isPending ? (
-                    <Badge ui="dashkit" variant="warning" tone="solid">
+                    <Badge tone="soft" variant="warning">
                         Pending activation on {clusterName(cluster)}
                     </Badge>
                 ) : (
-                    <code>Not yet activated on {clusterName(cluster)}</code>
+                    <Badge tone="soft" variant="gray">
+                        Not active yet
+                    </Badge>
                 ),
         },
         activatedAt && {
@@ -135,32 +168,10 @@ const BaseFeatureCard = ({
                 />
             ),
         },
-        featureInfo?.description && {
-            label: 'Description',
-            value: featureInfo?.description,
-        },
-        featureInfo && {
-            label: 'SIMDs',
-            value: (
-                <StackedList mono={false}>
-                    {featureInfo.simds.map((simd, index) => (
-                        <li key={index}>
-                            {simd && featureInfo.simd_link[index] ? (
-                                <ExternalLink href={featureInfo.simd_link[index]}>
-                                    SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
-                                </ExternalLink>
-                            ) : (
-                                <code>No link</code>
-                            )}
-                        </li>
-                    ))}
-                </StackedList>
-            ),
-        },
     ];
 
     return (
-        <AccountCard title={featureInfo?.title ?? 'Feature Activation'} account={account}>
+        <AccountCard title="Overview" account={account}>
             <KeyValueRows rows={rows} />
         </AccountCard>
     );
@@ -228,31 +239,35 @@ function ClusterActivationEpochAtCluster({
     activatedAt: number | null;
     isPending?: boolean;
 }) {
-    const buildClusterPath = useBuildClusterPath();
-
     if (cluster === Cluster.Custom) return null;
 
-    if (activatedAt !== null && clusterInfo?.epochSchedule) {
+    // Active or pending, but the cluster epoch data has not arrived (still loading, or the RPC failed): say so
+    // rather than a bare dash, which next to an "Active" status would read as "not activated".
+    if (activatedAt !== null) {
+        if (!clusterInfo?.epochSchedule) return <ActivationUnavailable />;
         const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(activatedAt));
-        return (
-            <Link href={buildClusterPath(`/epoch/${epoch}`)}>
-                {clusterName(cluster)} Epoch {epoch.toString()}
-            </Link>
-        );
+        return <ClusterEpoch cluster={cluster} epoch={epoch} />;
     }
 
-    if (isPending && clusterInfo?.epochInfo) {
+    if (isPending) {
+        if (!clusterInfo?.epochInfo) return <ActivationUnavailable />;
         const nextEpoch = clusterInfo.epochInfo.epoch + 1n;
         const remainingSlots = clusterInfo.epochInfo.slotsInEpoch - clusterInfo.epochInfo.slotIndex;
         return (
             <div>
-                <Link href={buildClusterPath(`/epoch/${nextEpoch}`)}>
-                    {clusterName(cluster)} Epoch {nextEpoch.toString()}
-                </Link>
+                <ClusterEpoch cluster={cluster} epoch={nextEpoch} />
                 <PendingEpochCountdown remainingSlots={remainingSlots} />
             </div>
         );
     }
 
-    return <code>No Activation Epoch</code>;
+    return (
+        <span className="text-outer-space-300" aria-label="Not activated on this cluster">
+            —
+        </span>
+    );
+}
+
+function ActivationUnavailable() {
+    return <span className="text-outer-space-300">Unavailable</span>;
 }

@@ -2,9 +2,14 @@ import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/res
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureGateCard } from '../FeatureGateCard';
+import { FeatureGateMarkdown } from '../FeatureGateMarkdown';
+import { SIMD_0266_MARKDOWN, SIMD_0266_URL } from './feature-gate-fixtures';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta<typeof FeatureGateCard> = {
+    args: {
+        children: <FeatureGateMarkdown baseUrl={SIMD_0266_URL}>{SIMD_0266_MARKDOWN}</FeatureGateMarkdown>,
+    },
     component: FeatureGateCard,
     decorators: [withViewportFromGlobal],
     parameters: {
@@ -17,24 +22,14 @@ const meta: Meta<typeof FeatureGateCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const render = () => (
-    <FeatureGateCard>
-        This feature gate controls the activation of cluster-level functionality. Activate it to enable the new
-        behaviour cluster-wide.
-    </FeatureGateCard>
-);
-
 export const Mobile: Story = {
     globals: { viewport: { value: 'iphonex' } },
-    render,
 };
 
 export const TabletPortrait: Story = {
     globals: { viewport: { value: 'ipad' } },
-    render,
 };
 
 export const TabletLandscape: Story = {
     globals: { viewport: { isRotated: true, value: 'ipad' } },
-    render,
 };

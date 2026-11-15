@@ -3,9 +3,10 @@ import { address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
+import { expect, fn, within } from 'storybook/test';
 
 import type { ActivatedFeature, UpcomingFeature } from '../../lib/partition-features';
-import { EmptyStateCard, FeatureGateTable } from '../FeatureGateTable';
+import { EmptyStateCard, FeatureGateTable, OtherActivationsCell, ShowMoreButton } from '../FeatureGateTable';
 
 const featureKey = (seed: number) => address(gen.address(seed));
 
@@ -72,38 +73,58 @@ const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
 export default meta;
 type Story = StoryObj<typeof FeatureGateTable<ActivatedFeature>>;
 
+const activatedArgs = {
+    cluster: Cluster.MainnetBeta,
+    emptyState: <EmptyStateCard>No activated features.</EmptyStateCard>,
+    features: activated,
+    secondColumn: {
+        header: 'Activation',
+        render: (feature: ActivatedFeature) => <span>{feature.clusterActivationEpoch}</span>,
+    },
+};
+
+const upcomingArgs = {
+    cluster: Cluster.MainnetBeta,
+    emptyState: <EmptyStateCard>No upcoming features.</EmptyStateCard>,
+    features: upcoming,
+    secondColumn: {
+        header: 'Activation',
+        render: (feature: UpcomingFeature) => <OtherActivationsCell activations={feature.otherActivations} />,
+    },
+};
+
 export const ActivatedRows: Story = {
+    args: activatedArgs,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText(baseFields.description, { exact: false })).toBeInTheDocument();
+    },
+};
+
+// The Activated section's header: a sort toggle with the direction shown by the chevrons.
+export const SortableActivation: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
-        emptyState: <EmptyStateCard>No activated features.</EmptyStateCard>,
-        features: activated,
-        secondColumn: {
-            header: 'Activation',
-            render: feature => <span>{feature.clusterActivationEpoch}</span>,
-        },
+        ...activatedArgs,
+        secondColumn: { ...activatedArgs.secondColumn, sort: { direction: 'desc', onToggle: fn() } },
+    },
+};
+
+// The Upcoming section folded to its first rows, with the button that shows the rest.
+export const WithFooter: StoryObj<typeof FeatureGateTable<UpcomingFeature>> = {
+    args: {
+        ...upcomingArgs,
+        footer: <ShowMoreButton hiddenCount={8} onClick={fn()} />,
     },
 };
 
 export const UpcomingRows: StoryObj<typeof FeatureGateTable<UpcomingFeature>> = {
-    args: {
-        cluster: Cluster.MainnetBeta,
-        emptyState: <EmptyStateCard>No upcoming features.</EmptyStateCard>,
-        features: upcoming,
-        secondColumn: {
-            header: 'Activated elsewhere',
-            render: feature => <div>{feature.otherActivations.map(a => `${a.cluster}:${a.epoch}`).join(', ')}</div>,
-        },
-    },
+    args: upcomingArgs,
 };
 
 export const Empty: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        ...activatedArgs,
         emptyState: <EmptyStateCard>No activated features on this cluster.</EmptyStateCard>,
         features: [],
-        secondColumn: {
-            header: 'Activation',
-            render: feature => <span>{feature.clusterActivationEpoch}</span>,
-        },
     },
 };

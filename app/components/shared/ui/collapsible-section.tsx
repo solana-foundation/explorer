@@ -61,7 +61,9 @@ export function CollapsibleSection({
                         {actions && <div className="flex shrink-0 gap-1">{actions}</div>}
                         {collapsible && (
                             <Button
-                                className="md:min-w-[86px]"
+                                // `-mx-px` trims the chevron's 2px of drawn margin so the icon-only button (label
+                                // hidden below `md`) is not wider than it is tall in the `sm` box's paddings.
+                                className="md:min-w-[86px] [&_svg]:-mx-px"
                                 variant="outline"
                                 aria-expanded={expanded}
                                 size="sm"
