@@ -192,7 +192,7 @@ function ScrollArrow({
             aria-label={label}
             disabled={disabled}
             onClick={onClick}
-            className="flex size-9 cursor-pointer items-center justify-center rounded-full border border-solid border-outer-space-700 bg-outer-space-900 p-0 text-white transition-colors hover:border-outer-space-500 disabled:cursor-default disabled:text-outer-space-600 disabled:hover:border-outer-space-700"
+            className="flex size-9 cursor-pointer items-center justify-center rounded-full border border-solid border-outer-space-700 bg-outer-space-900 p-0 text-white transition-colors hover:border-outer-space-500 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:cursor-default disabled:text-outer-space-600 disabled:hover:border-outer-space-700"
         >
             {children}
         </button>
