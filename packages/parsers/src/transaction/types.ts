@@ -3,11 +3,11 @@ import type { Address } from '@solana/kit';
 export type TransactionVersion = 'legacy' | 0 | 1;
 
 /**
- * The version an RPC response reports, before the message is decoded.
+ * The version as an RPC client returns it, before `normalizeVersion` checks it.
  * `null` means the response has no `version` field, because the request omitted `maxSupportedTransactionVersion`.
  * A bigint is accepted defensively, since older kit versions can return it.
  */
-export type ReportedTransactionVersion = TransactionVersion | bigint | null;
+export type RpcTransactionVersion = 'legacy' | number | bigint | null;
 
 export type AddressTableLookup = {
     accountKey: Address;
@@ -97,7 +97,7 @@ export type RpcTransactionResponse = {
         readonly [key: string]: unknown;
     } | null;
     transaction: RpcWireTransaction | RpcJsonTransaction | RpcJsonParsedTransaction;
-    version?: ReportedTransactionVersion;
+    version?: RpcTransactionVersion;
 };
 
 export type RpcTransactionConfig = {

@@ -4,16 +4,16 @@ export type {
     ParsedTransaction,
     PriorityFeeLamports,
     RawInstruction,
-    ReportedTransactionVersion,
     RpcParsedInstruction,
     RpcTransactionConfig,
     RpcTransactionResponse,
+    RpcTransactionVersion,
     TransactionAccount,
     TransactionConfig,
     TransactionInstruction,
     TransactionVersion,
 } from './types.js';
-export { isV1MessageBytes } from './version.js';
+export { isV1MessageBytes, normalizeVersion } from './version.js';
 export {
     InvalidTransactionConfigError,
     MalformedTransactionError,

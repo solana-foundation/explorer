@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { isV1MessageBytes } from '../version.js';
+import { UnsupportedTransactionVersionError } from '../errors.js';
+import { isV1MessageBytes, normalizeVersion } from '../version.js';
 
 describe('isV1MessageBytes', () => {
     it('should report true for the v1 prefix', () => {
@@ -17,5 +18,26 @@ describe('isV1MessageBytes', () => {
 
     it('should report false for empty bytes', () => {
         expect(isV1MessageBytes(new Uint8Array())).toBe(false);
+    });
+});
+
+describe('normalizeVersion', () => {
+    it.each([
+        ['legacy', 'legacy'],
+        [0, 0],
+        [1, 1],
+        [0n, 0],
+        [1n, 1],
+    ] as const)('should accept %s', (version, expected) => {
+        expect(normalizeVersion(version)).toBe(expected);
+    });
+
+    it.each([2, 2n, undefined])('should reject %s', version => {
+        expect(() => normalizeVersion(version)).toThrow(UnsupportedTransactionVersionError);
+    });
+
+    it('should reject a null version', () => {
+        // eslint-disable-next-line unicorn/no-null -- null stands for a response with no `version` field
+        expect(() => normalizeVersion(null)).toThrow(UnsupportedTransactionVersionError);
     });
 });
