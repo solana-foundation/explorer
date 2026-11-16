@@ -29,7 +29,7 @@ export const verifiedProgramsSearchProvider: SearchProvider = {
     priority: 65,
     search(query: string, ctx: SearchContext): SearchOptions[] {
         if (query.length < 2) return [];
-        if (ctx.cluster !== Cluster.MainnetBeta) return [];
+        if (ctx.cluster !== Cluster.Mainnet) return [];
 
         const q = query.toLowerCase();
         const MAX_RESULTS = 10;

@@ -11,7 +11,7 @@ import { type Details, DispatchContext, useFetchRawTransaction } from '../raw';
 
 const MOCK_URL = 'https://api.mainnet-beta.solana.com';
 
-let mockCluster = Cluster.MainnetBeta;
+let mockCluster = Cluster.Mainnet;
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: mockCluster, url: MOCK_URL }),
 }));
@@ -28,7 +28,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    mockCluster = Cluster.MainnetBeta;
+    mockCluster = Cluster.Mainnet;
 });
 
 describe('useFetchRawTransaction', () => {

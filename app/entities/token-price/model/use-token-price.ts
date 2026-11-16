@@ -26,7 +26,7 @@ export type PriceResult =
 type PriceSwrKey = ['token-price', string];
 
 function getPriceSwrKey(cluster: Cluster, mintAddress?: string): PriceSwrKey | null {
-    if (!mintAddress || cluster !== Cluster.MainnetBeta) {
+    if (!mintAddress || cluster !== Cluster.Mainnet) {
         return null;
     }
 

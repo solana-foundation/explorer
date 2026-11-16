@@ -9,7 +9,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { UpgradeableProgramSection } from '../UpgradeableLoaderAccountSection';
 
-vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.MainnetBeta }) }));
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.Mainnet }) }));
 vi.mock('@entities/account', () => ({ useRefreshAccount: () => vi.fn() }));
 vi.mock('@features/account', () => ({
     AccountCard: ({ children }: { children: ReactNode }) => <div>{children}</div>,

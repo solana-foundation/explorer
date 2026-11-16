@@ -66,7 +66,7 @@ export const Default: Story = {
 // Neither line of the saved pill is reachable from `Default`, which starts with empty storage.
 export const WithSavedClusters: Story = {
     decorators: [
-        withClusterState({ cluster: Cluster.MainnetBeta, modalOpen: true, status: ClusterStatus.Connected }),
+        withClusterState({ cluster: Cluster.Mainnet, modalOpen: true, status: ClusterStatus.Connected }),
         withSavedClusters(SAVED),
     ],
     play: async ({ canvasElement }) => {

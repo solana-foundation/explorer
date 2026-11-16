@@ -33,7 +33,7 @@ const renderTable = (props: Partial<Parameters<typeof FeatureGateTable<Activated
     render(
         <FeatureGateTable<ActivatedFeature>
             features={[FEATURE]}
-            cluster={Cluster.MainnetBeta}
+            cluster={Cluster.Mainnet}
             secondColumn={{ header: 'Activation', render: feature => feature.clusterActivationEpoch }}
             emptyState={<EmptyStateCard>Nothing here.</EmptyStateCard>}
             {...props}

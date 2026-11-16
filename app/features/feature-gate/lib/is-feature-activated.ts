@@ -4,7 +4,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 export function isFeatureActivated(feature: FeatureInfoType, cluster: Cluster) {
     switch (cluster) {
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return feature.mainnet_activation_epoch !== null;
         case Cluster.Devnet:
             return feature.devnet_activation_epoch !== null;

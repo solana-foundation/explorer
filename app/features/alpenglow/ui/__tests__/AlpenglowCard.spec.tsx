@@ -9,7 +9,7 @@ const CERT = { blockId: 'HnvmbDUEbrmuj3mYAA1EKGGzpZRuFRgMRPwtsgGFadmn', slot: 46
 
 const mocks = vi.hoisted(() => ({ useAlpenglowStatus: vi.fn() }));
 
-vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.MainnetBeta }) }));
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.Mainnet }) }));
 vi.mock('../../model/use-alpenglow-status', () => ({ useAlpenglowStatus: mocks.useAlpenglowStatus }));
 vi.mock('@utils/url', () => ({ useClusterPath: ({ pathname }: { pathname: string }) => pathname }));
 
@@ -35,7 +35,7 @@ describe('AlpenglowCard', () => {
         renderWith({ kind: 'pending' });
 
         // Substring match: the title carries a leading icon in its own element.
-        expect(screen.getByText('Alpenglow on Mainnet Beta', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('Alpenglow on Mainnet', { exact: false })).toBeInTheDocument();
         expect(screen.getByText('TowerBFT — Alpenglow not activated')).toBeInTheDocument();
     });
 

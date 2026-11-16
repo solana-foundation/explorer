@@ -23,7 +23,7 @@ export async function GET(request: Request, props: Params) {
     }
 
     const { searchParams } = new URL(request.url);
-    const clusterParam = searchParams.get('cluster') ?? clusterSlug(Cluster.MainnetBeta);
+    const clusterParam = searchParams.get('cluster') ?? clusterSlug(Cluster.Mainnet);
 
     const cluster = clusterFromSlug(clusterParam);
     if (cluster == undefined) {

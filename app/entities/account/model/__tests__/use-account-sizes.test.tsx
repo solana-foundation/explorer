@@ -34,7 +34,7 @@ vi.mock('@entities/cluster/@x/account', async () => {
 describe('useAccountSizes', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockCluster.current = { cluster: Cluster.MainnetBeta, url: DEFAULT_RPC_URL };
+        mockCluster.current = { cluster: Cluster.Mainnet, url: DEFAULT_RPC_URL };
         mockGetMultipleAccounts.mockImplementation(async addresses => sizedAccounts(addresses));
     });
 

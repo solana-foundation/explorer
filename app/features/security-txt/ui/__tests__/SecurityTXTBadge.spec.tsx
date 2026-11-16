@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({ useSecurityTxt: vi.fn() }));
 vi.mock('../../model/useSecurityTxt', () => ({ useSecurityTxt: mocks.useSecurityTxt }));
 // `useClusterPath` (in the badge) reads the cluster context; stub the provider.
 vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta, url: '' })),
+    useCluster: vi.fn(() => ({ cluster: Cluster.Mainnet, url: '' })),
 }));
 
 const mockPubkey = new PublicKey('ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S');

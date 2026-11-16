@@ -39,8 +39,8 @@ export async function GET(request: Request, props: Params) {
     // Solscan indexes mainnet-beta only. Answering for another cluster would serve a mainnet number
     // under a devnet address, which is worse than refusing.
     const { searchParams } = new URL(request.url);
-    const cluster = searchParams.get('cluster') ?? clusterSlug(Cluster.MainnetBeta);
-    if (cluster !== clusterSlug(Cluster.MainnetBeta)) {
+    const cluster = searchParams.get('cluster') ?? clusterSlug(Cluster.Mainnet);
+    if (cluster !== clusterSlug(Cluster.Mainnet)) {
         return NextResponse.json(
             { error: 'Stake rewards are only available on mainnet' },
             { headers: ERROR_CACHE_HEADERS, status: 400 },
@@ -59,7 +59,7 @@ export async function GET(request: Request, props: Params) {
     try {
         // Gate the metered request behind one cheap RPC call: the route is public, and every cache
         // miss spends shared paid quota across up to ten upstream calls.
-        if (!(await isStakeAccount({ address, rpcUrl: serverClusterUrl(Cluster.MainnetBeta) }))) {
+        if (!(await isStakeAccount({ address, rpcUrl: serverClusterUrl(Cluster.Mainnet) }))) {
             return NextResponse.json({ error: 'Not a stake account' }, { headers: ERROR_CACHE_HEADERS, status: 404 });
         }
 

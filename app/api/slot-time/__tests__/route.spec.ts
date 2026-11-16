@@ -52,7 +52,7 @@ describe('GET /api/slot-time', () => {
     // Otherwise a route that resolved every cluster to mainnet would pass the whole suite, and testnet
     // visitors would count down at mainnet's rate — the very mix-up this route exists to end.
     it.each([
-        ['mainnet-beta', Cluster.MainnetBeta, MAINNET_RPC_URL],
+        ['mainnet-beta', Cluster.Mainnet, MAINNET_RPC_URL],
         ['testnet', Cluster.Testnet, TESTNET_RPC_URL],
     ])('should dial the endpoint configured for %s', async (_name, cluster, expectedUrl) => {
         await GET(createRequest(cluster));
@@ -68,13 +68,13 @@ describe('GET /api/slot-time', () => {
     });
 
     it('should measure over the window both fetch paths use', async () => {
-        await GET(createRequest(Cluster.MainnetBeta));
+        await GET(createRequest(Cluster.Mainnet));
 
         expect(mocks.getRecentPerformanceSamples).toHaveBeenCalledWith(MEASURED_SAMPLES);
     });
 
     it('should cache a successful response at the CDN', async () => {
-        const response = await GET(createRequest(Cluster.MainnetBeta));
+        const response = await GET(createRequest(Cluster.Mainnet));
 
         expect(response.headers.get('Cache-Control')).toBe(
             'public, max-age=60, s-maxage=300, stale-while-revalidate=3600',
@@ -86,7 +86,7 @@ describe('GET /api/slot-time', () => {
     it('should bound the call with a deadline, so a wedged node cannot hold the function open', async () => {
         const timeout = vi.spyOn(AbortSignal, 'timeout');
 
-        await GET(createRequest(Cluster.MainnetBeta));
+        await GET(createRequest(Cluster.Mainnet));
 
         expect(mocks.send).toHaveBeenCalledWith({ abortSignal: expect.any(AbortSignal) });
         expect(timeout).toHaveBeenCalledWith(UPSTREAM_TIMEOUT_MS);
@@ -110,10 +110,10 @@ describe('GET /api/slot-time', () => {
         // The CDN keys on the whole URL, so every extra spelling of one request is another miss. One
         // shape gets answered, and nothing else reaches the node.
         it.each([
-            ['an unexpected extra param', `?cluster=${Cluster.MainnetBeta}&bust=1`],
-            ['a repeated param', `?cluster=${Cluster.MainnetBeta}&cluster=${Cluster.MainnetBeta}`],
+            ['an unexpected extra param', `?cluster=${Cluster.Mainnet}&bust=1`],
+            ['a repeated param', `?cluster=${Cluster.Mainnet}&cluster=${Cluster.Mainnet}`],
             ['a percent-encoded digit', '?cluster=%30'],
-            ['the param in another position', `?bust=1&cluster=${Cluster.MainnetBeta}`],
+            ['the param in another position', `?bust=1&cluster=${Cluster.Mainnet}`],
         ])('should refuse %s without asking the node', async (_reason, query) => {
             const response = await GET(new Request(`http://localhost:3000/api/slot-time${query}`));
 
@@ -142,7 +142,7 @@ describe('GET /api/slot-time', () => {
         // call shape rather than the level: a warning reaches Sentry too, the moment it is handed a
         // context, so asserting the level alone would let one be added here unnoticed.
         it.each([
-            ['a query that is not the canonical shape', `?cluster=${Cluster.MainnetBeta}&bust=1`],
+            ['a query that is not the canonical shape', `?cluster=${Cluster.Mainnet}&bust=1`],
             ['a cluster the server must not resolve', '?cluster=999'],
         ])('should keep the refusal for %s out of Sentry', async (_reason, query) => {
             await GET(new Request(`http://localhost:3000/api/slot-time${query}`));
@@ -179,7 +179,7 @@ describe('GET /api/slot-time', () => {
         ])('should refuse %s rather than serve a rate', async (_reason, samples) => {
             mocks.send.mockResolvedValueOnce(samples);
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             // Unclassified: one node behind a balancer may have history the next one lacks, so it stays
             // re-askable.
@@ -212,7 +212,7 @@ describe('GET /api/slot-time', () => {
                 new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
             );
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(503);
             expect(await response.json()).toEqual({ error: 'Upstream RPC error' });
@@ -232,7 +232,7 @@ describe('GET /api/slot-time', () => {
         ])('should report, and briefly cache, %s', async (_reason, error) => {
             mocks.send.mockRejectedValueOnce(error);
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(502);
             expect(response.headers.get('Cache-Control')).toBe(ERROR_CACHE);
@@ -244,7 +244,7 @@ describe('GET /api/slot-time', () => {
         it('should report an unrecognised connection failure, and leave it re-askable', async () => {
             mocks.send.mockRejectedValueOnce(connectionFailure('ENOTFOUND'));
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(503);
             expect(await response.json()).toEqual({ error: 'Failed to measure slot time' });

@@ -18,7 +18,7 @@ function getChainIdFromGenesisHash(genesisHash: string): ChainId | undefined {
 
 export function getChainId(cluster: Cluster, genesisHash?: string): ChainId | undefined {
     switch (cluster) {
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return ChainId.MAINNET;
         case Cluster.Testnet:
             return ChainId.TESTNET;

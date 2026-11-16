@@ -130,7 +130,7 @@ export function UpgradeableProgramSection({
                                     <span className="min-w-0">
                                         <Address pubkey={programData.authority} link />
                                     </span>
-                                    {cluster == Cluster.MainnetBeta && (
+                                    {cluster == Cluster.Mainnet && (
                                         // The Squads lookup suspends. A slow lookup must not hide the whole page.
                                         <Suspense fallback={null}>
                                             <MultisigBadge authority={programData.authority} pubkey={account.pubkey} />

@@ -32,7 +32,7 @@ describe('fetchTokenInfosFromApi', () => {
 
         expect(tokens).toEqual([tokenInfo(MINT_A), tokenInfo(MINT_B)]);
         expect(sentRequest()).toEqual({
-            body: { addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta, includeOnChainFallback: true },
+            body: { addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet, includeOnChainFallback: true },
             method: 'POST',
             url: '/api/token-info',
         });
@@ -104,7 +104,7 @@ describe('fetchTokenInfosFromApi', () => {
         await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([tokenInfo(MINT_B, true)]);
         expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
             sentry: 'always',
-            sentryExtras: { cluster: Cluster.MainnetBeta, malformed: 1, total: 2 },
+            sentryExtras: { cluster: Cluster.Mainnet, malformed: 1, total: 2 },
         });
     });
 
@@ -117,7 +117,7 @@ describe('fetchTokenInfosFromApi', () => {
         expect(Logger.warn).toHaveBeenCalledTimes(1);
         expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
             sentry: 'always',
-            sentryExtras: { cluster: Cluster.MainnetBeta, malformed: 2, total: 2 },
+            sentryExtras: { cluster: Cluster.Mainnet, malformed: 2, total: 2 },
         });
     });
 
@@ -170,12 +170,12 @@ describe('fetchTokenInfoFromApi', () => {
     it('should request one mint without the on-chain fallback and resolve its token', async () => {
         vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(MINT_A)] }));
 
-        const token = await fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.MainnetBeta);
+        const token = await fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.Mainnet);
 
         expect(token).toEqual(tokenInfo(MINT_A));
         expect(sentRequest().body).toEqual({
             addresses: [MINT_A],
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             includeOnChainFallback: false,
         });
     });
@@ -183,7 +183,7 @@ describe('fetchTokenInfoFromApi', () => {
     it('should resolve undefined when the route does not list the mint', async () => {
         vi.mocked(fetch).mockResolvedValue(Response.json({ content: [] }));
 
-        await expect(fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.MainnetBeta)).resolves.toBeUndefined();
+        await expect(fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.Mainnet)).resolves.toBeUndefined();
     });
 });
 
@@ -192,7 +192,7 @@ type Request = Parameters<typeof fetchTokenInfosFromApi>[0];
 function request(overrides: Partial<Request> = {}): Request {
     return {
         addresses: [MINT_A, MINT_B],
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         genesisHash: undefined,
         includeOnChainFallback: false,
         ...overrides,
