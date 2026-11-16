@@ -1,5 +1,5 @@
-import { getTransactionConfig } from './config.js';
 import { LAMPORTS_PER_SIGNATURE } from './constants.js';
+import { getV1ResourceLimits } from './resource-limits.js';
 import type { ParsedTransaction, PriorityFeeLamports } from './types.js';
 
 /**
@@ -30,9 +30,8 @@ export function resolvePriorityFeeLamports(
     transaction: ParsedTransaction,
     meta: { feeLamports: bigint | undefined },
 ): PriorityFeeLamports | undefined {
-    const declared = getTransactionConfig(transaction)?.priorityFeeLamports;
     if (transaction.version === 1) {
-        return declared ?? 0n;
+        return getV1ResourceLimits(transaction).priorityFeeLamports;
     }
     if (meta.feeLamports === undefined) {
         return undefined;
