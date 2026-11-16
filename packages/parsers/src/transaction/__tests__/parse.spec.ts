@@ -1,6 +1,7 @@
 import {
     blockhash,
     type CompiledTransactionMessageWithLifetime,
+    getCompiledTransactionMessageEncoder,
     type LegacyCompiledTransactionMessage,
     TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
 } from '@solana/kit';
@@ -13,6 +14,7 @@ import {
     UnsupportedTransactionVersionError,
 } from '../errors.js';
 import {
+    decodeCompiledMessage,
     fromCompiledMessage,
     fromMessageBytes,
     fromRpcTransaction,
@@ -203,6 +205,45 @@ describe('fromCompiledMessage', () => {
         const { compiled } = legacyTransactionWithHeader({ numReadonlySignerAccounts: 1 });
 
         expect(() => fromCompiledMessage(compiled)).toThrow('exceed available accounts');
+    });
+});
+
+describe('decodeCompiledMessage', () => {
+    it.each([
+        ['legacy', legacyTransaction],
+        ['v0', v0Transaction],
+        ['v1', v1Transaction],
+    ] as const)('should decode %s message bytes into a message that encodes back to them', (_label, fixture) => {
+        const messageBytes = fixture.messageBytes();
+
+        expect(getCompiledTransactionMessageEncoder().encode(decodeCompiledMessage(messageBytes))).toEqual(
+            messageBytes,
+        );
+    });
+
+    it('should ignore bytes past the end of the message', () => {
+        const messageBytes = v1Transaction.messageBytes();
+
+        expect(decodeCompiledMessage(new Uint8Array([...messageBytes, 0x00]))).toEqual(
+            decodeCompiledMessage(messageBytes),
+        );
+    });
+
+    it('should reject message bytes of an unknown version', () => {
+        const bytes = v1Transaction.messageBytes();
+        bytes[0] = 0x82;
+
+        expect(() => decodeCompiledMessage(bytes)).toThrow(UnsupportedTransactionVersionError);
+    });
+
+    it('should reject v1 message bytes that set only one of the two priority fee mask bits', () => {
+        expect(() => decodeCompiledMessage(v1MessageBytesWithHalfSetPriorityFeeMask())).toThrow(
+            InvalidTransactionConfigError,
+        );
+    });
+
+    it('should reject bytes that do not decode', () => {
+        expect(() => decodeCompiledMessage(new Uint8Array([]))).toThrow(MalformedTransactionError);
     });
 });
 

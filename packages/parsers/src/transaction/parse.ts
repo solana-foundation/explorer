@@ -149,8 +149,21 @@ export function fromRpcTransaction(response: RpcTransactionResponse): ParsedTran
     return fromCompiledMessage(compiled, { loadedAddresses, signatures: toBase58Signatures(wire.signatures) });
 }
 
+/**
+ * Decodes message bytes into a compiled message, without the round-trip check of `fromMessageBytes`.
+ * Ignores bytes past the end of the message and may decode a truncated message.
+ * For input that can carry extra bytes. Re-encode the result before sending or measuring it.
+ * Throws {@link UnsupportedTransactionVersionError}, {@link InvalidTransactionConfigError}
+ * or {@link MalformedTransactionError}.
+ */
+export function decodeCompiledMessage(
+    bytes: Uint8Array,
+): CompiledTransactionMessage & CompiledTransactionMessageWithLifetime {
+    return tryRunDecode(() => getCompiledTransactionMessageDecoder().decode(bytes));
+}
+
 function decodeMessageBytes(bytes: Uint8Array): CompiledTransactionMessage & CompiledTransactionMessageWithLifetime {
-    const compiled = tryRunDecode(() => getCompiledTransactionMessageDecoder().decode(bytes));
+    const compiled = decodeCompiledMessage(bytes);
     assertCanonicalMessage(compiled, bytes);
     return compiled;
 }
