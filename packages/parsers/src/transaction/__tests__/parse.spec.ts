@@ -3,6 +3,7 @@ import {
     type CompiledTransactionMessageWithLifetime,
     getCompiledTransactionMessageEncoder,
     type LegacyCompiledTransactionMessage,
+    SolanaError,
     TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
 } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
@@ -44,11 +45,27 @@ import {
     wireResponse,
 } from './fixtures.js';
 
+const INVALID_SIGNATURES = [
+    ['short', 'not-a-signature'],
+    ['non-base58', 'l'.repeat(64)],
+    ['non-64-byte', '1'.repeat(88)],
+];
+
 describe('fromCompiledMessage', () => {
     it('should get the version from the message', () => {
         expect(fromCompiledMessage(legacyTransaction.compiled()).version).toBe('legacy');
         expect(fromCompiledMessage(v0Transaction.compiled()).version).toBe(0);
         expect(fromCompiledMessage(v1Transaction.compiled()).version).toBe(1);
+    });
+
+    it('should return the signatures from options', () => {
+        const signatures = [gen.signature(1), undefined];
+
+        expect(fromCompiledMessage(v1Transaction.compiled(), { signatures }).signatures).toEqual(signatures);
+    });
+
+    it.each(INVALID_SIGNATURES)('should reject a %s signature from options', (_label, value) => {
+        expect(() => fromCompiledMessage(v1Transaction.compiled(), { signatures: [value] })).toThrow(SolanaError);
     });
 
     it('should resolve instructions with their accounts', () => {
@@ -305,6 +322,13 @@ describe('fromRpcTransaction', () => {
 
     it('should return undefined for an unsigned signer slot', () => {
         expect(fromRpcTransaction(unsignedWireResponse(1)).signatures[0]).toBeUndefined();
+    });
+
+    it.each(INVALID_SIGNATURES)('should reject a %s signature from a json response', (_label, value) => {
+        const response = jsonResponse();
+        const transaction = { ...response.transaction, signatures: [value] };
+
+        expect(() => fromRpcTransaction({ ...response, transaction })).toThrow(SolanaError);
     });
 
     it('should decode a base58-encoded response to the same value as a base64 one', () => {
