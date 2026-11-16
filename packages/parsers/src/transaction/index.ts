@@ -3,6 +3,7 @@ export type {
     FromMessageOptions,
     ParsedTransaction,
     PriorityFeeLamports,
+    RawInstruction,
     ReportedTransactionVersion,
     RpcParsedInstruction,
     RpcTransactionConfig,

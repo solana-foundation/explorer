@@ -32,6 +32,7 @@ import type {
     AddressTableLookup,
     FromMessageOptions,
     ParsedTransaction,
+    RawInstruction,
     ReportedTransactionVersion,
     RpcJsonParsedTransaction,
     RpcJsonTransaction,
@@ -51,7 +52,7 @@ type KitJsonResponse = Parameters<typeof decodeTransactionFromRpcResponse>[0];
 export function fromCompiledMessage(
     message: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime,
     options: FromMessageOptions = {},
-): ParsedTransaction {
+): ParsedTransaction<RawInstruction> {
     const addressTableLookups =
         message.version === 0 ? toCompiledAddressTableLookups(message.addressTableLookups) : undefined;
     return parseCompiledMessage(message, { ...options, addressTableLookups });
@@ -60,7 +61,7 @@ export function fromCompiledMessage(
 function parseCompiledMessage(
     message: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime,
     options: FromMessageOptions & { addressTableLookups: readonly AddressTableLookup[] | undefined },
-): ParsedTransaction {
+): ParsedTransaction<RawInstruction> {
     // `lookups` is `undefined` when the source did not report the tables, and always for legacy and v1.
     // A compiled message itself cannot tell an absent list from an empty one.
     const { addressTableLookups } = options;
@@ -89,9 +90,7 @@ function parseCompiledMessage(
     );
     // kit account metas lack source and lookup table details. Reading by index keeps a repeated key's flags apart.
     const accountIndices = getInstructionAccountIndices(message);
-    const instructions = kitInstructions.map((ix, i) =>
-        toTransactionInstruction(ix, accountIndices[i], resolved.accounts),
-    );
+    const instructions = kitInstructions.map((ix, i) => toRawInstruction(ix, accountIndices[i], resolved.accounts));
 
     return buildTransaction({
         config: readTransactionConfig(message),
@@ -104,10 +103,18 @@ function parseCompiledMessage(
     });
 }
 
-export function fromMessageBytes(bytes: Uint8Array, options: FromMessageOptions = {}): ParsedTransaction {
+export function fromMessageBytes(
+    bytes: Uint8Array,
+    options: FromMessageOptions = {},
+): ParsedTransaction<RawInstruction> {
     return fromCompiledMessage(decodeMessageBytes(bytes), options);
 }
 
+/** Wire and `json` responses hold only {@link RawInstruction}s. `jsonParsed` may add RPC-parsed ones. */
+export function fromRpcTransaction(
+    response: RpcTransactionResponse & { transaction: RpcWireTransaction | RpcJsonTransaction },
+): ParsedTransaction<RawInstruction>;
+export function fromRpcTransaction(response: RpcTransactionResponse): ParsedTransaction;
 export function fromRpcTransaction(response: RpcTransactionResponse): ParsedTransaction {
     const loadedAddresses = response.meta?.loadedAddresses;
     const { transaction } = response;
@@ -269,12 +276,11 @@ function getInstructionAccountIndices(message: CompiledTransactionMessage): read
         : message.instructions.map(ix => ix.accountIndices ?? []);
 }
 
-/** Maps one of kit's `ResolvedInstruction`s onto the TransactionInstruction shape. */
-function toTransactionInstruction(
+function toRawInstruction(
     ix: ResolvedInstruction,
     accountIndices: readonly number[],
     accounts: readonly TransactionAccount[],
-): TransactionInstruction {
+): RawInstruction {
     return {
         accounts: accountIndices.map(index => accounts[index]),
         // Return consistent empty data, since kit omits it and json encodings keep it.
@@ -329,7 +335,7 @@ function fromJsonTransaction(
     transaction: RpcJsonTransaction,
     version: TransactionVersion,
     loadedAddresses: FromMessageOptions['loadedAddresses'],
-): ParsedTransaction {
+): ParsedTransaction<RawInstruction> {
     const { message } = transaction;
 
     message.accountKeys.forEach(key => assertIsAddress(key));
@@ -391,16 +397,16 @@ function fromJsonParsedTransaction(
     });
 }
 
-function buildTransaction(txData: {
+function buildTransaction<TInstruction extends TransactionInstruction>(txData: {
     config: ReturnType<typeof readTransactionConfig>;
-    instructions: TransactionInstruction[];
+    instructions: TInstruction[];
     /** `undefined` means the response did not report the tables. */
     lookups: readonly AddressTableLookup[] | undefined;
     lifetimeSpecifier: string;
     resolved: AccountResolutionResult;
     signatures: readonly (string | undefined)[];
     version: TransactionVersion;
-}): ParsedTransaction {
+}): ParsedTransaction<TInstruction> {
     const base = {
         accounts: txData.resolved.accounts,
         instructions: txData.instructions,

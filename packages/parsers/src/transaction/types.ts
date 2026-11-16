@@ -27,9 +27,13 @@ export type TransactionAccount = {
 /** The RPC's own decode, under `jsonParsed` encoding only. The RPC sends no account list or data with it. */
 export type RpcParsedInstruction = { programAddress: Address; parsed: unknown };
 
-export type TransactionInstruction =
-    | { programAddress: Address; accounts: readonly TransactionAccount[]; data: Uint8Array }
-    | RpcParsedInstruction;
+export type RawInstruction = {
+    programAddress: Address;
+    accounts: readonly TransactionAccount[];
+    data: Uint8Array;
+};
+
+export type TransactionInstruction = RawInstruction | RpcParsedInstruction;
 
 /** A u64 on the wire, so bigint keeps every value exact. */
 export type PriorityFeeLamports = bigint;
@@ -42,18 +46,19 @@ export type TransactionConfig = {
     priorityFeeLamports?: PriorityFeeLamports;
 };
 
-type TransactionBase = {
+type TransactionBase<TInstruction extends TransactionInstruction> = {
     accounts: readonly TransactionAccount[];
-    instructions: readonly TransactionInstruction[];
+    instructions: readonly TInstruction[];
     numSignerAccounts: number;
     /** Recent blockhash or durable nonce. */
     lifetimeSpecifier: string;
     signatures: readonly (string | undefined)[];
 };
 
-export type ParsedTransaction =
-    | (TransactionBase & { version: 'legacy' })
-    | (TransactionBase & {
+/** `TInstruction` is {@link RawInstruction} when parsed from a compiled message. */
+export type ParsedTransaction<TInstruction extends TransactionInstruction = TransactionInstruction> =
+    | (TransactionBase<TInstruction> & { version: 'legacy' })
+    | (TransactionBase<TInstruction> & {
           version: 0;
           /** `undefined` means the response did not report the tables. `[]` means none. */
           addressTableLookups?: readonly AddressTableLookup[];
@@ -62,7 +67,7 @@ export type ParsedTransaction =
           /** Lookup table indexes that no loaded address fills. Absent when the encoding omits the tables. */
           unmatchedLookupTableIndexes?: readonly AddressTableLookup[];
       })
-    | (TransactionBase & { version: 1; config?: TransactionConfig });
+    | (TransactionBase<TInstruction> & { version: 1; config?: TransactionConfig });
 
 /**
  * `loadedAddresses` is RPC-shaped: plain strings, because that is what every caller holds.

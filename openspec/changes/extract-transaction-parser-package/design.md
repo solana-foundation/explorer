@@ -8,26 +8,30 @@ differences inside. Callers pass a transaction and get the result, without needi
 Knows what an RPC returns, declared structurally. Makes no RPC calls, carries no web3.js or cluster config.
 
 ```ts
-type TransactionBase = {
+type TransactionBase<TInstruction extends TransactionInstruction> = {
     accounts: readonly TransactionAccount[];
-    instructions: readonly TransactionInstruction[];
+    instructions: readonly TInstruction[];
     numSignerAccounts: number;
     lifetimeSpecifier: string;
     signatures: readonly (string | undefined)[];
 };
 
-export type ParsedTransaction =
-    | (TransactionBase & { version: 'legacy' })
-    | (TransactionBase & {
+export type ParsedTransaction<TInstruction extends TransactionInstruction = TransactionInstruction> =
+    | (TransactionBase<TInstruction> & { version: 'legacy' })
+    | (TransactionBase<TInstruction> & {
           version: 0;
           addressTableLookups?: readonly AddressTableLookup[];
           unmatchedLookupTableAddresses?: readonly Address[];
           unmatchedLookupTableIndexes?: readonly AddressTableLookup[];
       })
-    | (TransactionBase & { version: 1; config?: TransactionConfig });
+    | (TransactionBase<TInstruction> & { version: 1; config?: TransactionConfig });
 ```
 
 - Accounts and instructions sit in the base.
+- `TInstruction` defaults to the full `TransactionInstruction` union. `fromCompiledMessage` and `fromMessageBytes`
+  return `ParsedTransaction<RawInstruction>`, because a compiled message has no RPC-parsed instructions.
+  `fromRpcTransaction` does the same for wire and `json` responses through an overload, and keeps the full union
+  for `jsonParsed`. Callers of the narrow results need no `isRpcParsedInstruction` check.
 - `addressTableLookups` and both `unmatchedLookupTable*` fields sit on the v0 arm alone.
 - v1 removed lookup tables and legacy tx never had them.
 - `addressTableLookups` is optional: `undefined` means the response did not report the tables, `[]` means
