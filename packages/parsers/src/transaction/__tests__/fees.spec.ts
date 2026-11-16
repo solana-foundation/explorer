@@ -4,15 +4,15 @@ import { gen } from '../../__tests__/gen.js';
 import { derivePriorityFeeLamports, resolvePriorityFeeLamports } from '../fees.js';
 import type { ParsedTransaction, TransactionConfig } from '../types.js';
 
-function v1TransactionWithConfig(config: TransactionConfig | undefined): ParsedTransaction {
+function v1TransactionWithConfig(config: TransactionConfig = {}): ParsedTransaction {
     return {
         accounts: [],
+        config,
         instructions: [],
         numSignerAccounts: 1,
         lifetimeSpecifier: gen.blockhash(7),
         signatures: [],
         version: 1,
-        ...(config && { config }),
     };
 }
 
@@ -57,7 +57,7 @@ describe('resolvePriorityFeeLamports', () => {
     });
 
     it('should return zero for a v1 transaction with no declared fee', () => {
-        const transaction = v1TransactionWithConfig(undefined);
+        const transaction = v1TransactionWithConfig();
 
         expect(resolvePriorityFeeLamports(transaction, { feeLamports: 8_000n })).toBe(0n);
     });

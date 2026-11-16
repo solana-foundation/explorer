@@ -60,10 +60,10 @@ describe('readTransactionConfig', () => {
         expect(readTransactionConfig(message)).toEqual({ computeUnitLimit: 19 });
     });
 
-    it('should return undefined when the message declares no limits', () => {
+    it('should return an empty config when the message declares no limits', () => {
         const message = v1CompiledWithConfig({ configMask: 0, configValues: [] });
 
-        expect(readTransactionConfig(message)).toBeUndefined();
+        expect(readTransactionConfig(message)).toEqual({});
     });
 
     it.each([
@@ -157,12 +157,12 @@ describe('fromRpcTransactionConfig', () => {
         expect(config).toEqual({ computeUnitLimit: 19, priorityFeeLamports: 24n });
     });
 
-    it('should return undefined when every limit is null', () => {
-        expect(fromRpcTransactionConfig(rpcConfig())).toBeUndefined();
+    it('should return an empty config when every limit is null', () => {
+        expect(fromRpcTransactionConfig(rpcConfig())).toEqual({});
     });
 
-    it('should return undefined when the response has no config', () => {
-        expect(fromRpcTransactionConfig(undefined)).toBeUndefined();
+    it('should return an empty config when the response has no config', () => {
+        expect(fromRpcTransactionConfig(undefined)).toEqual({});
     });
 });
 

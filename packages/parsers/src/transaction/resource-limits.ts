@@ -20,10 +20,10 @@ export function getV1ResourceLimits(transaction: ParsedTransaction): V1ResourceL
 
     const { config } = transaction;
     return {
-        computeUnitLimit: Math.min(config?.computeUnitLimit ?? 0, MAX_COMPUTE_UNITS),
-        heapSizeBytes: config?.heapSize ?? V1_DEFAULT_HEAP_SIZE_BYTES,
+        computeUnitLimit: Math.min(config.computeUnitLimit ?? 0, MAX_COMPUTE_UNITS),
+        heapSizeBytes: config.heapSize ?? V1_DEFAULT_HEAP_SIZE_BYTES,
         loadedAccountsDataSizeLimitBytes:
-            config?.loadedAccountsDataSizeLimit ?? V1_DEFAULT_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BYTES,
-        priorityFeeLamports: config?.priorityFeeLamports ?? 0n,
+            config.loadedAccountsDataSizeLimit ?? V1_DEFAULT_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BYTES,
+        priorityFeeLamports: config.priorityFeeLamports ?? 0n,
     };
 }

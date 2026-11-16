@@ -24,7 +24,7 @@ export type ParsedTransaction<TInstruction extends TransactionInstruction = Tran
           unmatchedLookupTableAddresses?: readonly Address[];
           unmatchedLookupTableIndexes?: readonly AddressTableLookup[];
       })
-    | (TransactionBase<TInstruction> & { version: 1; config?: TransactionConfig });
+    | (TransactionBase<TInstruction> & { version: 1; config: TransactionConfig });
 ```
 
 - Accounts and instructions sit in the base.
@@ -40,7 +40,8 @@ export type ParsedTransaction<TInstruction extends TransactionInstruction = Tran
   the encoding omits them.
 - `unmatchedLookupTableIndexes` lists lookup table indexes that no loaded address fills. Absent when the
   encoding omits the tables. The two fields are the two sides of one positional match.
-- `config` sits on the v1 and is optional, because a tx may set no limits at all.
+- `config` sits on the v1 arm and is required, because every v1 message carries a config mask. A mask that
+  declares no limits reads as `{}`. Agave sends `transactionConfig` on every v1 RPC message too.
 - `TransactionConfig` repeats kit's `V1TransactionConfig` field for field, under a name the union can use on
   any version. kit does export that type, so the comment in `v1-message-bridge.ts` saying otherwise is stale.
 
@@ -128,7 +129,7 @@ cluster, plus per-program reserves quoted from Agave. It moves from `app/entitie
 
 - v1 with `config.computeUnitLimit` - `declared`.
 - legacy/v0 with `SetComputeUnitLimit` ix - `declared`.
-- v1 with no config - `fallback` (to 0).
+- v1 with no `config.computeUnitLimit` - `fallback` (to 0).
 - legacy/v0 with no limit instruction - `calculated`.
 
 Two signature changes come with this:

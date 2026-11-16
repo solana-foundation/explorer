@@ -23,7 +23,7 @@ export function getRequestedComputeUnits(
 ): RequestedComputeUnits {
     if (transaction.version === 1) {
         return {
-            source: transaction.config?.computeUnitLimit === undefined ? 'fallback' : 'declared',
+            source: transaction.config.computeUnitLimit === undefined ? 'fallback' : 'declared',
             value: getV1ResourceLimits(transaction).computeUnitLimit,
         };
     }

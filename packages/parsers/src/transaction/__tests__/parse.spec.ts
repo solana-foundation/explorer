@@ -122,6 +122,12 @@ describe('fromCompiledMessage', () => {
         expect(transaction).toMatchObject({ config: { computeUnitLimit: 19 }, version: 1 });
     });
 
+    it('should read an empty config from a v1 message that declares no limits', () => {
+        const transaction = fromCompiledMessage(v1CompiledWithConfig({ configMask: 0, configValues: [] }));
+
+        expect(transaction).toHaveProperty('config', {});
+    });
+
     it.each([
         ['legacy', legacyTransaction],
         ['v1', v1Transaction],
@@ -294,6 +300,13 @@ describe('fromRpcTransaction', () => {
         ['wire', wireResponse],
     ] as const)('should accept a bigint version in a %s response', (_label, makeResponse) => {
         expect(fromRpcTransaction({ ...makeResponse(1), version: 1n }).version).toBe(1);
+    });
+
+    it.each([
+        ['json', jsonResponse],
+        ['jsonParsed', jsonParsedResponse],
+    ] as const)('should read an empty config from a v1 %s response that sends none', (_label, makeResponse) => {
+        expect(fromRpcTransaction(makeResponse(1))).toHaveProperty('config', {});
     });
 
     it('should reject a wire response whose bigint version disagrees with its bytes', () => {

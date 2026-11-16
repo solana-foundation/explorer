@@ -44,8 +44,8 @@ describe('ParsedTransaction', () => {
         expectTypeOf<ParsedTransactionOf<1>>().not.toHaveProperty('unmatchedLookupTableIndexes');
     });
 
-    it('should carry an optional config on the v1 arm only', () => {
-        expectTypeOf<ParsedTransactionOf<1>>().toHaveProperty('config').toEqualTypeOf<TransactionConfig | undefined>();
+    it('should carry a required config on the v1 arm only', () => {
+        expectTypeOf<ParsedTransactionOf<1>>().toHaveProperty('config').toEqualTypeOf<TransactionConfig>();
         expectTypeOf<ParsedTransactionOf<0>>().not.toHaveProperty('config');
         expectTypeOf<ParsedTransactionOf<'legacy'>>().not.toHaveProperty('config');
     });
