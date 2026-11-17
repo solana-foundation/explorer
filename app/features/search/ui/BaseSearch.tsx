@@ -74,7 +74,8 @@ export function BaseSearch({
                 const nextIndex = e.shiftKey
                     ? (currentIndex - 1 + visibleTabs.length) % visibleTabs.length
                     : (currentIndex + 1) % visibleTabs.length;
-                onFilterChange(visibleTabs[nextIndex].id);
+                const nextTab = visibleTabs.at(nextIndex);
+                if (nextTab) onFilterChange(nextTab.id);
                 return;
             }
             if (open) return;

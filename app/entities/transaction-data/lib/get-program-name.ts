@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { LOADER_IDS, PROGRAM_INFO_BY_ID } from '@utils/programs';
 
@@ -11,5 +12,5 @@ export function getProgramName(programId: PublicKey, fallback: string = UNKNOWN_
 // Undefined when no name is known — for callers that render their own fallback instead of a label.
 export function findProgramName(programId: PublicKey): string | undefined {
     const address = programId.toBase58();
-    return PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
+    return getOwn(PROGRAM_INFO_BY_ID, address)?.name ?? getOwn(LOADER_IDS, address);
 }

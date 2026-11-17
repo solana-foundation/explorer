@@ -1,4 +1,5 @@
 import type { InstructionData } from '@entities/idl';
+import { getOwn } from '@shared/lib/object';
 import { camelCase } from 'change-case';
 import { useEffect, useMemo, useRef } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
@@ -48,7 +49,7 @@ export function usePdaPrefill({
 
     useEffect(() => {
         for (const [accountName, path] of pdaAccountPaths.entries()) {
-            const pdaData = pdas[accountName];
+            const pdaData = getOwn(pdas, accountName);
             if (!pdaData?.generated) continue;
 
             const currentValue = String(form.getValues(path) || '').trim();

@@ -52,7 +52,7 @@ export async function signWeb3jsTransactions<T extends Web3Transaction>(
     const signed = await signer.modifyAndSignTransactions(unsigned);
 
     return transactions.map((original, index) => {
-        const signedTransaction = signed[index];
+        const signedTransaction = signed.at(index);
         if (!signedTransaction) {
             throw new Error('Wallet returned fewer signed transactions than were requested');
         }

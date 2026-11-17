@@ -281,7 +281,7 @@ function AnswerBlockView({ caret, revealed }: { caret: boolean; revealed: Reveal
                         {row.map((cell, columnIndex) => (
                             <div key={columnIndex} className="flex flex-col gap-1">
                                 <span className="font-mono text-xs uppercase leading-4 tracking-widest text-heavy-metal-500">
-                                    {block.head[columnIndex]}
+                                    {block.head.at(columnIndex)}
                                 </span>
                                 <span className="text-sm leading-5 text-dark-foreground [overflow-wrap:anywhere]">
                                     {cell}

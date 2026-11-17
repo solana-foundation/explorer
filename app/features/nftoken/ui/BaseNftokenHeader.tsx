@@ -1,6 +1,7 @@
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { LoadingArtPlaceholder } from '@components/common/LoadingArtPlaceholder';
 import { NFTImageContent } from '@components/common/NFTArt';
+import { getOwn } from '@shared/lib/object';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 
@@ -34,7 +35,7 @@ export function BaseNftokenHeader({
 }) {
     if (metadata.kind === 'loading') return <LoadingArtPlaceholder />;
 
-    const copy = COPY[kind];
+    const copy = getOwn(COPY, kind);
     const loaded = metadata.kind === 'loaded' ? metadata.metadata : undefined;
 
     return (

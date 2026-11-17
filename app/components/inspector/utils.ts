@@ -1,3 +1,4 @@
+import { invariant } from '@shared/lib/invariant';
 import {
     AccountMeta,
     MessageAddressTableLookup,
@@ -23,13 +24,17 @@ function findLookupAddressByIndex(
 
     if (accountIndex >= message.staticAccountKeys.length) {
         const lookupIndex = accountIndex - message.staticAccountKeys.length;
-        lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
+        const lookups = lookupsForAccountKeyIndex.at(lookupIndex);
+        invariant(lookups, `lookup index ${lookupIndex} out of range`);
+        lookup = lookups.lookupTableKey;
         dynamicLookups = {
             isStatic: false,
-            lookups: lookupsForAccountKeyIndex[lookupIndex],
+            lookups,
         };
     } else {
-        lookup = message.staticAccountKeys[accountIndex];
+        const staticKey = message.staticAccountKeys.at(accountIndex);
+        invariant(staticKey, `account key index ${accountIndex} out of range`);
+        lookup = staticKey;
         dynamicLookups = {
             isStatic: true,
             lookups: undefined,
@@ -105,7 +110,7 @@ export function intoTransactionInstructionFromVersionedMessage(
     } else {
         // This is only needed for Squads vault transactions, in normal messages, outer program IDs cannot be in addressTableLookups
         const lookupIndex = compiledInstruction.programIdIndex - originalMessage.staticAccountKeys.length;
-        programId = addressTableLookups[lookupIndex].accountKey;
+        programId = addressTableLookups.at(lookupIndex)?.accountKey;
     }
     if (!programId) throw new Error('Program ID not found');
 

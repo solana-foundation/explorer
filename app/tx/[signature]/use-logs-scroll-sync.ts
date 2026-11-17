@@ -47,12 +47,14 @@ export function useLogsPanelScrollSync({
 
             // Active = last card whose top has crossed the sticky nav threshold.
             let activeIndex = 0;
-            for (let i = 0; i < cards.length; i++) {
-                if (cards[i].getBoundingClientRect().top <= navThreshold) activeIndex = i;
+            for (const [i, card] of cards.entries()) {
+                if (card.getBoundingClientRect().top <= navThreshold) activeIndex = i;
                 else break;
             }
 
-            const cardRect = cards[activeIndex].getBoundingClientRect();
+            const activeCard = cards.at(activeIndex);
+            if (!activeCard) return;
+            const cardRect = activeCard.getBoundingClientRect();
             const progress = Math.max(0, Math.min(1, (navThreshold - cardRect.top) / cardRect.height));
 
             const logRow = logsPanel.querySelector<HTMLElement>(`[data-ix-index="${activeIndex}"]`);

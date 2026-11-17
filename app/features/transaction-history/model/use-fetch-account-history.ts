@@ -3,6 +3,7 @@
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import type { Address } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import { fetchOnce } from '@utils/fetch-once';
@@ -89,7 +90,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 url,
             };
 
-            const cached = state.entries[address];
+            const cached = getOwn(state.entries, address);
             const isLoadMore = !refresh && Boolean(cached?.data?.fetched?.length);
             if (isLoadMore && cached?.data) {
                 if (cached.data.foundOldest) return;

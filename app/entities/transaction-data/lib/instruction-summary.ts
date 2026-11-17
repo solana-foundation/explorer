@@ -1,4 +1,5 @@
 import { getBlockTransactionInstructions } from '@entities/block-data/@x/transaction-data';
+import { invariant } from '@shared/lib/invariant';
 import { getBase58Encoder, getCompiledTransactionMessageDecoder, type ReadonlyUint8Array } from '@solana/kit';
 import { ComputeBudgetProgram, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
@@ -30,10 +31,11 @@ export function getCompiledInstructionSummaries(messageBytes: ReadonlyUint8Array
     const message = COMPILED_MESSAGE_DECODER.decode(messageBytes);
 
     return getBlockTransactionInstructions(message)
-        .map(({ data, programAddressIndex }) => ({
-            data,
-            programId: new PublicKey(message.staticAccounts[programAddressIndex]),
-        }))
+        .map(({ data, programAddressIndex }) => {
+            const programAddress = message.staticAccounts.at(programAddressIndex);
+            invariant(programAddress, `program address index ${programAddressIndex} out of range`);
+            return { data, programId: new PublicKey(programAddress) };
+        })
         .filter(ix => !isComputeBudget(ix.programId))
         .map(ix => toSummary(resolveNamesFromData(ix)));
 }

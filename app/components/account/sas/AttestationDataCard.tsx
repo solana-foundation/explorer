@@ -1,5 +1,6 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
+import { getOwn } from '@shared/lib/object';
 import {
     Attestation as SasAttestation,
     decodeSchema,
@@ -33,7 +34,15 @@ export function AttestationDataCard({ account, onNotFound }: { account?: Account
 }
 
 function SchemaCard({ schema }: { schema: SasSchema }) {
-    const layout = Object.fromEntries(schema.fieldNames.map((name, i) => [name, SchemaDataType[schema.layout[i]]]));
+    const layout = Object.fromEntries(
+        schema.fieldNames.map((name, i) => {
+            const type = schema.layout.at(i);
+            return [
+                name,
+                type === undefined ? undefined : getOwn<Readonly<Record<number, string>>, number>(SchemaDataType, type),
+            ];
+        }),
+    );
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
@@ -58,8 +67,8 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
 function withByteFieldsAsHex(schema: SasSchema, data: Record<string, unknown>): Record<string, unknown> {
     return Object.fromEntries(
         schema.fieldNames.map((name, index) => {
-            const value = data[name];
-            const isByteVector = schema.layout[index] === SchemaDataType.VecU8 && Array.isArray(value);
+            const value = getOwn(data, name);
+            const isByteVector = schema.layout.at(index) === SchemaDataType.VecU8 && Array.isArray(value);
             return [name, isByteVector ? `0x${toHex(Uint8Array.from(value as number[]))}` : value];
         }),
     );

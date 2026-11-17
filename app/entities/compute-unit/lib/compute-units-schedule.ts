@@ -3,6 +3,7 @@ import {
     getBlockTransactionConfig,
     getBlockTransactionInstructions,
 } from '@entities/block-data/@x/compute-unit';
+import { getOwn } from '@shared/lib/object';
 import { type Address, address, getBase58Encoder } from '@solana/kit';
 import { type ParsedInstruction, type PartiallyDecodedInstruction } from '@solana/web3.js';
 import {
@@ -124,7 +125,7 @@ export function getReservedComputeUnits({
     let highestActivationEpoch = -1;
 
     for (const config of COMPUTE_UNIT_RESERVE_CONFIGS) {
-        const activationEpoch = config.activations[cluster];
+        const activationEpoch = getOwn(config.activations, cluster);
         if (activationEpoch <= epochNumber && activationEpoch > highestActivationEpoch) {
             applicableConfig = config;
             highestActivationEpoch = activationEpoch;

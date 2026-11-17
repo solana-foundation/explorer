@@ -22,7 +22,7 @@ export type SquadsAccountType = 'batch' | 'vaultTransaction';
 
 export function detectSquadsAccountType(owner: PublicKey, rawData: Uint8Array): SquadsAccountType | undefined {
     if (owner.toBase58() !== SQUADS_V4_ADDRESS || rawData.length < 8) return undefined;
-    const matches = (discriminator: number[]) => discriminator.every((byte, i) => byte === rawData[i]);
+    const matches = (discriminator: number[]) => discriminator.every((byte, i) => byte === rawData.at(i));
     if (matches(BATCH_DISCRIMINATOR)) return 'batch';
     if (matches(VAULT_TRANSACTION_DISCRIMINATOR)) return 'vaultTransaction';
     return undefined;

@@ -1,3 +1,4 @@
+import { invariant } from '@shared/lib/invariant';
 import {
     address,
     bytesEqual,
@@ -99,11 +100,15 @@ export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
     const message = new V1MessageView(
         {
             addressTableLookups: [],
-            compiledInstructions: compiled.instructionHeaders.map((header, i) => ({
-                accountKeyIndexes: [...compiled.instructionPayloads[i].instructionAccountIndices],
-                data: new Uint8Array(compiled.instructionPayloads[i].instructionData),
-                programIdIndex: header.programAccountIndex,
-            })),
+            compiledInstructions: compiled.instructionHeaders.map((header, i) => {
+                const payload = compiled.instructionPayloads.at(i);
+                invariant(payload, 'v1 instruction header has no matching payload');
+                return {
+                    accountKeyIndexes: [...payload.instructionAccountIndices],
+                    data: new Uint8Array(payload.instructionData),
+                    programIdIndex: header.programAccountIndex,
+                };
+            }),
             header: {
                 numReadonlySignedAccounts: compiled.header.numReadonlySignerAccounts,
                 numReadonlyUnsignedAccounts: compiled.header.numReadonlyNonSignerAccounts,

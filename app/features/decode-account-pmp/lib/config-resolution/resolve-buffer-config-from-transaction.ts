@@ -50,8 +50,8 @@ export function resolveConfigFromTransaction(
 
     for (const { accountKeys, data } of instructions) {
         if (
-            (data.kind === 'setData' && accountKeys[PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX] === bufferAddress) ||
-            (data.kind === 'initialize' && accountKeys[PMP_METADATA_ACCOUNT_INDEX] === bufferAddress)
+            (data.kind === 'setData' && accountKeys.at(PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX) === bufferAddress) ||
+            (data.kind === 'initialize' && accountKeys.at(PMP_METADATA_ACCOUNT_INDEX) === bufferAddress)
         ) {
             return { config: data.config, dataSource: data.dataSource, kind: 'found-for-buffer-acc', signature };
         }
@@ -78,7 +78,7 @@ function collectPmpInstructions(tx: JsonTransaction): PmpInstruction[] {
         ...(tx.meta?.loadedAddresses?.writable ?? []),
         ...(tx.meta?.loadedAddresses?.readonly ?? []),
     ];
-    const at = (index: number): string => keys[index] ?? '';
+    const at = (index: number): string => keys.at(index) ?? '';
 
     const inner = (tx.meta?.innerInstructions ?? []).flatMap(group => group.instructions);
 
@@ -119,18 +119,18 @@ function findConfigForMetadataAcc(decoded: DecodedPmpInstruction[], target: stri
 
     // `collectPmpInstructions` maps an unresolvable key index to an empty string rather than throwing, so a
     // malformed instruction arrives as `''` and has to be rejected explicitly.
-    const metadata = copies[0].accountKeys[PMP_METADATA_ACCOUNT_INDEX];
+    const metadata = copies[0].accountKeys.at(PMP_METADATA_ACCOUNT_INDEX);
     if (!metadata) return undefined;
 
     // Counting EVERY write to the destination rather than only the copies.
-    const writesToMetadata = writes.filter(ix => ix.accountKeys[PMP_METADATA_ACCOUNT_INDEX] === metadata);
+    const writesToMetadata = writes.filter(ix => ix.accountKeys.at(PMP_METADATA_ACCOUNT_INDEX) === metadata);
     if (writesToMetadata.length !== 1) return undefined;
 
     for (const { accountKeys, data } of decoded) {
         const isIxWithConfig = data.kind === 'setData' || data.kind === 'initialize';
 
         // Matched at index 0 for metadata account
-        if (isIxWithConfig && accountKeys[PMP_METADATA_ACCOUNT_INDEX] === metadata) {
+        if (isIxWithConfig && accountKeys.at(PMP_METADATA_ACCOUNT_INDEX) === metadata) {
             return {
                 config: data.config,
                 dataSource: data.dataSource,
@@ -157,7 +157,7 @@ function findConfigForMetadataAcc(decoded: DecodedPmpInstruction[], target: stri
 function isWholeDataWrite({ accountKeys, data }: DecodedPmpInstruction, source: string): boolean {
     return (
         data.kind === 'write' &&
-        accountKeys[PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX] === source &&
+        accountKeys.at(PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX) === source &&
         data.offset === 0 &&
         data.chunk === undefined
     );

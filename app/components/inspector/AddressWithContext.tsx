@@ -49,10 +49,9 @@ export function AddressFromLookupTableWithContext({
         );
     } else if (typeof lookupTable === 'string') {
         return <div>Invalid Lookup Table</div>;
-    } else if (lookupTableIndex >= lookupTable.state.addresses.length) {
-        return <div>Invalid Lookup Table Index</div>;
     } else {
-        const pubkey = lookupTable.state.addresses[lookupTableIndex];
+        const pubkey = lookupTable.state.addresses.at(lookupTableIndex);
+        if (!pubkey) return <div>Invalid Lookup Table Index</div>;
         return (
             <div className={cn('flex flex-col', align === 'left' ? 'items-start' : 'items-end')}>
                 <Address pubkey={pubkey} link alignRight={align === 'right'} />

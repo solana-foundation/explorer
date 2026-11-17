@@ -41,6 +41,7 @@ import {
     TokenBatchCard,
 } from '@features/token-batch';
 import { VoteDetailsCard } from '@features/vote';
+import { getOwn } from '@shared/lib/object';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -157,7 +158,7 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
 // The RPC sets `program`, so a label such as `toString` must not resolve to a member of `Object.prototype`.
 function programRoute(dispatched: DispatchResult): ProgramRoute | undefined {
     const label = 'unknown' in dispatched ? dispatched.programLabel : dispatched.program;
-    return Object.hasOwn(PROGRAM_CARDS, label) ? PROGRAM_CARDS[label] : undefined;
+    return getOwn(PROGRAM_CARDS, label);
 }
 
 function parsedOf(dispatched: DispatchResult): ParsedInstructionInfo | undefined {

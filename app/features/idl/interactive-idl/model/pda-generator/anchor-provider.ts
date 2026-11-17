@@ -54,7 +54,7 @@ async function computePdas(
     const instruction = findInstruction(idl, instructionName);
     if (!instruction) return {};
 
-    const pdaAddresses: Record<string, PdaGenerationResult> = {};
+    const pdaAddresses: Array<[string, PdaGenerationResult]> = [];
 
     for (const account of instruction.accounts) {
         if (!account.pda) continue;
@@ -74,17 +74,17 @@ async function computePdas(
 
             if (seedBuffers && derivationProgramId) {
                 const [pda] = PublicKey.findProgramAddressSync(seedBuffers, derivationProgramId);
-                pdaAddresses[camelName] = { generated: pda.toBase58(), seeds: seedInfo };
+                pdaAddresses.push([camelName, { generated: pda.toBase58(), seeds: seedInfo }]);
             } else {
-                pdaAddresses[camelName] = { generated: null, seeds: seedInfo };
+                pdaAddresses.push([camelName, { generated: null, seeds: seedInfo }]);
             }
         } catch {
             const { info: seedInfo } = buildSeedsWithInfo(account.pda.seeds, args, accounts, instruction);
-            pdaAddresses[camelName] = { generated: null, seeds: seedInfo };
+            pdaAddresses.push([camelName, { generated: null, seeds: seedInfo }]);
         }
     }
 
-    return pdaAddresses;
+    return Object.fromEntries(pdaAddresses);
 }
 
 function findInstruction(idl: SupportedIdl, instructionName: string): PdaInstruction | null {

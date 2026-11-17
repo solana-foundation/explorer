@@ -12,6 +12,7 @@ import {
     useCustomUrlDraft,
     useSavedClusters,
 } from '@features/cluster-switcher/client';
+import { getOwn } from '@shared/lib/object';
 import { scrollToTop } from '@shared/lib/scrollToTop';
 import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
 import { useAtom } from 'jotai';
@@ -98,9 +99,9 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
     const facts = (
         <span
             className="flex shrink-0 items-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em]"
-            style={{ color: STATUS_LABEL[status].colour }}
+            style={{ color: getOwn(STATUS_LABEL, status).colour }}
         >
-            {STATUS_LABEL[status].label}
+            {getOwn(STATUS_LABEL, status).label}
         </span>
     );
 

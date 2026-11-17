@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { camelCase } from 'change-case';
 
@@ -36,12 +37,12 @@ export function resolveProgramId(
     const path = camelCase(pdaProgram.path);
 
     if (isIdlSeedArg(pdaProgram)) {
-        const value = context.args[path];
+        const value = getOwn(context.args, path);
         return value ? new PublicKey(value) : null;
     }
 
     if (isIdlSeedAccount(pdaProgram)) {
-        const value = context.accounts[path];
+        const value = getOwn(context.accounts, path);
         return typeof value === 'string' ? new PublicKey(value) : null;
     }
 

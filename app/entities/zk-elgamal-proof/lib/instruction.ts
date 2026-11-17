@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
 
 // Human-readable names for ZK ElGamal Proof Program instructions, indexed by the
@@ -23,7 +24,7 @@ export function isZkElGamalProofProgram(programId: string): boolean {
 }
 
 export function getZkElGamalProofInstructionName(discriminator: number): string {
-    return INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';
+    return getOwn(INSTRUCTION_NAMES, discriminator) ?? 'Unknown Instruction';
 }
 
 /**

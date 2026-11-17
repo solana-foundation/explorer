@@ -1,4 +1,5 @@
 import type { SolanaRpc } from '@entities/cluster';
+import { invariant } from '@shared/lib/invariant';
 import { isSome } from '@solana/kit';
 import { AddressLookupTableAccount, type VersionedMessage } from '@solana/web3.js';
 import { fetchAllMaybeAddressLookupTable } from '@solana-program/address-lookup-table';
@@ -32,15 +33,17 @@ export async function resolveAddressLookupTables(
     );
 
     return accounts.map((account, i) => {
+        const key = keys.at(i);
+        invariant(key, 'Lookup table fetch returned more accounts than requested');
         if (!account.exists) {
             throw new Error(
-                `Address lookup table ${keys[i].toBase58()} could not be loaded: the RPC returned no account ` +
+                `Address lookup table ${key.toBase58()} could not be loaded: the RPC returned no account ` +
                     `for it. The table may have been closed, or this RPC may not carry it.`,
             );
         }
         const { addresses, authority, deactivationSlot, lastExtendedSlot, lastExtendedSlotStartIndex } = account.data;
         return new AddressLookupTableAccount({
-            key: keys[i],
+            key,
             state: {
                 addresses: addresses.map(address => toLegacyPublicKey(address)),
                 authority: isSome(authority) ? toLegacyPublicKey(authority.value) : undefined,

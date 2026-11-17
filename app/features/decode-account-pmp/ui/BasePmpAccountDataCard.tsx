@@ -2,6 +2,7 @@ import { Address } from '@components/common/Address';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { TruncatedValue } from '@components/shared/TruncatedValue';
 import { PMP_POINTER_HASH_NOTES, PMP_UNRESOLVED_SOURCE_HASH_NOTE } from '@entities/pmp-account';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { DataSource } from '@solana-program/program-metadata';
 import { camelToTitleCase } from '@utils/index';
@@ -90,7 +91,9 @@ export function FieldValue({ type, value }: { type: FieldType; value: boolean | 
 
 export function PayloadHashRow({ dataSource, hash }: { dataSource?: DataSource; hash: string }) {
     const pointerNote =
-        dataSource === undefined || dataSource === DataSource.Direct ? undefined : PMP_POINTER_HASH_NOTES[dataSource];
+        dataSource === undefined || dataSource === DataSource.Direct
+            ? undefined
+            : getOwn(PMP_POINTER_HASH_NOTES, dataSource);
 
     const label =
         dataSource === undefined ? (

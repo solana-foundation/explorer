@@ -4,6 +4,7 @@ import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@providers/stats/solanaClusterStats';
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
+import { getOwn } from '@shared/lib/object';
 import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Plugin, Tooltip } from 'chart.js';
 import { renderText } from 'chart.js/helpers';
 import React from 'react';
@@ -81,7 +82,9 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number, minutesPerBar: number): ChartO
                     if (!tooltipEl) {
                         tooltipEl = document.createElement('div');
                         tooltipEl.id = 'chartjs-tooltip';
-                        tooltipEl.innerHTML = '<div class="content"></div>';
+                        const contentEl = document.createElement('div');
+                        contentEl.className = 'content';
+                        tooltipEl.append(contentEl);
                         document.body.appendChild(tooltipEl);
                     }
 
@@ -185,10 +188,10 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     const { perfHistory, avgTps, historyMaxTps } = performanceInfo;
     const averageTps = Math.round(avgTps != null ? avgTps : 0.0).toLocaleString('en-US');
     const transactionCount = <AnimatedTransactionCount info={performanceInfo} />;
-    const { minutesPerBar } = SERIES_INFO[series];
+    const { minutesPerBar } = getOwn(SERIES_INFO, series);
     // A node with less history than the interval returns fewer bars; the empty slots in front keep the axis at the
     // full interval instead of stretching the bars it has across it.
-    const seriesData = padStart(perfHistory[series], BAR_COUNT);
+    const seriesData = padStart(getOwn(perfHistory, series), BAR_COUNT);
     const chartOptions = React.useMemo<ChartOptions<'bar'>>(
         () => TPS_CHART_OPTIONS(historyMaxTps, minutesPerBar),
         [historyMaxTps, minutesPerBar],
@@ -238,7 +241,7 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                                 aria-pressed={series === key}
                                 onClick={() => setSeries(key)}
                             >
-                                {SERIES_INFO[key].interval}
+                                {getOwn(SERIES_INFO, key).interval}
                             </Button>
                         ))}
                     </div>
@@ -335,8 +338,8 @@ const TIME_SCALE_PLUGIN: Plugin<'bar'> = {
     afterDraw(chart) {
         const index = chart.getActiveElements()[0]?.index;
         const scale = chart.scales.x;
-        const text = index === undefined ? undefined : chart.data.labels?.[index];
-        const item = index === undefined ? undefined : scale?.getLabelItems()[index];
+        const text = index === undefined ? undefined : chart.data.labels?.at(index);
+        const item = index === undefined ? undefined : scale?.getLabelItems().at(index);
         if (!scale || !item || typeof text !== 'string') return;
 
         const { ctx } = chart;

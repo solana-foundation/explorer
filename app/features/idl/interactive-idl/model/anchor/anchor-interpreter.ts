@@ -156,7 +156,7 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
         args: any[],
     ) {
         const convertedArguments = args.map((arg, index) => {
-            const argDef = argumentsMeta[index];
+            const argDef = argumentsMeta.at(index);
             if (!argDef) {
                 throw new Error(`Argument at index ${index} not found in instruction definition`);
             }
@@ -178,13 +178,11 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
         accountsMeta: Readonly<Required<IdlInstruction['accounts']>>,
         accounts: Record<string, string>,
     ): Record<string, PublicKey | null> {
-        const converted: ReturnType<typeof this.convertAccounts> = {};
+        const converted: Array<[string, PublicKey | null]> = [];
 
         function findAccountMeta(name: string, metas = accountsMeta) {
-            const accountIndex = metas.findIndex(meta => meta.name === name);
-            if (accountIndex !== -1) {
-                const accountMeta = metas[accountIndex];
-
+            const accountMeta = metas.find(meta => meta.name === name);
+            if (accountMeta) {
                 if ('accounts' in accountMeta) {
                     // current limitation: we do not parse nested accounts
                     return undefined;
@@ -205,12 +203,12 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
 
             try {
                 if (!value || value === '') {
-                    if (accountMeta?.optional) converted[key] = null;
+                    if (accountMeta?.optional) converted.push([key, null]);
                 } else if (typeof value === 'string') {
                     if (value.trim() !== '') {
-                        converted[key] = new PublicKey(value);
+                        converted.push([key, new PublicKey(value)]);
                     } else {
-                        if (accountMeta?.optional) converted[key] = null;
+                        if (accountMeta?.optional) converted.push([key, null]);
                     }
                 }
             } catch {
@@ -218,6 +216,6 @@ export class AnchorInterpreter implements IdlInterpreter<AnchorIdl, AnchorUnifie
             }
         }
 
-        return converted;
+        return Object.fromEntries(converted);
     }
 }

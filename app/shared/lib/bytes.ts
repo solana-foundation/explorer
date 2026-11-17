@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import type { ReadonlyUint8Array } from '@solana/kit';
 import type BN from 'bn.js';
 
@@ -34,8 +35,9 @@ export function readU64LE(data: Uint8Array, offset: number): bigint {
 }
 
 export function readU8(data: Uint8Array, offset: number): number {
-    if (offset >= data.length) throw new RangeError(`readU8: offset ${offset} out of bounds (length ${data.length})`);
-    return data[offset];
+    const value = getOwn(data, offset);
+    if (value === undefined) throw new RangeError(`readU8: offset ${offset} out of bounds (length ${data.length})`);
+    return value;
 }
 
 /**
@@ -46,7 +48,7 @@ export function toLeBytes(value: number, size: number): Uint8Array {
     const bytes = new Uint8Array(size);
     let remaining = BigInt(value);
     for (let i = 0; i < size; i++) {
-        bytes[i] = Number(remaining & 0xffn);
+        bytes.set([Number(remaining & 0xffn)], i);
         remaining >>= 8n;
     }
     return bytes;
@@ -207,7 +209,7 @@ export function writeUint32LE(bytes: Uint8Array, value: number, offset: number):
  * Replaces: buffer.readUInt8(offset)
  */
 export function readUint8(bytes: Uint8Array, offset: number): number {
-    return bytes[offset] ?? 0;
+    return getOwn(bytes, offset) ?? 0;
 }
 
 /**
@@ -257,8 +259,8 @@ export function equals(a: Uint8Array, b: Uint8Array): boolean {
         return false;
     }
 
-    for (let i = 0; i < a.byteLength; i++) {
-        if (a[i] !== b[i]) {
+    for (const [i, byte] of a.entries()) {
+        if (byte !== b.at(i)) {
             return false;
         }
     }
@@ -275,8 +277,8 @@ export function startsWith(data: Uint8Array, prefix: Uint8Array): boolean {
         return false;
     }
 
-    for (let i = 0; i < prefix.length; i++) {
-        if (data[i] !== prefix[i]) {
+    for (const [i, byte] of prefix.entries()) {
+        if (data.at(i) !== byte) {
             return false;
         }
     }
@@ -304,8 +306,8 @@ export function indexOf(haystack: Uint8Array, needle: string | Uint8Array): numb
     }
 
     outer: for (let i = 0; i <= haystack.length - pattern.length; i++) {
-        for (let j = 0; j < pattern.length; j++) {
-            if (haystack[i + j] !== pattern[j]) {
+        for (const [j, byte] of pattern.entries()) {
+            if (haystack[i + j] !== byte) {
                 continue outer;
             }
         }

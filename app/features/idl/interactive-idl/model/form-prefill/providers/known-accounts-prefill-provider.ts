@@ -8,18 +8,17 @@ import type { ExternalDependency } from '../types';
 import { traverseInstructionAccounts } from './traverse-accounts';
 
 // Build address-to-patterns map from PROGRAM_INFO_BY_ID
-const KNOWN_ACCOUNTS: Record<string, readonly string[]> = Object.entries(PROGRAM_INFO_BY_ID)
-    .filter(([, info]) => info.name in KNOWN_PROGRAM_PATTERNS)
-    .reduce(
-        (acc, [address, info]) => {
+const KNOWN_ACCOUNTS: Record<string, readonly string[]> = Object.fromEntries(
+    Object.entries(PROGRAM_INFO_BY_ID)
+        .filter(([, info]) => info.name in KNOWN_PROGRAM_PATTERNS)
+        .reduce((acc, [address, info]) => {
             const patterns = KNOWN_PROGRAM_PATTERNS[info.name as PROGRAM_NAMES];
             if (patterns) {
-                acc[address] = patterns;
+                acc.push([address, patterns]);
             }
             return acc;
-        },
-        { ...KNOWN_ACCOUNT_PATTERNS } as Record<string, readonly string[]>,
-    );
+        }, Object.entries(KNOWN_ACCOUNT_PATTERNS)),
+);
 
 /**
  * Creates a known accounts prefill dependency that automatically fills
