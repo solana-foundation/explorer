@@ -6,16 +6,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { COOKIE_CONSENT_CHANGE_EVENT, EConsentStatus } from '../../ui/CookieConsent';
 import { useAnalyticsConsent } from '../use-analytics-consent';
 
-vi.mock('../../lib/cookie', () => ({
-    getCookie: vi.fn(() => null),
+vi.mock('../../lib/stored-value', () => ({
+    getStoredValue: vi.fn(() => null),
 }));
 
-import { getCookie } from '../../lib/cookie';
+import { getStoredValue } from '../../lib/stored-value';
 
 describe('useAnalyticsConsent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getCookie).mockReturnValue(null);
+        vi.mocked(getStoredValue).mockReturnValue(null);
     });
 
     it.each([
@@ -23,7 +23,7 @@ describe('useAnalyticsConsent', () => {
         ['true when granted', EConsentStatus.Granted, true],
         ['false when denied', EConsentStatus.Denied, false],
     ])('should return isConsentGiven=%s', (_, consent, expected) => {
-        vi.mocked(getCookie).mockReturnValue(consent);
+        vi.mocked(getStoredValue).mockReturnValue(consent);
         const { result } = renderHook(() => useAnalyticsConsent());
         expect(result.current.isConsentGiven).toBe(expected);
     });

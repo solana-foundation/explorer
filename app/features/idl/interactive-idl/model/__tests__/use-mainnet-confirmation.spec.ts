@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { toConnectableUrl } from '@entities/cluster';
-import { getCookie, setCookie } from '@features/cookie';
+import { getStoredValue, setStoredValue } from '@features/cookie';
 import { act, renderHook } from '@testing-library/react';
 import { Cluster, clusterName, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,7 +16,7 @@ vi.mock('@features/cookie');
 describe('useMainnetConfirmation', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getCookie).mockReturnValue(null);
+        vi.mocked(getStoredValue).mockReturnValue(null);
     });
 
     describe('when cluster is Mainnet Beta', () => {
@@ -68,7 +68,7 @@ describe('useMainnetConfirmation', () => {
             });
 
             expect(mockAction).not.toHaveBeenCalled();
-            expect(setCookie).not.toHaveBeenCalled();
+            expect(setStoredValue).not.toHaveBeenCalled();
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
         });
@@ -183,12 +183,12 @@ describe('useMainnetConfirmation', () => {
                 await result.current.confirm();
             });
 
-            expect(setCookie).toHaveBeenCalledWith('idl_mainnet_accepted', 'true', 182 * 24 * 60 * 60);
+            expect(setStoredValue).toHaveBeenCalledWith('idl_mainnet_accepted', 'true', 182 * 24 * 60 * 60);
         });
 
         it('should skip dialog on mainnet when disclaimer cookie exists', async () => {
             setup();
-            vi.mocked(getCookie).mockReturnValue('true');
+            vi.mocked(getStoredValue).mockReturnValue('true');
 
             const mockAction = vi.fn();
             const { result } = renderHook(() => useMainnetConfirmation());

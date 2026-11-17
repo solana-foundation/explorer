@@ -856,7 +856,7 @@ export default tseslint.config(
 
             // app/features (FSD features)
             'app/features/account/ui/AccountDownloadDropdown.tsx',
-            'app/features/cookie/lib/cookie.ts',
+            'app/features/cookie/lib/stored-value.ts',
             'app/features/cookie/model/use-analytics-consent.ts',
             'app/features/cookie/ui/CookieConsent.tsx',
             'app/features/idl/formatted-idl/model/search.ts',
