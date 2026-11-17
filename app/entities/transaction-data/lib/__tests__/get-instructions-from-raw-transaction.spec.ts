@@ -13,7 +13,7 @@ import {
     setTransactionMessageFeePayer,
     setTransactionMessageLifetimeUsingBlockhash,
 } from '@solana/kit';
-import { AddressLookupTableAccount, PublicKey, SystemProgram } from '@solana/web3.js';
+import { AddressLookupTableAccount, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { createWeb3TransactionMessage, FEE_PAYER, RECIPIENT } from '../../__fixtures__/wire-transactions';
@@ -28,6 +28,7 @@ type LoadedAddresses = { readonly: string[]; writable: string[] };
 
 const PROGRAM = address(gen.address(5));
 const TABLE = new PublicKey(gen.address(6));
+const READONLY = address(gen.address(7));
 const DATA = new Uint8Array([2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]);
 const DATA_BASE58 = getBase58Decoder().decode(DATA);
 
@@ -108,6 +109,33 @@ function v0RawWithLookup(instructions: CompiledInner[], loadedAddresses?: Loaded
     return withInner(raw, instructions, loadedAddresses);
 }
 
+function v0RawWithWritableAndReadonlyLookups(loadedAddresses: LoadedAddresses) {
+    const table = new AddressLookupTableAccount({
+        key: TABLE,
+        state: { addresses: [new PublicKey(RECIPIENT), new PublicKey(READONLY)] } as never,
+    });
+    const transaction = createWeb3TransactionMessage();
+    transaction.instructions.push(
+        new TransactionInstruction({
+            keys: [{ isSigner: false, isWritable: false, pubkey: new PublicKey(READONLY) }],
+            programId: new PublicKey(PROGRAM),
+        }),
+    );
+    const message = transaction.compileToV0Message([table]);
+    const staticCount = message.staticAccountKeys.length;
+    const raw: RawTransaction = {
+        message,
+        messageBytes: message.serialize(),
+        serializedSize: 0,
+        signatures: [],
+        slot: 0,
+        transaction,
+        version: 0,
+    };
+    const inner = { accounts: [0, staticCount, staticCount + 1], data: DATA_BASE58, programIdIndex: 1 };
+    return withInner(raw, [inner], loadedAddresses);
+}
+
 function firstInner(raw: RawTransaction) {
     const [instruction] = getInnerInstructionsFromRawTransaction(raw).get(0) ?? [];
     return instruction && { ...instruction, data: Array.from(instruction.data) };
@@ -165,6 +193,16 @@ describe('getInnerInstructionsFromRawTransaction', () => {
         });
 
         expect(firstInner(raw)?.accounts.map(account => account.address)).toEqual([FEE_PAYER, RECIPIENT]);
+    });
+
+    it('should resolve the loaded writable addresses before the loaded readonly addresses when the message is v0', () => {
+        const raw = v0RawWithWritableAndReadonlyLookups({ readonly: [READONLY], writable: [RECIPIENT] });
+
+        expect(firstInner(raw)?.accounts).toEqual([
+            { address: FEE_PAYER, role: AccountRole.WRITABLE_SIGNER },
+            { address: RECIPIENT, role: AccountRole.WRITABLE },
+            { address: READONLY, role: AccountRole.READONLY },
+        ]);
     });
 
     it('should throw when a v0 message has lookup tables and the meta has no loaded addresses', () => {
