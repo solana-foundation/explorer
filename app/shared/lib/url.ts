@@ -28,3 +28,12 @@ export function getSafeExternalHref(value: string | undefined | null): string | 
     if (!url || !SAFE_EXTERNAL_PROTOCOLS.includes(url.protocol)) return undefined;
     return value as string;
 }
+
+/** Drops a leading `http://` or `https://`, for display. Any other text comes back unchanged. */
+export function stripWebScheme(value: string): string {
+    const schemeEnd = value.indexOf(SCHEME_SEPARATOR);
+    if (!SAFE_EXTERNAL_PROTOCOLS.includes(value.slice(0, schemeEnd + 1))) return value;
+    return value.slice(schemeEnd + SCHEME_SEPARATOR.length);
+}
+
+const SCHEME_SEPARATOR = '://';

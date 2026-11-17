@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getSafeExternalHref, parseUrl } from '../url';
+import { getSafeExternalHref, parseUrl, stripWebScheme } from '../url';
 
 describe('parseUrl', () => {
     it('should parse absolute URLs', () => {
@@ -45,4 +45,21 @@ describe('getSafeExternalHref', () => {
     it.each([undefined, null])('should return undefined for nullish input: %p', value => {
         expect(getSafeExternalHref(value)).toBeUndefined();
     });
+});
+
+describe('stripWebScheme', () => {
+    it.each([
+        ['https://github.com/foo/bar', 'github.com/foo/bar'],
+        ['http://localhost:3000', 'localhost:3000'],
+        ['https://<deployment>', '<deployment>'],
+    ])('should drop the web scheme of %s', (value, expected) => {
+        expect(stripWebScheme(value)).toBe(expected);
+    });
+
+    it.each(['github.com/foo/bar', 'https', 'ftp://example.com', 'javascript://x', ''])(
+        'should return %j unchanged',
+        value => {
+            expect(stripWebScheme(value)).toBe(value);
+        },
+    );
 });
