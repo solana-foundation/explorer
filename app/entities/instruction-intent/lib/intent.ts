@@ -15,13 +15,10 @@ export type InstructionFetchResult =
 // Codama returns a plain string and we need parts to render an `<Address />` link.
 export type IntentSentencePart = { kind: 'text'; text: string } | { kind: 'address'; address: Address };
 
-export type IntentField = { label: string; value: string };
-
 export type InstructionIntent = {
     sentenceParts: readonly IntentSentencePart[];
     /** False when a template value could not be filled and the sentence is the short intent label. */
     interpolated: boolean;
-    fields: readonly IntentField[];
     /** The intent depends on live account state, which can differ from the state at the transaction's slot. */
     usedAccountData: boolean;
 };

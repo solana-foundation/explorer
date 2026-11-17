@@ -34,11 +34,6 @@ describe('computeInstructionIntent', () => {
         });
 
         expect(intent).toEqual({
-            fields: [
-                { label: 'Amount', value: '1.5 SOL' },
-                { label: 'From', value: SOURCE },
-                { label: 'To', value: DESTINATION },
-            ],
             interpolated: true,
             sentenceParts: [
                 { kind: 'text', text: 'Transfer 1.5 SOL from ' },
@@ -137,7 +132,6 @@ describe('computeInstructionIntent', () => {
         expect(intent.interpolated).toBe(false);
         expect(intent.usedAccountData).toBe(false);
         expect(intent.sentenceParts).toEqual([{ kind: 'text', text: 'Mint tokens' }]);
-        expect(intent.fields[0]).toEqual({ label: 'Amount', value: '1500000 (raw)' });
     });
 
     it('should not report account data when the sentence is withheld', async () => {

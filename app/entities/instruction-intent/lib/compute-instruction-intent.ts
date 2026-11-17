@@ -2,7 +2,7 @@ import type { ParsedInstruction } from '@codama/dynamic-parsers';
 import { type Address, address, isAddress, type MaybeEncodedAccount } from '@solana/kit';
 import type { RootNode } from 'codama';
 
-import type { InstructionIntent, IntentField, IntentSentencePart } from './intent';
+import type { InstructionIntent, IntentSentencePart } from './intent';
 import { loadIntentSdk } from './load-intent-sdk';
 
 export async function computeInstructionIntent({
@@ -26,14 +26,13 @@ export async function computeInstructionIntent({
     const interpolated = display.interpolatedIntent !== null;
 
     return {
-        fields: display.fields,
         interpolated,
         sentenceParts,
         usedAccountData: interpolated && accounts.some(account => account.exists),
     };
 }
 
-function knownAddresses(parsed: ParsedInstruction, fields: readonly IntentField[]): Address[] {
+function knownAddresses(parsed: ParsedInstruction, fields: readonly { value: string }[]): Address[] {
     const accounts = [...parsed.accounts, ...(parsed.remainingAccounts ?? [])].map(account => account.address);
     const values = fields.map(field => field.value).filter(isAddress);
     return [...new Set([...accounts, ...values])];

@@ -7,7 +7,6 @@ import { DESTINATION, SOURCE } from '../../mocks/fixtures';
 import { InstructionIntentPanel } from '../InstructionIntentPanel';
 
 const TRANSFER: InstructionIntent = {
-    fields: [],
     interpolated: true,
     sentenceParts: [
         { kind: 'text', text: 'Transfer 100000000 base units from ' },
