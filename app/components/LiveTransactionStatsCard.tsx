@@ -105,9 +105,13 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number, minutesPerBar: number): ChartO
                         const { dataIndex, raw } = tooltipModel.dataPoints[0];
                         const tooltipContent = tooltipEl.querySelector('div');
                         if (tooltipContent) {
-                            let innerHtml = `<div class="value">${raw} TPS</div>`;
-                            innerHtml += `<div class="label">${(BAR_COUNT - dataIndex) * minutesPerBar}min ago</div>`;
-                            tooltipContent.innerHTML = innerHtml;
+                            const valueEl = document.createElement('div');
+                            valueEl.className = 'value';
+                            valueEl.textContent = `${raw} TPS`;
+                            const labelEl = document.createElement('div');
+                            labelEl.className = 'label';
+                            labelEl.textContent = `${(BAR_COUNT - dataIndex) * minutesPerBar}min ago`;
+                            tooltipContent.replaceChildren(valueEl, labelEl);
                         }
                     }
 

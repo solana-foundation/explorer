@@ -147,11 +147,10 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                         gap: 8px;
                                         margin-bottom: 6px;
                                     ">
-                                        <div style="
+                                        <div class="cu-tooltip-swatch" style="
                                             width: 12px;
                                             height: 12px;
                                             border-radius: 2px;
-                                            background-color: ${color};
                                             flex-shrink: 0;
                                             margin-top: 3px;
                                         "></div>
@@ -172,16 +171,18 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                             // An instruction name can come from program-authored on-chain IDL metadata, so
                             // it is written as text. Interpolating it into the markup above would let an
                             // IDL author inject HTML into this page.
+                            const swatchEl = tooltipContent.querySelector<HTMLElement>('.cu-tooltip-swatch');
                             const titleEl = tooltipContent.querySelector('.cu-tooltip-title');
                             const cuEl = tooltipContent.querySelector('.cu-tooltip-cu');
-                            if (!titleEl || !cuEl) {
+                            if (!swatchEl || !titleEl || !cuEl) {
                                 // Unreachable unless the template above is edited to drop these class
                                 // names. Kept so that edit degrades to a hidden tooltip rather than one
                                 // showing the previous instruction's figures.
-                                Logger.warn('[compute-unit] CU tooltip markup is missing its text nodes');
+                                Logger.warn('[compute-unit] CU tooltip markup is missing its swatch or text nodes');
                                 tooltipEl.style.opacity = '0';
                                 return;
                             }
+                            swatchEl.style.backgroundColor = String(color);
                             titleEl.textContent = title;
                             cuEl.textContent = `${dataset.displayValue} ${cuText}`;
                         }
