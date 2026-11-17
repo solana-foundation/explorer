@@ -8,12 +8,10 @@ export function hasReliableChanges(
     return simulation.status === 'done' && !simulation.result.error;
 }
 
-// Message explaining a failed/reverted run, or `undefined` when it did not fail. The `done`-with-error
-// case only carries a generic `TransactionError`, so it points at the Logs rather than repeating it.
+// Message explaining a failed/reverted run, or `undefined` when it did not fail.
 export function simulationFailureMessage(simulation: SimulationState): string | undefined {
     if (simulation.status === 'error') return simulation.error;
-    if (simulation.status === 'done' && simulation.result.error) {
-        return 'Transaction reverted during simulation — see the Logs for the program error.';
-    }
-    return undefined;
+    if (simulation.status !== 'done' || !simulation.result.error) return undefined;
+    if (!simulation.result.logs?.some(instruction => instruction.failed)) return simulation.result.error;
+    return 'Transaction reverted during simulation — see the Logs for the program error.';
 }

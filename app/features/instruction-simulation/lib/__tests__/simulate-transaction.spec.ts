@@ -126,6 +126,53 @@ describe('simulateTransaction', () => {
         expect(result).toMatchObject({ error: 'AccountNotFound', logs: undefined });
     });
 
+    it('should return the raw error when an object-shaped error comes without logs', async () => {
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
+                createSimulationResponse({
+                    err: { InsufficientFundsForRent: { account_index: 0n } },
+                    logs: [],
+                }),
+            ),
+        });
+
+        const result = await simulate(rpc);
+
+        expect(result.error).toBe('{"InsufficientFundsForRent":{"account_index":0}}');
+    });
+
+    it.each([
+        {
+            err: { InsufficientFundsForRent: { account_index: 2n } },
+            expected: '{"InsufficientFundsForRent":{"account_index":2}}',
+        },
+        { err: 'UnbalancedTransaction', expected: 'UnbalancedTransaction' },
+    ])('should return the raw error $expected when the logs mark no failed instruction', async ({ err, expected }) => {
+        const succeededLogs: InstructionLogs[] = [
+            {
+                computeUnits: 150,
+                failed: false,
+                invokedProgram: SYSTEM_PROGRAM_ADDRESS,
+                logs: [{ prefix: '> ', style: 'success', text: 'Program returned success' }],
+                truncated: false,
+            },
+        ];
+        mockParseProgramLogs.mockReturnValue(succeededLogs);
+
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
+                createSimulationResponse({
+                    err,
+                    logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, `Program ${SYSTEM_PROGRAM_ADDRESS} success`],
+                }),
+            ),
+        });
+
+        const result = await simulate(rpc);
+
+        expect(result).toMatchObject({ error: expected, logs: succeededLogs });
+    });
+
     it('should return TransactionError when simulation has logs and an error', async () => {
         const mockLogs: InstructionLogs[] = [
             {

@@ -276,7 +276,12 @@ function interpretSimulation(
         // SOL/token balance cards (unreliable after a failed tx) while still
         // showing the parsed logs so the user can diagnose the failure.
         if (simResult.err) {
-            error = 'TransactionError';
+            const hasFailedIxs = logs.some(instruction => instruction.failed);
+            if (hasFailedIxs) {
+                error = 'TransactionError';
+            } else {
+                error = typeof simResult.err === 'string' ? simResult.err : JSON.stringify(simResult.err);
+            }
         }
     }
 
