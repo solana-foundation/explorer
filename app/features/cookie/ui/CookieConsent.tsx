@@ -6,12 +6,12 @@ import { Button } from '@/app/components/shared/ui/button';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { cn } from '@/app/components/shared/utils';
 
-import { getCookie, setCookie } from '../lib/cookie';
+import { getStoredValue, setStoredValue } from '../lib/stored-value';
 
 export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
-export const COOKIE_COUNTRY_NAME = 'solana_country';
+export const COUNTRY_STORAGE_KEY = 'solana_country';
 export const COOKIE_CONSENT_CHANGE_EVENT = 'cookie-consent-change';
-const COOKIE_MAX_AGE = 15778476; // 6 months in seconds
+const CONSENT_MAX_AGE_SECONDS = 15778476; // 6 months in seconds
 const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-information';
 
 export enum EConsentStatus {
@@ -25,14 +25,14 @@ export function CookieConsent() {
     const [isEU, setIsEU] = useState<boolean | null>(null);
 
     const autoGrantConsent = () => {
-        setCookie(COOKIE_CONSENT_NAME, EConsentStatus.Granted, COOKIE_MAX_AGE);
+        setStoredValue(COOKIE_CONSENT_NAME, EConsentStatus.Granted, CONSENT_MAX_AGE_SECONDS);
         setConsent(EConsentStatus.Granted);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: EConsentStatus.Granted }));
     };
 
     useEffect(() => {
         setIsMounted(true);
-        const storedConsent = getCookie(COOKIE_CONSENT_NAME) as EConsentStatus | null;
+        const storedConsent = getStoredValue(COOKIE_CONSENT_NAME) as EConsentStatus | null;
         setConsent(storedConsent);
 
         if (storedConsent) return;
@@ -41,7 +41,7 @@ export function CookieConsent() {
             .then(res => res.json())
             .then(data => {
                 if (data.country) {
-                    setCookie(COOKIE_COUNTRY_NAME, data.country, COOKIE_MAX_AGE);
+                    setStoredValue(COUNTRY_STORAGE_KEY, data.country, CONSENT_MAX_AGE_SECONDS);
                 }
                 setIsEU(data.isEU);
                 if (!data.isEU) autoGrantConsent();
@@ -53,7 +53,7 @@ export function CookieConsent() {
     }, []);
 
     const handleConsent = (value: EConsentStatus) => {
-        setCookie(COOKIE_CONSENT_NAME, value, COOKIE_MAX_AGE);
+        setStoredValue(COOKIE_CONSENT_NAME, value, CONSENT_MAX_AGE_SECONDS);
         setConsent(value);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: value }));
     };

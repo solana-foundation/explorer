@@ -1,11 +1,11 @@
-import { getCookie, setCookie } from '@features/cookie';
+import { getStoredValue, setStoredValue } from '@features/cookie';
 import { Cluster } from '@utils/cluster';
 import { useCallback, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 
-const MAINNET_DISCLAIMER_COOKIE = 'idl_mainnet_accepted';
-const COOKIE_MAX_AGE = 182 * 24 * 60 * 60;
+const MAINNET_DISCLAIMER_KEY = 'idl_mainnet_accepted';
+const ACCEPTANCE_MAX_AGE_SECONDS = 182 * 24 * 60 * 60;
 
 type PendingAction<T> = {
     action: () => Promise<void> | void;
@@ -25,7 +25,7 @@ export function useMainnetConfirmation<T = unknown>() {
 
     const requireConfirmation = useCallback(
         async (action: () => Promise<void> | void, context?: T) => {
-            if (currentCluster === Cluster.Mainnet && !getCookie(MAINNET_DISCLAIMER_COOKIE)) {
+            if (currentCluster === Cluster.Mainnet && !getStoredValue(MAINNET_DISCLAIMER_KEY)) {
                 setPendingAction({ action, context });
                 setIsOpen(true);
             } else {
@@ -37,7 +37,7 @@ export function useMainnetConfirmation<T = unknown>() {
 
     const confirm = useCallback(async () => {
         if (pendingAction) {
-            setCookie(MAINNET_DISCLAIMER_COOKIE, 'true', COOKIE_MAX_AGE);
+            setStoredValue(MAINNET_DISCLAIMER_KEY, 'true', ACCEPTANCE_MAX_AGE_SECONDS);
             setIsOpen(false);
             try {
                 await pendingAction.action();
