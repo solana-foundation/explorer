@@ -74,11 +74,7 @@ describe('BaseCUProfilingCard', () => {
         });
     });
 
-    /**
-     * The tooltip builds its shell with innerHTML, so the one thing that must never be interpolated is
-     * the instruction name — it can come from program-authored on-chain IDL metadata, which makes it
-     * attacker-controlled by anyone who can publish an IDL.
-     */
+    // The instruction name can come from on-chain IDL metadata, so anyone who publishes an IDL controls it.
     describe('tooltip', () => {
         it('should write a program-authored name as text, not as markup', () => {
             const name = '<img src=x onerror="alert(1)">';
