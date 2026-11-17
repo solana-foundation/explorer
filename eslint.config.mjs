@@ -2,6 +2,7 @@ import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import vitest from '@vitest/eslint-plugin';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import boundaries from 'eslint-plugin-boundaries';
+import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import sortKeysFix from 'eslint-plugin-sort-keys-fix';
 import storybook from 'eslint-plugin-storybook';
@@ -565,6 +566,19 @@ export default tseslint.config(
         plugins: { boundary: clientBoundaryPlugin },
         rules: {
             'boundary/no-server-actions': 'error',
+        },
+    },
+
+    // Program, token and IDL names are authored on-chain, so a string parsed as HTML can inject markup.
+    // Write a value as text instead.
+    {
+        files: ['app/**/*.[jt]s?(x)'],
+        ignores: TEST_AND_STORY_FILES,
+        plugins: { 'no-unsanitized': noUnsanitized },
+        rules: {
+            'no-unsanitized/method': 'error',
+            'no-unsanitized/property': 'error',
+            'react/no-danger': 'error',
         },
     },
 
