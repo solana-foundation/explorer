@@ -70,6 +70,7 @@ describe('parseExplorerUrl', () => {
         [`https://solscan.io/account/${DEFAULT_ADDRESS}?cluster=testnet`, Cluster.Testnet],
         [`https://solscan.io/account/${DEFAULT_ADDRESS}?cluster=mainnet-beta`, Cluster.Mainnet],
         [`https://solscan.io/account/${DEFAULT_ADDRESS}?cluster=unknown`, Cluster.Mainnet],
+        [`https://solscan.io/account/${DEFAULT_ADDRESS}?cluster=constructor`, Cluster.Mainnet],
         [`https://orb.markets/address/${DEFAULT_ADDRESS}?cluster=devnet`, Cluster.Devnet],
     ])('should resolve the cluster of %s', (url, cluster) => {
         expect(parseExplorerUrl(url)).toMatchObject({ cluster, pathname: `/address/${DEFAULT_ADDRESS}` });
