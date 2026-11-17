@@ -355,11 +355,12 @@ export function identifyInstructionType(data: Uint8Array): MetaplexInstructionTy
 }
 
 function buildInfo(def: InstructionDef, instruction: KitInstruction): Record<string, unknown> {
-    const info: Record<string, unknown> = {};
-    def.accounts.forEach((name, i) => {
-        const account = instruction.accounts[i];
-        if (name && account) info[name] = new PublicKey(account.address);
-    });
+    const info: Record<string, unknown> = Object.fromEntries(
+        def.accounts.flatMap((name, i): [string, PublicKey][] => {
+            const account = instruction.accounts.at(i);
+            return name && account ? [[name, new PublicKey(account.address)]] : [];
+        }),
+    );
     if (def.getSerializer) {
         const [raw] = def.getSerializer().deserialize(instruction.data);
         if (def.extractData) Object.assign(info, def.extractData(raw));

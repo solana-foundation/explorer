@@ -17,6 +17,7 @@ import {
     PMP_UNCOMPRESSED_BYTES_LABEL,
     type PmpPayloadDecodeResult,
 } from '@entities/pmp-account';
+import { getOwn } from '@shared/lib/object';
 import type { Address } from '@solana/kit';
 import { Compression, DataSource } from '@solana-program/program-metadata';
 
@@ -109,12 +110,12 @@ export function accountPayloadFields({
 
 /** A non-Direct payload stores a pointer, so the row says why there is no hash rather than digest the reference. */
 function hashFields(decoded: PmpPayloadDecodeResult, dataSource: DataSource): InstructionFieldList {
-    const hash = getPayloadDataHash(decoded);
-    if (hash === undefined) return [];
+    const dataHash = getPayloadDataHash(decoded);
+    if (dataHash === undefined) return [];
     return [
         dataSource === DataSource.Direct
-            ? string('Data Hash', hash)
-            : text('Data Hash', PMP_POINTER_HASH_NOTES[dataSource]),
+            ? string('Data Hash', dataHash)
+            : text('Data Hash', getOwn(PMP_POINTER_HASH_NOTES, dataSource)),
     ];
 }
 
@@ -191,6 +192,6 @@ function bytesBadge(
 ): { text: string; tone: 'info' | 'warning' } | undefined {
     if (compression === Compression.None) return undefined;
     return side === 'compressed'
-        ? { text: PMP_COMPRESSED_BYTES_LABELS[compression], tone: 'warning' }
+        ? { text: getOwn(PMP_COMPRESSED_BYTES_LABELS, compression), tone: 'warning' }
         : { text: PMP_UNCOMPRESSED_BYTES_LABEL, tone: 'info' };
 }

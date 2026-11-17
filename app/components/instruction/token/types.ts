@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { PublicKeyFromString } from '@validators/pubkey';
 import {
     array,
@@ -830,7 +831,7 @@ export const IX_STRUCTS = {
 
 export function getTokenIxValidator(type: string): Parameters<typeof create>[1] | undefined {
     // `type` arrives as a free string from RPC; IX_STRUCTS is keyed by the narrower TokenInstructionType.
-    return (IX_STRUCTS as Record<string, Parameters<typeof create>[1]>)[type];
+    return getOwn(IX_STRUCTS as Record<string, Parameters<typeof create>[1]>, type);
 }
 
 export const IX_TITLES = {

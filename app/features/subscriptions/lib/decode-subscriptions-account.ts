@@ -42,7 +42,7 @@ export function decodeSubscriptionsAccount(
 ): SubscriptionsAccountData | undefined {
     if (data.length === 0) return undefined;
 
-    const discriminator = data[DISCRIMINATOR_OFFSET];
+    const discriminator = data.at(DISCRIMINATOR_OFFSET);
     const encoded = toEncodedAccount(address, data);
 
     try {

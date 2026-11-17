@@ -41,7 +41,7 @@ export function toRawInstructionNode(
 
 export function instructionDataOf(nodes: ReadonlyArray<InstructionNode | undefined>) {
     return (index: number): Uint8Array | undefined => {
-        const ix = nodes[index]?.ix;
+        const ix = nodes.at(index)?.ix;
         return ix && !('parsed' in ix) ? ix.data : undefined;
     };
 }

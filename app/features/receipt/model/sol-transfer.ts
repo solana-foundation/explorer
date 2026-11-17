@@ -6,6 +6,7 @@ import {
     type LocatedInstruction,
     type SolTransferInstruction,
 } from '@entities/transfer-instruction';
+import { invariant } from '@shared/lib/invariant';
 import type { ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
@@ -58,7 +59,9 @@ function getSolTransferInstructions(transaction: TransactionWithMeta): LocatedIn
     const topLevel = transaction.transaction.message.instructions;
     return collected.filter(({ innerIndex, topLevelIndex }) => {
         if (innerIndex === undefined) return true;
-        return !isRentFundingProgram(topLevel[topLevelIndex].programId);
+        const parent = topLevel.at(topLevelIndex);
+        invariant(parent, `missing top-level instruction at index ${topLevelIndex}`);
+        return !isRentFundingProgram(parent.programId);
     });
 }
 

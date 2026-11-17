@@ -1,3 +1,5 @@
+import { getOwn } from '@shared/lib/object';
+
 // https://github.com/anza-xyz/agave/blob/v2.1.13/programs/system/src/system_processor.rs#L299
 const SYSTEM_PROGRAM_INSTRUCTION_COMPUTE_UNITS = 150;
 
@@ -38,5 +40,5 @@ export const PROGRAM_DEFAULT_COMPUTE_UNITS: Record<string, number> = {
 };
 
 export function getDefaultComputeUnits(programId: string): number {
-    return PROGRAM_DEFAULT_COMPUTE_UNITS[programId] ?? 0;
+    return getOwn(PROGRAM_DEFAULT_COMPUTE_UNITS, programId) ?? 0;
 }

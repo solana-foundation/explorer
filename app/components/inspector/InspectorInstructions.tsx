@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
@@ -54,7 +55,7 @@ export function InspectorInstructions() {
     const [activeTab, setActiveTab] = React.useState('cli');
     const rust = rustExample(encoding);
     const kit = kitExample(encoding);
-    const ts = TS_PRINT_LINES[encoding];
+    const ts = getOwn(TS_PRINT_LINES, encoding);
 
     const tabs: TabData[] = [
         {
@@ -77,8 +78,8 @@ export function InspectorInstructions() {
                     encodingChoice={<EncodingChoice encoding={encoding} onEncodingChange={onEncodingChange} />}
                     instruction={
                         <>
-                            Add <code className={INLINE_CODE}>{RUST_ENCODING_CRATE[encoding]}</code> crate dependency
-                            and <code className={INLINE_CODE}>{RUST_PRINT_LINE[encoding]}</code>
+                            Add <code className={INLINE_CODE}>{getOwn(RUST_ENCODING_CRATE, encoding)}</code> crate
+                            dependency and <code className={INLINE_CODE}>{getOwn(RUST_PRINT_LINE, encoding)}</code>
                         </>
                     }
                     example={<BaseCodeExample language="rust" code={rust.code} focus={rust.focus} />}

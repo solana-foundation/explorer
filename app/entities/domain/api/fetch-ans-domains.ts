@@ -104,11 +104,12 @@ async function fetchDomainNames(rpc: AnsRpc, entries: ReverseLookupEntry[]): Pro
                 .send();
 
             return accountInfos.flatMap((info, i) => {
-                if (!info) return [];
+                const entry = batch.at(i);
+                if (!info || !entry) return [];
 
                 const record = decodeAnsNameRecord(base64Encoder.encode(info.data[0]));
                 if (!record?.name) return [];
-                return [{ address: batch[i].nameAccountAddress, name: record.name + batch[i].tldName }];
+                return [{ address: entry.nameAccountAddress, name: record.name + entry.tldName }];
             });
         }),
     );

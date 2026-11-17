@@ -5,6 +5,7 @@ import {
     type InstructionNode,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 
 import type { AssociatedTokenParsed } from '../lib/associated-token-parser';
@@ -53,7 +54,9 @@ export function AssociatedTokenDetailsCard({ node, parsed }: Props) {
     // is not, `parsed` is RPC's raw fallback rather than this slice's output. Only the
     // tx page can reach this: `fromTransactionInstruction` reports
     // failures as `{ unknown: true }`, which the router handles before this card.
-    const isCanonical = Boolean(variant && info && variant.fields.every(([, f]) => info[f] instanceof PublicKey));
+    const isCanonical = Boolean(
+        variant && info && variant.fields.every(([, f]) => getOwn(info, f) instanceof PublicKey),
+    );
 
     if (!variant || !info || !isCanonical) {
         return <UnknownDetailsCard node={node} />;
@@ -63,7 +66,7 @@ export function AssociatedTokenDetailsCard({ node, parsed }: Props) {
         <InstructionCardView node={node} title={variant.title}>
             <InstructionFields
                 programId={node.programId}
-                fields={variant.fields.map(([label, field]) => address(label, info[field] as PublicKey))}
+                fields={variant.fields.map(([label, field]) => address(label, getOwn(info, field) as PublicKey))}
             />
         </InstructionCardView>
     );

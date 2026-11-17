@@ -120,8 +120,8 @@ export const receiptMultiTransfer9: FormattedReceipt = formatReceiptData(
     {
         ...baseSolReceipt,
         total: 1125000000,
-        transfers: Array.from({ length: 9 }, (_, i) => ({
-            receiver: EXTRA_RECEIVERS[i],
+        transfers: EXTRA_RECEIVERS.slice(0, 9).map((receiver, i) => ({
+            receiver,
             sender: raw.sender,
             total: (i + 1) * 25000000,
         })),

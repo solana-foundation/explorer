@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { camelToTitleCase } from '@utils/index';
 
 import { readUint32LE } from '@/app/shared/lib/bytes';
@@ -44,7 +45,7 @@ const RPC_TYPES_BY_TAG: Partial<Record<string, readonly string[]>> = {
 const TAG_BYTES = 4;
 
 export function resolveNativeProgramInstructionName({ programId, data }: InstructionNameLookup): string | undefined {
-    const rpcTypes = RPC_TYPES_BY_TAG[programId];
+    const rpcTypes = getOwn(RPC_TYPES_BY_TAG, programId);
     if (!rpcTypes || data.length < TAG_BYTES) return undefined;
 
     const rpcType = rpcTypes[readUint32LE(data, 0)];

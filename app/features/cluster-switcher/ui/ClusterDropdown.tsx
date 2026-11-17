@@ -4,6 +4,7 @@ import { FOCUS_RULE_CLASSES, focusRuleStyle, isKeyboardFocus } from '@components
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { cn } from '@components/shared/utils';
 import { useCluster } from '@entities/cluster';
+import { getOwn } from '@shared/lib/object';
 import { ClusterStatus } from '@utils/cluster';
 import React from 'react';
 import { ChevronDown } from 'react-feather';
@@ -33,12 +34,12 @@ export function ClusterDropdown({ align = 'end', className, onOpenChange, open }
     const [focused, setFocused] = React.useState(false);
 
     const label = endpoint ? endpointName(endpoint) : name;
-    const { label: statusLabel } = STATUS_STYLE[status];
+    const { label: statusLabel } = getOwn(STATUS_STYLE, status);
 
     const provenance = endpointProvenance(endpoint?.href);
-    const lead = provenance ? PROVENANCE_MARK[provenance] : undefined;
+    const lead = provenance ? getOwn(PROVENANCE_MARK, provenance) : undefined;
     const LeadGlyph = lead?.glyph;
-    const factsColour = status === ClusterStatus.Connected ? CONNECTED_GREY : STATUS_STYLE[status].colour;
+    const factsColour = status === ClusterStatus.Connected ? CONNECTED_GREY : getOwn(STATUS_STYLE, status).colour;
     // The mark is colour and an aria-hidden glyph, so the name has to say it too.
     const described = lead ? `${label} (${lead.label} endpoint)` : label;
 

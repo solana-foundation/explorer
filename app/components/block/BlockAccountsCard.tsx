@@ -48,7 +48,7 @@ export function BlockAccountsCard({ block, blockSlot }: { block: BlockData; bloc
             const accountKeys = getBlockTransactionAccounts(tx);
             getBlockTransactionInstructions(tx.message).forEach(ix => {
                 ix.accountIndices.forEach(index => {
-                    const accountKey = accountKeys[index];
+                    const accountKey = accountKeys.at(index);
                     invariant(accountKey, `account key index ${index} out of range`);
                     txSet.set(accountKey, isBlockTransactionAccountWritable(tx, index));
                 });

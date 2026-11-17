@@ -5,6 +5,7 @@ import { ActionType } from '@providers/block';
 import * as Cache from '@providers/cache';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import { InflationReward, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
@@ -169,7 +170,7 @@ export function useRewards(address: string): Cache.CacheEntry<Rewards> | undefin
         throw new Error(`useRewards must be used within a AccountsProvider`);
     }
 
-    return context.entries[address];
+    return getOwn(context.entries, address);
 }
 
 export function useFetchRewards() {

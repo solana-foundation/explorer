@@ -39,25 +39,25 @@ export class CodamaInterpreter implements IdlInterpreter<BaseIdl, CodamaUnifiedP
         args: UnifiedArguments,
     ): Promise<TransactionInstruction | VersionedMessage> {
         // Normalize accounts to UnifiedAccounts (Record<string, PublicKey | null>)
-        const normalizedAccounts: UnifiedAccounts = {};
+        const normalizedAccounts: Array<[string, PublicKey | null]> = [];
         for (const [key, value] of Object.entries(accounts)) {
             if (!value) {
-                normalizedAccounts[key] = null;
+                normalizedAccounts.push([key, null]);
             } else if (typeof value === 'string') {
                 if (value.trim() === '') {
-                    normalizedAccounts[key] = null;
+                    normalizedAccounts.push([key, null]);
                 } else {
                     try {
-                        normalizedAccounts[key] = new PublicKey(value);
+                        normalizedAccounts.push([key, new PublicKey(value)]);
                     } catch {
                         throw new Error(`Invalid public key for account "${key}": ${value}`);
                     }
                 }
             } else {
-                normalizedAccounts[key] = value;
+                normalizedAccounts.push([key, value]);
             }
         }
 
-        return program.buildInstruction(instructionName, normalizedAccounts, args);
+        return program.buildInstruction(instructionName, Object.fromEntries(normalizedAccounts), args);
     }
 }

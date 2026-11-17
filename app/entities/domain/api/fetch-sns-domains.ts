@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { array, is, record, string, unknown } from 'superstruct';
 
 import { formatSnsName, getSnsNameAccount } from '../lib/sns-name-service';
@@ -31,7 +32,7 @@ function parseBonfidaResponse(data: unknown, address: string): string[] {
         throw new Error('Unexpected Bonfida API response format');
     }
 
-    const value = data[address];
+    const value = getOwn(data, address);
     if (value === undefined) return [];
 
     if (!is(value, DomainNames)) {

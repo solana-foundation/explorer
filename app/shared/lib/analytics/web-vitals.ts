@@ -1,3 +1,5 @@
+import { getOwn } from '@shared/lib/object';
+
 import { type GA4EventName, trackEvent } from './track-event';
 
 export enum WebVitalsEvent {
@@ -28,7 +30,7 @@ const EVENT_BY_METRIC_NAME: Record<string, WebVitalsEvent | undefined> = {
 
 export const webVitalsAnalytics = {
     trackMetric({ name, rating, value }: WebVitalsMetric): void {
-        const event = EVENT_BY_METRIC_NAME[name];
+        const event = getOwn(EVENT_BY_METRIC_NAME, name);
 
         // useReportWebVitals also emits the deprecated FID, which INP replaced.
         if (!event) {

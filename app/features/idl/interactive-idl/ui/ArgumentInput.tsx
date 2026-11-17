@@ -2,6 +2,7 @@ import { Badge } from '@components/shared/ui/badge';
 import { Input } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import type { ArgField } from '@entities/idl';
+import { invariant } from '@shared/lib/invariant';
 import { forwardRef, useEffect, useId, useRef } from 'react';
 import { X } from 'react-feather';
 
@@ -44,8 +45,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
             // eslint-disable-next-line no-restricted-syntax -- remove commas from array item input
             const sanitizeArrayItem = (value: string) => value.replace(/,/g, '');
             const sanitizedValue = sanitizeArrayItem(newValue);
-            const newValues = [...values];
-            newValues[index] = sanitizedValue;
+            const newValues = values.map((item, i) => (i === index ? sanitizedValue : item));
             updateValue(newValues);
         };
 
@@ -57,8 +57,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
 
             if (pastedValues.length === 0) return;
 
-            const newValues = [...values];
-            newValues[index] = pastedValues[0];
+            const newValues = values.map((item, i) => (i === index ? pastedValues[0] : item));
 
             const remainingValues = pastedValues.slice(1);
             const availableSlots = Math.max(0, maxLength - newValues.length);
@@ -81,8 +80,8 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
             if (values.length <= 1) return;
 
             setRemovedIndex(index);
-            const itemId = stableIds[index];
-            removeRefsForIds([itemId]);
+            const itemId = stableIds.at(index);
+            if (itemId !== undefined) removeRefsForIds([itemId]);
             removeId(index);
             updateValue(values.filter((_, i) => i !== index));
         };
@@ -92,7 +91,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
                 e.preventDefault();
                 handleAddItem();
             }
-            if ((e.key === 'Delete' || e.key === 'Backspace') && values[index] === '') {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && values.at(index) === '') {
                 e.preventDefault();
                 handleRemoveItem(index);
             }
@@ -116,7 +115,8 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
             >
                 <div className="space-y-2">
                     {values.map((item, index) => {
-                        const itemId = stableIds[index];
+                        const itemId = stableIds.at(index);
+                        invariant(itemId !== undefined, 'Missing stable id for array item');
                         return (
                             <div key={itemId} className="flex items-center gap-2">
                                 <Input
@@ -235,7 +235,8 @@ function useAutoFocus(
         if (lengthDiff < 0 && removedIndexRef.current !== null) {
             // Item was removed - focus the item at the removed index (or previous if it was last)
             const focusIndex = Math.max(0, Math.min(removedIndexRef.current, values.length - 1));
-            getInputRef(stableIds[focusIndex])?.focus();
+            const focusId = stableIds.at(focusIndex);
+            if (focusId !== undefined) getInputRef(focusId)?.focus();
             removedIndexRef.current = null;
         }
 

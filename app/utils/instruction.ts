@@ -1,5 +1,6 @@
 import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
 import { type TransactionWithMeta } from '@entities/transaction-data';
+import { getOwn } from '@shared/lib/object';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -52,7 +53,7 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
         const parsed = create(ix.parsed, ParsedInfo);
         const { type: rawType } = parsed;
         const type = create(rawType, TokenInstructionType);
-        return IX_TITLES[type];
+        return getOwn(IX_TITLES, type);
     } catch (err) {
         Logger.error(err, { signature: signatureInfo.signature });
         return 'Unknown';

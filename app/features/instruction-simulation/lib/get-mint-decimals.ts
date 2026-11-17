@@ -21,10 +21,8 @@ export function getMintDecimals(
 ): MintDecimalsMap {
     const mintToDecimals: MintDecimalsMap = {};
 
-    for (let index = 0; index < accountKeys.length; index++) {
-        const key = accountKeys[index];
-
-        const preEntry = decimalsFromPreAccount(key, parsedAccountsPre[index]);
+    for (const [index, key] of accountKeys.entries()) {
+        const preEntry = decimalsFromPreAccount(key, parsedAccountsPre.at(index));
         if (preEntry) mintToDecimals[preEntry.mint] = preEntry.decimals;
 
         const postEntry = decimalsFromPostAccount(key, accountDatasPost.at(index));
@@ -85,5 +83,5 @@ function isMintBuffer(bytes: Uint8Array): boolean {
     if (bytes.length < MINT_SIZE) return false;
     if (bytes.length === TOKEN_ACCOUNT_SIZE) return false;
     // Token-2022: discriminator at offset 165 distinguishes mints from token accounts
-    return bytes[TOKEN_ACCOUNT_SIZE] === ACCOUNT_TYPE_MINT;
+    return bytes.at(TOKEN_ACCOUNT_SIZE) === ACCOUNT_TYPE_MINT;
 }

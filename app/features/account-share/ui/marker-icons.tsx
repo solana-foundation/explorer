@@ -3,6 +3,8 @@
 // each stroked icon to a single filled path, which is what satori renders cleanly - so they are
 // embedded verbatim rather than pulled from a stroke-based icon library.
 
+import { getOwn } from '@shared/lib/object';
+
 export type MarkerIconName = 'badge-alert' | 'badge-check' | 'file-code' | 'file-x' | 'shield-check' | 'shield-off';
 
 // The design draws these at 28px square; the viewBox is the gallery's own.
@@ -27,7 +29,7 @@ const PATHS: Record<MarkerIconName, string> = {
 export function MarkerIcon({ color, name }: { color: string; name: MarkerIconName }) {
     return (
         <svg fill="none" height={ICON_SIZE} viewBox={VIEW_BOX} width={ICON_SIZE} xmlns="http://www.w3.org/2000/svg">
-            <path d={PATHS[name]} fill={color} />
+            <path d={getOwn(PATHS, name)} fill={color} />
         </svg>
     );
 }

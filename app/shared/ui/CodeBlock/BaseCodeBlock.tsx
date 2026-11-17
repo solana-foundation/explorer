@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { Check, Copy, XCircle } from 'react-feather';
@@ -83,7 +84,7 @@ export function BaseCodeBlock({
     wrap,
     ...props
 }: BaseCodeBlockProps) {
-    const label = copyLabelByState[copyState];
+    const label = getOwn(copyLabelByState, copyState);
 
     return (
         <div className={cn(rootVariants({ variant }), className)} {...props}>

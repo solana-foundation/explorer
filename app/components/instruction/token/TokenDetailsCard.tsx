@@ -11,6 +11,7 @@ import {
 } from '@entities/instruction-card';
 import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
+import { getOwn } from '@shared/lib/object';
 import { type AccountMeta, PublicKey } from '@solana/web3.js';
 import { capitalizeFirstLetter, normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
@@ -35,8 +36,8 @@ type TokenDetailsCardProps = {
 export function TokenDetailsCard({ node, parsed }: TokenDetailsCardProps) {
     const { type: rawType, info } = create(parsed, ParsedInfo);
     const type = create(rawType, TokenInstructionType);
-    const title = `${TOKEN_IDS[node.programId.toString()]}: ${IX_TITLES[type]}`;
-    const struct = IX_STRUCTS[type] as Struct<TokenInfo, Record<string, Struct<unknown>>>;
+    const title = `${TOKEN_IDS[node.programId.toString()]}: ${getOwn(IX_TITLES, type)}`;
+    const struct = getOwn(IX_STRUCTS, type) as Struct<TokenInfo, Record<string, Struct<unknown>>>;
 
     return (
         <TokenInstructionCard
@@ -116,7 +117,11 @@ function TokenInstructionCard({
 
 /** A numeric field also holds a string, so only the declared type marks a field as text. */
 function declaredStringFields(struct: Struct<TokenInfo, Record<string, Struct<unknown>>>): ReadonlySet<string> {
-    return new Set(Object.keys(struct.schema).filter(key => struct.schema[key].type === 'string'));
+    return new Set(
+        Object.entries(struct.schema)
+            .filter(([, field]) => field.type === 'string')
+            .map(([key]) => key),
+    );
 }
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {

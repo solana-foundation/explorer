@@ -3,6 +3,7 @@
 import * as Cache from '@providers/cache';
 import { ActionType } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import React from 'react';
 
 import type { AccountHistory } from '../lib/types';
@@ -31,7 +32,7 @@ export function useAccountHistory(address: string): Cache.CacheEntry<AccountHist
         throw new Error(`useAccountHistory must be used within a AccountsProvider`);
     }
 
-    return context.entries[address];
+    return getOwn(context.entries, address);
 }
 
 // Whether the current endpoint supports getTransactionsForAddress, and therefore

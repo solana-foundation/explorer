@@ -40,18 +40,18 @@ export function normalizeSearchParams(searchParams: SearchParams): SearchParams 
         return {};
     }
 
-    const out: SearchParams = {};
+    const out = new Map<string, SearchParams[string]>();
 
     for (const [key, value] of Object.entries(searchParams)) {
         if (key.startsWith(HTML_ENTITY_AMP_PREFIX)) {
             const realKey = key.slice(HTML_ENTITY_AMP_PREFIX.length);
-            if (!(realKey in out)) {
-                out[realKey] = value;
+            if (!out.has(realKey)) {
+                out.set(realKey, value);
             }
         } else {
-            out[key] = value;
+            out.set(key, value);
         }
     }
 
-    return out;
+    return Object.fromEntries(out);
 }

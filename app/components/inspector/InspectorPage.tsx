@@ -254,7 +254,7 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
         // The account discriminator (first 8 bytes) distinguishes a Batch — which holds
         // many inner transactions — from a single VaultTransaction.
         const discriminator = accountInfo.data.subarray(0, 8);
-        const isBatch = batchDiscriminator.every((byte, i) => byte === discriminator[i]);
+        const isBatch = batchDiscriminator.every((byte, i) => byte === discriminator.at(i));
 
         if (isBatch) {
             const batch = await Batch.fromAccountAddress(connection, pubkey, 'confirmed');
@@ -313,7 +313,7 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
     }
 
     const activeIndex = Math.min(selected, messages.length - 1);
-    const message = messages[activeIndex];
+    const message = messages.at(activeIndex);
 
     return (
         <>

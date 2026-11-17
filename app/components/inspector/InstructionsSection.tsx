@@ -7,6 +7,7 @@ import {
     InstructionSurfaceProvider,
     toInstructionNode,
 } from '@entities/instruction-card';
+import { invariant } from '@shared/lib/invariant';
 import {
     AddressLookupTableAccount,
     type CompiledInnerInstruction,
@@ -73,13 +74,9 @@ export function InstructionsSection({
     );
 
     if (failedLookupIndex >= 0) {
-        return (
-            <ErrorCard
-                text={`Failed to fetch address lookup table: ${message.addressTableLookups[
-                    failedLookupIndex
-                ].accountKey.toString()}`}
-            />
-        );
+        const failedLookup = message.addressTableLookups.at(failedLookupIndex);
+        invariant(failedLookup, `lookup table index ${failedLookupIndex} out of range`);
+        return <ErrorCard text={`Failed to fetch address lookup table: ${failedLookup.accountKey.toString()}`} />;
     }
 
     if (!nodes) {

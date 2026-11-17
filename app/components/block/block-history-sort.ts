@@ -1,6 +1,8 @@
 // Pure sort model for the block transactions table, split out of BlockHistoryCard so the ordering and
 // the URL-param transitions can be unit-tested without rendering the component.
 
+import { getOwn } from '@shared/lib/object';
+
 import { type SortDirection } from '@/app/shared/lib/sort-direction';
 
 export { type SortDirection } from '@/app/shared/lib/sort-direction';
@@ -83,7 +85,7 @@ export function nextSortParams(
 ): URLSearchParams {
     const toggledDirection: SortDirection = activeDirection === 'asc' ? 'desc' : 'asc';
     const nextDirection: SortDirection =
-        explicitDirection ?? (sortKey === activeMode ? toggledDirection : DEFAULT_DIRECTION[sortKey]);
+        explicitDirection ?? (sortKey === activeMode ? toggledDirection : getOwn(DEFAULT_DIRECTION, sortKey));
 
     const params = new URLSearchParams(current);
     if (sortKey === 'index' && nextDirection === 'asc') {

@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 // Subpath imports: the `date-fns` and `date-fns/locale` barrels load every function and every locale.
 import type { Duration, Locale } from 'date-fns';
 import { differenceInDays } from 'date-fns/differenceInDays';
@@ -150,7 +151,7 @@ const relativeLocale: Locale = {
             lessThanXMinutes: { one: '1 minute', other: '{{count}} minutes' },
             lessThanXSeconds: { one: '1 second', other: '{{count}} seconds' },
         };
-        const override = noLessThan[token];
+        const override = getOwn(noLessThan, token);
         if (!override) return enUS.formatDistance(token, count, options);
         const tpl = count === 1 ? override.one : override.other.replace('{{count}}', String(count));
         if (!options?.addSuffix) return tpl;

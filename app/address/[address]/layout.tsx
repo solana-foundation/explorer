@@ -44,6 +44,7 @@ import {
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
 import { CacheEntry, FetchStatus, isFetchingWithoutData } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from '@solana/attestation';
 import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
@@ -280,7 +281,7 @@ function DetailsSections({
 
     return (
         <PageSections>
-            {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
+            {getOwn(FLAGGED_ACCOUNTS_WARNING, address) ?? null}
             <InfoSection account={account} tokenInfo={tokenInfo} />
             {notification}
             <MoreSection baseUrl={`/address/${address}`} tabs={navigationTabs} asyncChildren={asyncTabChildren}>
@@ -411,8 +412,9 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
         tabs.push(...TABS_LOOKUP[parsedData.program]);
     }
 
-    if (parsedData && programTypeKey in TABS_LOOKUP) {
-        tabs.push(...TABS_LOOKUP[programTypeKey]);
+    const programTypeTabs = getOwn(TABS_LOOKUP, programTypeKey);
+    if (parsedData && programTypeTabs) {
+        tabs.push(...programTypeTabs);
     }
 
     // Address lookup tables

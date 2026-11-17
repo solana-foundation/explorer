@@ -52,13 +52,14 @@ export function useProgramIdlNames(programIds: string[], cluster: Cluster, url: 
                     // console-only — so a plain field would leave the event with no reason attached.
                     Logger.warn('[idl] IDL fetch failed; instruction names unavailable for this program', {
                         sentry: true,
-                        sentryExtras: { cluster, programId: resolvable[i], reason: String(result.reason) },
+                        sentryExtras: { cluster, programId: resolvable.at(i), reason: String(result.reason) },
                     });
                 }
             });
-            const resolved = settled.flatMap((result, i) =>
-                result.status === 'fulfilled' ? [[resolvable[i], result.value] as const] : [],
-            );
+            const resolved = resolvable.flatMap((id, i) => {
+                const result = settled.at(i);
+                return result?.status === 'fulfilled' ? [[id, result.value] as const] : [];
+            });
             if (resolved.length === 0) throw new Error('idl-instruction-names: every IDL fetch failed');
             return resolved;
         },

@@ -6,6 +6,7 @@ import { BalanceDelta } from '@components/common/BalanceDelta';
 import { cn } from '@components/shared/utils';
 import { fetchTokenInfosFromApi, getChainId } from '@entities/token-info';
 import { useTransactionDetails } from '@providers/transactions';
+import { invariant } from '@shared/lib/invariant';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
@@ -163,20 +164,19 @@ export function generateTokenBalanceRows(
     postTokenBalances: TokenBalance[],
     accounts: ParsedMessageAccount[],
 ): TokenBalanceRow[] {
-    const preBalanceMap: { [index: number]: TokenBalance } = {};
-    const postBalanceMap: { [index: number]: TokenBalance } = {};
+    const preBalanceMap = new Map<number, TokenBalance>();
+    const postBalanceMap = new Map<number, TokenBalance>();
 
-    preTokenBalances.forEach(balance => (preBalanceMap[balance.accountIndex] = balance));
-    postTokenBalances.forEach(balance => (postBalanceMap[balance.accountIndex] = balance));
+    preTokenBalances.forEach(balance => preBalanceMap.set(balance.accountIndex, balance));
+    postTokenBalances.forEach(balance => postBalanceMap.set(balance.accountIndex, balance));
 
     // Check if any pre token balances do not have corresponding
     // post token balances. If not, insert a post balance of zero
     // so that the delta is displayed properly
-    for (const index in preBalanceMap) {
-        const preBalance = preBalanceMap[index];
-        if (!postBalanceMap[index]) {
-            postBalanceMap[index] = {
-                accountIndex: Number(index),
+    for (const [index, preBalance] of preBalanceMap) {
+        if (!postBalanceMap.has(index)) {
+            postBalanceMap.set(index, {
+                accountIndex: index,
                 mint: preBalance.mint,
                 uiTokenAmount: {
                     amount: '0',
@@ -184,16 +184,16 @@ export function generateTokenBalanceRows(
                     uiAmount: null,
                     uiAmountString: '0',
                 },
-            };
+            });
         }
     }
 
     const rows: TokenBalanceRow[] = [];
 
-    for (const index in postBalanceMap) {
-        const { uiTokenAmount, accountIndex, mint, owner } = postBalanceMap[index];
-        const preBalance = preBalanceMap[accountIndex];
-        const account = accounts[accountIndex].pubkey;
+    for (const { uiTokenAmount, accountIndex, mint, owner } of postBalanceMap.values()) {
+        const preBalance = preBalanceMap.get(accountIndex);
+        const account = accounts.at(accountIndex)?.pubkey;
+        invariant(account, `account index ${accountIndex} out of range`);
 
         if (!uiTokenAmount.uiAmountString) {
             // uiAmount deprecation
@@ -211,7 +211,7 @@ export function generateTokenBalanceRows(
             }
 
             rows.push({
-                account: accounts[accountIndex].pubkey,
+                account,
                 accountIndex,
                 balance: '0',
                 delta: new BigNumber(-preBalanceUiAmountString),
@@ -220,7 +220,7 @@ export function generateTokenBalanceRows(
             });
 
             rows.push({
-                account: accounts[accountIndex].pubkey,
+                account,
                 accountIndex,
                 balance: postBalanceUiAmountString,
                 delta: new BigNumber(postBalanceUiAmountString),

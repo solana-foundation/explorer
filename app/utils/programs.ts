@@ -11,6 +11,7 @@ import {
     SERUM_DEX_V3_PROGRAM_IDS,
     SERUM_DEX_V3_PROGRAM_LABEL,
 } from '@explorer/decoder-serum/detection';
+import { getOwn } from '@shared/lib/object';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -390,5 +391,5 @@ export const TOKEN_IDS: { [key: string]: string } = {
 
 // Cluster-agnostic name lookup; the /mcp resolver injects this and has no per-cluster context (see app/mcp/dependencies.ts).
 export function programNameByAddress(address: string): string | undefined {
-    return PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
+    return getOwn(PROGRAM_INFO_BY_ID, address)?.name ?? getOwn(LOADER_IDS, address);
 }
