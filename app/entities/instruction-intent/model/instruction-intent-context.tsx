@@ -1,45 +1,18 @@
 'use client';
 
-import { createContext, type ReactNode, useContext, useId, useState } from 'react';
+import { createContext, useContext } from 'react';
 
-import type { InstructionFetchResult, InstructionIntentResult } from '../lib/intent';
-import { useInstructionIntent } from './use-instruction-intent';
+import type { InstructionIntentResult } from '../lib/intent';
 
-type InstructionIntentContextValue = {
+export type InstructionIntentContextValue = {
     open: boolean;
     toggle: () => void;
     result: InstructionIntentResult;
     panelId: string;
 };
 
-const InstructionIntentContext = createContext<InstructionIntentContextValue | undefined>(undefined);
-
-/** The intent state of one card, shared by its Intent button and its intent row. */
-export function InstructionIntentProvider({
-    programId,
-    ixFetchResult,
-    children,
-}: {
-    programId: string;
-    ixFetchResult: InstructionFetchResult;
-    children: ReactNode;
-}) {
-    const panelId = useId();
-    const [open, setOpen] = useState(false);
-    const [enabled, setEnabled] = useState(false);
-    const result = useInstructionIntent({ enabled, ixFetchResult, programId });
-
-    const toggle = () => {
-        setOpen(value => !value);
-        setEnabled(true);
-    };
-
-    return (
-        <InstructionIntentContext.Provider value={{ open, panelId, result, toggle }}>
-            {children}
-        </InstructionIntentContext.Provider>
-    );
-}
+// Apart from the provider so the Intent button and row do not bundle useInstructionIntent and the Codama parser
+export const InstructionIntentContext = createContext<InstructionIntentContextValue | undefined>(undefined);
 
 export function useInstructionIntentContext(): InstructionIntentContextValue | undefined {
     return useContext(InstructionIntentContext);

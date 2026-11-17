@@ -47,13 +47,6 @@ const RootNodeWithIntentShape = type({
     version: string(),
 });
 
-const UNAVAILABLE_TEXT: Record<IntentUnavailableReason, string> = {
-    'idl-failed': "Couldn't load this program's IDL.",
-    'malformed-metadata': "Couldn't use this program's intent metadata.",
-    'no-instruction-intent': "This program's intent metadata doesn't describe this instruction.",
-    'no-metadata': "This program doesn't publish intent metadata.",
-};
-
 /** A Codama root of a compatible version with at least one intent template. */
 export function checkIntentSupport(idl: unknown): IntentSupportStatus {
     if (!is(idl, RootNodeWithIntentShape)) return { status: 'none' };
@@ -83,8 +76,4 @@ export function checkInstructionIntentExists(root: RootNode, instruction: KitIns
         // A published IDL is untrusted, and a malformed node throws in the parser
         return { reason: 'malformed-metadata', status: 'unavailable' };
     }
-}
-
-export function getIntentUnavailableText(reason: IntentUnavailableReason): string {
-    return UNAVAILABLE_TEXT[reason];
 }

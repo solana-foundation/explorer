@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { InstructionFetchResult } from '../../lib/intent';
 import { SYSTEM_PROGRAM_ADDRESS } from '../../mocks/fixtures';
-import { InstructionIntentProvider, useInstructionIntentContext } from '../instruction-intent-context';
+import { useInstructionIntentContext } from '../instruction-intent-context';
+import { InstructionIntentProvider } from '../instruction-intent-provider';
 
 const LOADING: InstructionFetchResult = { status: 'loading' };
 

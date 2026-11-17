@@ -3,7 +3,8 @@ import { Skeleton } from '@components/shared/ui/skeleton';
 import { cva } from 'class-variance-authority';
 import type { ReactNode } from 'react';
 
-import { getIntentUnavailableText, type InstructionIntent, type InstructionIntentResult } from '../lib/intent';
+import type { InstructionIntent, InstructionIntentResult } from '../lib/intent';
+import { getIntentUnavailableText } from '../lib/unavailable-text';
 import { IntentSentence } from './IntentSentence';
 
 type PanelIntent = Exclude<InstructionIntentResult, { status: 'idle' }>;
