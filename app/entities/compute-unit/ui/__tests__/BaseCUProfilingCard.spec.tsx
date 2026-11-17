@@ -100,6 +100,16 @@ describe('BaseCUProfilingCard', () => {
             expect(textOf(showTooltip().tooltip, '.cu-tooltip-cu')).toBe('~200,000 CU reserved');
         });
 
+        it('should set the swatch to the color of its bar', () => {
+            render(<BaseCUProfilingCard instructions={transferAndComputeBudget()} />);
+
+            // eslint-disable-next-line testing-library/no-node-access -- imperative Chart.js DOM, not a render
+            const swatch = showTooltip().tooltip.querySelector<HTMLElement>('.cu-tooltip-swatch');
+
+            // jsdom serializes a hex color as rgb().
+            expect(swatch?.style.backgroundColor).toBe('rgb(32, 215, 155)');
+        });
+
         it('should qualify the instruction name with its program', () => {
             render(<BaseCUProfilingCard instructions={transferAndComputeBudget()} />);
 
