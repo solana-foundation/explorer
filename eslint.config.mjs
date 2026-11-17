@@ -1,8 +1,10 @@
 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+import sdl from '@microsoft/eslint-plugin-sdl';
 import vitest from '@vitest/eslint-plugin';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import boundaries from 'eslint-plugin-boundaries';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
+import security from 'eslint-plugin-security';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import sortKeysFix from 'eslint-plugin-sort-keys-fix';
 import storybook from 'eslint-plugin-storybook';
@@ -95,6 +97,16 @@ const HOOKS_PENDING_CLIENT_ONLY = [
     'app/shared/lib/use-hydrated.ts',
     'app/shared/lib/use-reduced-motion.ts',
 ];
+
+// `recommended` of eslint-plugin-security only warns, and a warning does not fail CI.
+const SECURITY_RECOMMENDED_RULES = Object.fromEntries(
+    Object.keys(security.configs.recommended.rules).map(rule => [rule, 'error']),
+);
+
+// SDL's `recommended` cannot be spread: it registers its own `security` and `react` plugins under keys
+// this config already uses, so ESLint rejects the redefinition.
+const SDL_RECOMMENDED_RULES = Object.assign({}, ...sdl.configs.recommended.map(config => config.rules));
+const SDL_NODE_PLUGIN = sdl.configs.recommended.find(config => config.plugins?.n).plugins.n;
 
 // A hook is never a component, so it never needs to *be* a client boundary — and `'use client'` costs
 // it the only build-time guard available: a server caller of a directive-carrying module gets a
@@ -569,16 +581,17 @@ export default tseslint.config(
         },
     },
 
-    // Program, token and IDL names are authored on-chain, so a string parsed as HTML can inject markup.
-    // Write a value as text instead.
+    // App code renders strings that program, token and IDL authors write on-chain. Such a string parsed as
+    // HTML can inject markup, and such a key, `constructor` for one, reads a member every object inherits.
     {
         files: ['app/**/*.[jt]s?(x)'],
         ignores: TEST_AND_STORY_FILES,
-        plugins: { 'no-unsanitized': noUnsanitized },
+        plugins: { '@microsoft/sdl': sdl, n: SDL_NODE_PLUGIN, 'no-unsanitized': noUnsanitized, security },
         rules: {
+            ...SDL_RECOMMENDED_RULES,
+            ...SECURITY_RECOMMENDED_RULES,
             'no-unsanitized/method': 'error',
             'no-unsanitized/property': 'error',
-            'react/no-danger': 'error',
         },
     },
 
