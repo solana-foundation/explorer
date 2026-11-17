@@ -1,3 +1,4 @@
+import { isDigits } from '@shared/lib/digits';
 import { PublicKey, TransactionSignature } from '@solana/web3.js';
 import { HumanizeDuration, HumanizeDurationLanguage } from 'humanize-duration-ts';
 
@@ -56,9 +57,14 @@ export function lamportsToSolString(lamports: number | bigint, maximumFractionDi
     return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(sol);
 }
 
-export function numberWithSeparator(s: string) {
-    // eslint-disable-next-line no-restricted-syntax -- insert thousands separator
-    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+export function numberWithSeparator(s: string): string {
+    const sign = s.startsWith('-') ? '-' : '';
+    const [integer, ...fraction] = s.slice(sign.length).split('.');
+    if (!isDigits(integer)) return s;
+
+    const groups: string[] = [];
+    for (let end = integer.length; end > 0; end -= 3) groups.unshift(integer.slice(Math.max(0, end - 3), end));
+    return [sign + groups.join(','), ...fraction].join('.');
 }
 
 const HUMANIZER = new HumanizeDuration(new HumanizeDurationLanguage());
