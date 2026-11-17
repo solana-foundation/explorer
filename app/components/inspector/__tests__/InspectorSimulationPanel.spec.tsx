@@ -9,9 +9,11 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SimulationResult } from '@/app/features/instruction-simulation/lib/simulate-transaction';
 import type { SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 
-vi.mock('@/app/components/ProgramLogsCardBody', () => ({ ProgramLogsCardBody: () => null }));
+vi.mock('@/app/components/ProgramLogsCardBody', () => ({
+    ProgramLogsCardBody: () => <div data-testid="program-logs" />,
+}));
 vi.mock('@/app/features/instruction-simulation/ui/BaseSimulatorCUProfilingCard', () => ({
-    BaseSimulatorCUProfilingCard: () => null,
+    BaseSimulatorCUProfilingCard: () => <div data-testid="cu-profiling" />,
 }));
 vi.mock('@/app/features/instruction-simulation/model/use-simulation-instruction-names', () => ({
     useSimulationInstructionNames: () => ({ instructions: [], unresolvable: false }),
@@ -54,9 +56,14 @@ describe('inspector::InspectorSimulationPanel', () => {
     });
 
     it('should point at the logs when a program fails during the simulation', () => {
-        renderPanel(createSimulationStateDone({ error: 'TransactionError', logs: FAILED_PROGRAM_LOGS }));
+        renderPanel(
+            createSimulationStateDone({ error: '{"InstructionError":[0,{"Custom":6001}]}', logs: FAILED_PROGRAM_LOGS }),
+        );
 
         expect(screen.getByText(/Transaction reverted during simulation/)).toBeInTheDocument();
+        expect(screen.getByTestId('program-logs')).toBeInTheDocument();
+        expect(screen.getByTestId('cu-profiling')).toBeInTheDocument();
+        expect(screen.queryByText(NO_LOGS_HINT)).not.toBeInTheDocument();
     });
 
     it('should show the failure reason when the logs mark no failed instruction', () => {
