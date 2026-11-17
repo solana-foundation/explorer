@@ -92,4 +92,11 @@ describe('InstructionIntentButton', () => {
         expect(screen.getByTestId('instruction-intent-trigger')).toHaveAttribute('aria-busy', 'true');
         expect(screen.getByTestId('instruction-intent-loading')).toBeInTheDocument();
     });
+
+    it('should not mark the button busy when the intent loads and the card is closed', () => {
+        mocks.useInstructionIntent.mockReturnValue({ status: 'loading' });
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING);
+
+        expect(screen.getByTestId('instruction-intent-trigger')).not.toHaveAttribute('aria-busy');
+    });
 });

@@ -11,9 +11,7 @@ export function InstructionIntentButton() {
     return (
         <BaseInstructionIntentButton
             open={open}
-            loading={open && result.status === 'loading'}
-            unavailable={result.status === 'unavailable'}
-            failed={result.status === 'failed'}
+            status={result.status}
             aria-controls={open ? panelId : undefined}
             onClick={toggle}
         />

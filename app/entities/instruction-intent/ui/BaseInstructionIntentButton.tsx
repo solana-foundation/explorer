@@ -2,23 +2,17 @@ import { Button } from '@components/shared/ui/button';
 import type { AriaAttributes } from 'react';
 import { AlignLeft, Loader } from 'react-feather';
 
+import type { InstructionIntentResult } from '../lib/intent';
+
 type BaseInstructionIntentButtonProps = {
     open: boolean;
-    loading?: boolean;
-    unavailable?: boolean;
-    failed?: boolean;
+    status: InstructionIntentResult['status'];
     onClick: () => void;
 } & Omit<AriaAttributes, 'aria-busy' | 'aria-expanded' | 'aria-label'>;
 
-export function BaseInstructionIntentButton({
-    open,
-    loading = false,
-    unavailable = false,
-    failed = false,
-    onClick,
-    ...aria
-}: BaseInstructionIntentButtonProps) {
-    const label = getLabel({ failed, unavailable });
+export function BaseInstructionIntentButton({ open, status, onClick, ...aria }: BaseInstructionIntentButtonProps) {
+    const loading = open && status === 'loading';
+    const label = getLabel(status);
 
     return (
         <Button
@@ -27,7 +21,7 @@ export function BaseInstructionIntentButton({
             size="sm"
             variant={open ? 'black' : 'white'}
             active={open}
-            dashed={unavailable || failed}
+            dashed={status === 'unavailable' || status === 'failed'}
             aria-label={label}
             title={label}
             aria-expanded={open}
@@ -47,8 +41,8 @@ export function BaseInstructionIntentButton({
     );
 }
 
-function getLabel({ failed, unavailable }: { failed: boolean; unavailable: boolean }): string {
-    if (failed) return 'Intent failed to load';
-    if (unavailable) return 'Intent unavailable';
+function getLabel(status: InstructionIntentResult['status']): string {
+    if (status === 'failed') return 'Intent failed to load';
+    if (status === 'unavailable') return 'Intent unavailable';
     return 'Intent';
 }

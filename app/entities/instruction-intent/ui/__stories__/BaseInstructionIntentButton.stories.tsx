@@ -4,7 +4,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { BaseInstructionIntentButton } from '../BaseInstructionIntentButton';
 
 const meta = {
-    args: { onClick: fn(), open: false },
+    args: { onClick: fn(), open: false, status: 'idle' },
     component: BaseInstructionIntentButton,
     tags: ['autodocs', 'test'],
     title: 'Entities/InstructionIntent/BaseInstructionIntentButton',
@@ -25,11 +25,11 @@ export const Open: Story = {
 };
 
 export const Loading: Story = {
-    args: { loading: true, open: true },
+    args: { open: true, status: 'loading' },
 };
 
 export const Unavailable: Story = {
-    args: { unavailable: true },
+    args: { status: 'unavailable' },
     play: async ({ canvasElement }) => {
         const button = within(canvasElement).getByRole('button', { name: 'Intent unavailable' });
 
@@ -38,11 +38,11 @@ export const Unavailable: Story = {
 };
 
 export const UnavailableOpen: Story = {
-    args: { open: true, unavailable: true },
+    args: { open: true, status: 'unavailable' },
 };
 
 export const Failed: Story = {
-    args: { failed: true },
+    args: { status: 'failed' },
     play: async ({ canvasElement }) => {
         const button = within(canvasElement).getByRole('button', { name: 'Intent failed to load' });
 
