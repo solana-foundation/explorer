@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-import { getStoredValue } from '../lib/stored-value';
-import { COOKIE_CONSENT_CHANGE_EVENT, COOKIE_CONSENT_NAME, EConsentStatus } from '../ui/CookieConsent';
+import { COOKIE_CONSENT_CHANGE_EVENT, EConsentStatus, getStoredConsent } from '../ui/CookieConsent';
 
 export function useAnalyticsConsent() {
-    const [consent, setConsent] = useState<EConsentStatus | null>(null);
+    const [consent, setConsent] = useState<EConsentStatus>();
 
     useEffect(() => {
-        const storedConsent = getStoredValue(COOKIE_CONSENT_NAME) as EConsentStatus | null;
-        setConsent(storedConsent);
+        setConsent(getStoredConsent());
 
         const handleConsentChange = (event: CustomEvent<EConsentStatus>) => {
             setConsent(event.detail);
@@ -19,7 +17,7 @@ export function useAnalyticsConsent() {
         return () => window.removeEventListener(COOKIE_CONSENT_CHANGE_EVENT, handleConsentChange as EventListener);
     }, []);
 
-    const isConsentGiven = consent !== null && consent !== EConsentStatus.Denied;
+    const isConsentGiven = consent === EConsentStatus.Granted;
 
     return { consent, isConsentGiven };
 }

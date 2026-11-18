@@ -1,6 +1,7 @@
 import { getStoredValue, setStoredValue } from '@features/cookie';
 import { Cluster } from '@utils/cluster';
 import { useCallback, useState } from 'react';
+import { literal } from 'superstruct';
 
 import { useCluster } from '@/app/providers/cluster';
 
@@ -16,7 +17,7 @@ type PendingAction<T> = {
  * Hook that provides a confirmation flow for mainnet transactions.
  * Returns a function that will either execute immediately (non-mainnet) or
  * prompt for confirmation (mainnet). Once accepted, the disclaimer is
- * persisted in a cookie.
+ * persisted in localStorage.
  */
 export function useMainnetConfirmation<T = unknown>() {
     const { cluster: currentCluster } = useCluster();
@@ -25,7 +26,7 @@ export function useMainnetConfirmation<T = unknown>() {
 
     const requireConfirmation = useCallback(
         async (action: () => Promise<void> | void, context?: T) => {
-            if (currentCluster === Cluster.Mainnet && !getStoredValue(MAINNET_DISCLAIMER_KEY)) {
+            if (currentCluster === Cluster.Mainnet && !getStoredValue(MAINNET_DISCLAIMER_KEY, literal('true'))) {
                 setPendingAction({ action, context });
                 setIsOpen(true);
             } else {
