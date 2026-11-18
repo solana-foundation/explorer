@@ -1,8 +1,9 @@
 import { gen } from '@__fixtures__/gen';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
+import { JUPITER_ROUTE_TIMEOUT_MS } from '@entities/token-info/api/lookup-token-info';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { POST } from '../route';
+import { maxDuration, POST } from '../route';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
@@ -39,6 +40,10 @@ describe('POST /api/token-info/verified', () => {
 
         expect(response.status).toBe(400);
         expect(mocks.lookupVerifiedTokenInfos).not.toHaveBeenCalled();
+    });
+
+    it('should keep the function duration under the browser timeout', () => {
+        expect(maxDuration * 1000).toBeLessThan(JUPITER_ROUTE_TIMEOUT_MS);
     });
 });
 

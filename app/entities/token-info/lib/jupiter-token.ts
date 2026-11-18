@@ -11,6 +11,7 @@ export const JupiterTokenStruct = type({
     isVerified: optional(nullable(boolean())),
     name: string(),
     symbol: string(),
+    website: optional(nullable(string())),
 });
 
 export type JupiterToken = Infer<typeof JupiterTokenStruct>;

@@ -141,9 +141,6 @@ export const WithHoldings: Story = {
 export const WithLogos: Story = {
     args: { address: ADDRESS },
     decorators: [
-        // Its own cache, and no revalidation: a fallback is only read when nothing is cached, and it
-        // does not stop SWR refetching. There is no route to answer that fetch here, so without both
-        // the seeded entries lose to empty ones.
         Story => (
             <SWRConfig value={{ fallback: swrFallback, provider: () => new Map(), revalidateOnMount: false }}>
                 <Story />
@@ -151,8 +148,6 @@ export const WithLogos: Story = {
         ),
         withTokensAndLogos,
     ],
-    // Symbol and logo can only come from resolved metadata, so this fails if the seeded entry stops
-    // matching the key the row looks up.
     play: async ({ canvasElement }) => {
         // GridTable mobile="stack" renders the balance in both the desktop and mobile layouts.
         const balances = await within(canvasElement).findAllByText('1234.56 USDC');

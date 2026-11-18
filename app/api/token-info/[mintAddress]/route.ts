@@ -3,13 +3,13 @@ import { clusterFromParam } from '@entities/cluster/server';
 import { isValidCluster, lookupTokenInfos } from '@entities/token-info/server';
 import { CLUSTERS } from '@utils/cluster';
 import { AddressFromString } from '@validators/pubkey';
-import { NextResponse } from 'next/server';
+import type { NextResponse } from 'next/server';
 import { coerce, enums, optional, refine, string, type, validate } from 'superstruct';
 
 import { invalidRequest, toTokenInfosResponse } from '@/app/api/token-info/responses';
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS } from '@/app/shared/lib/http-utils';
 
-export const maxDuration = 30;
+export const maxDuration = 10;
 
 const ClusterFromString = coerce(enums(CLUSTERS), string(), value => clusterFromParam(value) ?? value);
 

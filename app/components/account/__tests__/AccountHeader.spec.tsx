@@ -1,5 +1,9 @@
+import { useDasImage } from '@entities/digital-asset';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
+import { isTokenProgramData, useMintAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import { type MintAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { vi } from 'vitest';
 
@@ -8,6 +12,7 @@ import { accountBytes, MAINNET_NFTS, nftokenAccount } from '@/app/features/nftok
 import { useSecurityTxt } from '@/app/features/security-txt';
 import { createNeodymeSecurityTxt, createPmpSecurityTxt } from '@/app/features/security-txt/ui/__tests__/helpers';
 import type { Account, UpgradeableLoaderAccountData } from '@/app/providers/accounts';
+import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
 import { Cluster } from '@/app/utils/cluster';
 import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 
@@ -49,6 +54,11 @@ vi.mock('@providers/compressed-nft', () => ({
 vi.mock('@entities/nft', async () => ({
     ...(await vi.importActual('@entities/nft')),
     isMetaplexNFT: vi.fn(() => false),
+}));
+
+vi.mock('@entities/digital-asset', async () => ({
+    ...(await vi.importActual('@entities/digital-asset')),
+    useDasImage: vi.fn(),
 }));
 
 const NON_TRUSTED_ADDRESS = '11111111111111111111111111111112';
@@ -163,7 +173,89 @@ describe('AccountHeader', () => {
             expect(screen.getByTestId('compressed-nft-header')).toBeInTheDocument();
         });
     });
+
+    describe('token mint', () => {
+        const MINT = 'AK76YSJJVqTEGHG3paqJCK9WmPHNcAQ9iQnSMYMDpump';
+        const LOGO_URI = 'https://example.com/token-info-logo.png';
+        const DAS_IMAGE = 'https://example.com/das-image.png';
+
+        beforeEach(() => {
+            vi.mocked(isTokenProgramData).mockReturnValue(true);
+            vi.mocked(useDasImage).mockImplementation(mint => (mint ? DAS_IMAGE : undefined));
+        });
+
+        describe.each([
+            {
+                kind: 'Token-2022',
+                mintInfo: token2022MintInfo(MINT),
+                parsedData: { parsed: { type: 'mint' }, program: 'spl-token-2022' },
+            },
+            {
+                kind: 'Metaplex',
+                mintInfo: undefined,
+                parsedData: {
+                    nftData: {
+                        json: undefined,
+                        metadata: { name: 'Pump', symbol: 'PUMP', uri: 'https://example.com/meta.json' },
+                    },
+                    parsed: { type: 'mint' },
+                    program: 'spl-token',
+                },
+            },
+        ])('when the $kind metadata has no image', ({ mintInfo, parsedData }) => {
+            beforeEach(() => {
+                vi.mocked(useMintAccountInfo).mockReturnValue(mintInfo);
+            });
+
+            it('should show the token info logo', () => {
+                renderMintHeader(MINT, parsedData, LOGO_URI);
+
+                expect(screen.getByAltText('Token logo')).toHaveAttribute('src', getProxiedUri(LOGO_URI));
+            });
+
+            it('should show the DAS image when the token info logo is empty', () => {
+                renderMintHeader(MINT, parsedData, '');
+
+                expect(screen.getByAltText('Token logo')).toHaveAttribute('src', getProxiedUri(DAS_IMAGE));
+            });
+        });
+    });
 });
+
+function renderMintHeader(mint: string, parsedData: unknown, logoURI: string) {
+    const account = {
+        data: { parsed: parsedData },
+        executable: false,
+        pubkey: new PublicKey(mint),
+    } as unknown as Account;
+    render(
+        <AccountHeader
+            address={mint}
+            account={account}
+            tokenInfo={{ ...tokenInfo(mint), logoURI }}
+            isTokenInfoLoading={false}
+        />,
+    );
+}
+
+function token2022MintInfo(mint: string): MintAccountInfo {
+    return {
+        extensions: [
+            {
+                extension: 'tokenMetadata',
+                state: {
+                    additionalMetadata: [],
+                    mint,
+                    name: 'Pump',
+                    symbol: 'PUMP',
+                    updateAuthority: null,
+                    uri: 'https://example.com/meta.json',
+                },
+            },
+            { extension: 'metadataPointer', state: { authority: null, metadataAddress: mint } },
+        ],
+    } as unknown as MintAccountInfo;
+}
 
 function renderHeader(address: string) {
     render(

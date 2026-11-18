@@ -1,13 +1,14 @@
 import { gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
+import { JUPITER_ROUTE_TIMEOUT_MS } from '@entities/token-info/api/lookup-token-info';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TokenInfo } from '@/app/entities/token-info/server';
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS } from '@/app/shared/lib/http-utils';
 import { Cluster } from '@/app/utils/cluster';
 
-import { GET } from '../route';
+import { GET, maxDuration } from '../route';
 
 const MINT = gen.address(1);
 
@@ -76,6 +77,10 @@ describe('GET /api/token-info/[mintAddress]', () => {
         const response = await get(`cluster=${Cluster.Mainnet}`);
 
         expect(response.headers.get('Cache-Control')).toBe(ERROR_CACHE_HEADERS['Cache-Control']);
+    });
+
+    it('should keep the function duration under the browser timeout', () => {
+        expect(maxDuration * 1000).toBeLessThan(JUPITER_ROUTE_TIMEOUT_MS);
     });
 });
 

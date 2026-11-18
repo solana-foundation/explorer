@@ -52,8 +52,8 @@ describe('searchJupiterTokens', () => {
         expect(fetchMock.mock.calls[0][1].signal).toBe(signal);
     });
 
-    it('should return the tokens, including one with a null isVerified', async () => {
-        const tokens = [jupiterToken(MINT_A), jupiterToken(MINT_B, { isVerified: null })];
+    it('should return the tokens, including one with a null isVerified and website', async () => {
+        const tokens = [jupiterToken(MINT_A), jupiterToken(MINT_B, { isVerified: null, website: null })];
         fetchMock.mockResolvedValueOnce(Response.json(tokens));
 
         const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
@@ -67,6 +67,11 @@ describe('searchJupiterTokens', () => {
             'an array with one malformed entry',
             [jupiterToken(MINT_A), { id: MINT_B }, jupiterToken(MINT_C)],
             [1, 'name'],
+        ],
+        [
+            'an entry whose isVerified is a string',
+            [jupiterToken(MINT_A), jupiterToken(MINT_B, { isVerified: 'true' })],
+            [1, 'isVerified'],
         ],
     ])('should return unavailable with the path that breaks the schema for %s', async (_, body, path) => {
         fetchMock.mockResolvedValueOnce(Response.json(body));

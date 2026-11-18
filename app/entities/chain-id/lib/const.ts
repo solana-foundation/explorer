@@ -3,7 +3,7 @@ import { create, define } from 'superstruct';
 
 declare const genesisHash: unique symbol;
 
-// A brand, so an RPC URL does not type-check where a genesis hash is expected.
+// The brand stops an RPC URL from type-checking where a genesis hash is expected.
 export type GenesisHash = string & { readonly [genesisHash]: true };
 
 export const GenesisHashFromString = define<GenesisHash>('GenesisHashFromString', value =>

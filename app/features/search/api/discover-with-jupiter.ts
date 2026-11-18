@@ -34,7 +34,6 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
 
 function reportUnavailable(error: unknown): void {
     if (matchAbortError(error)) return;
-    // A 403 refuses the query text, so any visitor can cause one from the search box.
     if (error instanceof JupiterHttpError && error.status === 403) {
         Logger.warn('[api:search] Jupiter returned 403', { sentry: true });
         return;

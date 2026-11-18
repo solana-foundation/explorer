@@ -31,6 +31,9 @@ export async function lookupTokenInfo({
     return queueLookup({ cluster, genesisHash, includeOnChainFallback }, mint);
 }
 
+// The timeout must exceed the server timeout on Jupiter requests, to allow for a cold start.
+export const JUPITER_ROUTE_TIMEOUT_MS = 15_000;
+
 export function lookupVerifiedTokenInfos({ addresses }: { addresses: readonly string[] }): Promise<TokenInfosLookup> {
     return sendTokenInfoRequest({
         ...toJsonPost('/api/token-info/verified', { addresses }),
@@ -67,9 +70,6 @@ function flushBatches(): void {
 }
 
 const CHUNK_CONCURRENCY = 6;
-
-// The timeout must exceed the server timeout on Jupiter requests, to allow for a cold start.
-export const JUPITER_ROUTE_TIMEOUT_MS = 15_000;
 
 async function sendBatch({ request, resolvers }: Batch): Promise<void> {
     const queued = [...resolvers].sort(([a], [b]) => (a < b ? -1 : 1));

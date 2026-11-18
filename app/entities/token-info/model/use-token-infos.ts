@@ -1,8 +1,11 @@
 import 'client-only';
 
 import { type ChainId, type GenesisHash, getChainId } from '@entities/chain-id/@x/token-info';
+import { useCluster } from '@providers/cluster';
+import { accountRefreshKey } from '@shared/lib/account-refresh-key';
 import { Cluster } from '@utils/cluster';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { unstable_serialize } from 'swr';
 import useSWRImmutable from 'swr/immutable';
 
 import { lookupTokenInfo, lookupVerifiedTokenInfos } from '../api/lookup-token-info';
@@ -26,21 +29,18 @@ export function useTokenInfo({
     mint: string | undefined;
 }): UseTokenInfoResult {
     const mints = useMemo(() => (mint ? [mint] : []), [mint]);
-    const { failureKind, isIdle, isLoading, tokenInfos } = useTokenInfos({ cluster, genesisHash, mints });
+    const { kind, tokenInfos } = useTokenInfos({ cluster, genesisHash, mints });
     const tokenInfo = mint ? tokenInfos.get(mint) : undefined;
 
-    if (isIdle) return { isLoading: false, kind: 'idle', tokenInfo: undefined };
-    if (isLoading) return { isLoading: true, kind: 'loading', tokenInfo: undefined };
+    if (kind === 'idle') return { isLoading: false, kind: 'idle', tokenInfo: undefined };
+    if (kind === 'loading') return { isLoading: true, kind: 'loading', tokenInfo: undefined };
     if (tokenInfo) return { isLoading: false, kind: 'listed', tokenInfo };
-    return { isLoading: false, kind: failureKind ?? 'not-listed', tokenInfo: undefined };
+    return { isLoading: false, kind: kind === 'resolved' ? 'not-listed' : kind, tokenInfo: undefined };
 }
 
-type UseTokenInfosResult = {
-    failureKind: LookupFailureKind | undefined;
-    isIdle: boolean;
-    isLoading: boolean;
-    tokenInfos: ReadonlyMap<string, TokenInfo>;
-};
+type UseTokenInfosResult = { kind: TokenInfosKind; tokenInfos: ReadonlyMap<string, TokenInfo> };
+
+type TokenInfosKind = 'idle' | 'loading' | 'resolved' | LookupFailureKind;
 
 type LookupFailureKind = Exclude<TokenInfoLookup['kind'], 'listed' | 'not-listed'>;
 
@@ -55,13 +55,14 @@ export function useTokenInfos({
     includeOnChainFallback?: boolean;
     mints: readonly string[];
 }): UseTokenInfosResult {
+    const { url } = useCluster();
     const chainId = getChainId(cluster, genesisHash);
     const key = useMemo(
         () =>
             chainId && mints.length > 0
-                ? getTokenInfosSwrKey({ chainId, cluster, includeOnChainFallback, mints })
+                ? getTokenInfosSwrKey({ chainId, cluster, includeOnChainFallback, mints, url })
                 : undefined,
-        [chainId, cluster, includeOnChainFallback, mints],
+        [chainId, cluster, includeOnChainFallback, mints, url],
     );
 
     const { data, error, isLoading } = useSWRImmutable<TokenInfo[], unknown>(
@@ -71,22 +72,7 @@ export function useTokenInfos({
     );
     const tokenInfos = useMemo(() => toTokenInfoMap(data), [data]);
 
-    return {
-        failureKind: data === undefined && error !== undefined ? toFailureKind(error) : undefined,
-        isIdle: key === undefined,
-        isLoading: isLoading && error === undefined,
-        tokenInfos,
-    };
-}
-
-function toTokenInfoMap(tokens: TokenInfo[] | undefined): ReadonlyMap<string, TokenInfo> {
-    return tokens ? new Map(tokens.map(token => [token.address, token])) : NO_TOKEN_INFOS;
-}
-
-const NO_TOKEN_INFOS: ReadonlyMap<string, TokenInfo> = new Map();
-
-function toFailureKind(error: unknown): LookupFailureKind {
-    return error instanceof TokenInfosLookupError ? error.kind : 'unavailable';
+    return { kind: key === undefined ? 'idle' : toTokenInfosKind({ data, error, isLoading }), tokenInfos };
 }
 
 export function getTokenInfosSwrKey({
@@ -94,19 +80,80 @@ export function getTokenInfosSwrKey({
     cluster,
     includeOnChainFallback = false,
     mints,
+    url,
 }: {
     chainId: ChainId;
     cluster: Cluster;
     includeOnChainFallback?: boolean;
     mints: readonly string[];
-}): readonly ['token-infos', string, Cluster, ChainId, boolean] {
+    url: string;
+}): readonly ['account-refresh', string, string, 'token-infos', Cluster, ChainId, boolean] {
     // The on-chain fallback skips a custom cluster, so the key needs the cluster and the chain id.
-    return ['token-infos', mints.join(','), cluster, chainId, includeOnChainFallback];
+    return accountRefreshKey(url, mints.join(','), 'token-infos', cluster, chainId, includeOnChainFallback);
 }
 
-export function isTokenInfoSwrKey(key: unknown, mint: string): boolean {
-    return Array.isArray(key) && key[0] === 'token-infos' && key[1] === mint;
+export function useVerifiedTokenInfos({
+    cluster,
+    genesisHash,
+    mints,
+}: {
+    cluster: Cluster;
+    genesisHash: GenesisHash | undefined;
+    mints: readonly string[];
+}): { isLoading: boolean; tokenInfos: ReadonlyMap<string, TokenInfo> } {
+    const chainId = getChainId(cluster, genesisHash);
+    const key = useMemo(
+        () =>
+            chainId && jupiterListsTokensOn(chainId) && mints.length > 0
+                ? getVerifiedTokenInfosSwrKey(mints)
+                : undefined,
+        [chainId, mints],
+    );
+
+    const { data, error, isLoading } = useSWRImmutable<TokenInfo[], unknown>(
+        key,
+        () => fetchVerifiedTokenInfos(mints),
+        { shouldRetryOnError: false },
+    );
+    const tokenInfos = useMemo(() => toTokenInfoMap(data), [data]);
+
+    // Before a render with this key commits, SWR returns a cached `error` with `isLoading` false.
+    // `committedKey` is state, not a ref, to re-render when SWR skips the revalidation on mount.
+    const serializedKey = unstable_serialize(key);
+    const [committedKey, setCommittedKey] = useState<string>();
+    useEffect(() => setCommittedKey(serializedKey), [serializedKey]);
+    const isStaleFailure = committedKey !== serializedKey && data === undefined && error !== undefined;
+
+    return { isLoading: isLoading || isStaleFailure, tokenInfos };
 }
+
+export function getVerifiedTokenInfosSwrKey(mints: readonly string[]): readonly ['verified-token-infos', string] {
+    return ['verified-token-infos', mints.join(',')];
+}
+
+function toTokenInfosKind({
+    data,
+    error,
+    isLoading,
+}: {
+    data: TokenInfo[] | undefined;
+    error: unknown;
+    isLoading: boolean;
+}): Exclude<TokenInfosKind, 'idle'> {
+    if (data !== undefined) return 'resolved';
+    if (error !== undefined) return toFailureKind(error);
+    return isLoading ? 'loading' : 'resolved';
+}
+
+function toFailureKind(error: unknown): LookupFailureKind {
+    return error instanceof TokenInfosLookupError ? error.kind : 'unavailable';
+}
+
+function toTokenInfoMap(tokens: TokenInfo[] | undefined): ReadonlyMap<string, TokenInfo> {
+    return tokens ? new Map(tokens.map(token => [token.address, token])) : NO_TOKEN_INFOS;
+}
+
+const NO_TOKEN_INFOS: ReadonlyMap<string, TokenInfo> = new Map();
 
 async function fetchListedTokenInfos({
     cluster,
@@ -133,44 +180,14 @@ function isSettled(lookup: TokenInfoLookup): boolean {
     return lookup.kind === 'listed' || lookup.kind === 'not-listed';
 }
 
-class TokenInfosLookupError extends Error {
-    constructor(readonly kind: LookupFailureKind) {
-        super('[token-info] A token info lookup failed');
-    }
-}
-
-export function useVerifiedTokenInfos({
-    cluster,
-    genesisHash,
-    mints,
-}: {
-    cluster: Cluster;
-    genesisHash: GenesisHash | undefined;
-    mints: readonly string[];
-}): { isLoading: boolean; tokenInfos: ReadonlyMap<string, TokenInfo> } {
-    const chainId = getChainId(cluster, genesisHash);
-    const key = useMemo(
-        () =>
-            chainId && jupiterListsTokensOn(chainId) && mints.length > 0
-                ? getVerifiedTokenInfosSwrKey(mints)
-                : undefined,
-        [chainId, mints],
-    );
-
-    const { data, isLoading } = useSWRImmutable<TokenInfo[], unknown>(key, () => fetchVerifiedTokenInfos(mints), {
-        shouldRetryOnError: false,
-    });
-    const tokenInfos = useMemo(() => toTokenInfoMap(data), [data]);
-
-    return { isLoading, tokenInfos };
-}
-
-export function getVerifiedTokenInfosSwrKey(mints: readonly string[]): readonly ['verified-token-infos', string] {
-    return ['verified-token-infos', mints.join(',')];
-}
-
 async function fetchVerifiedTokenInfos(mints: readonly string[]): Promise<TokenInfo[]> {
     const lookup = await lookupVerifiedTokenInfos({ addresses: mints });
     if (lookup.kind !== 'resolved') throw new TokenInfosLookupError(lookup.kind);
     return lookup.tokens;
+}
+
+class TokenInfosLookupError extends Error {
+    constructor(readonly kind: LookupFailureKind) {
+        super('[token-info] A token info lookup failed');
+    }
 }
