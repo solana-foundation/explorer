@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CONSENT_STORAGE_KEY, CookieConsent, EConsentStatus } from '../CookieConsent';
 
@@ -30,6 +30,30 @@ describe('CookieConsent', () => {
         await waitFor(() => expect(screen.queryByText('ACCEPT')).toBeNull());
         expect(fetch).not.toHaveBeenCalled();
         expect(setStoredValue).not.toHaveBeenCalled();
+    });
+
+    describe('with an answer saved in the legacy cookie', () => {
+        afterEach(() => {
+            document.cookie = 'solana_cookie_consent=; max-age=0';
+        });
+
+        it('should keep a denial when geo-location fails', async () => {
+            document.cookie = 'solana_cookie_consent=denied';
+            vi.stubGlobal(
+                'fetch',
+                vi.fn(() => Promise.reject(new Error('Network error'))),
+            );
+            render(<CookieConsent />);
+            await waitFor(() => expect(screen.queryByText('ACCEPT')).toBeNull());
+            expect(fetch).not.toHaveBeenCalled();
+            expect(setStoredValue).not.toHaveBeenCalled();
+        });
+
+        it('should show the banner for a grant', async () => {
+            document.cookie = 'solana_cookie_consent=granted';
+            render(<CookieConsent />);
+            expect(await screen.findByText('ACCEPT')).toBeInTheDocument();
+        });
     });
 
     it('should not render for non-EU users and auto-grants consent', async () => {
