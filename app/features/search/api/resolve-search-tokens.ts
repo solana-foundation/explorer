@@ -1,3 +1,5 @@
+import { isRedactedTokenAddress } from '@entities/token-info/server';
+
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
 
@@ -36,7 +38,9 @@ export async function resolveSearchTokens(
 
     let discovered: DiscoveredToken[];
     try {
-        discovered = (await discoverWithJupiter(query, discoveryController.signal)).slice(0, SEARCH_TOKENS_LIMIT);
+        discovered = (await discoverWithJupiter(query, discoveryController.signal))
+            .filter(t => !isRedactedTokenAddress(t.address))
+            .slice(0, SEARCH_TOKENS_LIMIT);
     } finally {
         clearTimeout(discoveryTimeout);
     }
