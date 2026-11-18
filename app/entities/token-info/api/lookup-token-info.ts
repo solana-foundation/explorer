@@ -84,7 +84,7 @@ type RouteRequest = BatchRequest & { addresses: string[] };
 
 function lookupTokenInfos(request: RouteRequest): Promise<TokenInfosLookup> {
     return sendTokenInfoRequest({
-        ...toJsonPost('/api/token-info', request),
+        ...toFetchArgs(request),
         sentryExtras: { addressCount: request.addresses.length, cluster: request.cluster },
         timeoutMs: request.includeOnChainFallback ? ROUTE_TIMEOUT_MS : JUPITER_ROUTE_TIMEOUT_MS,
     });
@@ -126,6 +126,22 @@ async function sendTokenInfoRequest({
         });
         return { kind: 'unavailable' };
     }
+}
+
+function toFetchArgs({ addresses, cluster, genesisHash, includeOnChainFallback }: RouteRequest): {
+    init: RequestInit;
+    url: string;
+} {
+    if (addresses.length === 1 && !includeOnChainFallback) {
+        const query = new URLSearchParams({ cluster: String(cluster) });
+        // A named cluster needs no hash, and sending one gives the same mint a second CDN cache key.
+        if (cluster === Cluster.Custom && genesisHash) query.set('genesisHash', genesisHash);
+        return {
+            init: { method: 'GET' },
+            url: `/api/token-info/${encodeURIComponent(addresses[0])}?${query.toString()}`,
+        };
+    }
+    return toJsonPost('/api/token-info', { addresses, cluster, genesisHash, includeOnChainFallback });
 }
 
 function toJsonPost(url: string, body: unknown): { init: RequestInit; url: string } {
