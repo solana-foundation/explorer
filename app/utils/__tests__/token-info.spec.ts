@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type FullTokenInfo, getFullTokenInfo } from '../token-info';
+import { getFullTokenInfo } from '../token-info';
 
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
@@ -16,29 +16,20 @@ describe('getFullTokenInfo', () => {
         vi.unstubAllGlobals();
     });
 
-    it('should reject when the token info request fails and the legacy list has no entry', async () => {
-        stubResponses({ legacyTokens: [], tokenInfoRoute: { ok: false, status: 503 } });
+    it('should reject when the token info request fails', async () => {
+        stubResponse({ ok: false, status: 503 });
 
         await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).rejects.toThrow('Token info request failed');
     });
 
-    it('should resolve the legacy list entry when the token info request fails', async () => {
-        stubResponses({ legacyTokens: [LEGACY_TOKEN], tokenInfoRoute: { ok: false, status: 503 } });
-
-        await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).resolves.toEqual(LEGACY_TOKEN);
-    });
-
     it('should resolve undefined when the token info route does not list the mint', async () => {
-        stubResponses({ legacyTokens: [], tokenInfoRoute: { content: [], ok: true, status: 200 } });
+        stubResponse({ content: [], ok: true, status: 200 });
 
         await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).resolves.toBeUndefined();
     });
 
     it('should resolve the route entry with the chain id and without the verified flag', async () => {
-        stubResponses({
-            legacyTokens: [],
-            tokenInfoRoute: { content: [tokenInfo(MINT.toBase58(), true)], ok: true, status: 200 },
-        });
+        stubResponse({ content: [tokenInfo(MINT.toBase58(), true)], ok: true, status: 200 });
 
         await expect(getFullTokenInfo(MINT, Cluster.Mainnet)).resolves.toEqual({
             address: MINT.toBase58(),
@@ -52,26 +43,8 @@ describe('getFullTokenInfo', () => {
 
 const MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 
-const LEGACY_TOKEN: FullTokenInfo = {
-    address: MINT.toBase58(),
-    chainId: 101,
-    decimals: 6,
-    name: 'USD Coin',
-    symbol: 'USDC',
-};
-
-function stubResponses({
-    legacyTokens,
-    tokenInfoRoute,
-}: {
-    legacyTokens: FullTokenInfo[];
-    tokenInfoRoute: { content?: unknown; ok: boolean; status: number };
-}) {
-    vi.mocked(fetch).mockImplementation(async input =>
-        String(input).includes('token-list')
-            ? jsonResponse({ ok: true, status: 200 }, { tokens: legacyTokens })
-            : jsonResponse(tokenInfoRoute, { content: tokenInfoRoute.content }),
-    );
+function stubResponse(tokenInfoRoute: { content?: unknown; ok: boolean; status: number }) {
+    vi.mocked(fetch).mockImplementation(async () => jsonResponse(tokenInfoRoute, { content: tokenInfoRoute.content }));
 }
 
 function jsonResponse({ ok, status }: { ok: boolean; status: number }, body: unknown) {
