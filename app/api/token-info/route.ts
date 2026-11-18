@@ -1,3 +1,4 @@
+import { GenesisHashFromString } from '@entities/chain-id/server';
 import { isValidCluster, lookupTokenInfos, TOKEN_INFO_REQUEST_LIMIT } from '@entities/token-info/server';
 import { isAddress } from '@solana/kit';
 import { NextResponse } from 'next/server';
@@ -21,7 +22,7 @@ const AddressStruct = refine(string(), 'address', value => isAddress(value));
 const RequestStruct = type({
     addresses: array(AddressStruct),
     cluster: number(),
-    genesisHash: optional(string()),
+    genesisHash: optional(GenesisHashFromString),
     includeOnChainFallback: optional(boolean()),
 });
 

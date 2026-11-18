@@ -1,7 +1,8 @@
 import { gen } from '@__fixtures__/gen';
-import { ChainId, GENESIS_HASHES } from '@entities/chain-id';
+import { ChainId, GENESIS_HASHES, type GenesisHash, GenesisHashFromString } from '@entities/chain-id';
 import { act, renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
+import { create } from 'superstruct';
 import { unstable_serialize } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -245,7 +246,7 @@ describe('useTokenInfos', () => {
             {
                 initialProps: {
                     cluster: Cluster.Custom,
-                    genesisHash: GENESIS_HASHES.DEVNET as string | undefined,
+                    genesisHash: GENESIS_HASHES.DEVNET as GenesisHash | undefined,
                 },
                 wrapper,
             },
@@ -323,7 +324,7 @@ describe('useTokenInfos', () => {
             () =>
                 useTokenInfos({
                     cluster: Cluster.Custom,
-                    genesisHash: 'not-a-genesis-hash',
+                    genesisHash: create(gen.blockhash(), GenesisHashFromString),
                     mints: [MINT_A],
                 }),
             {
@@ -363,7 +364,7 @@ describe('useTokenInfos', () => {
         const { rerender } = renderHook(
             ({ genesisHash }) => useTokenInfos({ cluster: Cluster.Mainnet, genesisHash, mints }),
             {
-                initialProps: { genesisHash: undefined as string | undefined },
+                initialProps: { genesisHash: undefined as GenesisHash | undefined },
                 wrapper,
             },
         );

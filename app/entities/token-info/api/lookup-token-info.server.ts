@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type ChainId, getChainId } from '@entities/chain-id/@x/token-info';
+import { type ChainId, type GenesisHash, getChainId } from '@entities/chain-id/@x/token-info';
 import { Logger } from '@shared/lib/logger';
 import { isAddress } from '@solana/kit';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
@@ -20,7 +20,7 @@ export async function lookupTokenInfo({
     mint,
 }: {
     cluster: Cluster;
-    genesisHash: string | undefined;
+    genesisHash: GenesisHash | undefined;
     mint: string;
 }): Promise<TokenInfoLookup> {
     if (!isAddress(mint)) return { kind: 'not-listed' };
@@ -35,7 +35,7 @@ export async function lookupTokenInfos({
 }: {
     addresses: string[];
     cluster: Cluster;
-    genesisHash: string | undefined;
+    genesisHash: GenesisHash | undefined;
     includeOnChainFallback?: boolean;
 }): Promise<TokenInfosLookup> {
     const chainId = getChainId(cluster, genesisHash);

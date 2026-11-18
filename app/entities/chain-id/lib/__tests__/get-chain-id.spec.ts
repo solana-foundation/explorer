@@ -1,8 +1,10 @@
+import { gen } from '@__fixtures__/gen';
 import { Cluster } from '@utils/cluster';
+import { create } from 'superstruct';
 import { describe, expect, it } from 'vitest';
 
 import { ChainId } from '../chain-id';
-import { GENESIS_HASHES } from '../const';
+import { GENESIS_HASHES, GenesisHashFromString } from '../const';
 import { getChainId } from '../get-chain-id';
 
 describe('getChainId', () => {
@@ -40,7 +42,7 @@ describe('getChainId', () => {
         });
 
         it('should return undefined for unknown genesisHash', () => {
-            expect(getChainId(cluster, 'unknown-genesis-hash')).toBeUndefined();
+            expect(getChainId(cluster, create(gen.blockhash(), GenesisHashFromString))).toBeUndefined();
         });
     });
 });

@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
+import { GENESIS_HASHES, type GenesisHash } from '@entities/chain-id/lib/const';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -272,7 +272,7 @@ async function lookupAll(
         cluster = Cluster.Mainnet,
         genesisHash,
         includeOnChainFallback,
-    }: { cluster?: Cluster; genesisHash?: string; includeOnChainFallback?: boolean } = {},
+    }: { cluster?: Cluster; genesisHash?: GenesisHash; includeOnChainFallback?: boolean } = {},
 ): Promise<TokenInfoLookup[]> {
     const pending = Promise.all(
         mints.map(mint => lookupTokenInfo({ cluster, genesisHash, includeOnChainFallback, mint })),

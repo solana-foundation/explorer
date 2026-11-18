@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
+import { GENESIS_HASHES, type GenesisHash } from '@entities/chain-id/lib/const';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
@@ -117,7 +117,7 @@ describe('useReceiptResult', () => {
 
 const RPC_URL = 'http://localhost:8899';
 
-function connectedWithGenesisHash(cluster: Cluster, genesisHash: string): ClusterContext {
+function connectedWithGenesisHash(cluster: Cluster, genesisHash: GenesisHash): ClusterContext {
     return {
         ...clusterContext({ cluster, connectableUrl: RPC_URL, status: ClusterStatus.Connected, url: RPC_URL }),
         genesisHash,
