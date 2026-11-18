@@ -34,4 +34,4 @@
 
 ## 4. Verify
 
-- [ ] `pnpm typecheck`, targeted tests asserting unsafe schemes render no anchor, and `pnpm openspec:validate` pass.
+- [x] `pnpm typecheck`, targeted tests asserting unsafe schemes render no anchor, and `pnpm openspec:validate` pass. The unsafe-scheme tests are `app/components/shared/ui/__tests__/external-link.spec.tsx` and `app/features/security-txt/ui/__tests__/common.spec.tsx`. Every migrated sink renders through `ExternalLink`, so the component test covers them.

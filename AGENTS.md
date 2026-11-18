@@ -61,7 +61,7 @@
 
 ## Design Decisions (OpenSpec)
 
-Non-trivial design and architectural choices are captured as **OpenSpec change proposals** under `openspec/changes/<change-id>/proposal.md`. `proposal.md` is the only required artifact; specs/tasks/design are optional per-change. See [`openspec/README.md`](openspec/README.md) for the convention and [`openspec/changes/pick-adr-methodology/proposal.md`](openspec/changes/pick-adr-methodology/proposal.md) for the rationale. Validate with `openspec validate <change-id> --type change --strict`.
+Non-trivial design and architectural choices are captured as **OpenSpec change proposals** under `openspec/changes/<change-id>/proposal.md`. `proposal.md` is the only required artifact; specs/tasks/design are optional per-change. See [`openspec/README.md`](openspec/README.md) for the convention and [`openspec/changes/archive/2026-11-18-pick-adr-methodology/proposal.md`](openspec/changes/archive/2026-11-18-pick-adr-methodology/proposal.md) for the rationale. Validate with `openspec validate <change-id> --type change --strict`.
 
 ## Writing
 
