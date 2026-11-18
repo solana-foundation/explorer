@@ -4,6 +4,7 @@ import { type ChainId, type GenesisHash, getChainId } from '@entities/chain-id/@
 import { Logger } from '@shared/lib/logger';
 import { isAddress } from '@solana/kit';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
+import { unstable_cache } from 'next/cache';
 
 import { reportJupiterError } from '../lib/errors';
 import { isRedactedTokenAddress } from '../lib/is-redacted-token-address';
@@ -11,7 +12,7 @@ import { jupiterListsTokensOn } from '../lib/jupiter-lists-tokens-on';
 import { type JupiterToken } from '../lib/jupiter-token';
 import { type TokenInfoLookup, type TokenInfosLookup, toTokenInfoLookup } from '../lib/token-info-lookup';
 import { type TokenInfo } from '../lib/types';
-import { type JupiterTokensResult, searchJupiterTokens } from './fetch-jupiter-tokens';
+import { fetchJupiterVerifiedTokens, type JupiterTokensResult, searchJupiterTokens } from './fetch-jupiter-tokens';
 import { getTokenInfosFromMetaplex } from './fetch-token-metaplex';
 
 export async function lookupTokenInfo({
@@ -49,6 +50,27 @@ export async function lookupTokenInfos({
 
     if (!includeOnChainFallback) return { kind: 'resolved', tokens: result.tokens };
     return { kind: 'resolved', tokens: await addMetaplexTokenInfos({ addresses, cluster, tokens: result.tokens }) };
+}
+
+export async function lookupVerifiedTokenInfos({
+    addresses,
+}: {
+    addresses: readonly string[];
+}): Promise<TokenInfosLookup> {
+    const result = await getVerifiedTokenInfos();
+    if (result.kind !== 'resolved') return result;
+    const requested = new Set(addresses);
+    return { kind: 'resolved', tokens: result.tokens.filter(token => requested.has(token.address)) };
+}
+
+async function getVerifiedTokenInfos(): Promise<TokenInfosLookup> {
+    try {
+        return { kind: 'resolved', tokens: await getCachedVerifiedTokenInfos() };
+    } catch (error) {
+        if (error instanceof JupiterFailureError) return { kind: error.failure.kind };
+        reportFailure({ error, kind: 'unavailable' }, VERIFIED_TOKENS_SENTRY_EXTRAS);
+        return { kind: 'unavailable' };
+    }
 }
 
 function reportFailure(failure: JupiterFailure, sentryExtras: Record<string, unknown>): void {
@@ -105,6 +127,31 @@ async function addMetaplexTokenInfos({
 const NOTHING_LISTED: JupiterTokenInfos = { kind: 'resolved', tokens: [] };
 
 const REVALIDATE_S = 3600;
+
+// The Next data cache keeps whatever the function returns, so a failure throws to stay out of it.
+const getCachedVerifiedTokenInfos = unstable_cache(
+    async (): Promise<TokenInfo[]> => {
+        const apiKey = process.env.JUPITER_API_KEY;
+        const result = apiKey
+            ? await fetchJupiterVerifiedTokens({ apiKey, signal: AbortSignal.timeout(JUPITER_TIMEOUT_MS) })
+            : missingApiKeyFailure();
+        if (result.kind !== 'resolved') {
+            reportFailure(result, VERIFIED_TOKENS_SENTRY_EXTRAS);
+            throw new JupiterFailureError(result);
+        }
+        return result.tokens.map(toTokenInfo);
+    },
+    ['jupiter-verified-token-infos'],
+    { revalidate: REVALIDATE_S },
+);
+
+const VERIFIED_TOKENS_SENTRY_EXTRAS = { tag: 'verified' };
+
+class JupiterFailureError extends Error {
+    constructor(readonly failure: JupiterFailure) {
+        super('[api:token-info] Jupiter verified tokens lookup failed');
+    }
+}
 
 async function fetchTokenInfosFromJupiter({
     apiKey,

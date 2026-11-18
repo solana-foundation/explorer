@@ -5,7 +5,8 @@ import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
-import { lookupTokenInfo } from '../api/lookup-token-info';
+import { lookupTokenInfo, lookupVerifiedTokenInfos } from '../api/lookup-token-info';
+import { jupiterListsTokensOn } from '../lib/jupiter-lists-tokens-on';
 import type { TokenInfoLookup } from '../lib/token-info-lookup';
 import type { TokenInfo } from '../lib/types';
 
@@ -136,4 +137,40 @@ class TokenInfosLookupError extends Error {
     constructor(readonly kind: LookupFailureKind) {
         super('[token-info] A token info lookup failed');
     }
+}
+
+export function useVerifiedTokenInfos({
+    cluster,
+    genesisHash,
+    mints,
+}: {
+    cluster: Cluster;
+    genesisHash: GenesisHash | undefined;
+    mints: readonly string[];
+}): { isLoading: boolean; tokenInfos: ReadonlyMap<string, TokenInfo> } {
+    const chainId = getChainId(cluster, genesisHash);
+    const key = useMemo(
+        () =>
+            chainId && jupiterListsTokensOn(chainId) && mints.length > 0
+                ? getVerifiedTokenInfosSwrKey(mints)
+                : undefined,
+        [chainId, mints],
+    );
+
+    const { data, isLoading } = useSWRImmutable<TokenInfo[], unknown>(key, () => fetchVerifiedTokenInfos(mints), {
+        shouldRetryOnError: false,
+    });
+    const tokenInfos = useMemo(() => toTokenInfoMap(data), [data]);
+
+    return { isLoading, tokenInfos };
+}
+
+export function getVerifiedTokenInfosSwrKey(mints: readonly string[]): readonly ['verified-token-infos', string] {
+    return ['verified-token-infos', mints.join(',')];
+}
+
+async function fetchVerifiedTokenInfos(mints: readonly string[]): Promise<TokenInfo[]> {
+    const lookup = await lookupVerifiedTokenInfos({ addresses: mints });
+    if (lookup.kind !== 'resolved') throw new TokenInfosLookupError(lookup.kind);
+    return lookup.tokens;
 }

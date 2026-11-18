@@ -1,6 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { ChainId } from '@entities/chain-id';
-import { getTokenInfosSwrKey, type TokenInfo } from '@entities/token-info';
+import { getVerifiedTokenInfosSwrKey, type TokenInfo } from '@entities/token-info';
 import {
     DispatchContext as TokensDispatch,
     type State as TokensState,
@@ -12,7 +11,6 @@ import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsPr
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-import { Cluster } from '@utils/cluster';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 import { SWRConfig, unstable_serialize } from 'swr';
@@ -35,10 +33,8 @@ const usdcTokenInfo: TokenInfo = {
     verified: true,
 };
 
-const seededTokenInfos = {
-    [unstable_serialize(
-        getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Mainnet, mints: [USDC_MINT, WSOL_MINT] }),
-    )]: [usdcTokenInfo],
+const swrFallback = {
+    [unstable_serialize(getVerifiedTokenInfosSwrKey([USDC_MINT, WSOL_MINT]))]: [usdcTokenInfo],
 };
 
 const tokensState = (entries: TokensState['entries']): TokensState => ({
@@ -147,16 +143,16 @@ export const WithLogos: Story = {
     decorators: [
         // Its own cache, and no revalidation: a fallback is only read when nothing is cached, and it
         // does not stop SWR refetching. There is no route to answer that fetch here, so without both
-        // the seeded entry loses to an empty one.
+        // the seeded entries lose to empty ones.
         Story => (
-            <SWRConfig value={{ fallback: seededTokenInfos, provider: () => new Map(), revalidateOnMount: false }}>
+            <SWRConfig value={{ fallback: swrFallback, provider: () => new Map(), revalidateOnMount: false }}>
                 <Story />
             </SWRConfig>
         ),
         withTokensAndLogos,
     ],
     // Symbol and logo can only come from resolved metadata, so this fails if the seeded entry stops
-    // matching the key the card looks up.
+    // matching the key the row looks up.
     play: async ({ canvasElement }) => {
         // GridTable mobile="stack" renders the balance in both the desktop and mobile layouts.
         const balances = await within(canvasElement).findAllByText('1234.56 USDC');

@@ -1,4 +1,6 @@
 import { gen } from '@__fixtures__/gen';
+import type { TokenInfo } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen, within } from '@testing-library/react';
@@ -32,22 +34,22 @@ vi.mock('@providers/cluster', async importOriginal => {
     return { ...actual, useCluster: useClusterMock };
 });
 
-// Only the bulk lookup is stubbed. `orderMintsByVerification` and `deriveScaledUiAmountMultiplier`
-// stay real, so these specs exercise the actual tiering rather than a re-statement of it.
-const { useTokenInfosMock } = vi.hoisted(() => ({ useTokenInfosMock: vi.fn() }));
+// Only the lookups are stubbed. `orderMintsByVerification` and `deriveScaledUiAmountMultiplier`
+// stay real, so these specs exercise the actual ordering rather than a re-statement of it.
+const { useTokenInfoMock, useVerifiedTokenInfosMock } = vi.hoisted(() => ({
+    useTokenInfoMock: vi.fn(),
+    useVerifiedTokenInfosMock: vi.fn(),
+}));
 vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
-    useTokenInfos: useTokenInfosMock,
+    useTokenInfo: useTokenInfoMock,
+    useVerifiedTokenInfos: useVerifiedTokenInfosMock,
 }));
 
 // Stub Address so we can assert props without dragging in nickname/visibility/cluster-path machinery.
 vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey, fetchTokenLabelInfo, tokenLabelInfo }: any) => (
-        <span
-            data-testid="address"
-            data-fetch-label={String(Boolean(fetchTokenLabelInfo))}
-            data-has-token-label-info={String(tokenLabelInfo !== undefined)}
-        >
+    Address: ({ pubkey, tokenLabelInfo }: any) => (
+        <span data-testid="address" data-has-token-label-info={String(tokenLabelInfo !== undefined)}>
             {pubkey.toBase58()}
         </span>
     ),
@@ -79,11 +81,14 @@ const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const LOGO = 'https://example.test/usdc.png';
 const TOKEN_ACCOUNT_A = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_ACCOUNT_B = 'SysvarC1ock11111111111111111111111111111111';
-
-// Distinct mints for the ordering specs, named for the tier each is set up to land in.
-const VERIFIED_MINT = MINT;
-const LISTED_MINT = 'So11111111111111111111111111111111111111112';
-const UNKNOWN_MINT = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+const USDC: TokenInfo = {
+    address: MINT,
+    decimals: 6,
+    logoURI: LOGO,
+    name: 'USD Coin',
+    symbol: 'USDC',
+    verified: true,
+};
 
 type TokenAmount = { amount: string; decimals: number; uiAmountString: string };
 
@@ -110,12 +115,17 @@ function makeEntry() {
     return makeEntryWith([makeTokenAccount({ amount: '1234560000', decimals: 6, uiAmountString: '1234.56' })]);
 }
 
-function tokenInfo(address: string, verified: boolean) {
-    return { address, decimals: 6, logoURI: null, name: `Token ${address.slice(0, 4)}`, symbol: 'TKN', verified };
+function verified(...tokens: TokenInfo[]) {
+    return { isLoading: false, tokenInfos: new Map(tokens.map(token => [token.address, token])) };
 }
 
-function resolved(entries: ReturnType<typeof tokenInfo>[] = []) {
-    return { isLoading: false, tokenInfos: new Map(entries.map(entry => [entry.address, entry])) };
+function listTokens(...tokens: TokenInfo[]) {
+    useTokenInfoMock.mockImplementation(({ mint }: { mint: string }) => {
+        const tokenInfo = tokens.find(token => token.address === mint);
+        return tokenInfo
+            ? { isLoading: false, kind: 'listed', tokenInfo }
+            : { isLoading: false, kind: 'not-listed', tokenInfo: undefined };
+    });
 }
 
 // GridTable renders the desktop grid (role="table") and a label-stacked mobile copy (also role="table")
@@ -135,48 +145,51 @@ function visibleMints() {
         .map(node => node.textContent);
 }
 
+function lookedUpMints() {
+    return new Set(useTokenInfoMock.mock.calls.map(([{ mint }]) => mint).filter(mint => mint !== undefined));
+}
+
 /** Undefined once every holding is on screen, since the footer renders nothing then. */
 function loadMoreButton() {
     return screen.queryAllByRole('button').find(button => button.textContent?.startsWith('Load More'));
 }
 
-describe('should render OwnedTokensCard from a single bulk lookup', () => {
+beforeEach(() => {
+    useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
+    useVerifiedTokenInfosMock.mockReturnValue(verified());
+    listTokens();
+});
+
+describe('should render OwnedTokensCard', () => {
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useAccountOwnedTokensMock.mockReturnValue(makeEntry());
         useSearchParamsMock.mockReturnValue(searchParams(null));
-        useTokenInfosMock.mockReturnValue(resolved());
     });
 
     afterEach(() => {
         vi.clearAllMocks();
     });
 
-    it('should render the symbol and logo from the bulk lookup and label the mint Address without a second fetch', () => {
-        useTokenInfosMock.mockReturnValue({
-            isLoading: false,
-            tokenInfos: new Map([
-                [MINT, { address: MINT, decimals: 6, logoURI: LOGO, name: 'USD Coin', symbol: 'USDC', verified: true }],
-            ]),
-        });
+    it('should render a verified mint from the verified lookup, without a token info request of its own', () => {
+        useVerifiedTokenInfosMock.mockReturnValue(verified(USDC));
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        // Logo column always rendered, with the resolved uri.
-        const logo = grid().getByTestId('token-logo');
-        expect(logo.getAttribute('data-uri')).toBe(LOGO);
-        // The card resolves every held mint in one call, so rows fetch nothing themselves.
-        expect(useTokenInfosMock).toHaveBeenCalledWith({
-            cluster: Cluster.Mainnet,
-            genesisHash: 'genesis',
-            mints: [MINT],
-        });
-        // Symbol comes from the lookup, rendered next to the amount in the balance cell.
+        expect(grid().getByTestId('token-logo').getAttribute('data-uri')).toBe(LOGO);
         expect(grid().getByText('USDC', { exact: false })).toBeInTheDocument();
-        // Mint Address is labeled from the already-resolved info (tokenLabelInfo), so it fetches nothing.
-        const address = grid().getByTestId('address');
-        expect(address.getAttribute('data-fetch-label')).toBe('false');
-        expect(address.getAttribute('data-has-token-label-info')).toBe('true');
+        expect(lookedUpMints()).toEqual(new Set());
+        expect(grid().getByTestId('address').getAttribute('data-has-token-label-info')).toBe('true');
+    });
+
+    it('should render an unverified mint from its own token info request', () => {
+        listTokens({ ...USDC, verified: false });
+
+        render(<OwnedTokensCard address={OWNER} />);
+
+        expect(grid().getByTestId('token-logo').getAttribute('data-uri')).toBe(LOGO);
+        expect(grid().getByText('USDC', { exact: false })).toBeInTheDocument();
+        expect(useTokenInfoMock).toHaveBeenCalledWith({ cluster: Cluster.Mainnet, genesisHash: 'genesis', mint: MINT });
+        expect(grid().getByTestId('address').getAttribute('data-has-token-label-info')).toBe('true');
     });
 
     it('should still render the logo column with a fallback when token info is unavailable', () => {
@@ -189,8 +202,8 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
         expect(screen.queryByText('USDC')).not.toBeInTheDocument();
     });
 
-    it('should hold the loading state until the lookup settles, rather than paint an unsorted list', () => {
-        useTokenInfosMock.mockReturnValue({ isLoading: true, tokenInfos: new Map() });
+    it('should hold the loading state until the verified lookup settles, rather than paint an unsorted list', () => {
+        useVerifiedTokenInfosMock.mockReturnValue({ isLoading: true, tokenInfos: new Map() });
 
         render(<OwnedTokensCard address={OWNER} />);
 
@@ -237,56 +250,29 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
     });
 });
 
-describe('should order holdings by verification tier', () => {
-    function heldInWorstOrder() {
-        return makeEntryWith([
-            makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, UNKNOWN_MINT),
-            makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, LISTED_MINT),
-            makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, VERIFIED_MINT),
-        ]);
-    }
-
-    beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
-        useSearchParamsMock.mockReturnValue(searchParams(null));
-        useAccountOwnedTokensMock.mockReturnValue(heldInWorstOrder());
-    });
-
+describe('should order holdings by verification', () => {
     afterEach(() => {
         vi.clearAllMocks();
     });
 
-    // The holdings are set up in the exact reverse of this order, so a pass cannot come from RPC order.
-    it('should render verified mints first, then listed, then those the list does not know', () => {
-        useTokenInfosMock.mockReturnValue(resolved([tokenInfo(VERIFIED_MINT, true), tokenInfo(LISTED_MINT, false)]));
-
-        render(<OwnedTokensCard address={OWNER} />);
-
-        expect(visibleMints()).toEqual([VERIFIED_MINT, LISTED_MINT, UNKNOWN_MINT]);
-    });
-
-    it('should fall back to RPC order when the lookup resolved nothing', () => {
-        useTokenInfosMock.mockReturnValue(resolved());
-
-        render(<OwnedTokensCard address={OWNER} />);
-
-        expect(visibleMints()).toEqual([UNKNOWN_MINT, LISTED_MINT, VERIFIED_MINT]);
-    });
-
-    // The spec pins this: reordering may promote a tier, never shuffle inside one.
-    it('should keep RPC order within a tier', () => {
+    it('should render the verified mints first, then the rest in RPC order', () => {
         const [first, second, third, fourth] = [gen.address(1), gen.address(2), gen.address(3), gen.address(4)];
+        useSearchParamsMock.mockReturnValue(searchParams(null));
         useAccountOwnedTokensMock.mockReturnValue(
             makeEntryWith(
                 [first, second, third, fourth].map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint)),
             ),
         );
-        useTokenInfosMock.mockReturnValue(resolved([tokenInfo(first, true), tokenInfo(third, true)]));
+        useVerifiedTokenInfosMock.mockReturnValue(verified(tokenInfo(fourth, true), tokenInfo(second, true)));
 
         render(<OwnedTokensCard address={OWNER} />);
 
-        // Verified pair keeps its relative order, then the unresolved pair keeps its own.
-        expect(visibleMints()).toEqual([first, third, second, fourth]);
+        expect(visibleMints()).toEqual([second, fourth, first, third]);
+        expect(useVerifiedTokenInfosMock).toHaveBeenCalledWith({
+            cluster: Cluster.Mainnet,
+            genesisHash: 'genesis',
+            mints: [first, second, third, fourth],
+        });
     });
 });
 
@@ -296,12 +282,11 @@ describe('should page the ordered holdings', () => {
     const verifiedMints = allMints.slice(-5);
 
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useAccountOwnedTokensMock.mockReturnValue(
             makeEntryWith(allMints.map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint))),
         );
-        useTokenInfosMock.mockReturnValue(resolved(verifiedMints.map(mint => tokenInfo(mint, true))));
+        useVerifiedTokenInfosMock.mockReturnValue(verified(...verifiedMints.map(mint => tokenInfo(mint, true))));
     });
 
     afterEach(() => {
@@ -315,6 +300,17 @@ describe('should page the ordered holdings', () => {
         expect(firstPage).toHaveLength(20);
         // Last five by RPC order, first five once ordered.
         expect(firstPage.slice(0, 5)).toEqual(verifiedMints);
+    });
+
+    // A lookup of every holding sends one Jupiter request per `TOKEN_INFO_REQUEST_LIMIT` mints and gets rate limited.
+    it('should look up token info only for the unverified mints on screen', async () => {
+        render(<OwnedTokensCard address={OWNER} />);
+
+        expect(lookedUpMints()).toEqual(new Set(allMints.slice(0, 15)));
+
+        await userEvent.click(screen.getByRole('button', { name: 'Load More (20 of 25)' }));
+
+        expect(lookedUpMints()).toEqual(new Set(allMints.slice(0, 20)));
     });
 
     it('should count unique mints in the footer, not token accounts', () => {
@@ -337,8 +333,6 @@ describe('should page the ordered holdings', () => {
 
 describe('should render the account address column only in detail display', () => {
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
-        useTokenInfosMock.mockReturnValue(resolved());
         useAccountOwnedTokensMock.mockReturnValue(makeEntry());
     });
 
@@ -385,15 +379,9 @@ describe('should render the account address column only in detail display', () =
 
 describe('should project holdings into the mobile stack', () => {
     beforeEach(() => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
         useSearchParamsMock.mockReturnValue(searchParams(null));
         useAccountOwnedTokensMock.mockReturnValue(makeEntry());
-        useTokenInfosMock.mockReturnValue({
-            isLoading: false,
-            tokenInfos: new Map([
-                [MINT, { address: MINT, decimals: 6, logoURI: LOGO, name: 'USD Coin', symbol: 'USDC', verified: true }],
-            ]),
-        });
+        listTokens(USDC);
     });
 
     afterEach(() => {
