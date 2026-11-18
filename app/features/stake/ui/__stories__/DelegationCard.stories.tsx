@@ -4,7 +4,7 @@ import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '../../../../../.storybook/decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo } from '../../lib/validators';
 import { TotalRewardStatus } from '../../model/use-total-reward';
@@ -42,7 +42,7 @@ const stakeAccount: StakeAccountInfo = {
 const meta = {
     component: DelegationCard,
     // The card renders vote/authority addresses, which resolve through both providers.
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Stake/DelegationCard',

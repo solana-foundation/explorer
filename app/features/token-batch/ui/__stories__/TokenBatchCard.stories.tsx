@@ -1,12 +1,7 @@
 import { toRawInstructionNode } from '@entities/instruction-card';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    nextjsParameters,
-    withTokenInfoBatch,
-    withTransactions,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { nextjsParameters, withTransactions, withTxInstructionSurface } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -18,7 +13,7 @@ import { TokenBatchCard } from '../TokenBatchCard';
 
 const meta = {
     component: TokenBatchCard,
-    decorators: [withTxInstructionSurface, withTransactions, withTokenInfoBatch],
+    decorators: [withTxInstructionSurface, withTransactions],
     parameters: {
         ...nextjsParameters,
     },

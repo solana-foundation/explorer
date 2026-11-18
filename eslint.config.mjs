@@ -68,7 +68,6 @@ const HOOKS_PENDING_CLIENT_ONLY = [
     'app/entities/idl/model/use-program-idl-names.ts',
     'app/entities/idl/model/use-program-idls.ts',
     'app/entities/slot-time/model/use-slot-time.ts',
-    'app/entities/token-info/model/use-token-info.ts',
     'app/entities/transaction-data/model/use-resolved-instruction-names.ts',
     'app/features/cluster-switcher/model/use-cluster-href.ts',
     'app/features/cluster-switcher/model/use-custom-url-draft.ts',
@@ -862,8 +861,6 @@ export default tseslint.config(
             'app/entities/idl/model/idl-version.ts',
             'app/entities/idl/model/use-format-codama-idl.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
-            'app/entities/token-info/model/token-info-batch-provider.tsx',
-            'app/entities/token-info/model/use-token-info.ts',
             'app/entities/token-price/lib/parse-usd.ts',
             'app/entities/token-price/model/use-token-price.ts',
 

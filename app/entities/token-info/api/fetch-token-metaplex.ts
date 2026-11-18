@@ -7,7 +7,6 @@ import {
     TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
-import { invariant } from '@shared/lib/invariant';
 import { address } from '@solana/kit';
 import { fetchAll } from '@utils/fetch-all';
 
@@ -23,26 +22,18 @@ import { chunk } from '@/app/shared/lib/array';
 import { resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
 
+import { isRedactedTokenAddress } from '../lib/is-redacted-token-address';
 import type { TokenInfo } from '../lib/types';
 
-/**
- * Milliseconds to wait for one mint's off-chain JSON. Carried over from the
- * `metaplexTimeout` default in `@solflare-wallet/utl-sdk`.
- */
 export const METAPLEX_TIMEOUT_MS = 5_000;
 
-/**
- * How many off-chain JSON reads may be in flight at once. One batch names up to
- * `MAX_ADDRESSES` mints, each pointing at a third-party host, so this bounds the
- * sockets one request opens instead of fanning out over the whole batch.
- */
 export const LOGO_CONCURRENCY = 8;
 
 /**
  * Wall clock the off-chain reads may spend across one batch, in milliseconds.
  * `METAPLEX_TIMEOUT_MS` bounds a single read, but a run of slow hosts would still
  * add up past the route's `maxDuration` and lose the whole response. Past this
- * point the remaining mints report `logoURI: null`, so names, symbols and
+ * point the remaining mints report no `logoURI`, so names, symbols and
  * decimals — which come from the metadata and mint accounts — still arrive.
  */
 export const LOGO_BUDGET_MS = 10_000;
@@ -59,19 +50,10 @@ export type FetchTokenInfosMetaplexOptions = {
 
 const NULL_CHAR = String.fromCharCode(0);
 
-/**
- * Strips the null padding the token metadata program adds to fixed-width
- * strings. Matches `removeEmptyChars` in `@metaplex-foundation/js`, which the
- * SDK relied on to clean up on-chain names and symbols.
- */
 function removeEmptyChars(value: string): string {
     return value.split(NULL_CHAR).join('');
 }
 
-/**
- * Reads `decimals` for each mint. Mirrors the SDK, which fetched the parsed
- * mint accounts separately because the metadata account does not carry them.
- */
 async function fetchDecimals(
     mints: string[],
     rpcEndpoint: string,
@@ -140,17 +122,15 @@ async function fetchLogoUri(
     metadata: Metadata,
     deadline: number,
     options: FetchTokenInfosMetaplexOptions,
-): Promise<string | null> {
+): Promise<string | undefined> {
     // Covers a mint with no `uri` at all, as well as one naming nothing readable.
     const uri = resolveMetadataUri(metadata.uri);
-    // eslint-disable-next-line unicorn/no-null -- `TokenInfo` requires a `logoURI` key, and JSON omits an `undefined` value
-    if (!uri) return null;
+    if (!uri) return undefined;
 
     const timeout = Math.min(METAPLEX_TIMEOUT_MS, deadline - Date.now());
     // The batch has spent its budget; the mints still queued give up their logo rather than the
     // request giving up its response.
-    // eslint-disable-next-line unicorn/no-null -- same contract as above
-    if (timeout <= 0) return null;
+    if (timeout <= 0) return undefined;
 
     try {
         const [error, resource] = await fetchResource(uri, {
@@ -162,42 +142,31 @@ async function fetchLogoUri(
             // A dead link, a slow host, or a blocked address is routine for third-party metadata.
             // `logProxyError` owns the log, so `onError` would log the failure a second time.
             logProxyError(error);
-            // eslint-disable-next-line unicorn/no-null -- same contract as above
-            return null;
+            return undefined;
         }
         logResourceFetched(resource, MAX_SIZE);
         const { data, headers } = resource;
-        // eslint-disable-next-line unicorn/no-null -- same contract as above
-        if (!matchJsonContent(headers.get('content-type'))) return null;
+        if (!matchJsonContent(headers.get('content-type'))) return undefined;
         const image = (data as { image?: unknown } | undefined)?.image;
-        // eslint-disable-next-line unicorn/no-null -- same contract as above
-        return typeof image === 'string' ? image : null;
+        return typeof image === 'string' ? image : undefined;
     } catch (error) {
         options.onError?.(error);
-        // eslint-disable-next-line unicorn/no-null -- same contract as above
-        return null;
+        return undefined;
     }
 }
 
-/**
- * Resolves token info from on-chain Metaplex metadata. Use this for mints the
- * unified token list (UTL) API does not carry.
- *
- * This replaces the Metaplex fallback in `@solflare-wallet/utl-sdk`. Like the
- * SDK it returns only mints whose token standard is `Fungible`, and it marks
- * every result unverified because the data is not on a curated list.
- */
 export async function getTokenInfosFromMetaplex(
     addresses: string[],
     rpcEndpoint: string,
     options: FetchTokenInfosMetaplexOptions = {},
 ): Promise<TokenInfo[]> {
-    if (addresses.length === 0 || !rpcEndpoint) return [];
+    const unredactedAddresses = addresses.filter(address => !isRedactedTokenAddress(address));
+    if (unredactedAddresses.length === 0 || !rpcEndpoint) return [];
 
     let fungible: Metadata[];
     try {
         const umi = getUmi(rpcEndpoint);
-        const pdas = addresses.map(address => findMetadataPda(umi, { mint: publicKey(address) }));
+        const pdas = unredactedAddresses.map(address => findMetadataPda(umi, { mint: publicKey(address) }));
 
         // Umi sends every key in a single `getMultipleAccounts` call, so batch here to stay under
         // the RPC limit. One failed batch must not lose the mints the others resolved.
@@ -233,16 +202,12 @@ export async function getTokenInfosFromMetaplex(
         fetchAll(fungible, metadata => fetchLogoUri(metadata, deadline, options), LOGO_CONCURRENCY),
     ]);
 
-    return fungible.map((metadata, index) => {
-        const logoURI = logoUris.at(index);
-        invariant(logoURI !== undefined, `logo URI index ${index} out of range`);
-        return {
-            address: metadata.mint.toString(),
-            decimals: decimals.get(metadata.mint.toString()) ?? DEFAULT_DECIMALS,
-            logoURI,
-            name: removeEmptyChars(metadata.name),
-            symbol: removeEmptyChars(metadata.symbol),
-            verified: false,
-        };
-    });
+    return fungible.map((metadata, index) => ({
+        address: metadata.mint.toString(),
+        decimals: decimals.get(metadata.mint.toString()) ?? DEFAULT_DECIMALS,
+        logoURI: logoUris.at(index),
+        name: removeEmptyChars(metadata.name),
+        symbol: removeEmptyChars(metadata.symbol),
+        verified: false,
+    }));
 }

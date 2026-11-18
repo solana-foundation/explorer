@@ -2,7 +2,7 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { type TokenInfo, useTokenInfo } from '@entities/token-info';
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData } from '@providers/accounts';
@@ -11,23 +11,20 @@ import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
-import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
+import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-extension';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { TokenExtension } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
-import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { create } from 'superstruct';
-import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
-import { FullTokenInfo } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
@@ -45,7 +42,7 @@ export function TokenAccountSection({
 }: {
     account: Account;
     tokenAccount: TokenAccount;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
 }) {
     const { cluster } = useCluster();
 
@@ -94,7 +91,7 @@ function FungibleTokenMintAccountCard({
 }: {
     account: Account;
     mintInfo: MintAccountInfo;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
 }) {
     const fetchInfo = useRefreshAccount();
 
@@ -138,7 +135,7 @@ function FungibleTokenMintAccountCard({
     return (
         <AccountCard
             title={
-                tokenInfo
+                tokenInfo?.name
                     ? 'Overview'
                     : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
                       ? 'Token-2022 Mint'
@@ -230,22 +227,13 @@ function NonFungibleTokenMintAccountCard({
     );
 }
 
-async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
-}
-
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useRefreshAccount();
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(info.mint.toBase58());
     const { cluster, genesisHash } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const swrKey = useMemo(
-        () => getTokenInfoSwrKey(info.mint.toString(), cluster, genesisHash),
-        [cluster, genesisHash, info.mint],
-    );
-
-    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
-    const [symbol, setSymbol] = useState<string | undefined>(undefined);
+    const { tokenInfo } = useTokenInfo({ cluster, genesisHash, mint: info.mint.toBase58() });
+    const symbol = info.isNative ? 'SOL' : tokenInfo?.symbol;
     const accountExtensions = info.extensions?.slice();
     accountExtensions?.sort(cmpExtension);
 
@@ -257,14 +245,6 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     ) : (
         <>{info.tokenAmount.uiAmountString}</>
     );
-
-    useEffect(() => {
-        if (info.isNative) {
-            setSymbol('SOL');
-        } else {
-            setSymbol(tokenInfo?.symbol);
-        }
-    }, [tokenInfo, info]);
 
     const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },

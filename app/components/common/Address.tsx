@@ -79,7 +79,7 @@ export function Address({
     let addressLabel = raw ? address : display;
 
     const shouldFetchTokenInfo = fetchTokenLabelInfo && isVisible;
-    const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, genesisHash);
+    const { tokenInfo } = useTokenInfo({ cluster, genesisHash, mint: shouldFetchTokenInfo ? address : undefined });
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
     }

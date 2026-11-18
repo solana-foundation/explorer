@@ -1,10 +1,8 @@
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { PublicKey } from '@solana/web3.js';
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { BigNumber } from 'bignumber.js';
-import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
 
 import { TokenBalancesCardInner } from '../TokenBalancesCard';
 
@@ -13,13 +11,13 @@ const WSOL = 'So11111111111111111111111111111111111111112';
 
 const mocks = vi.hoisted(() => ({
     cluster: { cluster: 0, genesisHash: undefined as string | undefined },
-    fetchTokenInfosFromApi: vi.fn(),
+    useTokenInfos: vi.fn(),
 }));
 
 vi.mock('@/app/providers/cluster', () => ({ useCluster: () => mocks.cluster }));
 vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
-    fetchTokenInfosFromApi: mocks.fetchTokenInfosFromApi,
+    useTokenInfos: mocks.useTokenInfos,
 }));
 vi.mock('@/app/providers/accounts/tokens', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/providers/accounts/tokens')>()),
@@ -33,91 +31,29 @@ describe('TokenBalancesCard token symbols', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.cluster = { cluster: Cluster.Mainnet, genesisHash: undefined };
+        mocks.useTokenInfos.mockReturnValue(resolved({}));
     });
 
-    it('should label each balance with the symbol of its own mint', async () => {
-        mocks.fetchTokenInfosFromApi.mockResolvedValue([
-            { address: USDC, symbol: 'USDC' },
-            { address: WSOL, symbol: 'wSOL' },
-        ]);
-
-        const { container } = renderCard([row(USDC, '100'), row(WSOL, '2')]);
-
-        await waitFor(() => expect(container.textContent).toContain('100 USDC'));
-        expect(container.textContent).toContain('2 wSOL');
-    });
-
-    it('should ask for every mint in the card', async () => {
-        mocks.fetchTokenInfosFromApi.mockResolvedValue([]);
-
-        renderCard([row(USDC, '100'), row(WSOL, '2')]);
-
-        await waitFor(() =>
-            expect(mocks.fetchTokenInfosFromApi).toHaveBeenCalledWith({
-                addresses: [USDC, WSOL],
-                cluster: Cluster.Mainnet,
-                genesisHash: undefined,
-                includeOnChainFallback: true,
-            }),
-        );
-    });
-
-    it('should fall back to "tokens" for a mint the response omits', async () => {
-        mocks.fetchTokenInfosFromApi.mockResolvedValue([{ address: USDC, symbol: 'USDC' }]);
-
-        const { container } = renderCard([row(USDC, '100'), row(WSOL, '2')]);
-
-        await waitFor(() => expect(container.textContent).toContain('100 USDC'));
-        expect(container.textContent).toContain('2 tokens');
-    });
-
-    // fetchTokenInfosFromApi reports a failed request as undefined. Caching that as "no symbols" would pin
-    // the fallback under the immutable key for the rest of the session.
-    it('should not cache the fallback when the request fails', async () => {
-        mocks.fetchTokenInfosFromApi.mockResolvedValueOnce(undefined);
-
-        const cache = new Map();
-        const { container, unmount } = renderCard([row(USDC, '100')], cache);
-        await waitFor(() => expect(mocks.fetchTokenInfosFromApi).toHaveBeenCalledTimes(1));
-        expect(container.textContent).toContain('100 tokens');
-        unmount();
-
-        mocks.fetchTokenInfosFromApi.mockResolvedValue([{ address: USDC, symbol: 'USDC' }]);
-        const { container: retried } = renderCard([row(USDC, '100')], cache);
-
-        await waitFor(() => expect(retried.textContent).toContain('100 USDC'));
-    });
-
-    it('should read again when the cluster changes', async () => {
-        mocks.fetchTokenInfosFromApi.mockResolvedValue([{ address: USDC, symbol: 'USDC' }]);
-        const cache = new Map();
-
-        renderCard([row(USDC, '100')], cache);
-        await waitFor(() => expect(mocks.fetchTokenInfosFromApi).toHaveBeenCalledTimes(1));
-
-        mocks.cluster = { cluster: Cluster.Devnet, genesisHash: undefined };
-        renderCard([row(USDC, '100')], cache);
-
-        await waitFor(() => expect(mocks.fetchTokenInfosFromApi).toHaveBeenCalledTimes(2));
-    });
-
-    // Without a genesisHash the Custom cluster has no chainId, so the request could only return nothing.
-    it('should not ask for symbols on a Custom cluster with no genesisHash', async () => {
-        mocks.cluster = { cluster: Cluster.Custom, genesisHash: undefined };
-
-        const { container } = renderCard([row(USDC, '100')]);
-
-        await waitFor(() => expect(container.textContent).toContain('100 tokens'));
-        expect(mocks.fetchTokenInfosFromApi).not.toHaveBeenCalled();
-    });
-
-    it('should ask for symbols on a Custom cluster whose genesisHash names a known chain', async () => {
+    it('should request every mint in the card with the on-chain fallback', () => {
         mocks.cluster = { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET };
-        mocks.fetchTokenInfosFromApi.mockResolvedValue([{ address: USDC, symbol: 'USDC' }]);
 
-        const { container } = renderCard([row(USDC, '100')]);
+        render(<TokenBalancesCardInner rows={[row(USDC, '100'), row(WSOL, '2')]} />);
 
-        await waitFor(() => expect(container.textContent).toContain('100 USDC'));
+        expect(mocks.useTokenInfos).toHaveBeenCalledWith({
+            cluster: Cluster.Custom,
+            genesisHash: GENESIS_HASHES.MAINNET,
+            includeOnChainFallback: true,
+            mints: [USDC, WSOL],
+        });
+    });
+
+    it('should show "tokens" for a mint without token info', () => {
+        mocks.useTokenInfos.mockReturnValue(resolved({ [USDC]: 'USDC' }));
+
+        const { container } = render(<TokenBalancesCardInner rows={[row(USDC, '100'), row(WSOL, '2')]} />);
+
+        expect(container.textContent).toContain('100 USDC');
+        expect(container.textContent).toContain('2 tokens');
     });
 });
 
@@ -125,11 +61,10 @@ function row(mint: string, balance: string) {
     return { account: new PublicKey(mint), accountIndex: 0, balance, delta: new BigNumber(0), mint };
 }
 
-function renderCard(rows: ReturnType<typeof row>[], cache = new Map()) {
-    return render(<TokenBalancesCardInner rows={rows} />, {
-        wrapper: ({ children }: { children: ReactNode }) => (
-            // dedupingInterval 0 so a remount in the same tick refetches instead of reusing the in-flight key.
-            <SWRConfig value={{ dedupingInterval: 0, provider: () => cache }}>{children}</SWRConfig>
-        ),
-    });
+function resolved(symbolsByMint: Record<string, string>): {
+    isLoading: boolean;
+    tokenInfos: Map<string, { symbol: string }>;
+} {
+    const entries = Object.entries(symbolsByMint).map(([mint, symbol]) => [mint, { symbol }] as const);
+    return { isLoading: false, tokenInfos: new Map(entries) };
 }

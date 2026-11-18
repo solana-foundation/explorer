@@ -9,7 +9,7 @@ import {
     type InstructionNode,
     type RawInstructionNode,
 } from '@entities/instruction-card';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { useTokenInfo } from '@entities/token-info';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
 import { getOwn } from '@shared/lib/object';
 import { type AccountMeta, PublicKey } from '@solana/web3.js';
@@ -17,7 +17,6 @@ import { capitalizeFirstLetter, normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, is, Struct } from 'superstruct';
-import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
@@ -79,13 +78,10 @@ function TokenInstructionCard({
     }, [fetchAccountInfo, mintAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const { cluster, genesisHash } = useCluster();
-    const { data: tokenDetails } = useSWR(
-        mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, genesisHash) : null,
-        fetchTokenInfo,
-    );
+    const { tokenInfo: tokenDetails } = useTokenInfo({ cluster, genesisHash, mint: mintAddress });
     const decimals =
         'tokenAmount' in info && is(info.tokenAmount, TokenAmountUi) ? info.tokenAmount.decimals : mintInfo?.decimals;
-    const tokenSymbol = mintAddress && tokenDetails ? tokenDetails.symbol : '';
+    const tokenSymbol = mintAddress && tokenDetails ? (tokenDetails.symbol ?? '') : '';
     const token = mintAddress !== undefined && address('Token', new PublicKey(mintAddress), { tokenLabel: true });
 
     // The RPC lists no accounts of an instruction it parses, so only a raw instruction has account rows.
@@ -121,10 +117,6 @@ function declaredStringFields(struct: Struct<TokenInfo, Record<string, Struct<un
             .filter(([, field]) => field.type === 'string')
             .map(([key]) => key),
     );
-}
-
-async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
 }
 
 /** An instruction without `amount` needs no mint, so it looks up no account. */

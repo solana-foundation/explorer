@@ -2,11 +2,9 @@
 
 import { AccountHeader } from '@components/common/Account';
 import { useAccountFetching, useRefreshAccount } from '@entities/account';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { useTokenInfo } from '@entities/token-info';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import { useMemo } from 'react';
-import useSWR from 'swr';
 
 import { Card, CardBody } from '@/app/shared/ui/Card';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
@@ -15,10 +13,6 @@ import { TokenExtension } from '@/app/validators/accounts/token-extension';
 import { LoadingCard } from '../common/LoadingCard';
 import { TokenExtensionsSection } from './TokenExtensionsSection';
 import { ParsedTokenExtension } from './types';
-
-async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
-}
 
 export function TokenExtensionsCard({
     decimals,
@@ -32,15 +26,14 @@ export function TokenExtensionsCard({
     const { cluster, genesisHash } = useCluster();
     const refresh = useRefreshAccount();
     const fetching = useAccountFetching(address);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, genesisHash), [address, cluster, genesisHash]);
-    const { data: tokenInfo, isLoading } = useSWR(swrKey, fetchTokenInfo);
+    const { isLoading, tokenInfo } = useTokenInfo({ cluster, genesisHash, mint: address });
 
     const extensions = populateTokenExtensions(mintExtensions);
 
     // check for nullish decimals to satisfy constraint for required decimals.
     if (isLoading) {
         return <LoadingCard />;
-    } else if (tokenInfo && tokenInfo.decimals !== null && decimals !== tokenInfo.decimals) {
+    } else if (tokenInfo && tokenInfo.decimals !== undefined && decimals !== tokenInfo.decimals) {
         throw new Error('Can not fetch token info.');
     }
 

@@ -1,4 +1,4 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -6,7 +6,7 @@ import { BaseDomainsCard } from '../BaseDomainsCard';
 
 const meta: Meta<typeof BaseDomainsCard> = {
     component: BaseDomainsCard,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch, withViewportFromGlobal],
+    decorators: [withClusterAndAccounts, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -8,7 +8,7 @@ import { AddressWithContext } from '../AddressWithContext';
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: AddressWithContext,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch, withViewportFromGlobal],
+    decorators: [withClusterAndAccounts, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

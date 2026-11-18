@@ -1,5 +1,5 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { nextjsParameters, withCluster, withScrollAnchor, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster, withScrollAnchor } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -16,7 +16,7 @@ const sampleIx = new TransactionInstruction({
 
 const meta: Meta<typeof BaseInstructionCard> = {
     component: BaseInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withViewportFromGlobal],
+    decorators: [withCluster, withScrollAnchor, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

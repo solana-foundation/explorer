@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -7,7 +7,7 @@ import { UpcomingFeatures } from '../UpcomingFeatures';
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: UpcomingFeatures,
-    decorators: [withViewportFromGlobal, withCluster, withTokenInfoBatch],
+    decorators: [withViewportFromGlobal, withCluster],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

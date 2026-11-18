@@ -13,7 +13,6 @@ import {
     withCluster,
     withMockTransactions,
     withScrollAnchor,
-    withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
@@ -57,7 +56,7 @@ const withFailedInstructionSurface: Decorator = Story => (
 
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard',

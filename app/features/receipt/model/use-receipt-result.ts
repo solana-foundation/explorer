@@ -1,7 +1,6 @@
-import { fetchTokenInfoFromApi } from '@entities/token-info';
+import { lookupTokenInfo } from '@entities/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { useCluster } from '@providers/cluster';
-import { PublicKey } from '@solana/web3.js';
 import useSWR, { type SWRResponse } from 'swr';
 
 import { isReceiptEnabled } from '../env';
@@ -19,7 +18,7 @@ export function useReceiptResult(
             if (!tx) return undefined;
             return extractReceiptData({
                 cluster,
-                getTokenInfo: mint => fetchTokenInfoFromApi(new PublicKey(mint), cluster, genesisHash),
+                lookupTokenInfo: mint => lookupTokenInfo({ cluster, genesisHash, mint }),
                 tx,
             });
         },

@@ -1,11 +1,11 @@
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UpcomingFeatures } from '../UpcomingFeatures';
 
 const meta = {
     component: UpcomingFeatures,
-    decorators: [withCluster, withTokenInfoBatch],
+    decorators: [withCluster],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/UpcomingFeatures',

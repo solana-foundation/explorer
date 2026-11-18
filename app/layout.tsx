@@ -14,7 +14,6 @@ import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
 import { SearchBar } from '@/app/components/SearchBarLoader';
-import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { rubikFont } from '@/app/styles';
@@ -51,21 +50,19 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                     <ScrollAnchorProvider>
                         <ClusterProvider>
                             <VisibilityProvider>
-                                <TokenInfoBatchProvider>
-                                    <ClusterModal />
-                                    <PendingCustomUrlConsent />
-                                    <div className="flex min-h-screen flex-col">
-                                        <div className="min-w-[292px] flex-1 overflow-x-clip pb-6">
-                                            <Navbar>
-                                                <SearchBar />
-                                            </Navbar>
-                                            <MessageBanner />
-                                            {children}
-                                        </div>
-                                        <Footer />
+                                <ClusterModal />
+                                <PendingCustomUrlConsent />
+                                <div className="flex min-h-screen flex-col">
+                                    <div className="min-w-[292px] flex-1 overflow-x-clip pb-6">
+                                        <Navbar>
+                                            <SearchBar />
+                                        </Navbar>
+                                        <MessageBanner />
+                                        {children}
                                     </div>
-                                    <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
-                                </TokenInfoBatchProvider>
+                                    <Footer />
+                                </div>
+                                <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
                             </VisibilityProvider>
                         </ClusterProvider>
                     </ScrollAnchorProvider>

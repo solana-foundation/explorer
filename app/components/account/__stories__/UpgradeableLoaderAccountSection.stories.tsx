@@ -1,6 +1,6 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { createNextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import {
@@ -32,7 +32,7 @@ const sampleProgramData = {
 
 const meta = {
     component: UpgradeableLoaderAccountSection,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withClusterAndAccounts],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
     tags: ['autodocs', 'test'],
     title: 'Components/Account/UpgradeableLoaderAccountSection',

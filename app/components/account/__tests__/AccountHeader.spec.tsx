@@ -51,10 +51,6 @@ vi.mock('@entities/nft', async () => ({
     isMetaplexNFT: vi.fn(() => false),
 }));
 
-vi.mock('@utils/token-info', () => ({
-    isRedactedTokenAddress: vi.fn(() => false),
-}));
-
 const NON_TRUSTED_ADDRESS = '11111111111111111111111111111112';
 const TRUSTED_ADDRESS = '11111111111111111111111111111111';
 const TRUSTED_NAME = PROGRAM_INFO_BY_ID[TRUSTED_ADDRESS].name;

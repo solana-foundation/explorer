@@ -1,10 +1,11 @@
 import { gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id';
-import { fetchTokenInfoFromApi } from '@entities/token-info';
+import { useTokenInfo } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -24,13 +25,18 @@ vi.mock('@entities/account', async importOriginal => ({
 }));
 vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
-    fetchTokenInfoFromApi: vi.fn(async () => undefined),
+    useTokenInfo: vi.fn((): ReturnType<typeof useTokenInfo> => ({
+        isLoading: false,
+        kind: 'not-listed',
+        tokenInfo: undefined,
+    })),
 }));
 vi.mock('../TokenExtensionsSection', () => ({ TokenExtensionsSection: () => null }));
 
 describe('TokenExtensionsCard', () => {
     beforeEach(() => {
         mock.entry = undefined;
+        vi.mocked(useTokenInfo).mockReset();
     });
 
     it('should disable the refresh button while the mint is fetching', async () => {
@@ -48,18 +54,27 @@ describe('TokenExtensionsCard', () => {
         expect(await screen.findByRole('button', { name: 'Refresh' })).toBeEnabled();
     });
 
-    // The RPC URL and the genesis hash are both strings, so no type stops a card from passing the URL.
-    it('should look up the mint with the genesis hash of a Custom cluster', async () => {
+    it('should look up the mint with the genesis hash of a Custom cluster', () => {
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         renderCard();
 
-        await waitFor(() =>
-            expect(fetchTokenInfoFromApi).toHaveBeenCalledWith(
-                new PublicKey(MINT),
-                Cluster.Custom,
-                GENESIS_HASHES.MAINNET,
-            ),
-        );
+        expect(useTokenInfo).toHaveBeenCalledWith({
+            cluster: Cluster.Custom,
+            genesisHash: GENESIS_HASHES.MAINNET,
+            mint: MINT,
+        });
+    });
+
+    it('should render a listed mint whose token info has no decimals', async () => {
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        vi.mocked(useTokenInfo).mockReturnValue({
+            isLoading: false,
+            kind: 'listed',
+            tokenInfo: { ...tokenInfo(MINT), decimals: undefined },
+        });
+        renderCard();
+
+        expect(await screen.findByRole('button', { name: 'Refresh' })).toBeInTheDocument();
     });
 });
 

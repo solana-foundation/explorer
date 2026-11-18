@@ -1,4 +1,4 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import type { SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
@@ -12,7 +12,7 @@ function sysvar(entries: SysvarStakeHistoryAccount['info']): SysvarStakeHistoryA
 
 const meta = {
     component: StakeHistoryCard,
-    decorators: [withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withViewportFromGlobal, withClusterAndAccounts],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

@@ -1,13 +1,13 @@
 import type { BlockData } from '@entities/block-data';
 import { address, blockhash, lamports, type Reward } from '@solana/kit';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockRewardsCard } from '../BlockRewardsCard';
 
 const meta: Meta<typeof BlockRewardsCard> = {
     component: BlockRewardsCard,
-    decorators: [withCluster, withTokenInfoBatch],
+    decorators: [withCluster],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockRewardsCard',
