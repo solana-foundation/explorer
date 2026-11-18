@@ -29,18 +29,18 @@ describe('useTablistKeyboard', () => {
         expect(event.preventDefault).toHaveBeenCalled();
     });
 
-    it('should move focus from the focused tab to the next one on ArrowRight', () => {
+    it('should move to the tab after the focused one, not after the selected one', () => {
         const onSelect = vi.fn();
-        const { result } = renderHook(() => useTablistKeyboard<HTMLButtonElement>(2, 0, onSelect));
-        const tabs = [document.createElement('button'), document.createElement('button')];
+        const { result } = renderHook(() => useTablistKeyboard<HTMLButtonElement>(3, 0, onSelect));
+        const tabs = [0, 1, 2].map(() => document.createElement('button'));
         document.body.append(...tabs);
         tabs.forEach((tab, index) => result.current.setTabRef(index)(tab));
-        tabs[0].focus();
+        tabs[1].focus();
 
         result.current.onKeyDown(keyEvent('ArrowRight'));
 
-        expect(onSelect).toHaveBeenCalledWith(1);
-        expect(tabs[1]).toHaveFocus();
+        expect(onSelect).toHaveBeenCalledWith(2);
+        expect(tabs[2]).toHaveFocus();
         tabs.forEach(tab => tab.remove());
     });
 
