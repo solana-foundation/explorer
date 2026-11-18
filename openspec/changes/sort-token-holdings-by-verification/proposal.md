@@ -38,7 +38,7 @@ The added cost is bounded and lands only where it is needed. The lookup sends on
 
 - Resolve mint metadata for the whole holdings list up front, instead of lazily per visible row. The lookup replaces the lazy path rather than adding to it, so its cost stays proportional to the list: a 20-mint account issues one request for 20 addresses, exactly what it issues today. Lists longer than the route's cap are chunked and merged. No mint-count threshold — gating the lookup would leave small lists unsorted and split the card into two behaviours for no saving.
 - Order the deduplicated mints into three tiers: verified, then listed by Jupiter but unverified, then not listed by Jupiter. RPC order is preserved within each tier, so the order is stable and reproducible.
-- Send the bulk lookup through `POST /api/token-info`. The route wraps its upstream Jupiter call in the Next data cache, so visitors who request the same chunk share one upstream round trip.
+- Send the bulk lookup through the token-info route: `POST /api/token-info` for a chunk of several mints, and `GET /api/token-info/[mintAddress]` for a chunk of one mint. The route wraps its upstream Jupiter call in the Next data cache, so visitors who request the same chunk share one upstream round trip.
 - Cap one request at the most mints Jupiter answers in one request, so one route request sends one Jupiter request. One constant, `TOKEN_INFO_REQUEST_LIMIT`, is both the route's cap and the client's chunk size, so it bounds one request without bounding the list.
 - Rows take resolved metadata from the bulk lookup instead of calling `useTokenInfo` one row at a time.
 - Clusters that Jupiter does not cover resolve nothing as verified, so every mint falls into the last tier and the order matches today's.

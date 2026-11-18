@@ -27,19 +27,33 @@ describe('lookupTokenInfo', () => {
         vi.clearAllMocks();
     });
 
-    it('should post one mint and return listed', async () => {
+    it('should request one mint without the fallback over GET and return listed', async () => {
         respond(200, { content: [tokenInfo(MINT_A, true)] });
 
         const [lookup] = await lookupAll([MINT_A]);
 
         expect(lookup).toEqual({ kind: 'listed', token: tokenInfo(MINT_A, true) });
         expect(sentRequests()).toEqual([
-            {
-                body: { addresses: [MINT_A], cluster: Cluster.Mainnet, includeOnChainFallback: false },
-                method: 'POST',
-                url: '/api/token-info',
-            },
+            { body: undefined, method: 'GET', url: `/api/token-info/${MINT_A}?cluster=${Cluster.Mainnet}` },
         ]);
+    });
+
+    it('should send the genesis hash of a Custom cluster in the query', async () => {
+        respond(200, { content: [] });
+
+        await lookupAll([MINT_A], { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET });
+
+        expect(sentRequests()[0].url).toBe(
+            `/api/token-info/${MINT_A}?cluster=${Cluster.Custom}&genesisHash=${GENESIS_HASHES.MAINNET}`,
+        );
+    });
+
+    it('should leave the genesis hash of a named cluster out of the query', async () => {
+        respond(200, { content: [] });
+
+        await lookupAll([MINT_A], { genesisHash: GENESIS_HASHES.MAINNET });
+
+        expect(sentRequests()[0].url).toBe(`/api/token-info/${MINT_A}?cluster=${Cluster.Mainnet}`);
     });
 
     it('should post the mints queued in one window in one sorted request', async () => {
@@ -71,7 +85,7 @@ describe('lookupTokenInfo', () => {
             { kind: 'listed', token: tokenInfo(MINT_A) },
         ]);
         expect(sentRequests()).toHaveLength(1);
-        expect(sentRequests()[0].body).toMatchObject({ addresses: [MINT_A] });
+        expect(sentRequests()[0].method).toBe('GET');
     });
 
     it('should send a separate request per cluster and per fallback flag', async () => {
@@ -90,16 +104,11 @@ describe('lookupTokenInfo', () => {
         await vi.runAllTimersAsync();
         await Promise.all(pending);
 
-        expect(sentRequests().map(({ body }) => body)).toEqual(
+        expect(sentRequests().map(({ method, url }) => `${method} ${url}`)).toEqual(
             expect.arrayContaining([
-                { addresses: [MINT_A], cluster: Cluster.Mainnet, includeOnChainFallback: false },
-                {
-                    addresses: [MINT_A],
-                    cluster: Cluster.Custom,
-                    genesisHash: GENESIS_HASHES.MAINNET,
-                    includeOnChainFallback: false,
-                },
-                { addresses: [MINT_A], cluster: Cluster.Mainnet, includeOnChainFallback: true },
+                `GET /api/token-info/${MINT_A}?cluster=${Cluster.Mainnet}`,
+                `GET /api/token-info/${MINT_A}?cluster=${Cluster.Custom}&genesisHash=${GENESIS_HASHES.MAINNET}`,
+                'POST /api/token-info',
             ]),
         );
         expect(fetch).toHaveBeenCalledTimes(3);
@@ -146,9 +155,9 @@ describe('lookupTokenInfo', () => {
         const mints = Array.from({ length: TOKEN_INFO_REQUEST_LIMIT + 1 }, (_, index) => gen.address(index + 10));
         const [lastMint] = [...mints].sort().slice(-1);
         vi.mocked(fetch).mockImplementation(async (_, init) =>
-            JSON.parse(String(init?.body)).addresses.length === 1
-                ? Response.json({ content: [tokenInfo(lastMint)] })
-                : new Response(null, { status: 503 }),
+            init?.method === 'POST'
+                ? new Response(null, { status: 503 })
+                : Response.json({ content: [tokenInfo(lastMint)] }),
         );
 
         const lookups = await lookupAll(mints);

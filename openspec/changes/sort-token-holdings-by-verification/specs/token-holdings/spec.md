@@ -46,7 +46,7 @@ The card MUST resolve mint metadata for every holding up front rather than lazil
 
 ### Requirement: The bulk lookup SHALL use the cacheable token-info route
 
-Metadata for the holdings list SHALL be requested through `POST /api/token-info`, which wraps its upstream call in the Next data cache, so visitors who request the same chunk share one upstream round trip. The request cap SHALL NOT exceed the most mints Jupiter answers in one request, so one route request sends one Jupiter request, and one constant SHALL serve as both the route's cap and the chunk size the client splits on, so the two cannot drift.
+Metadata for the holdings list SHALL be requested through the token-info route, which wraps its upstream call in the Next data cache, so visitors who request the same chunk share one upstream round trip. A chunk of several mints SHALL use `POST /api/token-info`, and a chunk of one mint SHALL use `GET /api/token-info/[mintAddress]`. The request cap SHALL NOT exceed the most mints Jupiter answers in one request, so one route request sends one Jupiter request, and one constant SHALL serve as both the route's cap and the chunk size the client splits on, so the two cannot drift.
 
 #### Scenario: Repeat views reuse the cached result
 
