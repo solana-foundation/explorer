@@ -7,6 +7,7 @@ export const TokenInfoStruct = type({
     name: optional(string()),
     symbol: optional(string()),
     verified: boolean(),
+    website: optional(string()),
 });
 
 export type TokenInfo = Infer<typeof TokenInfoStruct>;

@@ -45,6 +45,22 @@ describe('discoverWithJupiter', () => {
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
+    it('should return no tokens with an error for a 401', async () => {
+        mocks.searchJupiterTokens.mockResolvedValueOnce({
+            error: new JupiterHttpError({ status: 401, statusText: 'Unauthorized' }),
+            kind: 'unavailable',
+        });
+
+        const tokens = await discoverWithJupiter('TKA', new AbortController().signal);
+
+        expect(tokens).toEqual([]);
+        expect(Logger.error).toHaveBeenCalledWith(
+            expect.objectContaining({ message: '[api:search] Jupiter discovery failed' }),
+            expect.objectContaining({ sentry: true }),
+        );
+        expect(Logger.warn).not.toHaveBeenCalled();
+    });
+
     it('should log nothing for an abort', async () => {
         mocks.searchJupiterTokens.mockResolvedValueOnce({
             error: new DOMException('This operation was aborted', 'AbortError'),

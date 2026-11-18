@@ -1,11 +1,11 @@
 import { lookupVerifiedTokenInfos } from '@entities/token-info/server';
 import { AddressFromString } from '@validators/pubkey';
-import { NextResponse } from 'next/server';
+import type { NextResponse } from 'next/server';
 import { array, is, type } from 'superstruct';
 
 import { invalidRequest, toTokenInfosResponse } from '@/app/api/token-info/responses';
 
-export const maxDuration = 30;
+export const maxDuration = 10;
 
 const RequestStruct = type({ addresses: array(AddressFromString) });
 

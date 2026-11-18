@@ -22,10 +22,7 @@ vi.mock('@providers/cluster', () => ({
 
 describe('useRefreshAccount', () => {
     it.each([
-        [
-            'token info',
-            getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Custom, mints: [MINT.toBase58()] }),
-        ],
+        ['token info', tokenInfosKey([MINT])],
         ['raw account data', rawAccountDataKey(MOCK_URL, MINT.toBase58())],
     ])('should refetch the %s of the account', async (_, key) => {
         const fetcher = await refreshWith(key);
@@ -36,6 +33,7 @@ describe('useRefreshAccount', () => {
     it.each([
         ['a key outside the refresh keys', ['nftoken-collection-nfts', MOCK_URL, MINT.toBase58()]],
         ['a refresh key of another account', rawAccountDataKey(MOCK_URL, OTHER.toBase58())],
+        ['the token info of a list that holds the account', tokenInfosKey([MINT, OTHER])],
         [
             'a refresh key of another cluster',
             accountRefreshKey('https://api.devnet.solana.com', MINT.toBase58(), 'raw'),
@@ -61,6 +59,15 @@ async function refreshWith(key: readonly unknown[]) {
 
     act(() => result.current(MINT, 'parsed'));
     return fetcher;
+}
+
+function tokenInfosKey(mints: PublicKey[]): ReturnType<typeof getTokenInfosSwrKey> {
+    return getTokenInfosSwrKey({
+        chainId: ChainId.MAINNET,
+        cluster: Cluster.Custom,
+        mints: mints.map(mint => mint.toBase58()),
+        url: MOCK_URL,
+    });
 }
 
 const MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');

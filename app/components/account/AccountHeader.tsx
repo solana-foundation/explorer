@@ -122,12 +122,14 @@ function TokenMintHeader({
         ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
     const dasImage = useDasImage(dasImageAddress(address, tokenInfo, parsedData));
+    const fallbackLogoURI = tokenInfo?.logoURI || dasImage;
 
     const defaultCard = useMemo(() => {
-        const logoURI = tokenInfo?.logoURI ?? dasImage;
-        const token = tokenInfo ? { ...tokenInfo, logoURI } : { logoURI, name: undefined };
+        const token = tokenInfo
+            ? { ...tokenInfo, logoURI: fallbackLogoURI }
+            : { logoURI: fallbackLogoURI, name: undefined };
         return <TokenMintHeaderCard token={token} />;
-    }, [dasImage, tokenInfo]);
+    }, [fallbackLogoURI, tokenInfo]);
 
     if (metadataPointerExtension && metadataExtension) {
         return (
@@ -136,7 +138,7 @@ function TokenMintHeader({
                     <Suspense fallback={defaultCard}>
                         <Token22MintHeader
                             address={address}
-                            fallbackLogoURI={dasImage}
+                            fallbackLogoURI={fallbackLogoURI}
                             metadataExtension={metadataExtension as any}
                             metadataPointerExtension={metadataPointerExtension as any}
                         />
@@ -150,7 +152,7 @@ function TokenMintHeader({
         return defaultCard;
     } else if (parsedData?.nftData) {
         const token = {
-            logoURI: parsedData?.nftData?.json?.image ?? dasImage,
+            logoURI: parsedData?.nftData?.json?.image ?? fallbackLogoURI,
             name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.name,
             symbol: parsedData?.nftData?.metadata.symbol,
         };
@@ -191,7 +193,7 @@ function Token22MintHeader({
 export function TokenMintHeaderCard({
     token,
 }: {
-    token: { name?: string | null; logoURI?: string | undefined; symbol?: string | null };
+    token: { name?: string | undefined; logoURI?: string | undefined; symbol?: string | undefined };
 }) {
     return (
         <div className="-mx-3 flex flex-wrap items-center">

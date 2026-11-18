@@ -1,9 +1,8 @@
 import { gen } from '@__fixtures__/gen';
-import { ChainId, GENESIS_HASHES, type GenesisHash, GenesisHashFromString } from '@entities/chain-id';
+import { GENESIS_HASHES, type GenesisHash, GenesisHashFromString } from '@entities/chain-id';
 import { act, renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { create } from 'superstruct';
-import { unstable_serialize } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -20,15 +19,10 @@ import { tokenInfo } from '../../__fixtures__/token-info';
 import { lookupTokenInfo, lookupVerifiedTokenInfos } from '../../api/lookup-token-info';
 import type { TokenInfoLookup } from '../../lib/token-info-lookup';
 import type { TokenInfo } from '../../lib/types';
-import {
-    getTokenInfosSwrKey,
-    isTokenInfoSwrKey,
-    useTokenInfo,
-    useTokenInfos,
-    useVerifiedTokenInfos,
-} from '../use-token-infos';
+import { useTokenInfo, useTokenInfos, useVerifiedTokenInfos } from '../use-token-infos';
 
 vi.mock('../../api/lookup-token-info', () => ({ lookupTokenInfo: vi.fn(), lookupVerifiedTokenInfos: vi.fn() }));
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'https://api.mainnet-beta.solana.com' }) }));
 
 const mockedLookup = vi.mocked(lookupTokenInfo);
 const mockedVerifiedLookup = vi.mocked(lookupVerifiedTokenInfos);
@@ -82,8 +76,8 @@ describe('useTokenInfos', () => {
             { wrapper },
         );
 
-        await waitForHook(() => expect(result.current.withoutFallback.isLoading).toBe(false));
-        await waitForHook(() => expect(result.current.withFallback.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.withoutFallback.kind).not.toBe('loading'));
+        await waitForHook(() => expect(result.current.withFallback.kind).not.toBe('loading'));
         expect(result.current.withFallback.tokenInfos.has(MINT_A)).toBe(true);
         expect(result.current.withoutFallback.tokenInfos.size).toBe(0);
     });
@@ -102,7 +96,7 @@ describe('useTokenInfos', () => {
                 wrapper: cachedWrapper,
             },
         );
-        await waitForHook(() => expect(failed.current.isLoading).toBe(false));
+        await waitForHook(() => expect(failed.current.kind).not.toBe('loading'));
         unmount();
 
         mockListedTokens([tokenInfo(MINT_A), tokenInfo(MINT_B)]);
@@ -125,7 +119,7 @@ describe('useTokenInfos', () => {
                 wrapper: cachedWrapper,
             },
         );
-        await waitForHook(() => expect(cached.current.isLoading).toBe(false));
+        await waitForHook(() => expect(cached.current.kind).not.toBe('loading'));
         unmount();
 
         renderHook(() => useTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }), {
@@ -146,7 +140,7 @@ describe('useTokenInfos', () => {
                 wrapper: swrWrapper(FAST_RETRY),
             },
         );
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.kind).not.toBe('loading'));
         await act(settleRetries);
 
         expect(mockedLookup).toHaveBeenCalledTimes(1);
@@ -160,8 +154,8 @@ describe('useTokenInfos', () => {
             { wrapper },
         );
 
-        expect(result.current.isLoading).toBe(true);
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+        expect(result.current.kind).toBe('loading');
+        await waitForHook(() => expect(result.current.kind).not.toBe('loading'));
     });
 
     it('should not report loading while a revalidation refetches a failed lookup', async () => {
@@ -170,15 +164,15 @@ describe('useTokenInfos', () => {
         const { result } = renderHookWithRevalidate(() =>
             useTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
         );
-        await waitForHook(() => expect(result.current.state.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.state.kind).not.toBe('loading'));
 
         mockedLookup.mockReturnValue(new Promise(() => {}));
         act(() => {
-            void result.current.revalidate(key => isTokenInfoSwrKey(key, MINT_A));
+            void result.current.revalidate(() => true);
         });
 
         await waitForHook(() => expect(mockedLookup).toHaveBeenCalledTimes(2));
-        expect(result.current.state.isLoading).toBe(false);
+        expect(result.current.state.kind).not.toBe('loading');
     });
 
     it('should replace a cached answer when a revalidation finds the mint listed', async () => {
@@ -186,10 +180,10 @@ describe('useTokenInfos', () => {
         const { result } = renderHookWithRevalidate(() =>
             useTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
         );
-        await waitForHook(() => expect(result.current.state.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.state.kind).not.toBe('loading'));
 
         mockListedTokens([tokenInfo(MINT_A)]);
-        await act(() => result.current.revalidate(key => isTokenInfoSwrKey(key, MINT_A)));
+        await act(() => result.current.revalidate(() => true));
 
         expect(result.current.state.tokenInfos.get(MINT_A)).toEqual(tokenInfo(MINT_A));
     });
@@ -209,7 +203,7 @@ describe('useTokenInfos', () => {
             { wrapper },
         );
 
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.kind).not.toBe('loading'));
         expect(mockedLookup).not.toHaveBeenCalled();
         expect(result.current.tokenInfos.size).toBe(0);
     });
@@ -339,27 +333,7 @@ describe('useTokenInfos', () => {
             },
         );
 
-        await waitForHook(() => expect(result.current.isLoading).toBe(false));
-        expect(mockedLookup).not.toHaveBeenCalled();
-    });
-
-    // Storybook seeds this cache entry to render rows without a route to answer the lookup.
-    it('should read an entry seeded under getTokenInfosSwrKey', () => {
-        const mints = [MINT_A, MINT_B];
-        const seeded = {
-            [unstable_serialize(getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Mainnet, mints }))]: [
-                tokenInfo(MINT_A),
-            ],
-        };
-
-        const { result } = renderHook(
-            () => useTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
-            {
-                wrapper: swrWrapper({ fallback: seeded, revalidateOnMount: false }),
-            },
-        );
-
-        expect(result.current.tokenInfos.get(MINT_A)).toEqual(tokenInfo(MINT_A));
+        await waitForHook(() => expect(result.current.kind).not.toBe('loading'));
         expect(mockedLookup).not.toHaveBeenCalled();
     });
 
@@ -419,7 +393,7 @@ describe('useTokenInfo', () => {
             await waitForHook(() => expect(result.current.state.kind).toBe(loaded.kind));
 
             mockedLookup.mockResolvedValue({ kind: 'rate-limited' });
-            await act(() => result.current.revalidate(key => isTokenInfoSwrKey(key, MINT_A)));
+            await act(() => result.current.revalidate(() => true));
 
             expect(mockedLookup).toHaveBeenCalledTimes(2);
             expect(result.current.state.kind).toBe(loaded.kind);
@@ -435,40 +409,6 @@ describe('useTokenInfo', () => {
         await act(settleRetries);
         expect(result.current).toEqual({ isLoading: false, kind: 'idle', tokenInfo: undefined });
         expect(mockedLookup).not.toHaveBeenCalled();
-    });
-});
-
-describe('isTokenInfoSwrKey', () => {
-    it.each([
-        [
-            'match',
-            'the key of the mint',
-            getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Mainnet, mints: [MINT_A] }),
-        ],
-        [
-            'match',
-            'the key of the mint with the fallback',
-            getTokenInfosSwrKey({
-                chainId: ChainId.DEVNET,
-                cluster: Cluster.Devnet,
-                includeOnChainFallback: true,
-                mints: [MINT_A],
-            }),
-        ],
-        [
-            'not match',
-            'the key of a list that holds the mint',
-            getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Mainnet, mints: [MINT_A, MINT_B] }),
-        ],
-        [
-            'not match',
-            'the key of another mint',
-            getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Mainnet, mints: [MINT_B] }),
-        ],
-        ['not match', 'a key of another family', ['account-refresh', MINT_A]],
-    ])('should %s %s', (outcome, _, key) => {
-        const matches = outcome === 'match';
-        expect(isTokenInfoSwrKey(key, MINT_A)).toBe(matches);
     });
 });
 
@@ -510,24 +450,94 @@ describe('useVerifiedTokenInfos', () => {
         expect(mockedVerifiedLookup).not.toHaveBeenCalled();
     });
 
-    it('should resolve no token info after a failed lookup, and ask again on the next mount', async () => {
-        const cache = new Map();
-        const cachedWrapper = swrWrapper({ dedupingInterval: 0, provider: () => cache });
-        mockedVerifiedLookup.mockResolvedValueOnce({ kind: 'rate-limited' });
+    it('should report loading on the next mount until the second lookup settles', async () => {
+        const cachedWrapper = await wrapperWithCachedFailure();
 
-        const { result: failed, unmount } = renderHook(
-            () => useVerifiedTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
+        const renders: ReturnType<typeof useVerifiedTokenInfos>[] = [];
+        const { result } = renderHook(
+            () => {
+                const state = useVerifiedTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints });
+                renders.push(state);
+                return state;
+            },
             { wrapper: cachedWrapper },
         );
-        await waitForHook(() => expect(failed.current.isLoading).toBe(false));
-        expect(failed.current.tokenInfos).toEqual(new Map());
-        unmount();
+
+        await waitForHook(() => expect(result.current.tokenInfos.has(MINT_A)).toBe(true));
+        expect(renders.find(render => !render.isLoading)?.tokenInfos.has(MINT_A)).toBe(true);
+    });
+
+    it('should resolve no token info on the next mount when the second lookup fails', async () => {
+        const cachedWrapper = await wrapperWithCachedFailure();
+        mockedVerifiedLookup.mockResolvedValueOnce({ kind: 'unavailable' });
 
         const { result } = renderHook(
             () => useVerifiedTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
             { wrapper: cachedWrapper },
         );
 
-        await waitForHook(() => expect(result.current.tokenInfos.has(MINT_A)).toBe(true));
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+        expect(result.current.tokenInfos).toEqual(new Map());
+        expect(mockedVerifiedLookup).toHaveBeenCalledTimes(2);
     });
+
+    it('should not stay loading when a mounted hook holds the failed lookup of the same mints', async () => {
+        const cache = new Map();
+        const sharedWrapper = swrWrapper({ dedupingInterval: 0, provider: () => cache });
+        mockedVerifiedLookup.mockResolvedValueOnce({ kind: 'rate-limited' });
+        const { result: failed } = renderHook(
+            () => useVerifiedTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
+            { wrapper: sharedWrapper },
+        );
+        await waitForHook(() => expect(failed.current.isLoading).toBe(false));
+
+        const { result } = renderHook(
+            () => useVerifiedTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
+            { wrapper: sharedWrapper },
+        );
+
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+        expect(mockedVerifiedLookup).toHaveBeenCalledTimes(1);
+    });
+
+    it('should report loading when the mints change to a list whose lookup failed', async () => {
+        const cachedWrapper = await wrapperWithCachedFailure();
+        const renders: ReturnType<typeof useVerifiedTokenInfos>[] = [];
+        const { rerender, result } = renderHook(
+            (props: { mints: string[] }) => {
+                const state = useVerifiedTokenInfos({
+                    cluster: Cluster.Mainnet,
+                    genesisHash: undefined,
+                    mints: props.mints,
+                });
+                renders.push(state);
+                return state;
+            },
+            { initialProps: { mints: [MINT_A] }, wrapper: cachedWrapper },
+        );
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+
+        mockedVerifiedLookup.mockResolvedValueOnce({ kind: 'unavailable' });
+        const firstRenderAfterChange = renders.length;
+        rerender({ mints });
+
+        expect(renders[firstRenderAfterChange].isLoading).toBe(true);
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+    });
+
+    async function wrapperWithCachedFailure(): Promise<ReturnType<typeof swrWrapper>> {
+        const cache = new Map();
+        const cachedWrapper = swrWrapper({ dedupingInterval: 0, provider: () => cache });
+        mockedVerifiedLookup.mockResolvedValueOnce({ kind: 'rate-limited' });
+
+        const { result, unmount } = renderHook(
+            () => useVerifiedTokenInfos({ cluster: Cluster.Mainnet, genesisHash: undefined, mints }),
+            { wrapper: cachedWrapper },
+        );
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
+        expect(result.current.tokenInfos).toEqual(new Map());
+        unmount();
+
+        return cachedWrapper;
+    }
 });

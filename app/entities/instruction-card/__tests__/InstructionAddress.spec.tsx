@@ -19,7 +19,7 @@ vi.mock('@entities/token-info', () => ({
     useTokenInfo: ({ mint }: { mint: string | undefined }) =>
         mint
             ? { isLoading: false, kind: 'listed', tokenInfo: { name: 'USD Coin', symbol: 'USDC' } }
-            : { isLoading: false, kind: 'not-listed', tokenInfo: undefined },
+            : { isLoading: false, kind: 'idle', tokenInfo: undefined },
 }));
 
 vi.mock('@/app/shared/lib/visibility', () => ({

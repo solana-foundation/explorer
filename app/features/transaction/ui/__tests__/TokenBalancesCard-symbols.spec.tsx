@@ -1,4 +1,6 @@
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
+import type { useTokenInfos } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { render } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
@@ -11,7 +13,7 @@ const WSOL = 'So11111111111111111111111111111111111111112';
 
 const mocks = vi.hoisted(() => ({
     cluster: { cluster: 0, genesisHash: undefined as string | undefined },
-    useTokenInfos: vi.fn(),
+    useTokenInfos: vi.fn<typeof useTokenInfos>(),
 }));
 
 vi.mock('@/app/providers/cluster', () => ({ useCluster: () => mocks.cluster }));
@@ -58,10 +60,9 @@ function row(mint: string, balance: string) {
     return { account: new PublicKey(mint), accountIndex: 0, balance, delta: new BigNumber(0), mint };
 }
 
-function resolved(symbolsByMint: Record<string, string>): {
-    isLoading: boolean;
-    tokenInfos: Map<string, { symbol: string }>;
-} {
-    const entries = Object.entries(symbolsByMint).map(([mint, symbol]) => [mint, { symbol }] as const);
-    return { isLoading: false, tokenInfos: new Map(entries) };
+function resolved(symbolsByMint: Record<string, string>): ReturnType<typeof useTokenInfos> {
+    const entries = Object.entries(symbolsByMint).map(
+        ([mint, symbol]) => [mint, { ...tokenInfo(mint), symbol }] as const,
+    );
+    return { kind: 'resolved', tokenInfos: new Map(entries) };
 }

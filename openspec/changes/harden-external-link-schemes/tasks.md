@@ -13,8 +13,7 @@
 > **Naming collision:** `CompressedNftCard`, `TokenAccountSection`, `TokenExtensionsSection`, `VerifiedBuildCard`, and `security-txt/ui/common.tsx` already `import { ExternalLink } from 'react-feather'` (the trailing icon next to each link). Alias one side on import when migrating — e.g. `import { ExternalLink as ExternalLinkIcon } from 'react-feather'`, or import the shared component as `ExternalLink as SafeExternalLink` — otherwise the first edit hits a duplicate-identifier `SyntaxError`.
 
 - [ ] `app/components/account/CompressedNftCard.tsx` — `content.links.external_url`
-- [ ] `app/components/account/TokenAccountSection.tsx` — `extensions.website`
-- [ ] `app/components/account/TokenAccountSection.tsx` — `extensions.bridgeContract` (×2; the missing `noopener` comes for free)
+- [x] `app/components/account/TokenAccountSection.tsx` — `tokenInfo.website`
 - [ ] `app/components/account/TokenAccountSection.tsx` — `nftData.json.external_url`
 - [ ] `app/components/account/TokenAccountSection.tsx` — `extension.uri`
 - [ ] `app/components/account/ConfigAccountSection.tsx` — `configData.website`

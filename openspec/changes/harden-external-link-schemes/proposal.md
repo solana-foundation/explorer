@@ -8,7 +8,7 @@
     - `ExternalLink` (`app/components/shared/ui/external-link.tsx`) — a safe-by-default anchor that applies the guard and owns `target="_blank"` + `rel="noopener noreferrer"` (those attributes are omitted from its props type, so a call site cannot drop them) and renders nothing for an unsafe href. `ExternalResourceLink` already composes it; `getProxiedUri` reuses the same shared `parseUrl`/`SAFE_EXTERNAL_PROTOCOLS` primitives for its scheme check (it returns a proxied path rather than rendering an anchor, so it does not itself call `getSafeExternalHref`/`ExternalLink`).
 - So the primitive **and** the component exist; what remains is that **other** sinks still render on-chain URLs through raw `<a>` tags. Audit of `href={…}` surfaced these unguarded, clearly on-chain-sourced sinks:
     - `app/components/account/CompressedNftCard.tsx` — `content.links.external_url`
-    - `app/components/account/TokenAccountSection.tsx` — `extensions.website`, `extensions.bridgeContract` (×2; one also uses `rel="noreferrer"` without `noopener`), `nftData.json.external_url`, `extension.uri`
+    - `app/components/account/TokenAccountSection.tsx` — `nftData.json.external_url`, `extension.uri`
     - `app/components/account/ConfigAccountSection.tsx` — `configData.website`
     - `app/components/account/TokenExtensionsSection.tsx` — `link.url`
     - `app/features/security-txt/ui/common.tsx` — the website field and `url`
@@ -34,6 +34,6 @@ With `ExternalLink` already in place, the design decision is settled: untrusted 
 ## Impact
 
 - **Files** — edits to `CompressedNftCard`, `TokenAccountSection`, `ConfigAccountSection`, `TokenExtensionsSection`, `VerifiedBuildCard`, and `security-txt/ui/common.tsx`; possible edits to the ambiguous sinks pending the provenance audit. No new shared code (the component and helper already exist).
-- **Behaviour** — links with non-http(s) schemes stop rendering as clickable anchors (today they render and are an XSS risk). Valid http(s) links are unchanged. The two `bridgeContract` anchors gain `noopener`.
+- **Behaviour** — links with non-http(s) schemes stop rendering as clickable anchors (today they render and are an XSS risk). Valid http(s) links are unchanged.
 - **Security** — closes the residual stored-XSS class left after the metadata-proxy PR; `ExternalLink` becomes the single, hard-to-skip rendering path for untrusted external links.
 - **Dependency** — builds on the `getSafeExternalHref` helper and `ExternalLink` component shipped by `add-metadata-proxy`; this change should land after that PR merges.

@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { GENESIS_HASHES } from '@entities/chain-id';
 import type { TokenInfo } from '@entities/token-info';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { FetchStatus } from '@providers/cache';
@@ -151,7 +152,11 @@ function loadMoreButton() {
 }
 
 beforeEach(() => {
-    useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis', url: 'http://rpc' });
+    useClusterMock.mockReturnValue({
+        cluster: Cluster.Mainnet,
+        genesisHash: GENESIS_HASHES.MAINNET,
+        url: 'http://rpc',
+    });
     useVerifiedTokenInfosMock.mockReturnValue(verified());
     listTokens();
 });
@@ -184,7 +189,11 @@ describe('should render OwnedTokensCard', () => {
 
         expect(grid().getByTestId('token-logo').getAttribute('data-uri')).toBe(LOGO);
         expect(grid().getByText('USDC', { exact: false })).toBeInTheDocument();
-        expect(useTokenInfoMock).toHaveBeenCalledWith({ cluster: Cluster.Mainnet, genesisHash: 'genesis', mint: MINT });
+        expect(useTokenInfoMock).toHaveBeenCalledWith({
+            cluster: Cluster.Mainnet,
+            genesisHash: GENESIS_HASHES.MAINNET,
+            mint: MINT,
+        });
         expect(grid().getByTestId('address').getAttribute('data-has-token-label-info')).toBe('true');
     });
 
@@ -266,7 +275,7 @@ describe('should order holdings by verification', () => {
         expect(visibleMints()).toEqual([second, fourth, first, third]);
         expect(useVerifiedTokenInfosMock).toHaveBeenCalledWith({
             cluster: Cluster.Mainnet,
-            genesisHash: 'genesis',
+            genesisHash: GENESIS_HASHES.MAINNET,
             mints: [first, second, third, fourth],
         });
     });

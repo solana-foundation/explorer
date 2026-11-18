@@ -1,5 +1,5 @@
 import { ParsedTokenExtension } from '@/app/components/account/types';
-import { TokenExtension, TokenExtensionType } from '@/app/validators/accounts/token-extension';
+import type { TokenExtension, TokenExtensionType } from '@/app/validators/accounts/token-extension';
 
 function populateSolanaDevelopersLink(component: string) {
     return `https://solana.com/developers/guides/token-extensions/${component}`;

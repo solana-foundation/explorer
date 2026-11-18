@@ -47,6 +47,14 @@ describe('useJupiterVerification', () => {
         await waitForHook(() => expect(result.current).toEqual({ status, verified }));
     });
 
+    it('should return loading while the lookup runs', () => {
+        mocks.lookupTokenInfo.mockReturnValueOnce(new Promise(() => {}));
+
+        const { result } = renderHook(() => useJupiterVerification(MINT), { wrapper: swrWrapper() });
+
+        expect(result.current).toEqual({ status: JupiterStatus.Loading, verified: false });
+    });
+
     it('should return nothing and look up nothing on a Custom cluster with the mainnet genesis hash', async () => {
         mocks.cluster = Cluster.Custom;
 

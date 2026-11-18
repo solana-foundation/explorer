@@ -2,7 +2,7 @@
 
 ### Requirement: Token holdings SHALL be ordered by verification
 
-The Token Holdings card SHALL order deduplicated mints into two tiers: mints in Jupiter's `verified` tag list first, then every other mint. The order MUST be stable. Within a tier, mints keep the order the RPC returned them in, so the same holdings render the same way on every load. No mint is removed from the list by this ordering, and every holding stays reachable through Load More.
+The Token Holdings card SHALL order deduplicated mints into two tiers: mints that Jupiter's `verified` tag list marks `isVerified` first, then every other mint. The order MUST be stable. Within a tier, mints keep the order the RPC returned them in, so the same holdings render the same way on every load. No mint is removed from the list by this ordering, and every holding stays reachable through Load More.
 
 #### Scenario: Verified holdings lead the list
 
@@ -33,7 +33,7 @@ The card MUST load the token info of its verified mints before it renders rows, 
 
 ### Requirement: Token info SHALL be requested only for the unverified rows on screen
 
-A verified row SHALL take its token info from the verified lookup. An unverified row SHALL look up its own token info, and the browser SHALL batch the lookups of one render into one request. A lookup of every holding costs one Jupiter request per `TOKEN_INFO_REQUEST_LIMIT` mints on every view, and a large account then exceeds the rate limit of `JUPITER_API_KEY`.
+A verified row SHALL take its token info from the verified lookup. An unverified row SHALL look up its own token info, and the browser SHALL batch the lookups of one render into one request. A lookup of every holding costs one Jupiter request per `TOKEN_INFO_REQUEST_LIMIT` mints on the first view of an account within the cache window, and a large account then exceeds the rate limit of `JUPITER_API_KEY`.
 
 #### Scenario: A page of verified rows sends no request
 
@@ -42,7 +42,7 @@ A verified row SHALL take its token info from the verified lookup. An unverified
 
 #### Scenario: A page with unverified rows sends one request
 
-- **WHEN** the card renders a page with unverified rows
+- **WHEN** the card renders a page with unverified rows on a cluster that Jupiter covers
 - **THEN** the browser SHALL send one token info request for the unverified mints of that page
 - **AND** it SHALL NOT request token info for a mint that is not on screen
 
@@ -71,7 +71,7 @@ A verified row SHALL take its token info from the verified lookup. An unverified
 
 Ordering MUST degrade rather than fail. When the verified lookup fails, or when Jupiter does not cover the active cluster, no mint is verified, so the list keeps RPC order. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
 
-An outage MUST stay distinguishable from an empty list. The route SHALL answer a failed lookup with an error status, the failure is reported, and the data cache SHALL NOT keep it, so the next request asks Jupiter again. A Jupiter answer with an entry that breaks Jupiter's documented token schema SHALL fail the lookup. The browser SHALL NOT keep a failed lookup, so the next mount of the card asks again. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
+An outage MUST stay distinguishable from an empty list. The route SHALL answer a failed lookup with an error status, the failure is reported, and the data cache SHALL NOT keep it, so the next request asks Jupiter again. A Jupiter answer with an entry that breaks Jupiter's documented token schema SHALL fail the lookup. The browser SHALL ask again on the next mount of the card, and SHALL show the loading state until that lookup settles. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
 
 #### Scenario: Upstream failure
 
@@ -101,9 +101,11 @@ An outage MUST stay distinguishable from an empty list. The route SHALL answer a
 
 - **WHEN** Jupiter does not cover the active cluster
 - **THEN** the card SHALL NOT send the verified lookup
+- **AND** the rows SHALL NOT send a token info request
 - **AND** the rendered order SHALL match the RPC order
 
 #### Scenario: A failed lookup is asked again
 
 - **WHEN** the verified lookup failed and the card mounts again
 - **THEN** the browser SHALL send the verified lookup again
+- **AND** the card SHALL show the loading state until that lookup settles

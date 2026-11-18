@@ -81,7 +81,7 @@ describe('lookupTokenInfos', () => {
         );
     });
 
-    it('should keep each response in the Next data cache', async () => {
+    it('should pass a revalidate period to the Jupiter search', async () => {
         await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Mainnet, genesisHash: undefined });
 
         const [search] = mocks.searchJupiterTokens.mock.calls[0];
@@ -137,7 +137,7 @@ describe('lookupTokenInfos', () => {
         expect(result).toEqual({ kind: 'unavailable' });
         expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
         expect(Logger.error).toHaveBeenCalledWith(
-            expect.objectContaining({ message: '[api:token-info] Token lookup unavailable' }),
+            expect.objectContaining({ message: '[token-info] Token lookup unavailable' }),
             expect.objectContaining({ sentry: true }),
         );
     });
@@ -151,6 +151,7 @@ describe('lookupTokenInfos', () => {
                 isVerified: true,
                 name: 'Token A',
                 symbol: 'TKA',
+                website: 'https://example.com',
             },
         ]);
 
@@ -165,14 +166,34 @@ describe('lookupTokenInfos', () => {
                     name: 'Token A',
                     symbol: 'TKA',
                     verified: true,
+                    website: 'https://example.com',
                 },
             ]),
         );
     });
 
-    it('should keep the verified flag of a redacted mint and drop its name, symbol and logo', async () => {
+    it('should drop the website of an unverified mint', async () => {
+        respond([jupiterToken(MINT_A, { website: 'https://example.com' })]);
+
+        const result = await lookupTokenInfos({
+            addresses: [MINT_A],
+            cluster: Cluster.Mainnet,
+            genesisHash: undefined,
+        });
+
+        expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
+    });
+
+    it('should keep the verified flag of a redacted mint and drop its name, symbol, logo and website', async () => {
         vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
-        respond([jupiterToken(MINT_A, { icon: 'https://example.com/a.png', isVerified: true }), jupiterToken(MINT_B)]);
+        respond([
+            jupiterToken(MINT_A, {
+                icon: 'https://example.com/a.png',
+                isVerified: true,
+                website: 'https://example.com',
+            }),
+            jupiterToken(MINT_B),
+        ]);
 
         const result = await lookupTokenInfos({
             addresses: [MINT_A, MINT_B],
@@ -218,7 +239,7 @@ describe('lookupTokenInfos', () => {
 
         expect(result).toEqual({ kind: 'rate-limited' });
         expect(Logger.warn).toHaveBeenCalledWith(
-            '[api:token-info] Jupiter rate limit exceeded',
+            '[token-info] Jupiter rate limit exceeded',
             expect.objectContaining({ sentry: true }),
         );
         expect(Logger.error).not.toHaveBeenCalled();
@@ -237,7 +258,7 @@ describe('lookupTokenInfos', () => {
         });
 
         expect(result).toEqual({ kind: 'unavailable' });
-        expect(Logger.warn).toHaveBeenCalledWith('[api:token-info] Token lookup unavailable', {
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Token lookup unavailable', {
             sentry: true,
             sentryExtras: expect.objectContaining({ upstreamError: expect.stringContaining('timed out') }),
         });
@@ -320,7 +341,7 @@ describe('lookupTokenInfos with the on-chain fallback', () => {
         });
 
         expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
-        expect(Logger.warn).toHaveBeenCalledWith('[api:token-info] Metaplex fallback failed', {
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Metaplex fallback failed', {
             error: expect.any(Error),
         });
     });
@@ -418,7 +439,7 @@ describe('lookupVerifiedTokenInfos', () => {
         mocks.fetchJupiterVerifiedTokens.mockResolvedValueOnce({ kind: 'rate-limited' });
 
         expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual(resolved([tokenInfo(MINT_A, true)]));
-        expect(Logger.warn).toHaveBeenCalledWith('[api:token-info] Jupiter rate limit exceeded', {
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Jupiter rate limit exceeded', {
             sentry: true,
             sentryExtras: { tag: 'verified' },
         });
@@ -430,7 +451,7 @@ describe('lookupVerifiedTokenInfos', () => {
         expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual({ kind: 'unavailable' });
         expect(mocks.fetchJupiterVerifiedTokens).not.toHaveBeenCalled();
         expect(Logger.error).toHaveBeenCalledWith(
-            expect.objectContaining({ message: '[api:token-info] Token lookup unavailable' }),
+            expect.objectContaining({ message: '[token-info] Token lookup unavailable' }),
             expect.objectContaining({ sentry: true }),
         );
     });

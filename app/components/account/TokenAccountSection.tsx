@@ -149,6 +149,15 @@ function FungibleTokenMintAccountCard({
                 </>
             ),
         },
+        tokenInfo?.website && {
+            label: 'Website',
+            value: (
+                <ExternalLink href={tokenInfo.website}>
+                    {tokenInfo.website}
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                </ExternalLink>
+            ),
+        },
         mintInfo.mintAuthority && {
             label: 'Mint Authority',
             value: <Address pubkey={mintInfo.mintAuthority} link />,

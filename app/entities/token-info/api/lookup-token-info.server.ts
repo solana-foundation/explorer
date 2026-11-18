@@ -75,25 +75,35 @@ async function getVerifiedTokenInfos(): Promise<TokenInfosLookup> {
 
 function reportFailure(failure: JupiterFailure, sentryExtras: Record<string, unknown>): void {
     if (failure.kind === 'rate-limited') {
-        Logger.warn('[api:token-info] Jupiter rate limit exceeded', { sentry: true, sentryExtras });
+        Logger.warn('[token-info] Jupiter rate limit exceeded', { sentry: true, sentryExtras });
         return;
     }
-    reportJupiterError({ error: failure.error, message: '[api:token-info] Token lookup unavailable', sentryExtras });
+    reportJupiterError({ error: failure.error, message: '[token-info] Token lookup unavailable', sentryExtras });
 }
 
 type JupiterFailure = Exclude<JupiterTokensResult, { kind: 'resolved' }>;
 
-type JupiterTokenInfos = { kind: 'resolved'; tokens: TokenInfo[] } | JupiterFailure;
+type JupiterTokenInfosResult = { kind: 'resolved'; tokens: TokenInfo[] } | JupiterFailure;
 
 const JUPITER_TIMEOUT_MS = 5_000;
 
-async function getJupiterTokenInfos(addresses: string[], chainId: ChainId): Promise<JupiterTokenInfos> {
+async function getJupiterTokenInfos(addresses: string[], chainId: ChainId): Promise<JupiterTokenInfosResult> {
     if (!jupiterListsTokensOn(chainId)) return NOTHING_LISTED;
 
     const apiKey = process.env.JUPITER_API_KEY;
     if (!apiKey) return missingApiKeyFailure();
 
-    return fetchTokenInfosFromJupiter({ apiKey, mints: addresses, signal: AbortSignal.timeout(JUPITER_TIMEOUT_MS) });
+    const result = await searchJupiterTokens({
+        apiKey,
+        query: addresses.join(','),
+        revalidate: REVALIDATE_S,
+        signal: AbortSignal.timeout(JUPITER_TIMEOUT_MS),
+    });
+    if (result.kind !== 'resolved') return result;
+
+    const requested = new Set(addresses);
+    const tokens = result.tokens.filter(token => requested.has(token.id)).map(toTokenInfo);
+    return { kind: 'resolved', tokens };
 }
 
 function missingApiKeyFailure(): JupiterFailure {
@@ -115,16 +125,16 @@ async function addMetaplexTokenInfos({
 
     try {
         const onChainTokens = await getTokenInfosFromMetaplex(unlistedAddresses, serverClusterUrl(cluster), {
-            onError: error => Logger.warn('[api:token-info] Metaplex lookup failed', { error }),
+            onError: error => Logger.warn('[token-info] Metaplex lookup failed', { error }),
         });
         return [...tokens, ...onChainTokens];
     } catch (error) {
-        Logger.warn('[api:token-info] Metaplex fallback failed', { error });
+        Logger.warn('[token-info] Metaplex fallback failed', { error });
         return tokens;
     }
 }
 
-const NOTHING_LISTED: JupiterTokenInfos = { kind: 'resolved', tokens: [] };
+const NOTHING_LISTED: JupiterTokenInfosResult = { kind: 'resolved', tokens: [] };
 
 const REVALIDATE_S = 3600;
 
@@ -149,25 +159,8 @@ const VERIFIED_TOKENS_SENTRY_EXTRAS = { tag: 'verified' };
 
 class JupiterFailureError extends Error {
     constructor(readonly failure: JupiterFailure) {
-        super('[api:token-info] Jupiter verified tokens lookup failed');
+        super('[token-info] Jupiter verified tokens lookup failed');
     }
-}
-
-async function fetchTokenInfosFromJupiter({
-    apiKey,
-    mints,
-    signal,
-}: {
-    apiKey: string;
-    mints: string[];
-    signal: AbortSignal;
-}): Promise<JupiterTokenInfos> {
-    const result = await searchJupiterTokens({ apiKey, query: mints.join(','), revalidate: REVALIDATE_S, signal });
-    if (result.kind !== 'resolved') return result;
-
-    const requested = new Set(mints);
-    const tokens = result.tokens.filter(token => requested.has(token.id)).map(toTokenInfo);
-    return { kind: 'resolved', tokens };
 }
 
 function toTokenInfo(token: JupiterToken): TokenInfo {
@@ -180,5 +173,7 @@ function toTokenInfo(token: JupiterToken): TokenInfo {
         name: token.name || undefined,
         symbol: token.symbol || undefined,
         verified,
+        // The mint creator sets the website, so only a verified mint shows one.
+        website: verified ? (token.website ?? undefined) : undefined,
     };
 }

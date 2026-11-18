@@ -43,6 +43,12 @@ describe('TokenAccountSection', () => {
         expect(screen.getByRole('heading', { name: 'Token Mint' })).toBeInTheDocument();
     });
 
+    it('should link the website of the token info', () => {
+        renderMint({ ...tokenInfo(ADDRESS, true), website: WEBSITE });
+
+        expect(screen.getByRole('link', { name: WEBSITE })).toHaveAttribute('href', WEBSITE);
+    });
+
     it.each([
         { isNative: false, label: 'Token balance (USDC)' },
         { isNative: true, label: 'Token balance (SOL)' },
@@ -63,6 +69,8 @@ describe('TokenAccountSection', () => {
         expect(screen.getByText(label)).toBeInTheDocument();
     });
 });
+
+const WEBSITE = 'https://www.circle.com/en/usdc';
 
 const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
