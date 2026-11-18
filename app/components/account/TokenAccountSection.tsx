@@ -1,6 +1,5 @@
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
-import { Copyable } from '@components/common/Copyable';
 import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
 import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
@@ -61,20 +60,6 @@ import { FullTokenInfo } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
-
-const getEthAddress = (link?: string) => {
-    let address = '';
-    if (link) {
-        // eslint-disable-next-line no-restricted-syntax -- extract Ethereum address from URL
-        const extractEth = link.match(/0x[a-fA-F0-9]{40,64}/);
-
-        if (extractEth) {
-            address = extractEth[0];
-        }
-    }
-
-    return address;
-};
 
 export const StatusBadge = ({ status }: { status: string }) => (
     <Badge ui="dashkit" variant={status === 'initialized' ? 'success' : 'warning'}>
@@ -142,9 +127,6 @@ function FungibleTokenMintAccountCard({
 }) {
     const fetchInfo = useRefreshAccount();
 
-    const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
-    const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
-
     const mintExtensions = mintInfo.extensions?.slice();
     mintExtensions?.sort(cmpExtension);
     const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintExtensions);
@@ -170,15 +152,6 @@ function FungibleTokenMintAccountCard({
                 </>
             ),
         },
-        tokenInfo?.extensions?.website && {
-            label: 'Website',
-            value: (
-                <ExternalLink href={tokenInfo.extensions.website}>
-                    {tokenInfo.extensions.website}
-                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                </ExternalLink>
-            ),
-        },
         mintInfo.mintAuthority && {
             label: 'Mint Authority',
             value: <Address pubkey={mintInfo.mintAuthority} link />,
@@ -189,24 +162,6 @@ function FungibleTokenMintAccountCard({
         },
         { label: 'Decimals', value: mintInfo.decimals },
         !mintInfo.isInitialized && { label: 'Status', value: 'Uninitialized' },
-        tokenInfo?.extensions?.bridgeContract &&
-            bridgeContractAddress && {
-                label: 'Bridge Contract',
-                value: (
-                    <Copyable text={bridgeContractAddress}>
-                        <ExternalLink href={tokenInfo.extensions.bridgeContract}>{bridgeContractAddress}</ExternalLink>
-                    </Copyable>
-                ),
-            },
-        tokenInfo?.extensions?.assetContract &&
-            assetContractAddress && {
-                label: 'Bridged Asset Contract',
-                value: (
-                    <Copyable text={assetContractAddress}>
-                        <ExternalLink href={tokenInfo.extensions.assetContract}>{assetContractAddress}</ExternalLink>
-                    </Copyable>
-                ),
-            },
     ];
 
     return (
