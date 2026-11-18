@@ -50,8 +50,8 @@ type TransferData = {
     units: string;
 };
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
+async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
 }
 
 function AmountCell({
@@ -78,13 +78,13 @@ function AmountCell({
 }
 
 export function TokenTransfersCard({ address }: { address: string }) {
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(toAddress(address), true, true);
     const loadMore = () => fetchAccountHistory(toAddress(address), true);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
+    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, genesisHash), [address, cluster, genesisHash]);
     const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
 
     const transactionRows = React.useMemo(() => {

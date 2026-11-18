@@ -5,7 +5,6 @@ import { useAccountFetching, useRefreshAccount } from '@entities/account';
 import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
@@ -17,8 +16,8 @@ import { LoadingCard } from '../common/LoadingCard';
 import { TokenExtensionsSection } from './TokenExtensionsSection';
 import { ParsedTokenExtension } from './types';
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
+async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
 }
 
 export function TokenExtensionsCard({
@@ -30,10 +29,10 @@ export function TokenExtensionsCard({
     address: string;
     extensions: TokenExtension[];
 }) {
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const refresh = useRefreshAccount();
     const fetching = useAccountFetching(address);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
+    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, genesisHash), [address, cluster, genesisHash]);
     const { data: tokenInfo, isLoading } = useSWR(swrKey, fetchTokenInfo);
 
     const extensions = populateTokenExtensions(mintExtensions);
