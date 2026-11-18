@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
+import { enums } from 'superstruct';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { getStoredValue, setStoredValue } from '../stored-value';
 
 const DAY_SECONDS = 24 * 60 * 60;
+const Consent = enums(['granted', 'denied']);
 
 afterEach(() => {
     localStorage.clear();
@@ -17,20 +19,21 @@ describe('stored-value', () => {
         setStoredValue('consent', 'granted', DAY_SECONDS);
 
         vi.setSystemTime(DAY_SECONDS * 1000 - 1);
-        expect(getStoredValue('consent')).toBe('granted');
+        expect(getStoredValue('consent', Consent)).toBe('granted');
 
         vi.setSystemTime(DAY_SECONDS * 1000);
-        expect(getStoredValue('consent')).toBeNull();
+        expect(getStoredValue('consent', Consent)).toBeUndefined();
     });
 
     it.each([
-        ['missing', undefined],
-        ['not JSON', 'granted'],
-        ['the wrong shape', '{"value":"granted"}'],
-    ])('should return null for an entry that is %s', (_case, raw) => {
+        ['that is missing', undefined],
+        ['that is not JSON', 'granted'],
+        ['of the wrong shape', '{"value":"granted"}'],
+        ['with a value the struct rejects', `{"expiresAt":${Number.MAX_SAFE_INTEGER},"value":"maybe"}`],
+    ])('should return undefined for an entry %s', (_case, raw) => {
         if (raw !== undefined) localStorage.setItem('consent', raw);
 
-        expect(getStoredValue('consent')).toBeNull();
+        expect(getStoredValue('consent', Consent)).toBeUndefined();
     });
 
     it('should treat blocked storage as empty', () => {
@@ -42,6 +45,6 @@ describe('stored-value', () => {
         });
 
         expect(() => setStoredValue('consent', 'granted', DAY_SECONDS)).not.toThrow();
-        expect(getStoredValue('consent')).toBeNull();
+        expect(getStoredValue('consent', Consent)).toBeUndefined();
     });
 });

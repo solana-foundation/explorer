@@ -16,7 +16,7 @@ vi.mock('@features/cookie');
 describe('useMainnetConfirmation', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getStoredValue).mockReturnValue(null);
+        vi.mocked(getStoredValue).mockReturnValue(undefined);
     });
 
     describe('when cluster is Mainnet Beta', () => {
@@ -168,8 +168,8 @@ describe('useMainnetConfirmation', () => {
         });
     });
 
-    describe('cookie persistence', () => {
-        it('should set disclaimer cookie when user confirms', async () => {
+    describe('disclaimer persistence', () => {
+        it('should store the disclaimer acceptance when user confirms', async () => {
             setup();
 
             const mockAction = vi.fn();
@@ -186,7 +186,7 @@ describe('useMainnetConfirmation', () => {
             expect(setStoredValue).toHaveBeenCalledWith('idl_mainnet_accepted', 'true', 182 * 24 * 60 * 60);
         });
 
-        it('should skip dialog on mainnet when disclaimer cookie exists', async () => {
+        it('should skip dialog on mainnet when the disclaimer acceptance is stored', async () => {
             setup();
             vi.mocked(getStoredValue).mockReturnValue('true');
 

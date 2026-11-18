@@ -7,7 +7,7 @@ import { COOKIE_CONSENT_CHANGE_EVENT, EConsentStatus } from '../../ui/CookieCons
 import { useAnalyticsConsent } from '../use-analytics-consent';
 
 vi.mock('../../lib/stored-value', () => ({
-    getStoredValue: vi.fn(() => null),
+    getStoredValue: vi.fn(() => undefined),
 }));
 
 import { getStoredValue } from '../../lib/stored-value';
@@ -15,11 +15,11 @@ import { getStoredValue } from '../../lib/stored-value';
 describe('useAnalyticsConsent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getStoredValue).mockReturnValue(null);
+        vi.mocked(getStoredValue).mockReturnValue(undefined);
     });
 
     it.each([
-        ['false when no consent', null, false],
+        ['false when no consent', undefined, false],
         ['true when granted', EConsentStatus.Granted, true],
         ['false when denied', EConsentStatus.Denied, false],
     ])('should return isConsentGiven=%s', (_, consent, expected) => {

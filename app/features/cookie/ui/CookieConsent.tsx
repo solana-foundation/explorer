@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { enums } from 'superstruct';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
@@ -8,7 +9,7 @@ import { cn } from '@/app/components/shared/utils';
 
 import { getStoredValue, setStoredValue } from '../lib/stored-value';
 
-export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
+export const CONSENT_STORAGE_KEY = 'solana_cookie_consent';
 export const COUNTRY_STORAGE_KEY = 'solana_country';
 export const COOKIE_CONSENT_CHANGE_EVENT = 'cookie-consent-change';
 const CONSENT_MAX_AGE_SECONDS = 15778476; // 6 months in seconds
@@ -20,19 +21,19 @@ export enum EConsentStatus {
 }
 
 export function CookieConsent() {
-    const [consent, setConsent] = useState<EConsentStatus | null>(null);
+    const [consent, setConsent] = useState<EConsentStatus>();
     const [isMounted, setIsMounted] = useState(false);
     const [isEU, setIsEU] = useState<boolean | null>(null);
 
     const autoGrantConsent = () => {
-        setStoredValue(COOKIE_CONSENT_NAME, EConsentStatus.Granted, CONSENT_MAX_AGE_SECONDS);
+        setStoredValue(CONSENT_STORAGE_KEY, EConsentStatus.Granted, CONSENT_MAX_AGE_SECONDS);
         setConsent(EConsentStatus.Granted);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: EConsentStatus.Granted }));
     };
 
     useEffect(() => {
         setIsMounted(true);
-        const storedConsent = getStoredValue(COOKIE_CONSENT_NAME) as EConsentStatus | null;
+        const storedConsent = getStoredConsent();
         setConsent(storedConsent);
 
         if (storedConsent) return;
@@ -53,12 +54,12 @@ export function CookieConsent() {
     }, []);
 
     const handleConsent = (value: EConsentStatus) => {
-        setStoredValue(COOKIE_CONSENT_NAME, value, CONSENT_MAX_AGE_SECONDS);
+        setStoredValue(CONSENT_STORAGE_KEY, value, CONSENT_MAX_AGE_SECONDS);
         setConsent(value);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: value }));
     };
 
-    if (!isMounted || consent !== null || isEU === null) {
+    if (!isMounted || consent !== undefined || isEU === null) {
         return null;
     }
 
@@ -91,6 +92,10 @@ export function CookieConsent() {
     }
 
     return null;
+}
+
+export function getStoredConsent(): EConsentStatus | undefined {
+    return getStoredValue(CONSENT_STORAGE_KEY, enums(Object.values(EConsentStatus)));
 }
 
 export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {

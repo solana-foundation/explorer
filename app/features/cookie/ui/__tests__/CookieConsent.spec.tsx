@@ -2,10 +2,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { COOKIE_CONSENT_NAME, CookieConsent, EConsentStatus } from '../CookieConsent';
+import { CONSENT_STORAGE_KEY, CookieConsent, EConsentStatus } from '../CookieConsent';
 
 vi.mock('../../lib/stored-value', () => ({
-    getStoredValue: vi.fn(() => null),
+    getStoredValue: vi.fn(() => undefined),
     setStoredValue: vi.fn(),
 }));
 
@@ -14,7 +14,7 @@ import { getStoredValue, setStoredValue } from '../../lib/stored-value';
 describe('CookieConsent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getStoredValue).mockReturnValue(null);
+        vi.mocked(getStoredValue).mockReturnValue(undefined);
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.resolve({ json: () => Promise.resolve({ isEU: true }) })),
@@ -40,7 +40,7 @@ describe('CookieConsent', () => {
         render(<CookieConsent />);
         await waitFor(() => expect(fetch).toHaveBeenCalled());
         expect(screen.queryByText('ACCEPT')).toBeNull();
-        expect(setStoredValue).toHaveBeenCalledWith(COOKIE_CONSENT_NAME, EConsentStatus.Granted, expect.any(Number));
+        expect(setStoredValue).toHaveBeenCalledWith(CONSENT_STORAGE_KEY, EConsentStatus.Granted, expect.any(Number));
     });
 
     it('should auto-grant consent when geo-location fails', async () => {
@@ -52,7 +52,7 @@ describe('CookieConsent', () => {
         await waitFor(() => expect(fetch).toHaveBeenCalled());
         await waitFor(() => {
             expect(setStoredValue).toHaveBeenCalledWith(
-                COOKIE_CONSENT_NAME,
+                CONSENT_STORAGE_KEY,
                 EConsentStatus.Granted,
                 expect.any(Number),
             );
@@ -79,6 +79,6 @@ describe('CookieConsent', () => {
         render(<CookieConsent />);
         const btn = await screen.findByText(label, {}, { timeout: 3000 });
         await userEvent.click(btn);
-        expect(setStoredValue).toHaveBeenCalledWith(COOKIE_CONSENT_NAME, consent, expect.any(Number));
+        expect(setStoredValue).toHaveBeenCalledWith(CONSENT_STORAGE_KEY, consent, expect.any(Number));
     });
 });
