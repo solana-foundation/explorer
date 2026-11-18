@@ -48,7 +48,7 @@ const SUCCEEDED_PROGRAM_LOGS: InstructionLogs[] = [
 ];
 
 describe('inspector::InspectorSimulationPanel', () => {
-    it('should show the failure reason when the simulation fails before any program runs', () => {
+    it('should show the failure reason when the simulation returns no logs', () => {
         renderPanel(createSimulationStateDone({ error: 'InvalidAccountForFee', logs: undefined }));
 
         expect(screen.getByText('Simulation Failure:')).toBeInTheDocument();
@@ -88,14 +88,14 @@ describe('inspector::InspectorSimulationPanel', () => {
     it.each([
         { logs: undefined, name: 'no log list' },
         { logs: [], name: 'an empty log list' },
-    ])('should say the logs and CU profiling are empty after a run with $name', ({ logs }) => {
+    ])('should display the message with empty logs and CU profiling after a simulation with $name', ({ logs }) => {
         renderPanel(createSimulationStateDone({ error: 'InvalidAccountForFee', logs }));
 
         expect(screen.getAllByText(NO_LOGS_HINT)).toHaveLength(2);
         expect(screen.queryByText(/Run the simulation to view/)).not.toBeInTheDocument();
     });
 
-    it('should ask to run the simulation before the first run', () => {
+    it('should display default message to run the simulation before the first run', () => {
         renderPanel({ simulate: vi.fn(), status: 'idle' });
 
         expect(screen.getByText('Run the simulation to view the program logs.')).toBeInTheDocument();

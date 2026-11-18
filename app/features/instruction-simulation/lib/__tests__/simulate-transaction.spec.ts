@@ -270,7 +270,7 @@ describe('simulateTransaction', () => {
             );
         });
 
-        it('should mark no instruction failed when the error points past the logged ones', async () => {
+        it('should mark no instruction failed when the failed instruction is missing from the logs', async () => {
             const rpc = createMockRpc({
                 simulateTransaction: rpcCall(
                     createSimulationResponse({ err: { InstructionError: [1n, { Custom: 1n }] } }),
