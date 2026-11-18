@@ -95,7 +95,15 @@ export function CookieConsent() {
 }
 
 export function getStoredConsent(): EConsentStatus | undefined {
-    return getStoredValue(CONSENT_STORAGE_KEY, enums(Object.values(EConsentStatus)));
+    return getStoredValue(CONSENT_STORAGE_KEY, enums(Object.values(EConsentStatus))) ?? readLegacyDenial();
+}
+
+const LEGACY_CONSENT_COOKIE = 'solana_cookie_consent';
+
+function readLegacyDenial(): EConsentStatus.Denied | undefined {
+    // eslint-disable-next-line @microsoft/sdl/no-cookies -- The legacy cookie is read, never written, so every copy expires within the consent max age.
+    const cookies = document.cookie.split('; ');
+    return cookies.includes(`${LEGACY_CONSENT_COOKIE}=${EConsentStatus.Denied}`) ? EConsentStatus.Denied : undefined;
 }
 
 export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
