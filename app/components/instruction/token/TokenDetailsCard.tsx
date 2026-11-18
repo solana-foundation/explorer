@@ -20,7 +20,6 @@ import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
-import { Cluster } from '@/app/utils/cluster';
 import { TOKEN_IDS } from '@/app/utils/programs';
 
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
@@ -78,9 +77,9 @@ function TokenInstructionCard({
         }
     }, [fetchAccountInfo, mintAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const { data: tokenDetails } = useSWR(
-        mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
+        mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, genesisHash) : null,
         fetchTokenInfo,
     );
     const decimals =
@@ -119,8 +118,8 @@ function declaredStringFields(struct: Struct<TokenInfo, Record<string, Struct<un
     return new Set(Object.keys(struct.schema).filter(key => struct.schema[key].type === 'string'));
 }
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
+async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
 }
 
 /** An instruction without `amount` needs no mint, so it looks up no account. */

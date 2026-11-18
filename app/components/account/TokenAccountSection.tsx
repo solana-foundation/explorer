@@ -304,16 +304,19 @@ function NonFungibleTokenMintAccountCard({
     );
 }
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
+async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
+    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
 }
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useRefreshAccount();
     const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
+    const swrKey = useMemo(
+        () => getTokenInfoSwrKey(info.mint.toString(), cluster, genesisHash),
+        [cluster, genesisHash, info.mint],
+    );
 
     const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
