@@ -1,5 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
 import type { VersionedMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
@@ -19,7 +18,7 @@ vi.mock('@/app/features/instruction-simulation/model/use-simulation-instruction-
     useSimulationInstructionNames: () => ({ instructions: [], unresolvable: false }),
 }));
 vi.mock('@providers/cluster', () => ({
-    useCluster: () => ({ cluster: Cluster.Devnet, url: 'https://api.devnet.solana.com' }),
+    useCluster: () => ({ cluster: Cluster.Devnet, url: DEFAULT_RPC_URL }),
 }));
 
 import { InspectorSimulationPanel } from '../InspectorSimulationPanel';
@@ -60,6 +59,7 @@ describe('inspector::InspectorSimulationPanel', () => {
             createSimulationStateDone({ error: '{"InstructionError":[0,{"Custom":6001}]}', logs: FAILED_PROGRAM_LOGS }),
         );
 
+        // eslint-disable-next-line no-restricted-syntax -- the failure text continues past this prefix
         expect(screen.getByText(/Transaction reverted during simulation/)).toBeInTheDocument();
         expect(screen.getByTestId('program-logs')).toBeInTheDocument();
         expect(screen.getByTestId('cu-profiling')).toBeInTheDocument();
@@ -92,6 +92,7 @@ describe('inspector::InspectorSimulationPanel', () => {
         renderPanel(createSimulationStateDone({ error: 'InvalidAccountForFee', logs }));
 
         expect(screen.getAllByText(NO_LOGS_HINT)).toHaveLength(2);
+        // eslint-disable-next-line no-restricted-syntax -- one pattern covers the logs and CU profiling placeholders
         expect(screen.queryByText(/Run the simulation to view/)).not.toBeInTheDocument();
     });
 
