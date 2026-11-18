@@ -3,7 +3,6 @@ import { cn } from '@components/shared/utils';
 import { truncateAddress } from '@entities/address';
 import WalletIcon from '@img/icons/wallet.svg';
 import { Slot } from '@radix-ui/react-slot';
-import { getOwn } from '@shared/lib/object';
 import { cva } from 'class-variance-authority';
 import Image from 'next/image';
 import { ReactNode, useMemo } from 'react';
@@ -76,11 +75,9 @@ export function BaseConnectWallet({
     };
 
     const displayLabel = useMemo(() => {
-        if (buttonState === 'connecting' || buttonState === 'has-wallet') {
-            return getOwn(labels, buttonState);
-        } else {
-            return labels?.['no-wallet'];
-        }
+        if (buttonState === 'connecting') return labels?.connecting;
+        if (buttonState === 'has-wallet') return labels?.['has-wallet'];
+        return labels?.['no-wallet'];
     }, [buttonState, labels]);
 
     const content = (

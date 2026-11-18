@@ -1,6 +1,5 @@
 'use client';
 
-import { getOwn } from '@shared/lib/object';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowRight } from 'react-feather';
@@ -424,7 +423,7 @@ export function GravityCta({
                     const dot = dots.at(index);
                     if (!dot || dot.dying > 0) continue;
                     const cell = cellOf(dot);
-                    const count = getOwn(counts, cell);
+                    const count = counts.at(cell);
                     if (count === undefined || count <= overfill || Math.random() >= rate) continue;
                     dot.dying = dt;
                     counts.set([count - 1], cell);
