@@ -1,6 +1,6 @@
 import 'client-only';
 
-import { type ChainId, getChainId } from '@entities/chain-id/@x/token-info';
+import { type ChainId, type GenesisHash, getChainId } from '@entities/chain-id/@x/token-info';
 import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
@@ -21,7 +21,7 @@ export function useTokenInfo({
     mint,
 }: {
     cluster: Cluster;
-    genesisHash: string | undefined;
+    genesisHash: GenesisHash | undefined;
     mint: string | undefined;
 }): UseTokenInfoResult {
     const mints = useMemo(() => (mint ? [mint] : []), [mint]);
@@ -50,7 +50,7 @@ export function useTokenInfos({
     mints,
 }: {
     cluster: Cluster;
-    genesisHash: string | undefined;
+    genesisHash: GenesisHash | undefined;
     includeOnChainFallback?: boolean;
     mints: readonly string[];
 }): UseTokenInfosResult {
@@ -114,7 +114,7 @@ async function fetchListedTokenInfos({
     mints,
 }: {
     cluster: Cluster;
-    genesisHash: string | undefined;
+    genesisHash: GenesisHash | undefined;
     includeOnChainFallback: boolean;
     mints: readonly string[];
 }): Promise<TokenInfo[]> {

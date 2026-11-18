@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { GENESIS_HASHES } from '@entities/chain-id';
 import { toConnectableUrl } from '@entities/cluster';
 import { useCluster, useEpochInfo } from '@providers/cluster';
 import { renderHook } from '@testing-library/react';
@@ -205,7 +206,7 @@ describe('useSearch', () => {
     const clusterState = {
         ...selection,
         connectableUrl: toConnectableUrl('https://rpc.example'),
-        genesisHash: 'genesis-hash',
+        genesisHash: GENESIS_HASHES.MAINNET,
         name: 'Mainnet',
         selection,
         status: ClusterStatus.Connected,
@@ -234,7 +235,7 @@ describe('useSearch', () => {
         renderHook(() => useSearch('someaddress'));
 
         const [key] = vi.mocked(useSWR).mock.calls[0];
-        expect(key).toEqual(['search', 'someaddress', Cluster.Mainnet, 'genesis-hash', undefined]);
+        expect(key).toEqual(['search', 'someaddress', Cluster.Mainnet, GENESIS_HASHES.MAINNET, undefined]);
     });
 
     it('should include the current epoch in the SWR key for a numeric query', () => {
@@ -249,7 +250,7 @@ describe('useSearch', () => {
         renderHook(() => useSearch('600'));
 
         const [key] = vi.mocked(useSWR).mock.calls[0];
-        expect(key).toEqual(['search', '600', Cluster.Mainnet, 'genesis-hash', '500']);
+        expect(key).toEqual(['search', '600', Cluster.Mainnet, GENESIS_HASHES.MAINNET, '500']);
     });
 });
 

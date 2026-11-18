@@ -1,6 +1,7 @@
 // Skips ClusterProvider's mount-time health check (getGenesisHash) and seeds the epoch hooks
 // SWR cache so consumers render epoch/schedule data without any network call.
 
+import { GENESIS_HASHES } from '@entities/chain-id';
 import { toConnectableUrl } from '@entities/cluster';
 import { type ClusterInfo, clusterModalOpenAtom, type ClusterState, StateContext } from '@providers/cluster';
 import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
@@ -12,7 +13,7 @@ const defaultSelection = clusterSelection(Cluster.Mainnet);
 
 const defaultState: ClusterState = {
     connectableUrl: toConnectableUrl(clusterUrl(defaultSelection)),
-    genesisHash: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',
+    genesisHash: GENESIS_HASHES.MAINNET,
     selection: defaultSelection,
     status: ClusterStatus.Connected,
 };

@@ -1,9 +1,9 @@
 import { Cluster } from '@utils/cluster';
 
 import { ChainId } from './chain-id';
-import { GENESIS_HASHES } from './const';
+import { GENESIS_HASHES, type GenesisHash } from './const';
 
-function getChainIdFromGenesisHash(genesisHash: string): ChainId | undefined {
+function getChainIdFromGenesisHash(genesisHash: GenesisHash): ChainId | undefined {
     switch (genesisHash) {
         case GENESIS_HASHES.MAINNET:
             return ChainId.MAINNET;
@@ -16,7 +16,7 @@ function getChainIdFromGenesisHash(genesisHash: string): ChainId | undefined {
     }
 }
 
-export function getChainId(cluster: Cluster, genesisHash?: string): ChainId | undefined {
+export function getChainId(cluster: Cluster, genesisHash?: GenesisHash): ChainId | undefined {
     switch (cluster) {
         case Cluster.Mainnet:
             return ChainId.MAINNET;

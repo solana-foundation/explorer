@@ -1,4 +1,4 @@
-import { getChainId } from '@entities/chain-id/@x/token-info';
+import { type GenesisHash, getChainId } from '@entities/chain-id/@x/token-info';
 import { chunk } from '@shared/lib/array';
 import { ROUTE_TIMEOUT_MS } from '@shared/lib/timeouts';
 import { isAddress } from '@solana/kit';
@@ -20,7 +20,7 @@ export async function lookupTokenInfo({
     mint,
 }: {
     cluster: Cluster;
-    genesisHash: string | undefined;
+    genesisHash: GenesisHash | undefined;
     includeOnChainFallback?: boolean;
     mint: string;
 }): Promise<TokenInfoLookup> {
@@ -31,7 +31,7 @@ export async function lookupTokenInfo({
     return queueLookup({ cluster, genesisHash, includeOnChainFallback }, mint);
 }
 
-type BatchRequest = { cluster: Cluster; genesisHash: string | undefined; includeOnChainFallback: boolean };
+type BatchRequest = { cluster: Cluster; genesisHash: GenesisHash | undefined; includeOnChainFallback: boolean };
 
 type Batch = { request: BatchRequest; resolvers: Map<string, ((lookup: TokenInfoLookup) => void)[]> };
 
