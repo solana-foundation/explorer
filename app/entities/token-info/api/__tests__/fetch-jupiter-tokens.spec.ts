@@ -4,7 +4,7 @@ import { gen } from '@/app/__fixtures__/gen';
 
 import { jupiterToken } from '../../__fixtures__/jupiter-token';
 import { JupiterHttpError } from '../../lib/errors';
-import { searchJupiterTokens } from '../fetch-jupiter-tokens';
+import { fetchJupiterVerifiedTokens, searchJupiterTokens } from '../fetch-jupiter-tokens';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
@@ -98,5 +98,20 @@ describe('searchJupiterTokens', () => {
         const result = await searchJupiterTokens({ apiKey: API_KEY, query: QUERY });
 
         expect(result).toEqual({ error, kind: 'unavailable' });
+    });
+});
+
+describe('fetchJupiterVerifiedTokens', () => {
+    it('should request the verified tag with the API key, outside the Next data cache', async () => {
+        const tokens = [jupiterToken(MINT_A)];
+        fetchMock.mockResolvedValueOnce(Response.json(tokens));
+        const signal = new AbortController().signal;
+
+        const result = await fetchJupiterVerifiedTokens({ apiKey: API_KEY, signal });
+
+        const [url, init] = fetchMock.mock.calls[0];
+        expect(url).toBe('https://api.jup.ag/tokens/v2/tag?query=verified');
+        expect(init).toMatchObject({ cache: 'no-store', headers: { 'x-api-key': API_KEY }, signal });
+        expect(result).toEqual({ kind: 'resolved', tokens });
     });
 });

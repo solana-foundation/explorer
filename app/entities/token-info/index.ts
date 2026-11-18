@@ -4,4 +4,10 @@ export { deriveScaledUiAmountMultiplier } from './lib/derive-scaled-ui-multiplie
 export { isRedactedTokenAddress } from './lib/is-redacted-token-address';
 export { orderMintsByVerification } from './lib/order-mints-by-verification';
 export type { TokenInfo } from './lib/types';
-export { getTokenInfosSwrKey, useTokenInfo, useTokenInfos } from './model/use-token-infos';
+export {
+    getTokenInfosSwrKey,
+    getVerifiedTokenInfosSwrKey,
+    useTokenInfo,
+    useTokenInfos,
+    useVerifiedTokenInfos,
+} from './model/use-token-infos';

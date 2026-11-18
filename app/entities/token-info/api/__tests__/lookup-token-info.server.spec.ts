@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { maxDuration } from '@/app/api/token-info/route';
+import { maxDuration as verifiedMaxDuration } from '@/app/api/token-info/verified/route';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { jupiterToken } from '../../__fixtures__/jupiter-token';
@@ -12,17 +13,44 @@ import { JupiterHttpError } from '../../lib/errors';
 import type { JupiterToken } from '../../lib/jupiter-token';
 import type { TokenInfo } from '../../lib/types';
 import { JUPITER_ROUTE_TIMEOUT_MS } from '../lookup-token-info';
-import { lookupTokenInfo, lookupTokenInfos } from '../lookup-token-info.server';
+import { lookupTokenInfo, lookupTokenInfos, lookupVerifiedTokenInfos } from '../lookup-token-info.server';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
 const MINT_C = gen.address(3);
 const MAINNET_RPC_URL = 'https://mainnet.rpc.test';
 
-const mocks = vi.hoisted(() => ({ getTokenInfosFromMetaplex: vi.fn(), searchJupiterTokens: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+    dataCache: new Map<string, unknown>(),
+    fetchJupiterVerifiedTokens: vi.fn(),
+    getTokenInfosFromMetaplex: vi.fn(),
+    isDataCacheStale: false,
+    searchJupiterTokens: vi.fn(),
+    unstableCacheOptions: undefined as unknown,
+}));
+
+// Like the Next data cache, the fake keeps whatever the function returns and nothing when it throws.
+vi.mock('next/cache', () => ({
+    unstable_cache: (fn: () => Promise<unknown>, keyParts: string[], options: unknown) => {
+        mocks.unstableCacheOptions = options;
+        return async () => {
+            const key = keyParts.join(',');
+            if (mocks.dataCache.has(key) && !mocks.isDataCacheStale) return mocks.dataCache.get(key);
+            try {
+                mocks.dataCache.set(key, await fn());
+            } catch (error) {
+                if (!mocks.dataCache.has(key)) throw error;
+            }
+            return mocks.dataCache.get(key);
+        };
+    },
+}));
 
 vi.mock('../fetch-token-metaplex', () => ({ getTokenInfosFromMetaplex: mocks.getTokenInfosFromMetaplex }));
-vi.mock('../fetch-jupiter-tokens', () => ({ searchJupiterTokens: mocks.searchJupiterTokens }));
+vi.mock('../fetch-jupiter-tokens', () => ({
+    fetchJupiterVerifiedTokens: mocks.fetchJupiterVerifiedTokens,
+    searchJupiterTokens: mocks.searchJupiterTokens,
+}));
 
 beforeEach(() => {
     vi.stubEnv('JUPITER_API_KEY', 'test-key');
@@ -38,7 +66,10 @@ afterEach(() => {
     vi.clearAllMocks();
     vi.restoreAllMocks();
     mocks.searchJupiterTokens.mockReset();
+    mocks.fetchJupiterVerifiedTokens.mockReset();
     mocks.getTokenInfosFromMetaplex.mockReset();
+    mocks.dataCache.clear();
+    mocks.isDataCacheStale = false;
 });
 
 describe('lookupTokenInfos', () => {
@@ -329,6 +360,85 @@ describe('lookupTokenInfo', () => {
         expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
     });
 });
+
+describe('lookupVerifiedTokenInfos', () => {
+    it('should return the token info of the verified tokens among the addresses', async () => {
+        respondVerified([jupiterToken(MINT_A, { isVerified: true }), jupiterToken(MINT_B, { isVerified: true })]);
+
+        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A, MINT_C] })).toEqual(
+            resolved([tokenInfo(MINT_A, true)]),
+        );
+    });
+
+    it('should keep the verified list in the Next data cache, so the next lookup sends no Jupiter request', async () => {
+        respondVerified([jupiterToken(MINT_A, { isVerified: true })]);
+
+        await lookupVerifiedTokenInfos({ addresses: [MINT_A] });
+        await lookupVerifiedTokenInfos({ addresses: [MINT_B] });
+
+        expect(mocks.fetchJupiterVerifiedTokens).toHaveBeenCalledTimes(1);
+        expect(mocks.unstableCacheOptions).toEqual({ revalidate: expect.any(Number) });
+    });
+
+    it('should time out the Jupiter request below the route maxDuration and the browser timeout', async () => {
+        const timeout = vi.spyOn(AbortSignal, 'timeout');
+        respondVerified([]);
+
+        await lookupVerifiedTokenInfos({ addresses: [MINT_A] });
+
+        expect(mocks.fetchJupiterVerifiedTokens).toHaveBeenCalledWith({
+            apiKey: 'test-key',
+            signal: timeout.mock.results[0].value,
+        });
+        expect(timeout.mock.calls[0][0]).toBeLessThanOrEqual((verifiedMaxDuration * 1000) / 2);
+        expect(timeout.mock.calls[0][0]).toBeLessThan(JUPITER_ROUTE_TIMEOUT_MS);
+    });
+
+    it.each([
+        ['rate-limited', { kind: 'rate-limited' }],
+        [
+            'unavailable',
+            { error: new JupiterHttpError({ status: 401, statusText: 'Unauthorized' }), kind: 'unavailable' },
+        ],
+    ])('should return %s, report it, and ask Jupiter again on the next lookup', async (kind, failure) => {
+        mocks.fetchJupiterVerifiedTokens.mockResolvedValueOnce(failure);
+        respondVerified([jupiterToken(MINT_A, { isVerified: true })]);
+
+        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual({ kind });
+        expect([...vi.mocked(Logger.warn).mock.calls, ...vi.mocked(Logger.error).mock.calls]).toEqual([
+            [expect.anything(), expect.objectContaining({ sentry: true, sentryExtras: { tag: 'verified' } })],
+        ]);
+        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual(resolved([tokenInfo(MINT_A, true)]));
+    });
+
+    it('should return the stale list and report a failed refresh of it', async () => {
+        respondVerified([jupiterToken(MINT_A, { isVerified: true })]);
+        await lookupVerifiedTokenInfos({ addresses: [MINT_A] });
+        mocks.isDataCacheStale = true;
+        mocks.fetchJupiterVerifiedTokens.mockResolvedValueOnce({ kind: 'rate-limited' });
+
+        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual(resolved([tokenInfo(MINT_A, true)]));
+        expect(Logger.warn).toHaveBeenCalledWith('[api:token-info] Jupiter rate limit exceeded', {
+            sentry: true,
+            sentryExtras: { tag: 'verified' },
+        });
+    });
+
+    it('should return unavailable and report an error without a request when JUPITER_API_KEY is not set', async () => {
+        vi.stubEnv('JUPITER_API_KEY', '');
+
+        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual({ kind: 'unavailable' });
+        expect(mocks.fetchJupiterVerifiedTokens).not.toHaveBeenCalled();
+        expect(Logger.error).toHaveBeenCalledWith(
+            expect.objectContaining({ message: '[api:token-info] Token lookup unavailable' }),
+            expect.objectContaining({ sentry: true }),
+        );
+    });
+});
+
+function respondVerified(tokens: JupiterToken[]) {
+    mocks.fetchJupiterVerifiedTokens.mockResolvedValue({ kind: 'resolved', tokens });
+}
 
 function respond(tokens: JupiterToken[]) {
     mocks.searchJupiterTokens.mockResolvedValueOnce({ kind: 'resolved', tokens });

@@ -1,14 +1,13 @@
 ## ADDED Requirements
 
-### Requirement: Token holdings SHALL be ordered by verification tier
+### Requirement: Token holdings SHALL be ordered by verification
 
-The Token Holdings card SHALL order deduplicated mints into three tiers, most trustworthy first: mints Jupiter marks `verified`, then mints Jupiter lists but does not mark verified, then mints Jupiter does not list. The order MUST be stable — within a tier, mints keep the order the RPC returned them in — so the same holdings render the same way on every load. No mint is removed from the list by this ordering; every holding stays reachable through Load More.
+The Token Holdings card SHALL order deduplicated mints into two tiers: mints in Jupiter's `verified` tag list first, then every other mint. The order MUST be stable. Within a tier, mints keep the order the RPC returned them in, so the same holdings render the same way on every load. No mint is removed from the list by this ordering, and every holding stays reachable through Load More.
 
 #### Scenario: Verified holdings lead the list
 
-- **WHEN** an account holds mints across all three tiers
-- **THEN** the card SHALL render every `verified` mint before any known-but-unverified mint
-- **AND** every known-but-unverified mint before any mint Jupiter does not list
+- **WHEN** an account holds verified and unverified mints
+- **THEN** the card SHALL render every verified mint before any other mint
 
 #### Scenario: Ordering is stable within a tier
 
@@ -18,55 +17,65 @@ The Token Holdings card SHALL order deduplicated mints into three tiers, most tr
 
 #### Scenario: Total count is unchanged by ordering
 
-- **WHEN** an account holds 1051 distinct mints of which 78 are verified
-- **THEN** the footer SHALL still report 1051 as the total
-- **AND** all 1051 SHALL remain reachable through Load More
+- **WHEN** an account holds 1117 distinct mints of which 46 are verified
+- **THEN** the footer SHALL still report 1117 as the total
+- **AND** all 1117 SHALL remain reachable through Load More
 
-### Requirement: Verification SHALL be resolved for the whole list before the card renders rows
+### Requirement: The verified token info SHALL load before the card renders rows
 
-The card MUST resolve mint metadata for every holding up front rather than lazily per visible row, because a tier cannot be assigned to a mint whose metadata has not been fetched. This lookup replaces the per-row lookup instead of adding to it, so a list issues one request for the mints it holds. The card SHALL show its existing loading state until the lookup settles, and MUST NOT render an unsorted list that reorders afterwards.
+The card MUST load the token info of its verified mints before it renders rows, because a tier cannot be assigned to a mint before the answer arrives. The card SHALL show its existing loading state until the lookup settles, and MUST NOT render an unsorted list that reorders afterwards.
 
-#### Scenario: Rows wait for verification rather than reordering
+#### Scenario: Rows wait for the verified token info
 
-- **WHEN** holdings have loaded but the metadata lookup is still in flight
+- **WHEN** holdings have loaded but the verified lookup is still in flight
 - **THEN** the card SHALL keep showing the loading state
 - **AND** it SHALL NOT render rows that would reorder once the lookup settles
 
-#### Scenario: A small account issues no more requests than before
+### Requirement: Token info SHALL be requested only for the unverified rows on screen
 
-- **WHEN** an account holds 20 distinct mints
-- **THEN** the card SHALL resolve them in a single request
-- **AND** rows SHALL NOT issue per-row metadata requests
+A verified row SHALL take its token info from the verified lookup. An unverified row SHALL look up its own token info, and the browser SHALL batch the lookups of one render into one request. A lookup of every holding costs one Jupiter request per `TOKEN_INFO_REQUEST_LIMIT` mints on every view, and a large account then exceeds the rate limit of `JUPITER_API_KEY`.
 
-#### Scenario: A long list is chunked
+#### Scenario: A page of verified rows sends no request
 
-- **WHEN** an account holds more distinct mints than one request may carry
-- **THEN** the card SHALL split them into chunks no larger than that cap
-- **AND** merge the results before ordering
+- **WHEN** every row of a page holds a verified mint
+- **THEN** the browser SHALL NOT send a token info request for that page
 
-### Requirement: The bulk lookup SHALL use the cacheable token-info route
+#### Scenario: A page with unverified rows sends one request
 
-Metadata for the holdings list SHALL be requested through the token-info route, which wraps its upstream call in the Next data cache, so visitors who request the same chunk share one upstream round trip. A chunk of several mints SHALL use `POST /api/token-info`, and a chunk of one mint SHALL use `GET /api/token-info/[mintAddress]`. The request cap SHALL NOT exceed the most mints Jupiter answers in one request, so one route request sends one Jupiter request, and one constant SHALL serve as both the route's cap and the chunk size the client splits on, so the two cannot drift.
+- **WHEN** the card renders a page with unverified rows
+- **THEN** the browser SHALL send one token info request for the unverified mints of that page
+- **AND** it SHALL NOT request token info for a mint that is not on screen
 
-#### Scenario: Repeat views reuse the cached result
+#### Scenario: Load More requests only the next page
 
-- **WHEN** two visitors open the same address within the route's cache window
-- **THEN** the second request SHALL be served from cache without a second upstream call
+- **WHEN** the user clicks Load More
+- **THEN** the browser SHALL request token info only for the unverified mints of the next page
+- **AND** the rows already on screen SHALL keep their token info
 
-#### Scenario: A request at the cap is accepted
+#### Scenario: Row renders for a mint with no metadata
 
-- **WHEN** the client sends exactly `TOKEN_INFO_REQUEST_LIMIT` distinct mints
-- **THEN** the route SHALL resolve them rather than rejecting the request
+- **WHEN** a row is rendered for a mint with no token info
+- **THEN** it SHALL render the mint address and balance
+- **AND** it SHALL omit the symbol and fall back to the placeholder logo
+
+### Requirement: The verified token info SHALL come from one server-cached list
+
+`POST /api/token-info/verified` SHALL answer the token info of the given mints that are in Jupiter's `verified` tag list. The server SHALL keep the list in the Next data cache, so Jupiter gets one request per cache refresh, not one per view.
+
+#### Scenario: Repeat views reuse the cached list
+
+- **WHEN** two visitors open token holdings within the cache window
+- **THEN** the second request SHALL be answered without a Jupiter request
 
 ### Requirement: Holdings SHALL fall back to RPC order when verification is unavailable
 
-Ordering MUST degrade rather than fail. When the metadata lookup fails, or when Jupiter does not cover the active cluster, every mint SHALL be treated as unknown, which collapses the three tiers into one and leaves the list in RPC order — the order shipped today. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
+Ordering MUST degrade rather than fail. When the verified lookup fails, or when Jupiter does not cover the active cluster, no mint is verified, so the list keeps RPC order. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
 
-Degrading silently to the user is not the same as degrading silently to us. An outage MUST stay distinguishable from a genuine "none of these mints are listed": the route SHALL answer a failed lookup with an error status rather than an empty list, so the failure is reported and is not cached as though the list had spoken. A Jupiter response with an entry that breaks Jupiter's documented schema SHALL fail its chunk, because a dropped entry would be cached as a mint Jupiter does not list. A failed chunk SHALL fail the whole list, because the browser keeps a resolved list for the session, so a list that kept the resolved chunks would show the failed chunk's mints as unknown until a page reload. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
+An outage MUST stay distinguishable from an empty list. The route SHALL answer a failed lookup with an error status, the failure is reported, and the data cache SHALL NOT keep it, so the next request asks Jupiter again. A Jupiter answer with an entry that breaks Jupiter's documented token schema SHALL fail the lookup. The browser SHALL NOT keep a failed lookup, so the next mount of the card asks again. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
 
 #### Scenario: Upstream failure
 
-- **WHEN** the metadata lookup fails for every chunk
+- **WHEN** the verified lookup fails
 - **THEN** the card SHALL render all holdings in RPC order
 - **AND** it SHALL NOT show an error card
 
@@ -76,42 +85,25 @@ Degrading silently to the user is not the same as degrading silently to us. An o
 - **THEN** the route SHALL answer an error status rather than `200` with an empty list
 - **AND** the failure SHALL be reported to error tracking
 
-#### Scenario: A malformed entry is not cached as unlisted
+#### Scenario: A malformed entry fails the lookup
 
-- **WHEN** Jupiter answers a chunk with one entry whose `isVerified` is a string
-- **THEN** the route SHALL answer an error status for that chunk rather than `200` without the mint
+- **WHEN** Jupiter answers the tag list with one entry whose `isVerified` is a string
+- **THEN** the route SHALL answer an error status rather than `200` without the mint
 - **AND** the failure SHALL be reported to error tracking
 
 #### Scenario: A stalled lookup gives up
 
-- **WHEN** a chunk's request does not settle within its timeout
-- **THEN** that chunk SHALL be abandoned and every mint treated as unknown
-- **AND** the card SHALL leave its loading state
+- **WHEN** the verified lookup does not settle within its timeout
+- **THEN** the card SHALL leave its loading state
+- **AND** it SHALL render all holdings in RPC order
 
 #### Scenario: Cluster without curated data
 
-- **WHEN** the active cluster resolves no verified mints
-- **THEN** every mint SHALL fall into the unknown tier
+- **WHEN** Jupiter does not cover the active cluster
+- **THEN** the card SHALL NOT send the verified lookup
 - **AND** the rendered order SHALL match the RPC order
 
-#### Scenario: Partial failure
+#### Scenario: A failed lookup is asked again
 
-- **WHEN** one chunk resolves and another fails
-- **THEN** every mint SHALL be treated as unknown, and the card SHALL render all holdings in RPC order
-- **AND** the next mount of the card SHALL request the list again
-
-### Requirement: Token rows SHALL receive resolved metadata as props
-
-`TokenRow` MUST become presentational: it SHALL take the mint's resolved name, symbol and logo as props and SHALL NOT call a metadata hook of its own, since the card already holds metadata for every mint after the bulk lookup. This removes one hook per rendered row and keeps the row testable without a provider.
-
-#### Scenario: Row renders from props alone
-
-- **WHEN** a row is rendered with resolved metadata
-- **THEN** it SHALL display that symbol and logo
-- **AND** it SHALL NOT trigger a metadata request
-
-#### Scenario: Row renders for a mint with no metadata
-
-- **WHEN** a row is rendered for a mint with no token info
-- **THEN** it SHALL render the mint address and balance
-- **AND** it SHALL omit the symbol and fall back to the placeholder logo
+- **WHEN** the verified lookup failed and the card mounts again
+- **THEN** the browser SHALL send the verified lookup again

@@ -45,6 +45,7 @@
 | Dynamic | `/api/token-image/[mintAddress]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
 | Dynamic | `/api/token-info/[mintAddress]` | — | — |
+| Dynamic | `/api/token-info/verified` | — | — |
 | Dynamic | `/api/token-market-data/[address]` | — | — |
 | Dynamic | `/api/token-price/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |

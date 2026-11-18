@@ -31,6 +31,14 @@ export async function lookupTokenInfo({
     return queueLookup({ cluster, genesisHash, includeOnChainFallback }, mint);
 }
 
+export function lookupVerifiedTokenInfos({ addresses }: { addresses: readonly string[] }): Promise<TokenInfosLookup> {
+    return sendTokenInfoRequest({
+        ...toJsonPost('/api/token-info/verified', { addresses }),
+        sentryExtras: { addressCount: addresses.length, tag: 'verified' },
+        timeoutMs: JUPITER_ROUTE_TIMEOUT_MS,
+    });
+}
+
 type BatchRequest = { cluster: Cluster; genesisHash: GenesisHash | undefined; includeOnChainFallback: boolean };
 
 type Batch = { request: BatchRequest; resolvers: Map<string, ((lookup: TokenInfoLookup) => void)[]> };

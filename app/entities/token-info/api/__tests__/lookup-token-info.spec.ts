@@ -10,7 +10,7 @@ import { tokenInfo } from '../../__fixtures__/token-info';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../../lib/request-limit';
 import type { TokenInfoLookup } from '../../lib/token-info-lookup';
 import { type TokenInfo } from '../../lib/types';
-import { lookupTokenInfo } from '../lookup-token-info';
+import { JUPITER_ROUTE_TIMEOUT_MS, lookupTokenInfo, lookupVerifiedTokenInfos } from '../lookup-token-info';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
@@ -272,6 +272,31 @@ describe('lookupTokenInfo', () => {
 
         await expect(lookupAll([MINT_A])).resolves.toEqual([{ kind: 'unavailable' }]);
         timeout.mockRestore();
+    });
+});
+
+describe('lookupVerifiedTokenInfos', () => {
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.clearAllMocks();
+        vi.restoreAllMocks();
+    });
+
+    it('should post the mints to the verified route with the Jupiter route timeout and return the tokens', async () => {
+        const timeout = vi.spyOn(AbortSignal, 'timeout');
+        respond(200, { content: [tokenInfo(MINT_A, true)] });
+
+        const lookup = await lookupVerifiedTokenInfos({ addresses: [MINT_A, MINT_B] });
+
+        expect(lookup).toEqual({ kind: 'resolved', tokens: [tokenInfo(MINT_A, true)] });
+        expect(sentRequests()).toEqual([
+            { body: { addresses: [MINT_A, MINT_B] }, method: 'POST', url: '/api/token-info/verified' },
+        ]);
+        expect(timeout).toHaveBeenCalledWith(JUPITER_ROUTE_TIMEOUT_MS);
     });
 });
 

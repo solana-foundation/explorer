@@ -5,7 +5,12 @@ import { array, validate } from 'superstruct';
 import { fetchUpstream } from '@/app/shared/lib/http-utils';
 
 import { JupiterHttpError } from '../lib/errors';
-import { JUPITER_TOKENS_SEARCH_URL, type JupiterToken, JupiterTokenStruct } from '../lib/jupiter-token';
+import {
+    JUPITER_TOKENS_SEARCH_URL,
+    JUPITER_VERIFIED_TOKENS_URL,
+    type JupiterToken,
+    JupiterTokenStruct,
+} from '../lib/jupiter-token';
 
 export type JupiterTokensResult =
     { kind: 'resolved'; tokens: JupiterToken[] } | { kind: 'rate-limited' } | { kind: 'unavailable'; error: unknown };
@@ -26,6 +31,17 @@ export function searchJupiterTokens({
         ...(revalidate === undefined ? {} : { next: { revalidate } }),
         signal,
     });
+}
+
+export function fetchJupiterVerifiedTokens({
+    apiKey,
+    signal,
+}: {
+    apiKey: string;
+    signal: AbortSignal;
+}): Promise<JupiterTokensResult> {
+    // The list exceeds the item size limit of the Next data cache.
+    return fetchJupiterTokens(JUPITER_VERIFIED_TOKENS_URL, { apiKey, cache: 'no-store', signal });
 }
 
 async function fetchJupiterTokens(
