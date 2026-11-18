@@ -1,5 +1,5 @@
 import { ParsedTokenExtension } from '@/app/components/account/types';
-import { TokenExtensionType } from '@/app/validators/accounts/token-extension';
+import { TokenExtension, TokenExtensionType } from '@/app/validators/accounts/token-extension';
 
 function populateSolanaDevelopersLink(component: string) {
     return `https://solana.com/developers/guides/token-extensions/${component}`;
@@ -279,4 +279,15 @@ export function populatePartialParsedTokenExtension(
                 status: 'active',
             };
     }
+}
+
+export function getCurrentTokenScaledUiAmountMultiplier(extensions: Array<TokenExtension> | undefined): string {
+    const scaledUiAmountConfig = extensions?.find(extension => extension.extension === 'scaledUiAmountConfig');
+    if (!scaledUiAmountConfig) {
+        return '1';
+    }
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    return currentTimestamp >= scaledUiAmountConfig.state.newMultiplierEffectiveTimestamp
+        ? scaledUiAmountConfig.state.newMultiplier
+        : scaledUiAmountConfig.state.multiplier;
 }

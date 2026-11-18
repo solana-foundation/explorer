@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { Address } from '../Address';
@@ -8,7 +8,7 @@ const pubkey = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
 const meta: Meta<typeof Address> = {
     component: Address,
-    decorators: [withCluster, withTokenInfoBatch],
+    decorators: [withCluster],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Common/Address',

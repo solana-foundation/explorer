@@ -7,7 +7,6 @@ import {
     withCluster,
     withMockTransactions,
     withScrollAnchor,
-    withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -34,7 +33,7 @@ const dispatched = createInstructionParserDispatcher([solanaAttestationInstructi
 
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionSas/SolanaAttestationDetailsCard',

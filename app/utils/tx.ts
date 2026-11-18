@@ -28,8 +28,8 @@ export function isSignatureValid(value: string): value is Signature {
 }
 
 export type TokenLabelInfo = {
-    name?: string;
-    symbol?: string;
+    name?: string | null;
+    symbol?: string | null;
 };
 
 export function getProgramName(address: string, cluster: Cluster): string {

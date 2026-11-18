@@ -1,7 +1,8 @@
+import { ChainId } from '@entities/chain-id';
+import { getTokenInfosSwrKey } from '@entities/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import { getFullTokenInfoSwrKey } from '@utils/token-info';
 import { SWRConfig } from 'swr';
 import useSWRImmutable from 'swr/immutable';
 import { describe, expect, it, vi } from 'vitest';
@@ -21,7 +22,10 @@ vi.mock('@providers/cluster', () => ({
 
 describe('useRefreshAccount', () => {
     it.each([
-        ['full token info', getFullTokenInfoSwrKey(MINT.toBase58(), Cluster.Custom, MOCK_URL, MOCK_GENESIS_HASH)],
+        [
+            'token info',
+            getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Custom, mints: [MINT.toBase58()] }),
+        ],
         ['raw account data', rawAccountDataKey(MOCK_URL, MINT.toBase58())],
     ])('should refetch the %s of the account', async (_, key) => {
         const fetcher = await refreshWith(key);

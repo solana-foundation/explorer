@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
-import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
@@ -21,7 +21,7 @@ const mockRawData = new Uint8Array([
 
 const meta: Meta<typeof BaseRawAccountRows> = {
     component: BaseRawAccountRows,
-    decorators: [withCardTableField, withTokenInfoBatch],
+    decorators: [withCardTableField],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Account/BaseRawAccountRows',

@@ -2,7 +2,7 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 130 kB | 430 kB |
+| Static | `/` | 110 kB | 430 kB |
 | Static | `/_not-found` | 0 B | 310 kB |
 | Dynamic | `/address/[address]` | 530 kB | 840 kB |
 | Dynamic | `/address/[address]/account-data` | 540 kB | 850 kB |

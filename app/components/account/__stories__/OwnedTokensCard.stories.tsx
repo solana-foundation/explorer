@@ -1,7 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { ChainId } from '@entities/chain-id';
-import { type TokenInfo } from '@entities/token-info';
-import { getTokenInfosSwrKey } from '@entities/token-info/client';
+import { getTokenInfosSwrKey, type TokenInfo } from '@entities/token-info';
 import {
     DispatchContext as TokensDispatch,
     type State as TokensState,
@@ -11,8 +10,9 @@ import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
+import { Cluster } from '@utils/cluster';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 import { SWRConfig, unstable_serialize } from 'swr';
@@ -35,13 +35,10 @@ const usdcTokenInfo: TokenInfo = {
     verified: true,
 };
 
-// The card resolves every held mint in one lookup, so seed that lookup's cache entry rather than the
-// per-mint batch provider. No entry for WSOL: an unresolved mint draws the fallback logo and, having
-// no verified flag, sorts below the seeded row.
 const seededTokenInfos = {
-    [unstable_serialize(getTokenInfosSwrKey([USDC_MINT, WSOL_MINT], ChainId.MAINNET))]: new Map([
-        [USDC_MINT, usdcTokenInfo],
-    ]),
+    [unstable_serialize(
+        getTokenInfosSwrKey({ chainId: ChainId.MAINNET, cluster: Cluster.Mainnet, mints: [USDC_MINT, WSOL_MINT] }),
+    )]: [usdcTokenInfo],
 };
 
 const tokensState = (entries: TokensState['entries']): TokensState => ({
@@ -132,7 +129,6 @@ const withNoTokens: Decorator = Story => (
 
 const meta = {
     component: OwnedTokensCard,
-    decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/OwnedTokensCard',

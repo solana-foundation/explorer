@@ -4,8 +4,12 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { cn } from '@components/shared/utils';
-import { deriveScaledUiAmountMultiplier, orderMintsByVerification, type TokenInfo } from '@entities/token-info';
-import { useTokenInfos } from '@entities/token-info/client';
+import {
+    deriveScaledUiAmountMultiplier,
+    orderMintsByVerification,
+    type TokenInfo,
+    useTokenInfos,
+} from '@entities/token-info';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -79,7 +83,7 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
     const mints = useMemo(() => Array.from(holdings.keys()), [holdings]);
 
     // Every mint, not just the visible ones: ordering needs each mint's verified status.
-    const { isLoading, tokenInfos } = useTokenInfos(mints, cluster, genesisHash);
+    const { isLoading, tokenInfos } = useTokenInfos({ cluster, genesisHash, mints });
 
     // A permutation of `mints`, so its length is the distinct mint count the footer reports.
     const orderedMints = useMemo(() => orderMintsByVerification(mints, tokenInfos), [mints, tokenInfos]);
@@ -184,7 +188,7 @@ function TokenLogo({ tokenInfo }: { tokenInfo: TokenInfo | undefined }) {
             alt="Token icon"
             className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
             height={16}
-            uri={tokenInfo?.logoURI ?? undefined}
+            uri={tokenInfo?.logoURI}
             width={16}
         />
     );

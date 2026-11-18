@@ -35,7 +35,10 @@ vi.mock('@providers/cluster', async importOriginal => {
 // Only the bulk lookup is stubbed. `orderMintsByVerification` and `deriveScaledUiAmountMultiplier`
 // stay real, so these specs exercise the actual tiering rather than a re-statement of it.
 const { useTokenInfosMock } = vi.hoisted(() => ({ useTokenInfosMock: vi.fn() }));
-vi.mock('@entities/token-info/client', () => ({ useTokenInfos: useTokenInfosMock }));
+vi.mock('@entities/token-info', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/token-info')>()),
+    useTokenInfos: useTokenInfosMock,
+}));
 
 // Stub Address so we can assert props without dragging in nickname/visibility/cluster-path machinery.
 vi.mock('@components/common/Address', () => ({
@@ -107,7 +110,6 @@ function tokenInfo(address: string, verified: boolean) {
     return { address, decimals: 6, logoURI: null, name: `Token ${address.slice(0, 4)}`, symbol: 'TKN', verified };
 }
 
-/** The resolved lookup, settled. Pass the entries the UTL list is meant to know about. */
 function resolved(entries: ReturnType<typeof tokenInfo>[] = []) {
     return { isLoading: false, tokenInfos: new Map(entries.map(entry => [entry.address, entry])) };
 }
@@ -160,7 +162,11 @@ describe('should render OwnedTokensCard from a single bulk lookup', () => {
         const logo = grid().getByTestId('token-logo');
         expect(logo.getAttribute('data-uri')).toBe(LOGO);
         // The card resolves every held mint in one call, so rows fetch nothing themselves.
-        expect(useTokenInfosMock).toHaveBeenCalledWith([MINT], Cluster.Mainnet, 'genesis');
+        expect(useTokenInfosMock).toHaveBeenCalledWith({
+            cluster: Cluster.Mainnet,
+            genesisHash: 'genesis',
+            mints: [MINT],
+        });
         // Symbol comes from the lookup, rendered next to the amount in the balance cell.
         expect(grid().getByText('USDC', { exact: false })).toBeInTheDocument();
         // Mint Address is labeled from the already-resolved info (tokenLabelInfo), so it fetches nothing.

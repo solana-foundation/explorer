@@ -6,7 +6,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { useTokenInfo } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
@@ -21,7 +21,6 @@ import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
 import { create } from 'superstruct';
-import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { RefreshButton } from '@/app/components/shared/ui/refresh-button';
@@ -49,10 +48,6 @@ type TransferData = {
     transfer: Transfer | TransferChecked;
     units: string;
 };
-
-async function fetchTokenInfo([_, address, cluster, genesisHash]: ReturnType<typeof getTokenInfoSwrKey>) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, genesisHash);
-}
 
 function AmountCell({
     amountString,
@@ -86,8 +81,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(toAddress(address), true, true);
     const loadMore = () => fetchAccountHistory(toAddress(address), true);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, genesisHash), [address, cluster, genesisHash]);
-    const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
+    const { isLoading: tokenInfoLoading, tokenInfo } = useTokenInfo({ cluster, genesisHash, mint: address });
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {

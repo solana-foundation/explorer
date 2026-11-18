@@ -5,7 +5,6 @@ import {
     withCluster,
     withMockTransactions,
     withScrollAnchor,
-    withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -50,7 +49,7 @@ const assertAccountInfoIx = {
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTxInstructionSurface, withMockTransactions],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',

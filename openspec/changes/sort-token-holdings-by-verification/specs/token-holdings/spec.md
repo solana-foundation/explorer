@@ -2,13 +2,13 @@
 
 ### Requirement: Token holdings SHALL be ordered by verification tier
 
-The Token Holdings card SHALL order deduplicated mints into three tiers, most trustworthy first: mints the unified token list (UTL) marks `verified`, then mints UTL knows but does not mark verified, then mints UTL does not know. The order MUST be stable — within a tier, mints keep the order the RPC returned them in — so the same holdings render the same way on every load. No mint is removed from the list by this ordering; every holding stays reachable through Load More.
+The Token Holdings card SHALL order deduplicated mints into three tiers, most trustworthy first: mints Jupiter marks `verified`, then mints Jupiter lists but does not mark verified, then mints Jupiter does not list. The order MUST be stable — within a tier, mints keep the order the RPC returned them in — so the same holdings render the same way on every load. No mint is removed from the list by this ordering; every holding stays reachable through Load More.
 
 #### Scenario: Verified holdings lead the list
 
 - **WHEN** an account holds mints across all three tiers
 - **THEN** the card SHALL render every `verified` mint before any known-but-unverified mint
-- **AND** every known-but-unverified mint before any mint unknown to UTL
+- **AND** every known-but-unverified mint before any mint Jupiter does not list
 
 #### Scenario: Ordering is stable within a tier
 
@@ -46,7 +46,7 @@ The card MUST resolve mint metadata for every holding up front rather than lazil
 
 ### Requirement: The bulk lookup SHALL use the cacheable token-info route
 
-Metadata for the holdings list SHALL be requested through `POST /api/token-info`, which wraps its upstream call in the Next data cache, and MUST NOT use the `'use server'` action that per-row lookups call, because that action makes every visitor re-pay the upstream round trip. The request cap SHALL be raised above its current 128, and one constant SHALL serve as both the route's cap and the chunk size the client splits on, so the two cannot drift.
+Metadata for the holdings list SHALL be requested through `POST /api/token-info`, which wraps its upstream call in the Next data cache, so visitors who request the same chunk share one upstream round trip. The request cap SHALL NOT exceed the most mints Jupiter answers in one request, so one route request sends one Jupiter request, and one constant SHALL serve as both the route's cap and the chunk size the client splits on, so the two cannot drift.
 
 #### Scenario: Repeat views reuse the cached result
 
@@ -55,14 +55,14 @@ Metadata for the holdings list SHALL be requested through `POST /api/token-info`
 
 #### Scenario: A request at the cap is accepted
 
-- **WHEN** the client sends exactly `MAX_ADDRESSES` distinct mints
+- **WHEN** the client sends exactly `TOKEN_INFO_REQUEST_LIMIT` distinct mints
 - **THEN** the route SHALL resolve them rather than rejecting the request
 
 ### Requirement: Holdings SHALL fall back to RPC order when verification is unavailable
 
-Ordering MUST degrade rather than fail. When the metadata lookup fails, or when the active cluster has no curated UTL data, every mint SHALL be treated as unknown, which collapses the three tiers into one and leaves the list in RPC order — the order shipped today. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
+Ordering MUST degrade rather than fail. When the metadata lookup fails, or when Jupiter does not cover the active cluster, every mint SHALL be treated as unknown, which collapses the three tiers into one and leaves the list in RPC order — the order shipped today. The card SHALL still render every holding, and a failed lookup MUST NOT produce an error state or an empty list.
 
-Degrading silently to the user is not the same as degrading silently to us. An outage MUST stay distinguishable from a genuine "none of these mints are listed": the route SHALL answer a failed lookup with an error status rather than an empty list, so the failure is reported and is not cached as though the list had spoken. A lookup that resolved some mints and dropped others is not an outage and SHALL still answer what it resolved. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
+Degrading silently to the user is not the same as degrading silently to us. An outage MUST stay distinguishable from a genuine "none of these mints are listed": the route SHALL answer a failed lookup with an error status rather than an empty list, so the failure is reported and is not cached as though the list had spoken. A Jupiter response with an entry that breaks Jupiter's documented schema SHALL fail its chunk, because a dropped entry would be cached as a mint Jupiter does not list. A failed chunk SHALL fail the whole list, because the browser keeps a resolved list for the session, so a list that kept the resolved chunks would show the failed chunk's mints as unknown until a page reload. Every request SHALL be bounded by a timeout, because an unbounded one leaves the card on its loading state indefinitely.
 
 #### Scenario: Upstream failure
 
@@ -72,14 +72,20 @@ Degrading silently to the user is not the same as degrading silently to us. An o
 
 #### Scenario: An outage is not cached as an answer
 
-- **WHEN** the upstream list lookup reports an error and resolves no mints
+- **WHEN** the Jupiter lookup fails
 - **THEN** the route SHALL answer an error status rather than `200` with an empty list
+- **AND** the failure SHALL be reported to error tracking
+
+#### Scenario: A malformed entry is not cached as unlisted
+
+- **WHEN** Jupiter answers a chunk with one entry whose `isVerified` is a string
+- **THEN** the route SHALL answer an error status for that chunk rather than `200` without the mint
 - **AND** the failure SHALL be reported to error tracking
 
 #### Scenario: A stalled lookup gives up
 
 - **WHEN** a chunk's request does not settle within its timeout
-- **THEN** that chunk SHALL be abandoned and its mints treated as unknown
+- **THEN** that chunk SHALL be abandoned and every mint treated as unknown
 - **AND** the card SHALL leave its loading state
 
 #### Scenario: Cluster without curated data
@@ -91,8 +97,8 @@ Degrading silently to the user is not the same as degrading silently to us. An o
 #### Scenario: Partial failure
 
 - **WHEN** one chunk resolves and another fails
-- **THEN** mints from the resolved chunk SHALL be tiered normally
-- **AND** mints from the failed chunk SHALL be treated as unknown
+- **THEN** every mint SHALL be treated as unknown, and the card SHALL render all holdings in RPC order
+- **AND** the next mount of the card SHALL request the list again
 
 ### Requirement: Token rows SHALL receive resolved metadata as props
 
@@ -106,6 +112,6 @@ Degrading silently to the user is not the same as degrading silently to us. An o
 
 #### Scenario: Row renders for a mint with no metadata
 
-- **WHEN** a row is rendered for a mint UTL does not know
+- **WHEN** a row is rendered for a mint with no token info
 - **THEN** it SHALL render the mint address and balance
 - **AND** it SHALL omit the symbol and fall back to the placeholder logo
