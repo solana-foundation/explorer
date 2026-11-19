@@ -7,7 +7,7 @@
         "audit:ci": "pnpm audit --prod --audit-level critical",
         "audit:prod": "pnpm audit --prod --audit-level high",
         "build": "pnpm build:packages && next build",
-        "check": "pnpm format:ci && pnpm lint && pnpm openspec:validate && pnpm build && pnpm test:ci",
+        "check": "pnpm format:ci && pnpm lint && pnpm openspec:validate && pnpm build && tsc --noEmit && pnpm test:ci",
         "build:info": "node scripts/update-build-info.js",
         "build:packages": "pnpm -r --filter './packages/**' run build",
         "build-sb": "storybook build",
