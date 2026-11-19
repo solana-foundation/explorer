@@ -1,3 +1,4 @@
+import { DEFAULT_ADDRESS } from '@__fixtures__/gen';
 import { Cluster } from '@utils/cluster';
 import { describe, expect, it } from 'vitest';
 
@@ -12,10 +13,7 @@ describe('explorerUrlSearchProvider', () => {
     });
 
     it('should return an option for a recognised Solscan URL', () => {
-        const results = explorerUrlSearchProvider.search(
-            'https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
-            ctx,
-        );
+        const results = explorerUrlSearchProvider.search(`https://solscan.io/account/${DEFAULT_ADDRESS}`, ctx);
         expect(results).toEqual([
             {
                 label: 'External Explorer',
@@ -23,9 +21,9 @@ describe('explorerUrlSearchProvider', () => {
                     {
                         cluster: Cluster.Mainnet,
                         label: 'solscan.io — Account',
-                        pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
+                        pathname: `/address/${DEFAULT_ADDRESS}`,
                         type: 'address',
-                        value: ['https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E'],
+                        value: [`https://solscan.io/account/${DEFAULT_ADDRESS}`],
                     },
                 ],
             },
@@ -33,7 +31,10 @@ describe('explorerUrlSearchProvider', () => {
     });
 
     it('should carry the resolved cluster from the external URL', () => {
-        const results = explorerUrlSearchProvider.search('https://solscan.io/account/abc?cluster=devnet', ctx);
+        const results = explorerUrlSearchProvider.search(
+            `https://solscan.io/account/${DEFAULT_ADDRESS}?cluster=devnet`,
+            ctx,
+        );
         expect(results).toEqual([
             {
                 label: 'External Explorer',
@@ -41,9 +42,9 @@ describe('explorerUrlSearchProvider', () => {
                     {
                         cluster: Cluster.Devnet,
                         label: 'solscan.io — Account',
-                        pathname: '/address/abc',
+                        pathname: `/address/${DEFAULT_ADDRESS}`,
                         type: 'address',
-                        value: ['https://solscan.io/account/abc?cluster=devnet'],
+                        value: [`https://solscan.io/account/${DEFAULT_ADDRESS}?cluster=devnet`],
                     },
                 ],
             },
