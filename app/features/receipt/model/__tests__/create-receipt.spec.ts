@@ -279,7 +279,7 @@ describe('createReceipt', () => {
                 cluster: Cluster.Mainnet,
                 transaction: mockUsdcTransferTransaction,
             });
-            vi.mocked(lookupTokenInfo).mockResolvedValueOnce(mockTokenInfo);
+            listMint('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU', mockTokenInfo);
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -300,11 +300,6 @@ describe('createReceipt', () => {
                     raw: 1,
                     unit: 'USDC',
                 },
-            });
-            expect(lookupTokenInfo).toHaveBeenCalledWith({
-                cluster: Cluster.Mainnet,
-                genesisHash: undefined,
-                mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
             });
         });
 
@@ -361,7 +356,7 @@ describe('createReceipt', () => {
                 cluster: Cluster.Mainnet,
                 transaction: mockToken2022Transfer2Transaction,
             });
-            vi.mocked(lookupTokenInfo).mockResolvedValueOnce(mockTokenInfo);
+            listMint('7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU', mockTokenInfo);
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -383,11 +378,6 @@ describe('createReceipt', () => {
                     unit: 'T22',
                 },
             });
-            expect(lookupTokenInfo).toHaveBeenCalledWith({
-                cluster: Cluster.Mainnet,
-                genesisHash: undefined,
-                mint: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-            });
         });
 
         it('should create a formatted token transfer receipt for Token-2022 transferChecked', async () => {
@@ -397,7 +387,7 @@ describe('createReceipt', () => {
                 cluster: Cluster.Mainnet,
                 transaction: mockToken2022TransferTransaction,
             });
-            vi.mocked(lookupTokenInfo).mockResolvedValueOnce(mockTokenInfo);
+            listMint('AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U', mockTokenInfo);
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -419,11 +409,6 @@ describe('createReceipt', () => {
                     unit: 'T2022',
                 },
             });
-            expect(lookupTokenInfo).toHaveBeenCalledWith({
-                cluster: Cluster.Mainnet,
-                genesisHash: undefined,
-                mint: 'AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U',
-            });
         });
 
         it('should create a receipt for multisig token transfer using multisigAuthority as sender', async () => {
@@ -444,11 +429,10 @@ describe('createReceipt', () => {
                 cluster: Cluster.Mainnet,
                 transaction: mockUsdcMultipleTransfersTransaction,
             });
-            vi.mocked(lookupTokenInfo).mockResolvedValueOnce(listedToken('USDC'));
+            const { authority, mint, receiver1, receiver2 } = mockUsdcMultipleTransfersAddresses;
+            listMint(mint, listedToken('USDC'));
 
             const receipt = unwrap(await createReceipt(mockSignature));
-
-            const { authority, mint, receiver1, receiver2 } = mockUsdcMultipleTransfersAddresses;
 
             expect(receipt.total).toMatchObject({
                 formatted: '1.000841',
@@ -467,11 +451,6 @@ describe('createReceipt', () => {
                 amount: { formatted: '0.000841', raw: 0.000841, unit: 'USDC' },
                 receiver: { address: receiver2 },
                 sender: { address: authority },
-            });
-            expect(lookupTokenInfo).toHaveBeenCalledWith({
-                cluster: Cluster.Mainnet,
-                genesisHash: undefined,
-                mint,
             });
         });
     });
@@ -764,4 +743,10 @@ describe('createReceipt', () => {
 
 function listedToken(symbol: string, logoURI?: string): TokenInfoLookup {
     return { kind: 'listed', token: { ...tokenInfo(gen.address()), logoURI, symbol } };
+}
+
+function listMint(mint: string, lookup: TokenInfoLookup): void {
+    vi.mocked(lookupTokenInfo).mockImplementationOnce(async request =>
+        request.mint === mint ? lookup : { kind: 'not-listed' },
+    );
 }

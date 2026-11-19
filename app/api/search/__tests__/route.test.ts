@@ -240,21 +240,7 @@ describe('GET /api/search', () => {
             process.env.NEXT_PUBLIC_BAD_TOKENS = BAD_TOKEN_MINT;
         });
 
-        it('should drop a redacted mint from the results and from the DAS request', async () => {
-            mockFetch(200, [makeJupiterToken({ id: BAD_TOKEN_MINT }), makeJupiterToken()]);
-
-            const res = await GET(makeRequest('sol'));
-            const data = await res.json();
-
-            expect(data.results.tokens.map((t: { tokenAddress: string }) => t.tokenAddress)).toEqual([VALID_ADDRESS]);
-            expect(getAssetBatchMock).toHaveBeenCalledWith(
-                [VALID_ADDRESS],
-                expect.any(String),
-                expect.any(AbortSignal),
-            );
-        });
-
-        it('should return 20 mints when Jupiter lists a redacted mint first', async () => {
+        it('should drop a redacted mint before the result limit and the DAS request', async () => {
             const goodAddresses = Array.from({ length: 20 }, (_, i) => gen.address(i + 2));
             mockFetch(200, [
                 makeJupiterToken({ id: BAD_TOKEN_MINT }),
@@ -265,6 +251,7 @@ describe('GET /api/search', () => {
             const data = await res.json();
 
             expect(data.results.tokens.map((t: { tokenAddress: string }) => t.tokenAddress)).toEqual(goodAddresses);
+            expect(getAssetBatchMock).toHaveBeenCalledWith(goodAddresses, expect.any(String), expect.any(AbortSignal));
         });
     });
 

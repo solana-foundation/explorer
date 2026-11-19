@@ -30,17 +30,39 @@ vi.mock('@providers/accounts/tokens', async importOriginal => ({
     useScaledUiAmountForMint: () => ['1', '1'],
 }));
 
+const WEBSITE = 'https://www.circle.com/en/usdc';
+
+const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+const MINT: TokenAccount = {
+    info: { decimals: 6, freezeAuthority: null, isInitialized: true, mintAuthority: null, supply: '1' },
+    type: 'mint',
+};
+
+const TOKEN_ACCOUNT_INFO = {
+    mint: ADDRESS,
+    owner: ADDRESS,
+    state: 'initialized',
+    tokenAmount: { amount: '1000000', decimals: 6, uiAmountString: '1' },
+};
+
+const ACCOUNT: Account = {
+    data: { parsed: { parsed: MINT, program: 'spl-token' } },
+    executable: false,
+    lamports: 1,
+    owner: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+    pubkey: new PublicKey(ADDRESS),
+    space: 82,
+};
+
 describe('TokenAccountSection', () => {
-    it('should title the mint card Overview when the token info has a name', () => {
-        renderMint(tokenInfo(ADDRESS));
+    it.each([
+        ['Overview', 'has a name', tokenInfo(ADDRESS)],
+        ['Token Mint', 'has no name', redactedTokenInfo(ADDRESS)],
+    ])('should title the mint card %s when the token info %s', (title, _, info) => {
+        renderMint(info);
 
-        expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
-    });
-
-    it('should title the mint card Token Mint when the token info has no name', () => {
-        renderMint(redactedTokenInfo(ADDRESS));
-
-        expect(screen.getByRole('heading', { name: 'Token Mint' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
     });
 
     it('should link the website of the token info', () => {
@@ -69,31 +91,6 @@ describe('TokenAccountSection', () => {
         expect(screen.getByText(label)).toBeInTheDocument();
     });
 });
-
-const WEBSITE = 'https://www.circle.com/en/usdc';
-
-const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
-const MINT: TokenAccount = {
-    info: { decimals: 6, freezeAuthority: null, isInitialized: true, mintAuthority: null, supply: '1' },
-    type: 'mint',
-};
-
-const TOKEN_ACCOUNT_INFO = {
-    mint: ADDRESS,
-    owner: ADDRESS,
-    state: 'initialized',
-    tokenAmount: { amount: '1000000', decimals: 6, uiAmountString: '1' },
-};
-
-const ACCOUNT: Account = {
-    data: { parsed: { parsed: MINT, program: 'spl-token' } },
-    executable: false,
-    lamports: 1,
-    owner: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-    pubkey: new PublicKey(ADDRESS),
-    space: 82,
-};
 
 function renderMint(info: TokenInfo): void {
     render(<TokenAccountSection account={ACCOUNT} tokenAccount={MINT} tokenInfo={info} />);

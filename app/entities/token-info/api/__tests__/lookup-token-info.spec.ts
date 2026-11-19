@@ -9,88 +9,94 @@ import { Logger } from '@/app/shared/lib/logger';
 import { tokenInfo } from '../../__fixtures__/token-info';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../../lib/request-limit';
 import type { TokenInfoLookup } from '../../lib/token-info-lookup';
-import { type TokenInfo } from '../../lib/types';
+import type { TokenInfo } from '../../lib/types';
 import { JUPITER_ROUTE_TIMEOUT_MS, lookupTokenInfo, lookupVerifiedTokenInfos } from '../lookup-token-info';
 
+// MINT_A sorts before MINT_B.
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
 
+// One more than the request limit, sorted, so the last mint goes alone in the second chunk.
+const MINTS_OVER_LIMIT = Array.from({ length: TOKEN_INFO_REQUEST_LIMIT + 1 }, (_, index) =>
+    gen.address(index + 10),
+).sort();
+
+const fetchMock = vi.fn<typeof fetch>();
+
+beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal('fetch', fetchMock);
+    respond(200, { content: [] });
+});
+
+afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+});
+
 describe('lookupTokenInfo', () => {
-    beforeEach(() => {
-        vi.useFakeTimers();
-        vi.stubGlobal('fetch', vi.fn());
-    });
+    it('should get one mint without the fallback and return it listed', async () => {
+        respond(200, { content: [tokenInfo(MINT_A)] });
 
-    afterEach(() => {
-        vi.useRealTimers();
-        vi.unstubAllGlobals();
-        vi.clearAllMocks();
-    });
-
-    it('should request one mint without the fallback over GET and return listed', async () => {
-        respond(200, { content: [tokenInfo(MINT_A, true)] });
-
-        const [lookup] = await lookupAll([MINT_A]);
-
-        expect(lookup).toEqual({ kind: 'listed', token: tokenInfo(MINT_A, true) });
+        expect(await lookupAll([MINT_A])).toEqual([{ kind: 'listed', token: tokenInfo(MINT_A) }]);
         expect(sentRequests()).toEqual([
             { body: undefined, method: 'GET', url: `/api/token-info/${MINT_A}?cluster=${Cluster.Mainnet}` },
         ]);
     });
 
-    it('should send the genesis hash of a Custom cluster in the query', async () => {
-        respond(200, { content: [] });
+    it.each([
+        ['add the genesis hash of a Custom cluster', Cluster.Custom, `&genesisHash=${GENESIS_HASHES.MAINNET}`],
+        ['leave out the genesis hash of a named cluster', Cluster.Mainnet, ''],
+    ])('should %s to the query', async (_, cluster, hashParam) => {
+        await lookupAll([MINT_A], { cluster, genesisHash: GENESIS_HASHES.MAINNET });
 
-        await lookupAll([MINT_A], { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET });
-
-        expect(sentRequests()[0].url).toBe(
-            `/api/token-info/${MINT_A}?cluster=${Cluster.Custom}&genesisHash=${GENESIS_HASHES.MAINNET}`,
-        );
+        expect(sentRequests()[0].url).toBe(`/api/token-info/${MINT_A}?cluster=${cluster}${hashParam}`);
     });
 
-    it('should leave the genesis hash of a named cluster out of the query', async () => {
-        respond(200, { content: [] });
-
-        await lookupAll([MINT_A], { genesisHash: GENESIS_HASHES.MAINNET });
-
-        expect(sentRequests()[0].url).toBe(`/api/token-info/${MINT_A}?cluster=${Cluster.Mainnet}`);
-    });
-
-    it('should post the mints queued in one window in one sorted request', async () => {
-        respond(200, { content: [tokenInfo(MINT_A), tokenInfo(MINT_B)] });
-        const [first, last] = [MINT_A, MINT_B].sort();
-
-        const lookups = await lookupAll([last, first]);
-
-        expect(lookups).toEqual([
-            { kind: 'listed', token: tokenInfo(last) },
-            { kind: 'listed', token: tokenInfo(first) },
-        ]);
-        expect(sentRequests()).toEqual([
+    it.each([
+        [
+            'the mints queued in one window, sorted',
+            [MINT_B, MINT_A],
+            {},
+            { addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet, includeOnChainFallback: false },
+        ],
+        [
+            'one mint with the on-chain fallback',
+            [MINT_A],
+            { includeOnChainFallback: true },
+            { addresses: [MINT_A], cluster: Cluster.Mainnet, includeOnChainFallback: true },
+        ],
+        [
+            'the genesis hash of a Custom cluster',
+            [MINT_A, MINT_B],
+            { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET },
             {
-                body: { addresses: [first, last], cluster: Cluster.Mainnet, includeOnChainFallback: false },
-                method: 'POST',
-                url: '/api/token-info',
+                addresses: [MINT_A, MINT_B],
+                cluster: Cluster.Custom,
+                genesisHash: GENESIS_HASHES.MAINNET,
+                includeOnChainFallback: false,
             },
-        ]);
+        ],
+    ])('should post %s in one request', async (_, mints, options, body) => {
+        await lookupAll(mints, options);
+
+        expect(sentRequests()).toEqual([{ body, method: 'POST', url: '/api/token-info' }]);
     });
 
-    it('should request a mint queued twice in one window once', async () => {
-        respond(200, { content: [tokenInfo(MINT_A)] });
+    it('should give each caller the lookup of its own mint from one request', async () => {
+        respond(200, { content: [tokenInfo(MINT_B)] });
 
-        const lookups = await lookupAll([MINT_A, MINT_A]);
-
-        expect(lookups).toEqual([
-            { kind: 'listed', token: tokenInfo(MINT_A) },
-            { kind: 'listed', token: tokenInfo(MINT_A) },
+        expect(await lookupAll([MINT_A, MINT_B, MINT_B])).toEqual([
+            { kind: 'not-listed' },
+            { kind: 'listed', token: tokenInfo(MINT_B) },
+            { kind: 'listed', token: tokenInfo(MINT_B) },
         ]);
-        expect(sentRequests()).toHaveLength(1);
-        expect(sentRequests()[0].method).toBe('GET');
+        expect(fetchMock).toHaveBeenCalledOnce();
     });
 
-    it('should send a separate request per cluster and per fallback flag', async () => {
-        respond(200, { content: [] });
-
+    it('should send one request per cluster and per fallback flag', async () => {
         const pending = [
             lookupTokenInfo({ cluster: Cluster.Mainnet, genesisHash: undefined, mint: MINT_A }),
             lookupTokenInfo({ cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET, mint: MINT_A }),
@@ -104,108 +110,41 @@ describe('lookupTokenInfo', () => {
         await vi.runAllTimersAsync();
         await Promise.all(pending);
 
-        expect(sentRequests().map(({ method, url }) => `${method} ${url}`)).toEqual(
-            expect.arrayContaining([
-                `GET /api/token-info/${MINT_A}?cluster=${Cluster.Mainnet}`,
-                `GET /api/token-info/${MINT_A}?cluster=${Cluster.Custom}&genesisHash=${GENESIS_HASHES.MAINNET}`,
-                'POST /api/token-info',
-            ]),
-        );
-        expect(fetch).toHaveBeenCalledTimes(3);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
     });
 
-    it('should post one mint with the on-chain fallback', async () => {
-        respond(200, { content: [] });
-
-        await lookupAll([MINT_A], { includeOnChainFallback: true });
-
-        expect(sentRequests()).toEqual([
-            {
-                body: { addresses: [MINT_A], cluster: Cluster.Mainnet, includeOnChainFallback: true },
-                method: 'POST',
-                url: '/api/token-info',
-            },
-        ]);
-    });
-
-    it('should send the genesis hash of a Custom cluster in the body', async () => {
-        respond(200, { content: [] });
-
-        await lookupAll([MINT_A, MINT_B], { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET });
-
-        expect(sentRequests()[0].body).toEqual({
-            addresses: [MINT_A, MINT_B].sort(),
-            cluster: Cluster.Custom,
-            genesisHash: GENESIS_HASHES.MAINNET,
-            includeOnChainFallback: false,
-        });
-    });
-
-    it('should split more mints than the request limit into chunks', async () => {
-        const mints = Array.from({ length: TOKEN_INFO_REQUEST_LIMIT + 1 }, (_, index) => gen.address(index + 10));
-        stubRouteListing(mints);
-
-        const lookups = await lookupAll(mints);
-
-        expect(sentRequests()).toHaveLength(2);
-        expect(lookups.every(lookup => lookup.kind === 'listed')).toBe(true);
-    });
-
-    it('should fail only the mints of a failed chunk', async () => {
-        const mints = Array.from({ length: TOKEN_INFO_REQUEST_LIMIT + 1 }, (_, index) => gen.address(index + 10));
-        const [lastMint] = [...mints].sort().slice(-1);
-        vi.mocked(fetch).mockImplementation(async (_, init) =>
+    it('should split more mints than the request limit into chunks and fail only the mints of a failed chunk', async () => {
+        const lastMint = MINTS_OVER_LIMIT[TOKEN_INFO_REQUEST_LIMIT];
+        fetchMock.mockImplementation(async (_, init) =>
             init?.method === 'POST'
                 ? new Response(null, { status: 503 })
                 : Response.json({ content: [tokenInfo(lastMint)] }),
         );
 
-        const lookups = await lookupAll(mints);
+        const lookups = await lookupAll(MINTS_OVER_LIMIT);
 
-        expect(lookups[mints.indexOf(lastMint)]).toEqual({ kind: 'listed', token: tokenInfo(lastMint) });
-        expect(lookups.filter(lookup => lookup.kind === 'unavailable')).toHaveLength(TOKEN_INFO_REQUEST_LIMIT);
+        expect(lookups.slice(0, -1)).toEqual(Array(TOKEN_INFO_REQUEST_LIMIT).fill({ kind: 'unavailable' }));
+        expect(lookups.at(-1)).toEqual({ kind: 'listed', token: tokenInfo(lastMint) });
     });
 
-    it('should give each chunk its own timeout', async () => {
+    it('should give a request with the on-chain fallback a timeout above the route maxDuration', async () => {
         const timeout = vi.spyOn(AbortSignal, 'timeout');
-        const mints = Array.from({ length: TOKEN_INFO_REQUEST_LIMIT + 1 }, (_, index) => gen.address(index + 10));
-        respond(200, { content: [] });
-
-        await lookupAll(mints);
-
-        const signals = vi.mocked(fetch).mock.calls.map(([, init]) => init?.signal);
-        expect(timeout).toHaveBeenCalledTimes(2);
-        expect(signals[0]).toBeInstanceOf(AbortSignal);
-        expect(signals[0]).not.toBe(signals[1]);
-        timeout.mockRestore();
-    });
-
-    it('should give a chunk with the on-chain fallback a timeout above the route maxDuration', async () => {
-        const timeout = vi.spyOn(AbortSignal, 'timeout');
-        respond(200, { content: [] });
 
         await lookupAll([MINT_A], { includeOnChainFallback: true });
 
         expect(timeout.mock.calls[0][0]).toBeGreaterThan(maxDuration * 1000);
-        timeout.mockRestore();
     });
 
-    it('should return not-listed without a request for a mint that is not an address', async () => {
-        await expect(lookupAll(['not-a-mint'])).resolves.toEqual([{ kind: 'not-listed' }]);
-        expect(fetch).not.toHaveBeenCalled();
+    it.each([
+        ['a mint that is not an address', ['not-a-mint'], {}],
+        ['a Custom cluster with no genesis hash', [MINT_A], { cluster: Cluster.Custom }],
+        ['devnet without the fallback', [MINT_A], { cluster: Cluster.Devnet }],
+    ])('should return not-listed without a request for %s', async (_, mints, options) => {
+        expect(await lookupAll(mints, options)).toEqual([{ kind: 'not-listed' }]);
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 
-    it('should return not-listed without a request on a Custom cluster with no genesis hash', async () => {
-        await expect(lookupAll([MINT_A], { cluster: Cluster.Custom })).resolves.toEqual([{ kind: 'not-listed' }]);
-        expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('should return not-listed without a request on devnet without the fallback', async () => {
-        await expect(lookupAll([MINT_A], { cluster: Cluster.Devnet })).resolves.toEqual([{ kind: 'not-listed' }]);
-        expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('should request devnet tokens with the on-chain fallback', async () => {
+    it('should look up a devnet mint with the on-chain fallback', async () => {
         respond(200, { content: [tokenInfo(MINT_A)] });
 
         const lookups = await lookupAll([MINT_A], { cluster: Cluster.Devnet, includeOnChainFallback: true });
@@ -213,79 +152,41 @@ describe('lookupTokenInfo', () => {
         expect(lookups).toEqual([{ kind: 'listed', token: tokenInfo(MINT_A) }]);
     });
 
-    it('should return rate-limited for a 429 response', async () => {
-        respond(429, { error: 'Token info rate limited' });
+    it.each([
+        ['rate-limited', 'a 429', () => respond(429, {})],
+        ['unavailable', 'a 503', () => respond(503, {})],
+        ['unavailable', 'a body without a content array', () => respond(200, {})],
+        ['unavailable', 'a network error', () => fetchMock.mockRejectedValue(new TypeError('Failed to fetch'))],
+        [
+            'unavailable',
+            'a browser without AbortSignal.timeout',
+            () =>
+                vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => {
+                    throw new TypeError('not a function');
+                }),
+        ],
+    ])('should return %s for %s', async (kind, _, arrange) => {
+        arrange();
 
-        await expect(lookupAll([MINT_A])).resolves.toEqual([{ kind: 'rate-limited' }]);
+        expect(await lookupAll([MINT_A])).toEqual([{ kind }]);
     });
 
-    it('should return unavailable for a 503 response', async () => {
-        respond(503, { error: 'Token info unavailable' });
+    it('should drop a malformed entry, return the other entries and report the count once', async () => {
+        respond(200, { content: [withoutField(MINT_A, 'verified'), tokenInfo(MINT_B)] });
 
-        await expect(lookupAll([MINT_A])).resolves.toEqual([{ kind: 'unavailable' }]);
-    });
-
-    it('should warn and return unavailable for a 200 body without a content array', async () => {
-        respond(200, {});
-
-        await expect(lookupAll([MINT_A])).resolves.toEqual([{ kind: 'unavailable' }]);
-        expect(Logger.warn).toHaveBeenCalledWith(
-            '[token-info] Token info response was not a token array',
-            expect.anything(),
-        );
-        expect(Logger.error).not.toHaveBeenCalled();
-    });
-
-    it('should drop a malformed entry, return the other entries and log the count', async () => {
-        respond(200, { content: [withoutField('verified'), tokenInfo(MINT_B, true)] });
-
-        const lookups = await lookupAll([MINT_A, MINT_B]);
-
-        expect(lookups).toEqual([{ kind: 'not-listed' }, { kind: 'listed', token: tokenInfo(MINT_B, true) }]);
-        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
+        expect(await lookupAll([MINT_A, MINT_B])).toEqual([
+            { kind: 'not-listed' },
+            { kind: 'listed', token: tokenInfo(MINT_B) },
+        ]);
+        expect(Logger.warn).toHaveBeenCalledOnce();
+        expect(Logger.warn).toHaveBeenCalledWith(expect.any(String), {
             sentry: 'always',
             sentryExtras: { addressCount: 2, cluster: Cluster.Mainnet, malformed: 1, total: 2 },
         });
     });
-
-    it('should log the count once when every entry is malformed', async () => {
-        respond(200, { content: [withoutField('verified'), withoutField('address')] });
-
-        await expect(lookupAll([MINT_A, MINT_B])).resolves.toEqual([{ kind: 'not-listed' }, { kind: 'not-listed' }]);
-        expect(Logger.warn).toHaveBeenCalledTimes(1);
-        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
-            sentry: 'always',
-            sentryExtras: { addressCount: 2, cluster: Cluster.Mainnet, malformed: 2, total: 2 },
-        });
-    });
-
-    it('should return unavailable when the request fails', async () => {
-        vi.mocked(fetch).mockRejectedValue(new TypeError('Failed to fetch'));
-
-        await expect(lookupAll([MINT_A])).resolves.toEqual([{ kind: 'unavailable' }]);
-    });
-
-    it('should return unavailable when the timeout signal cannot be created', async () => {
-        const timeout = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => {
-            throw new TypeError('AbortSignal.timeout is not a function');
-        });
-
-        await expect(lookupAll([MINT_A])).resolves.toEqual([{ kind: 'unavailable' }]);
-        timeout.mockRestore();
-    });
 });
 
 describe('lookupVerifiedTokenInfos', () => {
-    beforeEach(() => {
-        vi.stubGlobal('fetch', vi.fn());
-    });
-
-    afterEach(() => {
-        vi.unstubAllGlobals();
-        vi.clearAllMocks();
-        vi.restoreAllMocks();
-    });
-
     it('should post the mints to the verified route with the Jupiter route timeout and return the tokens', async () => {
         const timeout = vi.spyOn(AbortSignal, 'timeout');
         respond(200, { content: [tokenInfo(MINT_A, true)] });
@@ -316,21 +217,17 @@ async function lookupAll(
 }
 
 function respond(status: number, body: unknown): void {
-    vi.mocked(fetch).mockImplementation(async () => Response.json(body, { status }));
-}
-
-function stubRouteListing(mints: string[]): void {
-    vi.mocked(fetch).mockImplementation(async () => Response.json({ content: mints.map(mint => tokenInfo(mint)) }));
-}
-
-function withoutField(field: keyof TokenInfo): Record<string, unknown> {
-    return Object.fromEntries(Object.entries(tokenInfo(MINT_A)).filter(([key]) => key !== field));
+    fetchMock.mockImplementation(async () => Response.json(body, { status }));
 }
 
 function sentRequests(): { body: unknown; method: string | undefined; url: string }[] {
-    return vi.mocked(fetch).mock.calls.map(([url, init]) => ({
+    return fetchMock.mock.calls.map(([url, init]) => ({
         body: init?.body === undefined ? undefined : JSON.parse(String(init.body)),
         method: init?.method,
         url: String(url),
     }));
+}
+
+function withoutField(address: string, field: keyof TokenInfo): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(tokenInfo(address)).filter(([key]) => key !== field));
 }

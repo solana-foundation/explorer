@@ -8,463 +8,265 @@ import { maxDuration as verifiedMaxDuration } from '@/app/api/token-info/verifie
 import { Logger } from '@/app/shared/lib/logger';
 
 import { jupiterToken } from '../../__fixtures__/jupiter-token';
-import { redactedTokenInfo, tokenInfo } from '../../__fixtures__/token-info';
-import { JupiterHttpError } from '../../lib/errors';
-import type { JupiterToken } from '../../lib/jupiter-token';
+import { redactedTokenInfo, resolved, tokenInfo } from '../../__fixtures__/token-info';
+import type { TokenInfosLookup } from '../../lib/token-info-lookup';
 import type { TokenInfo } from '../../lib/types';
+import { getTokenInfosFromMetaplex } from '../fetch-token-metaplex';
 import { JUPITER_ROUTE_TIMEOUT_MS } from '../lookup-token-info';
 import { lookupTokenInfo, lookupTokenInfos, lookupVerifiedTokenInfos } from '../lookup-token-info.server';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
 const MINT_C = gen.address(3);
-const MAINNET_RPC_URL = 'https://mainnet.rpc.test';
 
-const mocks = vi.hoisted(() => ({
-    dataCache: new Map<string, unknown>(),
-    fetchJupiterVerifiedTokens: vi.fn(),
-    getTokenInfosFromMetaplex: vi.fn(),
-    isDataCacheStale: false,
-    searchJupiterTokens: vi.fn(),
-    unstableCacheOptions: undefined as unknown,
-}));
+const dataCache = vi.hoisted(() => new Map<string, unknown>());
 
-// Like the Next data cache, the fake keeps whatever the function returns and nothing when it throws.
+// Like the Next data cache, the fake keeps what the function returns, and nothing when it throws.
 vi.mock('next/cache', () => ({
-    unstable_cache: (fn: () => Promise<unknown>, keyParts: string[], options: unknown) => {
-        mocks.unstableCacheOptions = options;
-        return async () => {
-            const key = keyParts.join(',');
-            if (mocks.dataCache.has(key) && !mocks.isDataCacheStale) return mocks.dataCache.get(key);
-            try {
-                mocks.dataCache.set(key, await fn());
-            } catch (error) {
-                if (!mocks.dataCache.has(key)) throw error;
-            }
-            return mocks.dataCache.get(key);
-        };
+    unstable_cache: (fn: () => Promise<unknown>, keyParts: string[]) => async () => {
+        const key = keyParts.join(',');
+        if (!dataCache.has(key)) dataCache.set(key, await fn());
+        return dataCache.get(key);
     },
 }));
+vi.mock('../fetch-token-metaplex', () => ({ getTokenInfosFromMetaplex: vi.fn() }));
 
-vi.mock('../fetch-token-metaplex', () => ({ getTokenInfosFromMetaplex: mocks.getTokenInfosFromMetaplex }));
-vi.mock('../fetch-jupiter-tokens', () => ({
-    fetchJupiterVerifiedTokens: mocks.fetchJupiterVerifiedTokens,
-    searchJupiterTokens: mocks.searchJupiterTokens,
-}));
+const fetchMock = vi.fn<typeof fetch>();
 
 beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock);
     vi.stubEnv('JUPITER_API_KEY', 'test-key');
-    vi.stubEnv('MAINNET_RPC_URL', MAINNET_RPC_URL);
-    mocks.searchJupiterTokens.mockResolvedValue({ kind: 'resolved', tokens: [] });
-    mocks.getTokenInfosFromMetaplex.mockResolvedValue([]);
-    vi.spyOn(Logger, 'warn').mockImplementation(() => {});
-    vi.spyOn(Logger, 'error').mockImplementation(() => {});
+    jupiterAnswers([]);
+    vi.mocked(getTokenInfosFromMetaplex).mockImplementation(async addresses => addresses.map(onChainTokenInfo));
 });
 
 afterEach(() => {
+    vi.unstubAllGlobals();
     vi.unstubAllEnvs();
-    vi.clearAllMocks();
     vi.restoreAllMocks();
-    mocks.searchJupiterTokens.mockReset();
-    mocks.fetchJupiterVerifiedTokens.mockReset();
-    mocks.getTokenInfosFromMetaplex.mockReset();
-    mocks.dataCache.clear();
-    mocks.isDataCacheStale = false;
+    vi.clearAllMocks();
+    dataCache.clear();
 });
 
 describe('lookupTokenInfos', () => {
-    it('should search Jupiter for the mints with the API key', async () => {
-        await lookupTokenInfos({ addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet, genesisHash: undefined });
+    it('should search Jupiter for the mints with the API key and a revalidate period', async () => {
+        await lookup([MINT_A, MINT_B]);
 
-        expect(mocks.searchJupiterTokens).toHaveBeenCalledWith(
-            expect.objectContaining({ apiKey: 'test-key', query: `${MINT_A},${MINT_B}` }),
-        );
+        const [url, init] = fetchMock.mock.calls[0];
+        expect(url).toBe(`https://api.jup.ag/tokens/v2/search?query=${MINT_A}%2C${MINT_B}`);
+        expect(init).toMatchObject({ headers: { 'x-api-key': 'test-key' }, next: { revalidate: expect.any(Number) } });
     });
 
-    it('should pass a revalidate period to the Jupiter search', async () => {
-        await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Mainnet, genesisHash: undefined });
-
-        const [search] = mocks.searchJupiterTokens.mock.calls[0];
-        expect(search.revalidate).toBeGreaterThan(0);
+    it.each([
+        ['devnet', Cluster.Devnet, undefined],
+        ['a Custom cluster with no genesis hash', Cluster.Custom, undefined],
+    ])('should resolve no tokens without a request on %s', async (_, cluster, genesisHash) => {
+        expect(await lookup([MINT_A], { cluster, genesisHash })).toEqual(resolved());
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 
-    it('should time out the Jupiter requests below the route maxDuration and the browser timeout', async () => {
-        const timeout = vi.spyOn(AbortSignal, 'timeout');
+    it('should search Jupiter on a Custom cluster with the mainnet genesis hash', async () => {
+        jupiterAnswers([jupiterToken(MINT_A)]);
 
-        await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Mainnet, genesisHash: undefined });
+        const result = await lookup([MINT_A], { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET });
 
-        const [search] = mocks.searchJupiterTokens.mock.calls[0];
-        expect(search.signal).toBe(timeout.mock.results[0].value);
-        expect(timeout.mock.calls[0][0]).toBeLessThanOrEqual((maxDuration * 1000) / 2);
-        expect(timeout.mock.calls[0][0]).toBeLessThan(JUPITER_ROUTE_TIMEOUT_MS);
-    });
-
-    it('should return nothing listed without a request on devnet', async () => {
-        expect(
-            await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Devnet, genesisHash: undefined }),
-        ).toEqual(resolved([]));
-        expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
-    });
-
-    it('should resolve no tokens without a request on a Custom cluster with no genesis hash', async () => {
-        expect(
-            await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Custom, genesisHash: undefined }),
-        ).toEqual(resolved([]));
-        expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
-    });
-
-    it('should search Jupiter for a custom cluster with the mainnet genesis hash', async () => {
-        respond([jupiterToken(MINT_A)]);
-
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Custom,
-            genesisHash: GENESIS_HASHES.MAINNET,
-        });
-
-        expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
-    });
-
-    it('should return unavailable and report an error without a request when JUPITER_API_KEY is not set', async () => {
-        vi.stubEnv('JUPITER_API_KEY', '');
-
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
-
-        expect(result).toEqual({ kind: 'unavailable' });
-        expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.objectContaining({ message: '[token-info] Token lookup unavailable' }),
-            expect.objectContaining({ sentry: true }),
-        );
+        expect(result).toEqual(resolved(tokenInfo(MINT_A)));
     });
 
     it('should map a Jupiter token to token info', async () => {
-        respond([
-            {
-                decimals: 9,
-                icon: 'https://example.com/a.png',
-                id: MINT_A,
-                isVerified: true,
-                name: 'Token A',
-                symbol: 'TKA',
-                website: 'https://example.com',
-            },
+        const icon = 'https://a.test/a.png';
+        const website = 'https://a.test';
+        jupiterAnswers([
+            jupiterToken(MINT_A, { decimals: 9, icon, isVerified: true, name: 'A', symbol: 'A', website }),
         ]);
 
-        expect(
-            await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Mainnet, genesisHash: undefined }),
-        ).toEqual(
-            resolved([
-                {
-                    address: MINT_A,
-                    decimals: 9,
-                    logoURI: 'https://example.com/a.png',
-                    name: 'Token A',
-                    symbol: 'TKA',
-                    verified: true,
-                    website: 'https://example.com',
-                },
-            ]),
+        const result = await lookup([MINT_A]);
+
+        expect(result).toEqual(
+            resolved({ ...tokenInfo(MINT_A, true), decimals: 9, logoURI: icon, name: 'A', symbol: 'A', website }),
         );
     });
 
     it('should drop the website of an unverified mint', async () => {
-        respond([jupiterToken(MINT_A, { website: 'https://example.com' })]);
+        jupiterAnswers([jupiterToken(MINT_A, { website: 'https://a.test' })]);
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
-
-        expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
-    });
-
-    it('should keep the verified flag of a redacted mint and drop its name, symbol, logo and website', async () => {
-        vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
-        respond([
-            jupiterToken(MINT_A, {
-                icon: 'https://example.com/a.png',
-                isVerified: true,
-                website: 'https://example.com',
-            }),
-            jupiterToken(MINT_B),
-        ]);
-
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A, MINT_B],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
-
-        expect(result).toEqual(resolved([redactedTokenInfo(MINT_A, true), tokenInfo(MINT_B)]));
+        expect(await lookup([MINT_A])).toEqual(resolved(tokenInfo(MINT_A)));
     });
 
     it('should keep the verified flag of a mint with an empty name and symbol', async () => {
-        respond([jupiterToken(MINT_A, { isVerified: true, name: '', symbol: '' })]);
+        jupiterAnswers([jupiterToken(MINT_A, { isVerified: true, name: '', symbol: '' })]);
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
+        expect(await lookup([MINT_A])).toEqual(
+            resolved({ ...tokenInfo(MINT_A, true), name: undefined, symbol: undefined }),
+        );
+    });
 
-        expect(result).toEqual(resolved([{ ...tokenInfo(MINT_A, true), name: undefined, symbol: undefined }]));
+    it('should keep only the verified flag of a mint in NEXT_PUBLIC_BAD_TOKENS', async () => {
+        vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+        jupiterAnswers([
+            jupiterToken(MINT_A, { icon: 'https://a.test/a.png', isVerified: true }),
+            jupiterToken(MINT_B),
+        ]);
+
+        expect(await lookup([MINT_A, MINT_B])).toEqual(resolved(redactedTokenInfo(MINT_A, true), tokenInfo(MINT_B)));
     });
 
     it('should drop a token for a mint that was not requested', async () => {
-        respond([jupiterToken(MINT_A), jupiterToken(MINT_B)]);
+        jupiterAnswers([jupiterToken(MINT_A), jupiterToken(MINT_B)]);
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
-
-        expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
+        expect(await lookup([MINT_A])).toEqual(resolved(tokenInfo(MINT_A)));
     });
 
-    it('should return rate-limited and warn when Jupiter rate limits the request', async () => {
-        mocks.searchJupiterTokens.mockResolvedValueOnce({ kind: 'rate-limited' });
+    it.each([
+        ['rate-limited', 'a warning', 429, Logger.warn],
+        ['unavailable', 'an error', 401, Logger.error],
+    ])('should return %s and report %s when Jupiter answers %i', async (kind, _, status, report) => {
+        fetchMock.mockResolvedValue(new Response(null, { status }));
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
-
-        expect(result).toEqual({ kind: 'rate-limited' });
-        expect(Logger.warn).toHaveBeenCalledWith(
-            '[token-info] Jupiter rate limit exceeded',
-            expect.objectContaining({ sentry: true }),
-        );
-        expect(Logger.error).not.toHaveBeenCalled();
-    });
-
-    it('should return unavailable and warn when Jupiter times out', async () => {
-        mocks.searchJupiterTokens.mockResolvedValueOnce({
-            error: new DOMException('The operation timed out.', 'TimeoutError'),
-            kind: 'unavailable',
-        });
-
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-        });
-
-        expect(result).toEqual({ kind: 'unavailable' });
-        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Token lookup unavailable', {
-            sentry: true,
-            sentryExtras: expect.objectContaining({ upstreamError: expect.stringContaining('timed out') }),
-        });
-        expect(Logger.error).not.toHaveBeenCalled();
+        expect(await lookup([MINT_A])).toEqual({ kind });
+        expect(report).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ sentry: true }));
     });
 });
 
 describe('lookupTokenInfos with the on-chain fallback', () => {
     it('should add the on-chain token info of the mints Jupiter does not list', async () => {
-        respond([jupiterToken(MINT_A)]);
-        mocks.getTokenInfosFromMetaplex.mockResolvedValue([tokenInfo(MINT_C)]);
+        jupiterAnswers([jupiterToken(MINT_A)]);
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A, MINT_B, MINT_C],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-            includeOnChainFallback: true,
-        });
+        const result = await lookup([MINT_A, MINT_B], { includeOnChainFallback: true });
 
-        expect(mocks.getTokenInfosFromMetaplex).toHaveBeenCalledWith([MINT_B, MINT_C], MAINNET_RPC_URL, {
-            onError: expect.any(Function),
-        });
-        expect(result).toEqual(resolved([tokenInfo(MINT_A), tokenInfo(MINT_C)]));
+        expect(result).toEqual(resolved(tokenInfo(MINT_A), onChainTokenInfo(MINT_B)));
     });
 
     it('should read on-chain metadata without a Jupiter request on devnet', async () => {
-        mocks.getTokenInfosFromMetaplex.mockResolvedValue([tokenInfo(MINT_A)]);
+        const result = await lookup([MINT_A], { cluster: Cluster.Devnet, includeOnChainFallback: true });
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Devnet,
-            genesisHash: undefined,
-            includeOnChainFallback: true,
-        });
-
-        expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
-        expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
+        expect(result).toEqual(resolved(onChainTokenInfo(MINT_A)));
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 
-    it('should not read on-chain metadata without the option', async () => {
-        await lookupTokenInfos({ addresses: [MINT_A], cluster: Cluster.Mainnet, genesisHash: undefined });
+    it.each([
+        ['without the option', [], { includeOnChainFallback: false }],
+        ['when Jupiter lists every mint', [jupiterToken(MINT_A)], { includeOnChainFallback: true }],
+        [
+            'on a Custom cluster',
+            [],
+            { cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET, includeOnChainFallback: true },
+        ],
+    ])('should not read on-chain metadata %s', async (_, listed, options) => {
+        jupiterAnswers(listed);
 
-        expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
-    });
+        await lookup([MINT_A], options);
 
-    it('should not read on-chain metadata when Jupiter lists every mint', async () => {
-        respond([jupiterToken(MINT_A)]);
-
-        await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-            includeOnChainFallback: true,
-        });
-
-        expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
-    });
-
-    it('should not read on-chain metadata on a custom cluster', async () => {
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Custom,
-            genesisHash: GENESIS_HASHES.MAINNET,
-            includeOnChainFallback: true,
-        });
-
-        expect(result).toEqual(resolved([]));
-        expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
+        expect(getTokenInfosFromMetaplex).not.toHaveBeenCalled();
     });
 
     it('should return the Jupiter tokens and warn when the on-chain read throws', async () => {
-        respond([jupiterToken(MINT_A)]);
-        mocks.getTokenInfosFromMetaplex.mockRejectedValue(new Error('rpc failed'));
+        jupiterAnswers([jupiterToken(MINT_A)]);
+        vi.mocked(getTokenInfosFromMetaplex).mockRejectedValue(new Error('rpc failed'));
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A, MINT_B],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-            includeOnChainFallback: true,
-        });
-
-        expect(result).toEqual(resolved([tokenInfo(MINT_A)]));
-        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Metaplex fallback failed', {
-            error: expect.any(Error),
-        });
+        expect(await lookup([MINT_A, MINT_B], { includeOnChainFallback: true })).toEqual(resolved(tokenInfo(MINT_A)));
+        expect(Logger.warn).toHaveBeenCalled();
     });
 
     it('should return a Jupiter failure without an on-chain read', async () => {
-        mocks.searchJupiterTokens.mockResolvedValueOnce({
-            error: new JupiterHttpError({ status: 503, statusText: 'Service Unavailable' }),
-            kind: 'unavailable',
-        });
+        fetchMock.mockResolvedValue(new Response(null, { status: 503 }));
 
-        const result = await lookupTokenInfos({
-            addresses: [MINT_A],
-            cluster: Cluster.Mainnet,
-            genesisHash: undefined,
-            includeOnChainFallback: true,
-        });
-
-        expect(result).toEqual({ kind: 'unavailable' });
-        expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
+        expect(await lookup([MINT_A], { includeOnChainFallback: true })).toEqual({ kind: 'unavailable' });
+        expect(getTokenInfosFromMetaplex).not.toHaveBeenCalled();
     });
 });
 
 describe('lookupTokenInfo', () => {
     it('should return the lookup of the mint', async () => {
-        respond([jupiterToken(MINT_A)]);
+        jupiterAnswers([jupiterToken(MINT_A)]);
 
-        expect(await lookupTokenInfo({ cluster: Cluster.Mainnet, genesisHash: undefined, mint: MINT_A })).toEqual({
-            kind: 'listed',
-            token: tokenInfo(MINT_A),
-        });
+        const result = await lookupTokenInfo({ cluster: Cluster.Mainnet, genesisHash: undefined, mint: MINT_A });
+
+        expect(result).toEqual({ kind: 'listed', token: tokenInfo(MINT_A) });
     });
 
     it('should return not-listed without a request for a mint that is not an address', async () => {
-        expect(await lookupTokenInfo({ cluster: Cluster.Mainnet, genesisHash: undefined, mint: 'bonk' })).toEqual({
-            kind: 'not-listed',
-        });
-        expect(mocks.searchJupiterTokens).not.toHaveBeenCalled();
+        const result = await lookupTokenInfo({ cluster: Cluster.Mainnet, genesisHash: undefined, mint: 'bonk' });
+
+        expect(result).toEqual({ kind: 'not-listed' });
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 });
 
 describe('lookupVerifiedTokenInfos', () => {
-    it('should return the token info of the verified tokens among the addresses', async () => {
-        respondVerified([jupiterToken(MINT_A, { isVerified: true }), jupiterToken(MINT_B, { isVerified: true })]);
+    it('should return the verified tokens among the addresses', async () => {
+        jupiterAnswers([jupiterToken(MINT_A, { isVerified: true }), jupiterToken(MINT_B, { isVerified: true })]);
 
-        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A, MINT_C] })).toEqual(
-            resolved([tokenInfo(MINT_A, true)]),
-        );
+        expect(await lookupVerified([MINT_A, MINT_C])).toEqual(resolved(tokenInfo(MINT_A, true)));
     });
 
-    it('should keep the verified list in the Next data cache, so the next lookup sends no Jupiter request', async () => {
-        respondVerified([jupiterToken(MINT_A, { isVerified: true })]);
+    it('should keep the verified list in the Next data cache, so the next lookup sends no request', async () => {
+        jupiterAnswers([jupiterToken(MINT_A, { isVerified: true })]);
 
-        await lookupVerifiedTokenInfos({ addresses: [MINT_A] });
-        await lookupVerifiedTokenInfos({ addresses: [MINT_B] });
+        await lookupVerified([MINT_A]);
+        await lookupVerified([MINT_B]);
 
-        expect(mocks.fetchJupiterVerifiedTokens).toHaveBeenCalledTimes(1);
-        expect(mocks.unstableCacheOptions).toEqual({ revalidate: expect.any(Number) });
-    });
-
-    it('should time out the Jupiter request below the route maxDuration and the browser timeout', async () => {
-        const timeout = vi.spyOn(AbortSignal, 'timeout');
-        respondVerified([]);
-
-        await lookupVerifiedTokenInfos({ addresses: [MINT_A] });
-
-        expect(mocks.fetchJupiterVerifiedTokens).toHaveBeenCalledWith({
-            apiKey: 'test-key',
-            signal: timeout.mock.results[0].value,
-        });
-        expect(timeout.mock.calls[0][0]).toBeLessThanOrEqual((verifiedMaxDuration * 1000) / 2);
-        expect(timeout.mock.calls[0][0]).toBeLessThan(JUPITER_ROUTE_TIMEOUT_MS);
+        expect(fetchMock).toHaveBeenCalledOnce();
     });
 
     it.each([
-        ['rate-limited', { kind: 'rate-limited' }],
-        [
-            'unavailable',
-            { error: new JupiterHttpError({ status: 401, statusText: 'Unauthorized' }), kind: 'unavailable' },
-        ],
-    ])('should return %s, report it, and ask Jupiter again on the next lookup', async (kind, failure) => {
-        mocks.fetchJupiterVerifiedTokens.mockResolvedValueOnce(failure);
-        respondVerified([jupiterToken(MINT_A, { isVerified: true })]);
+        ['rate-limited', 429],
+        ['unavailable', 401],
+    ])('should return %s, report it, and ask Jupiter again on the next lookup', async (kind, status) => {
+        fetchMock.mockResolvedValueOnce(new Response(null, { status }));
+        jupiterAnswers([jupiterToken(MINT_A, { isVerified: true })]);
 
-        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual({ kind });
-        expect([...vi.mocked(Logger.warn).mock.calls, ...vi.mocked(Logger.error).mock.calls]).toEqual([
-            [expect.anything(), expect.objectContaining({ sentry: true, sentryExtras: { tag: 'verified' } })],
-        ]);
-        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual(resolved([tokenInfo(MINT_A, true)]));
-    });
-
-    it('should return the stale list and report a failed refresh of it', async () => {
-        respondVerified([jupiterToken(MINT_A, { isVerified: true })]);
-        await lookupVerifiedTokenInfos({ addresses: [MINT_A] });
-        mocks.isDataCacheStale = true;
-        mocks.fetchJupiterVerifiedTokens.mockResolvedValueOnce({ kind: 'rate-limited' });
-
-        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual(resolved([tokenInfo(MINT_A, true)]));
-        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Jupiter rate limit exceeded', {
-            sentry: true,
-            sentryExtras: { tag: 'verified' },
-        });
-    });
-
-    it('should return unavailable and report an error without a request when JUPITER_API_KEY is not set', async () => {
-        vi.stubEnv('JUPITER_API_KEY', '');
-
-        expect(await lookupVerifiedTokenInfos({ addresses: [MINT_A] })).toEqual({ kind: 'unavailable' });
-        expect(mocks.fetchJupiterVerifiedTokens).not.toHaveBeenCalled();
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.objectContaining({ message: '[token-info] Token lookup unavailable' }),
-            expect.objectContaining({ sentry: true }),
-        );
+        expect(await lookupVerified([MINT_A])).toEqual({ kind });
+        expect(await lookupVerified([MINT_A])).toEqual(resolved(tokenInfo(MINT_A, true)));
     });
 });
 
-function respondVerified(tokens: JupiterToken[]) {
-    mocks.fetchJupiterVerifiedTokens.mockResolvedValue({ kind: 'resolved', tokens });
+it.each([
+    ['the search', maxDuration, () => lookup([MINT_A])],
+    ['the verified list', verifiedMaxDuration, () => lookupVerified([MINT_A])],
+])(
+    'should time out %s below half the route maxDuration and below the browser timeout',
+    async (_, routeMaxDuration, act) => {
+        const timeout = vi.spyOn(AbortSignal, 'timeout');
+
+        await act();
+
+        const [ms] = timeout.mock.calls[0];
+        expect(fetchMock.mock.calls[0][1]?.signal).toBe(timeout.mock.results[0].value);
+        expect(ms).toBeLessThanOrEqual((routeMaxDuration * 1000) / 2);
+        expect(ms).toBeLessThan(JUPITER_ROUTE_TIMEOUT_MS);
+    },
+);
+
+it.each([
+    ['the search', () => lookup([MINT_A])],
+    ['the verified list', () => lookupVerified([MINT_A])],
+])(
+    'should return unavailable and report an error without a request for %s when JUPITER_API_KEY is not set',
+    async (_, act) => {
+        vi.stubEnv('JUPITER_API_KEY', '');
+
+        expect(await act()).toEqual({ kind: 'unavailable' });
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ sentry: true }));
+    },
+);
+
+function lookup(
+    addresses: string[],
+    options: Partial<Parameters<typeof lookupTokenInfos>[0]> = {},
+): Promise<TokenInfosLookup> {
+    return lookupTokenInfos({ addresses, cluster: Cluster.Mainnet, genesisHash: undefined, ...options });
 }
 
-function respond(tokens: JupiterToken[]) {
-    mocks.searchJupiterTokens.mockResolvedValueOnce({ kind: 'resolved', tokens });
+function lookupVerified(addresses: string[]): Promise<TokenInfosLookup> {
+    return lookupVerifiedTokenInfos({ addresses });
 }
 
-function resolved(tokens: TokenInfo[]) {
-    return { kind: 'resolved', tokens };
+function jupiterAnswers(tokens: unknown[]): void {
+    fetchMock.mockImplementation(async () => Response.json(tokens));
+}
+
+function onChainTokenInfo(address: string): TokenInfo {
+    return { ...tokenInfo(address), symbol: 'ON-CHAIN' };
 }

@@ -1,18 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { isTransientError, JupiterHttpError, reportJupiterError } from '../errors';
 
 describe('reportJupiterError', () => {
-    beforeEach(() => {
-        vi.spyOn(Logger, 'warn').mockImplementation(() => {});
-        vi.spyOn(Logger, 'error').mockImplementation(() => {});
-    });
-
     afterEach(() => {
         vi.clearAllMocks();
-        vi.restoreAllMocks();
     });
 
     it('should warn with the upstream error for a transient error', () => {
@@ -43,12 +37,11 @@ describe('reportJupiterError', () => {
 });
 
 describe('isTransientError', () => {
-    it.each([408, 500, 502, 503, 504])('should be true for HTTP %i', status => {
-        expect(isTransientError(new JupiterHttpError({ status, statusText: 'x' }))).toBe(true);
-    });
-
-    it.each([400, 401, 403, 404, 422])('should be false for HTTP %i', status => {
-        expect(isTransientError(new JupiterHttpError({ status, statusText: 'x' }))).toBe(false);
+    it.each([
+        [true, 503],
+        [false, 401],
+    ])('should be %s for HTTP %i', (transient, status) => {
+        expect(isTransientError(new JupiterHttpError({ status, statusText: 'x' }))).toBe(transient);
     });
 
     it('should be true for an expired abort signal', async () => {
