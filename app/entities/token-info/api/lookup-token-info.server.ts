@@ -60,7 +60,8 @@ export async function lookupVerifiedTokenInfos({
     const result = await getVerifiedTokenInfos();
     if (result.kind !== 'resolved') return result;
     const requested = new Set(addresses);
-    return { kind: 'resolved', tokens: result.tokens.filter(token => requested.has(token.address)) };
+    const tokens = result.tokens.filter(token => requested.has(token.address)).map(redactTokenInfo);
+    return { kind: 'resolved', tokens };
 }
 
 async function getVerifiedTokenInfos(): Promise<TokenInfosLookup> {
@@ -102,7 +103,10 @@ async function getJupiterTokenInfos(addresses: string[], chainId: ChainId): Prom
     if (result.kind !== 'resolved') return result;
 
     const requested = new Set(addresses);
-    const tokens = result.tokens.filter(token => requested.has(token.id)).map(toTokenInfo);
+    const tokens = result.tokens
+        .filter(token => requested.has(token.id))
+        .map(toTokenInfo)
+        .map(redactTokenInfo);
     return { kind: 'resolved', tokens };
 }
 
@@ -165,7 +169,6 @@ class JupiterFailureError extends Error {
 
 function toTokenInfo(token: JupiterToken): TokenInfo {
     const verified = token.isVerified === true;
-    if (isRedactedTokenAddress(token.id)) return { address: token.id, decimals: token.decimals, verified };
     return {
         address: token.id,
         decimals: token.decimals,
@@ -176,4 +179,9 @@ function toTokenInfo(token: JupiterToken): TokenInfo {
         // The mint creator sets the website, so only a verified mint shows one.
         website: verified ? (token.website ?? undefined) : undefined,
     };
+}
+
+function redactTokenInfo(token: TokenInfo): TokenInfo {
+    if (!isRedactedTokenAddress(token.address)) return token;
+    return { address: token.address, decimals: token.decimals, verified: token.verified };
 }

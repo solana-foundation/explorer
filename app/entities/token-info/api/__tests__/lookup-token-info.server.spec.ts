@@ -101,10 +101,10 @@ describe('lookupTokenInfos', () => {
         );
     });
 
-    it('should keep only the verified flag of a mint in NEXT_PUBLIC_BAD_TOKENS', async () => {
+    it('should redact a mint in NEXT_PUBLIC_BAD_TOKENS', async () => {
         vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
         jupiterAnswers([
-            jupiterToken(MINT_A, { icon: 'https://a.test/a.png', isVerified: true }),
+            jupiterToken(MINT_A, { icon: 'https://a.test/a.png', isVerified: true, website: 'https://a.test' }),
             jupiterToken(MINT_B),
         ]);
 
@@ -207,6 +207,15 @@ describe('lookupVerifiedTokenInfos', () => {
         await lookupVerified([MINT_B]);
 
         expect(fetchMock).toHaveBeenCalledOnce();
+    });
+
+    it('should redact a mint added to NEXT_PUBLIC_BAD_TOKENS after the verified list was cached', async () => {
+        jupiterAnswers([jupiterToken(MINT_A, { isVerified: true })]);
+        await lookupVerified([MINT_A]);
+
+        vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+
+        expect(await lookupVerified([MINT_A])).toEqual(resolved(redactedTokenInfo(MINT_A, true)));
     });
 
     it.each([
