@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { type Address, address } from '@solana/kit';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import { getOwn } from '../object';
 
@@ -16,5 +17,21 @@ describe('getOwn', () => {
         expect(getOwn(clusters, 'constructor')).toBeUndefined();
         expect(getOwn(clusters, '__proto__')).toBeUndefined();
         expect(getOwn(clusters, 'testnet')).toBeUndefined();
+    });
+
+    it('should type a read through an index signature as possibly undefined', () => {
+        const byName: Record<string, number> = {};
+        const byAddress: Record<Address, number> = {};
+
+        expectTypeOf(getOwn(byName, 'devnet')).toEqualTypeOf<number | undefined>();
+        expectTypeOf(getOwn(byAddress, address('11111111111111111111111111111111'))).toEqualTypeOf<
+            number | undefined
+        >();
+    });
+
+    it('should type a read of a literal key as defined', () => {
+        const byCluster: Record<'devnet' | 'testnet', number> = { devnet: 1, testnet: 2 };
+
+        expectTypeOf(getOwn(byCluster, 'devnet')).toEqualTypeOf<number>();
     });
 });
