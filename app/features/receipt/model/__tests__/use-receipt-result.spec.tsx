@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
+import { GENESIS_HASHES, type GenesisHash } from '@entities/chain-id/lib/const';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
@@ -29,7 +29,7 @@ const MINT = gen.publicKey();
 
 describe('useReceiptResult', () => {
     beforeEach(() => {
-        mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET);
         mocks.isReceiptEnabled = true;
         vi.stubGlobal(
             'fetch',
@@ -48,35 +48,18 @@ describe('useReceiptResult', () => {
         });
 
         await waitForHook(() => expect(result.current.data).toMatchObject({ kind: 'ok', receipt: { symbol: 'USDC' } }));
-        expect(sentBodies()).toEqual([
-            {
-                addresses: [MINT.toBase58()],
-                cluster: Cluster.Custom,
-                genesisHash: GENESIS_HASHES.MAINNET,
-                includeOnChainFallback: false,
-            },
-        ]);
     });
 
     it('should build the receipt again when the genesis hash changes', async () => {
-        const symbolByGenesisHash: Record<string, string> = {
-            [GENESIS_HASHES.DEVNET]: 'DEVUSDC',
-            [GENESIS_HASHES.MAINNET]: 'USDC',
-        };
-        vi.mocked(fetch).mockImplementation(async (_input, init) => {
-            const { genesisHash } = JSON.parse(String(init?.body));
-            return Response.json({
-                content: [{ ...tokenInfo(MINT.toBase58()), symbol: symbolByGenesisHash[genesisHash] }],
-            });
-        });
-        mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.DEVNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.DEVNET);
         const tx = tokenTransfer();
         const { rerender, result } = renderHook(() => useReceiptResult(SIGNATURE, tx), {
             wrapper: swrWrapper(),
         });
-        await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'DEVUSDC' } }));
+        await waitForHook(() => expect(result.current.data).toMatchObject({ kind: 'ok' }));
+        expect(result.current.data).toMatchObject({ receipt: { symbol: undefined } });
 
-        mocks.cluster = connectedTo(Cluster.Custom, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Custom, GENESIS_HASHES.MAINNET);
         rerender();
 
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { symbol: 'USDC' } }));
@@ -89,7 +72,7 @@ describe('useReceiptResult', () => {
         });
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Custom' } }));
 
-        mocks.cluster = connectedTo(Cluster.Mainnet, GENESIS_HASHES.MAINNET);
+        mocks.cluster = connectedWithGenesisHash(Cluster.Mainnet, GENESIS_HASHES.MAINNET);
         rerender();
 
         await waitForHook(() => expect(result.current.data).toMatchObject({ receipt: { network: 'Mainnet' } }));
@@ -134,7 +117,7 @@ describe('useReceiptResult', () => {
 
 const RPC_URL = 'http://localhost:8899';
 
-function connectedTo(cluster: Cluster, genesisHash: string): ClusterContext {
+function connectedWithGenesisHash(cluster: Cluster, genesisHash: GenesisHash): ClusterContext {
     return {
         ...clusterContext({ cluster, connectableUrl: RPC_URL, status: ClusterStatus.Connected, url: RPC_URL }),
         genesisHash,
@@ -170,8 +153,4 @@ function tokenTransfer(mint = MINT.toBase58()): TransactionWithMeta {
             },
         ],
     });
-}
-
-function sentBodies(): Record<string, unknown>[] {
-    return vi.mocked(fetch).mock.calls.map(([, init]) => JSON.parse(String(init?.body)));
 }

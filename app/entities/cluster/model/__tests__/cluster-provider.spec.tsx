@@ -3,8 +3,12 @@ import { createStore, Provider } from 'jotai';
 import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
+vi.mock('@solana/kit', async importOriginal => ({
+    ...(await importOriginal<typeof import('@solana/kit')>()),
+    createSolanaRpc: vi.fn(),
+}));
 
+import { gen } from '@__fixtures__/gen';
 import { createSolanaRpc } from '@solana/kit';
 
 import { ClusterStatus } from '../../lib/cluster';
@@ -16,6 +20,8 @@ function mockGenesis(send: () => Promise<string>) {
         getGenesisHash: () => ({ send }),
     } as unknown as ReturnType<typeof createSolanaRpc>);
 }
+
+const GENESIS_HASH = gen.blockhash();
 
 // A sentinel, not an empty string: the failure to catch is the endpoint being absent from the context
 // altogether, which every fetching hook reads as "wait".
@@ -66,7 +72,7 @@ beforeEach(() => {
 // for an endpoint that never arrives, on every cluster.
 describe('ClusterProvider connectable endpoint', () => {
     it('should publish the endpoint for a cluster that needs no decision', async () => {
-        mockGenesis(() => Promise.resolve('genesis'));
+        mockGenesis(() => Promise.resolve(GENESIS_HASH));
 
         renderProvider('cluster=devnet');
 
@@ -75,7 +81,7 @@ describe('ClusterProvider connectable endpoint', () => {
     });
 
     it('should publish nothing, and connect to nothing, while a custom URL awaits consent', async () => {
-        mockGenesis(() => Promise.resolve('genesis'));
+        mockGenesis(() => Promise.resolve(GENESIS_HASH));
 
         renderProvider('cluster=custom&customUrl=https://my-node.example/rpc');
 
@@ -87,7 +93,7 @@ describe('ClusterProvider connectable endpoint', () => {
     });
 
     it('should publish a custom endpoint once its origin is approved', async () => {
-        mockGenesis(() => Promise.resolve('genesis'));
+        mockGenesis(() => Promise.resolve(GENESIS_HASH));
         sessionStorage.setItem('explorer:approvedRpcOrigins', JSON.stringify(['https://my-node.example']));
 
         renderProvider('cluster=custom&customUrl=https://my-node.example/rpc');
@@ -109,7 +115,7 @@ describe('ClusterProvider connection status', () => {
     it('should reconnect when returning to a cluster whose check previously failed', async () => {
         // Devnet is down at first, then the endpoint recovers.
         let shouldFail = true;
-        mockGenesis(() => (shouldFail ? Promise.reject(new Error('rpc down')) : Promise.resolve('genesis')));
+        mockGenesis(() => (shouldFail ? Promise.reject(new Error('rpc down')) : Promise.resolve(GENESIS_HASH)));
 
         const { rerender } = renderProvider('cluster=devnet');
         await waitFor(() => expect(statusText()).toBe(ClusterStatus[ClusterStatus.Failure]));

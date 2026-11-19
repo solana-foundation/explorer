@@ -1,6 +1,6 @@
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { MAX_SIZE, statusError } from '@/app/api/metadata/proxy';
@@ -87,6 +87,10 @@ describe('getTokenInfosFromMetaplex', () => {
         mocks.fetchResource.mockResolvedValue(jsonResource({}));
     });
 
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
     it('should not touch the network without addresses', async () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         await expect(getTokenInfosFromMetaplex([], RPC)).resolves.toEqual([]);
@@ -107,6 +111,15 @@ describe('getTokenInfosFromMetaplex', () => {
             [`${MINT_A}-pda`, 255],
             [`${MINT_B}-pda`, 255],
         ]);
+    });
+
+    it('should not read the metadata of a redacted mint', async () => {
+        vi.stubEnv('NEXT_PUBLIC_BAD_TOKENS', MINT_A);
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await getTokenInfosFromMetaplex([MINT_A, MINT_B], RPC);
+
+        expect(mocks.safeFetchAllMetadata).toHaveBeenCalledWith({}, [[`${MINT_B}-pda`, 255]]);
     });
 
     it('should batch the metadata lookup so it stays under the getMultipleAccounts key limit', async () => {
@@ -217,7 +230,7 @@ describe('getTokenInfosFromMetaplex', () => {
         expect(result.decimals).toBe(6);
     });
 
-    it('should report a null logo when the off-chain JSON has no image', async () => {
+    it('should report no logo when the off-chain JSON has no image', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
         mocks.fetchResource.mockResolvedValueOnce(jsonResource({}));
@@ -225,7 +238,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
 
-        expect(result.logoURI).toBeNull();
+        expect(result.logoURI).toBeUndefined();
     });
 
     // Regression guard: this must never build a URL from the incoming request's host, and must
@@ -302,14 +315,14 @@ describe('getTokenInfosFromMetaplex', () => {
             expect(mocks.fetchResource).toHaveBeenCalledTimes(1);
             expect(result.map(t => [t.address, t.logoURI])).toEqual([
                 [MINT_A, 'logo-a'],
-                [MINT_B, null],
+                [MINT_B, undefined],
             ]);
         } finally {
             vi.useRealTimers();
         }
     });
 
-    it('should report a null logo when the proxy fetcher throws', async () => {
+    it('should report no logo when the proxy fetcher throws', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
         const failure = new Error('terminated');
@@ -319,11 +332,11 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
 
-        expect(result).toMatchObject({ address: MINT_A, logoURI: null });
+        expect(result).toMatchObject({ address: MINT_A, logoURI: undefined });
         expect(onError).toHaveBeenCalledWith(failure);
     });
 
-    it('should report a null logo and log a blocked address only through the proxy log policy', async () => {
+    it('should report no logo and log a blocked address only through the proxy log policy', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
         // What `fetchResource` returns for a private host.
@@ -338,7 +351,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
 
-        expect(result).toMatchObject({ address: MINT_A, logoURI: null });
+        expect(result).toMatchObject({ address: MINT_A, logoURI: undefined });
         expect(onError).not.toHaveBeenCalled();
         expect(Logger.warn).toHaveBeenCalledWith(
             '[api:metadata-proxy] Hostname resolution blocked (SSRF protection)',
@@ -354,7 +367,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
 
-        expect(result.logoURI).toBeNull();
+        expect(result.logoURI).toBeUndefined();
     });
 
     it('should skip the off-chain read for a mint with no uri', async () => {
@@ -364,7 +377,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
 
-        expect(result.logoURI).toBeNull();
+        expect(result.logoURI).toBeUndefined();
         expect(mocks.fetchResource).not.toHaveBeenCalled();
     });
 
@@ -409,7 +422,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
 
-        expect(result).toMatchObject({ address: MINT_A, decimals: 6, logoURI: null, symbol: 'USDC' });
+        expect(result).toMatchObject({ address: MINT_A, decimals: 6, logoURI: undefined, symbol: 'USDC' });
         expect(mocks.fetchResource).not.toHaveBeenCalled();
     });
 
@@ -421,7 +434,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
 
-        expect(result.logoURI).toBeNull();
+        expect(result.logoURI).toBeUndefined();
         expect(mocks.fetchResource).not.toHaveBeenCalled();
         // Junk on-chain data is not an app fault, and the NFT page maps `onError` to `Logger.error`.
         expect(onError).not.toHaveBeenCalled();

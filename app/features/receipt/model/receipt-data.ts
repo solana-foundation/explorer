@@ -1,15 +1,13 @@
 import { truncateAddress } from '@entities/address';
-import type { TokenInfo } from '@entities/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { lamportsToSolString } from '@utils/index';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { displayTimestampUtc } from '@/app/utils/date';
 
 import type { FormattedReceipt } from '../types';
 import { createSolTransferReceipt } from './sol-transfer';
-import { createTokenTransferReceipt, type GetTokenInfo } from './token-transfer';
+import { createTokenTransferReceipt, type LookupTokenInfo } from './token-transfer';
 import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
 /**
@@ -27,14 +25,14 @@ export type ReceiptResult =
 
 export async function extractReceiptData({
     cluster,
-    getTokenInfo,
+    lookupTokenInfo,
     tx,
 }: {
     cluster: Cluster;
-    getTokenInfo: GetTokenInfo;
+    lookupTokenInfo: LookupTokenInfo;
     tx: TransactionWithMeta;
 }): Promise<ReceiptResult> {
-    const tokenOutcome = await createTokenTransferReceipt(tx, mint => getParsedTokenInfo(mint, getTokenInfo));
+    const tokenOutcome = await createTokenTransferReceipt(tx, lookupTokenInfo);
     if (tokenOutcome.kind === 'ok') {
         return { kind: 'ok', receipt: formatReceiptData(tokenOutcome.receipt, cluster) };
     }
@@ -98,14 +96,4 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
         return { ...base, kind: 'token' as const, mint: receipt.mint, symbol: receipt.symbol };
     }
     return { ...base, kind: 'sol' as const };
-}
-
-async function getParsedTokenInfo(mint: string, getTokenInfo: GetTokenInfo): Promise<TokenInfo | undefined> {
-    try {
-        const tokenInfo = await getTokenInfo(mint);
-        return tokenInfo;
-    } catch (error) {
-        Logger.error(error);
-        return undefined;
-    }
 }

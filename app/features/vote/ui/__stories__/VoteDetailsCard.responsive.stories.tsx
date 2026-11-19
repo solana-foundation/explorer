@@ -3,7 +3,6 @@ import {
     nextjsParameters,
     withMockTransactions,
     withScrollAnchor,
-    withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
@@ -23,13 +22,7 @@ import {
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: VoteDetailsCard,
-    decorators: [
-        withViewportFromGlobal,
-        withTxInstructionSurface,
-        withMockTransactions,
-        withScrollAnchor,
-        withTokenInfoBatch,
-    ],
+    decorators: [withViewportFromGlobal, withTxInstructionSurface, withMockTransactions, withScrollAnchor],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

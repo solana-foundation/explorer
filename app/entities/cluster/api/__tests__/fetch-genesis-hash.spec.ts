@@ -27,6 +27,12 @@ describe('fetchGenesisHash', () => {
         await expect(fetchGenesisHash('https://api.mainnet-beta.solana.com')).resolves.toBe(GENESIS_HASH);
     });
 
+    it('should reject a value that is not a base58 hash', async () => {
+        send.mockResolvedValue('genesis');
+
+        await expect(fetchGenesisHash('https://api.mainnet-beta.solana.com')).rejects.toThrow();
+    });
+
     // The cluster status waits on this call, and every hook keyed on that status waits with it, so a node
     // that accepts the connection and never answers has to fail rather than hold the tree at loading. The
     // value is pinned too: a deadline long enough is the same as none to a visitor watching the card.

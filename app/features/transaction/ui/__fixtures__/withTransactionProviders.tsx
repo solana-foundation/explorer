@@ -6,7 +6,6 @@ import {
     mockTransactionStatus,
 } from '@storybook-config/__fixtures__/transactions';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
 import React from 'react';
 
@@ -21,15 +20,13 @@ export function withTransactionProviders(
     return function Wrapper({ children }: { children: React.ReactNode }) {
         return (
             <ClusterProvider>
-                <MockTokenInfoBatchProvider>
-                    <MockTransactionsProvider parsed={parsed} status={status} raw={raw}>
-                        <MockAccountsProvider>
-                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
-                                {children}
-                            </InstructionParserProvider>
-                        </MockAccountsProvider>
-                    </MockTransactionsProvider>
-                </MockTokenInfoBatchProvider>
+                <MockTransactionsProvider parsed={parsed} status={status} raw={raw}>
+                    <MockAccountsProvider>
+                        <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                            {children}
+                        </InstructionParserProvider>
+                    </MockAccountsProvider>
+                </MockTransactionsProvider>
             </ClusterProvider>
         );
     };

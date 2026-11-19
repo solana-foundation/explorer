@@ -7,7 +7,6 @@ import {
     withCluster,
     withMockTransactions,
     withScrollAnchor,
-    withTokenInfoBatch,
     withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
@@ -34,14 +33,7 @@ const dispatched = createInstructionParserDispatcher([solanaAttestationInstructi
 
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
-    decorators: [
-        withCluster,
-        withScrollAnchor,
-        withTokenInfoBatch,
-        withTxInstructionSurface,
-        withMockTransactions,
-        withViewportFromGlobal,
-    ],
+    decorators: [withCluster, withScrollAnchor, withTxInstructionSurface, withMockTransactions, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

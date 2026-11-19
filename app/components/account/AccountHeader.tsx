@@ -2,6 +2,7 @@ import { CompressedNftAccountHeader } from '@components/account/CompressedNftCar
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { useDasImage } from '@entities/digital-asset';
 import { isMetaplexNFT } from '@entities/nft';
+import { isRedactedTokenAddress, type TokenInfo } from '@entities/token-info';
 import { STAKE_PROGRAM_LABEL } from '@explorer/parsers';
 import { NftokenAccountHeader, parseNftokenAccount } from '@features/nftoken';
 import {
@@ -22,7 +23,6 @@ import { dasImageAddress } from '@/app/components/account/das-image-address';
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
 import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
-import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function AccountHeader({
     address,
@@ -32,7 +32,7 @@ export function AccountHeader({
 }: {
     address: string;
     account?: Account;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
     isTokenInfoLoading: boolean;
 }) {
     const mintInfo = useMintAccountInfo(address);
@@ -64,7 +64,7 @@ export function AccountHeader({
         return <ProgramHeader address={address} />;
     }
 
-    // Stake accounts have a stable parsed type that doesn't depend on the token-info (UTL) fetch,
+    // Stake accounts have a stable parsed type that doesn't depend on the token-info fetch,
     // so resolve their header before the isTokenInfoLoading gate and render the correct title
     // ("Stake Account") instead of the generic "Account" fallback.
     if (parsedData?.program === STAKE_PROGRAM_LABEL) {
@@ -111,7 +111,7 @@ function TokenMintHeader({
     parsedData,
 }: {
     address: string;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
     mintInfo?: MintAccountInfo;
     parsedData?: TokenProgramData;
 }): JSX.Element {
@@ -122,12 +122,14 @@ function TokenMintHeader({
         ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
     const dasImage = useDasImage(dasImageAddress(address, tokenInfo, parsedData));
+    const fallbackLogoURI = tokenInfo?.logoURI || dasImage;
 
     const defaultCard = useMemo(() => {
-        const logoURI = tokenInfo?.logoURI ?? dasImage;
-        const token = tokenInfo ? { ...tokenInfo, logoURI } : { logoURI, name: undefined };
+        const token = tokenInfo
+            ? { ...tokenInfo, logoURI: fallbackLogoURI }
+            : { logoURI: fallbackLogoURI, name: undefined };
         return <TokenMintHeaderCard token={token} />;
-    }, [dasImage, tokenInfo]);
+    }, [fallbackLogoURI, tokenInfo]);
 
     if (metadataPointerExtension && metadataExtension) {
         return (
@@ -136,7 +138,7 @@ function TokenMintHeader({
                     <Suspense fallback={defaultCard}>
                         <Token22MintHeader
                             address={address}
-                            fallbackLogoURI={dasImage}
+                            fallbackLogoURI={fallbackLogoURI}
                             metadataExtension={metadataExtension as any}
                             metadataPointerExtension={metadataPointerExtension as any}
                         />
@@ -145,12 +147,12 @@ function TokenMintHeader({
             </>
         );
     }
-    // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
+    // Fall back to token info when there is stub metadata (blank uri), updatable by default by the mint authority
     else if (!parsedData?.nftData?.metadata.uri && tokenInfo) {
         return defaultCard;
     } else if (parsedData?.nftData) {
         const token = {
-            logoURI: parsedData?.nftData?.json?.image ?? dasImage,
+            logoURI: parsedData?.nftData?.json?.image ?? fallbackLogoURI,
             name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.name,
             symbol: parsedData?.nftData?.metadata.symbol,
         };

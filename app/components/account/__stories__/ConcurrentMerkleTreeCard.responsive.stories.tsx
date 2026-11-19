@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -7,7 +7,7 @@ import { buildConcurrentMerkleTreeData } from './mocks/concurrent-merkle-tree';
 
 const meta: Meta<typeof ConcurrentMerkleTreeCard> = {
     component: ConcurrentMerkleTreeCard,
-    decorators: [withCluster, withTokenInfoBatch, withViewportFromGlobal],
+    decorators: [withCluster, withViewportFromGlobal],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

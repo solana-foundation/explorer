@@ -1,9 +1,6 @@
 import 'server-only';
 
-import { createAbortSignal, getTokenInfo, isTransientError } from '@entities/token-info/server';
-import { type Cluster } from '@utils/cluster';
-
-import { Logger } from '@/app/shared/lib/logger';
+import { lookupTokenInfo } from '@entities/token-info/server';
 
 import { getTx } from '../api/get-tx';
 import { type QueryCluster } from './cluster';
@@ -22,20 +19,7 @@ export async function createReceipt(signature: string, cluster?: QueryCluster): 
     const data = await getTx(signature, undefined, cluster);
     return extractReceiptData({
         cluster: data.cluster,
-        getTokenInfo: mint =>
-            getTokenInfo(mint, data.cluster, undefined, {
-                onError: error => reportTokenInfoError(error, { cluster: data.cluster, mint }),
-                signal: createAbortSignal(),
-            }),
+        lookupTokenInfo: mint => lookupTokenInfo({ cluster: data.cluster, genesisHash: undefined, mint }),
         tx: data.transaction,
     });
-}
-
-function reportTokenInfoError(error: unknown, context: { cluster: Cluster; mint: string }): void {
-    const message = '[receipt] Token info lookup failed';
-    if (isTransientError(error)) {
-        Logger.warn(message, { error, ...context });
-        return;
-    }
-    Logger.error(new Error(message, { cause: error }), { sentry: true, sentryExtras: context });
 }

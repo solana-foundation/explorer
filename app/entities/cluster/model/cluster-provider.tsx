@@ -1,5 +1,6 @@
 'use client';
 
+import { type GenesisHash } from '@entities/chain-id/@x/cluster';
 import { createContext, type ReactNode } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
@@ -20,7 +21,7 @@ interface State {
     // consumer: a provider that forgot the field would leave all of them waiting, and say nothing.
     connectableUrl: ConnectableUrl | undefined;
     // Chain identity, resolved by the connection health check. Cheap and static per cluster.
-    genesisHash?: string;
+    genesisHash?: GenesisHash;
     // A valid custom endpoint from the query string that the user has not agreed to yet. Nothing connects
     // to it while it is set; the consent prompt owns the decision. Kept beside the selection rather than
     // inside its Custom arm, because it is a question awaiting an answer, not the endpoint in use.

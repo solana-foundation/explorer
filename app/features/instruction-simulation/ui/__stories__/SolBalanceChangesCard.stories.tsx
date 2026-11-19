@@ -2,7 +2,7 @@ import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import BN from 'bn.js';
 import { expect, within } from 'storybook/test';
@@ -14,7 +14,7 @@ const ALICE = gen.publicKey(1).toBase58();
 
 const meta = {
     component: SolBalanceChangesCard,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SolBalanceChangesCard',

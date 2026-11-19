@@ -1,35 +1,53 @@
 import { gen } from '@__fixtures__/gen';
 import { describe, expect, it, vi } from 'vitest';
 
-import { getTokenInfo } from '@/app/entities/token-info/server';
+import { lookupTokenInfo } from '@/app/entities/token-info/server';
 import { Cluster, CLUSTERS, clusterSlug } from '@/app/utils/cluster';
 import getReadableTitleFromAddress from '@/app/utils/get-readable-title-from-address';
 
 vi.mock('@/app/entities/token-info/server', () => ({
-    getTokenInfo: vi.fn(() => undefined),
+    lookupTokenInfo: vi.fn(async () => ({ kind: 'not-listed' })),
 }));
 
 describe('getReadableTitleFromAddress', () => {
     it.each(CLUSTERS)('should look the token up on the cluster the slug names (%i)', async cluster => {
         await getReadableTitleFromAddress(props(clusterSlug(cluster)));
 
-        expect(getTokenInfo).toHaveBeenCalledWith(TOKEN_ADDRESS, cluster);
+        expect(lookupTokenInfo).toHaveBeenCalledWith({ cluster, genesisHash: undefined, mint: TOKEN_ADDRESS });
     });
 
     it.each([undefined, 'not-a-cluster'])('should fall back to the default cluster for %s', async clusterParam => {
         await getReadableTitleFromAddress(props(clusterParam));
 
-        expect(getTokenInfo).toHaveBeenCalledWith(TOKEN_ADDRESS, Cluster.Mainnet);
+        expect(lookupTokenInfo).toHaveBeenCalledWith({
+            cluster: Cluster.Mainnet,
+            genesisHash: undefined,
+            mint: TOKEN_ADDRESS,
+        });
     });
 
-    it('should return the bare address when the address is not a token', async () => {
-        expect(await getReadableTitleFromAddress(props(clusterSlug(Cluster.Devnet)))).toBe(TOKEN_ADDRESS);
-    });
+    it.each(['not-listed', 'rate-limited', 'unavailable'] as const)(
+        'should return the bare address when the lookup is %s',
+        async kind => {
+            vi.mocked(lookupTokenInfo).mockResolvedValueOnce({ kind });
+
+            expect(await getReadableTitleFromAddress(props())).toBe(TOKEN_ADDRESS);
+        },
+    );
 
     it('should title a token with its name and a truncated address', async () => {
-        vi.mocked(getTokenInfo).mockResolvedValueOnce(tokenInfo('Wrapped SOL'));
+        vi.mocked(lookupTokenInfo).mockResolvedValueOnce({ kind: 'listed', token: tokenInfo('Wrapped SOL') });
 
         expect(await getReadableTitleFromAddress(props())).toBe('Token | Wrapped SOL (TK…11)');
+    });
+
+    it('should return the bare address for a redacted token', async () => {
+        vi.mocked(lookupTokenInfo).mockResolvedValueOnce({
+            kind: 'listed',
+            token: { ...tokenInfo('Wrapped SOL'), name: undefined, symbol: undefined },
+        });
+
+        expect(await getReadableTitleFromAddress(props())).toBe(TOKEN_ADDRESS);
     });
 });
 
@@ -41,7 +59,7 @@ function props(cluster?: string) {
 }
 
 function tokenInfo(name: string) {
-    return { address: TOKEN_ADDRESS, decimals: 9, logoURI: null, name, symbol: 'SOL', verified: false };
+    return { address: TOKEN_ADDRESS, decimals: 9, name, symbol: 'SOL', verified: false };
 }
 
 // A vanity address, so the truncated title asserts a literal `TK…11` instead of recomputing

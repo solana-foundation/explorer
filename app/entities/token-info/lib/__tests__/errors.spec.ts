@@ -1,14 +1,47 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { isTransientError, TokenInfoHttpError, TokenInfoInvalidResponseError } from '../errors';
+import { Logger } from '@/app/shared/lib/logger';
 
-describe('isTransientError', () => {
-    it.each([429, 500, 502, 503, 504])('should be true for HTTP %i', status => {
-        expect(isTransientError(new TokenInfoHttpError({ status, statusText: 'x' }))).toBe(true);
+import { isTransientError, JupiterHttpError, reportJupiterError } from '../errors';
+
+describe('reportJupiterError', () => {
+    afterEach(() => {
+        vi.clearAllMocks();
     });
 
-    it.each([400, 401, 403, 404, 422])('should be false for HTTP %i', status => {
-        expect(isTransientError(new TokenInfoHttpError({ status, statusText: 'x' }))).toBe(false);
+    it('should warn with the upstream error for a transient error', () => {
+        reportJupiterError({
+            error: new JupiterHttpError({ status: 503, statusText: 'Service Unavailable' }),
+            message: 'lookup failed',
+            sentryExtras: { tag: 'verified' },
+        });
+
+        expect(Logger.warn).toHaveBeenCalledWith('lookup failed', {
+            sentry: true,
+            sentryExtras: { tag: 'verified', upstreamError: 'HTTP 503: Service Unavailable' },
+        });
+        expect(Logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should report an error with the cause for an error that is not transient', () => {
+        const error = new JupiterHttpError({ status: 401, statusText: 'Unauthorized' });
+
+        reportJupiterError({ error, message: 'lookup failed', sentryExtras: { tag: 'verified' } });
+
+        expect(Logger.error).toHaveBeenCalledWith(expect.objectContaining({ cause: error, message: 'lookup failed' }), {
+            sentry: true,
+            sentryExtras: { tag: 'verified' },
+        });
+        expect(Logger.warn).not.toHaveBeenCalled();
+    });
+});
+
+describe('isTransientError', () => {
+    it.each([
+        [true, 503],
+        [false, 401],
+    ])('should be %s for HTTP %i', (transient, status) => {
+        expect(isTransientError(new JupiterHttpError({ status, statusText: 'x' }))).toBe(transient);
     });
 
     it('should be true for an expired abort signal', async () => {
@@ -36,10 +69,6 @@ describe('isTransientError', () => {
 
         expect(errorCode(error)).toBe('UND_ERR_SOCKET');
         expect(isTransientError(error)).toBe(true);
-    });
-
-    it('should be false for an invalid response', () => {
-        expect(isTransientError(new TokenInfoInvalidResponseError())).toBe(false);
     });
 
     it('should be false for a body that is not JSON', async () => {

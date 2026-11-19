@@ -17,7 +17,6 @@ import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from './__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from './__mocks__/MockHistoryProvider';
 import { MockStatsProvider } from './__mocks__/MockStatsProvider';
-import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
 import type { Decorator, Parameters } from './types';
 
@@ -154,24 +153,6 @@ export const withTransactions: Decorator = Story => (
                 <Story />
             </MockAccountsProvider>
         </TransactionsProvider>
-    </ClusterProvider>
-);
-
-/** Wraps stories with MockTokenInfoBatchProvider. Usage: `decorators: [withTokenInfoBatch]` */
-export const withTokenInfoBatch: Decorator = Story => (
-    <MockTokenInfoBatchProvider>
-        <Story />
-    </MockTokenInfoBatchProvider>
-);
-
-/** Wraps stories with ClusterProvider, MockTokenInfoBatchProvider, and MockAccountsProvider. Usage: `decorators: [withClusterAccountsAndTokenInfo]` */
-export const withClusterAccountsAndTokenInfo: Decorator = Story => (
-    <ClusterProvider>
-        <MockTokenInfoBatchProvider>
-            <MockAccountsProvider>
-                <Story />
-            </MockAccountsProvider>
-        </MockTokenInfoBatchProvider>
     </ClusterProvider>
 );
 

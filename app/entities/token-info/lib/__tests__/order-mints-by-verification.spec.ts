@@ -9,11 +9,11 @@ function infos(...tokens: TokenInfo[]): ReadonlyMap<string, TokenInfo> {
 }
 
 describe('orderMintsByVerification', () => {
-    it('should put verified mints first, then listed, then unknown', () => {
+    it('should put verified mints first, then the rest in incoming order', () => {
         const mints = ['unknown', 'listed', 'verified'];
 
         expect(orderMintsByVerification(mints, infos(tokenInfo('verified', true), tokenInfo('listed', false)))).toEqual(
-            ['verified', 'listed', 'unknown'],
+            ['verified', 'unknown', 'listed'],
         );
     });
 

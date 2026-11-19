@@ -2,7 +2,7 @@
 
 ### Requirement: External links sourced from untrusted data SHALL be scheme-validated before rendering
 
-Any anchor whose `href` is derived from on-chain or other third-party data — NFT/token `external_url`, token `extensions.website`/`bridgeContract`, token-extension `uri`/`link.url`, config-account `website`, security.txt fields, verified-build metadata values — SHALL pass its target through the shared `getSafeExternalHref` guard (`app/shared/lib/url.ts`) before it reaches the DOM, and SHALL render the clickable link only when the value is an absolute `http:`/`https:` URL. This closes the stored-XSS vector where a `javascript:`/`data:`/`vbscript:` scheme in on-chain metadata executes in the Explorer origin on click — `rel`/`target` do not prevent that.
+Any anchor whose `href` is derived from on-chain or other third-party data — NFT/token `external_url`, token `website`, token-extension `uri`/`link.url`, config-account `website`, security.txt fields, verified-build metadata values — SHALL pass its target through the shared `getSafeExternalHref` guard (`app/shared/lib/url.ts`) before it reaches the DOM, and SHALL render the clickable link only when the value is an absolute `http:`/`https:` URL. This closes the stored-XSS vector where a `javascript:`/`data:`/`vbscript:` scheme in on-chain metadata executes in the Explorer origin on click — `rel`/`target` do not prevent that.
 
 #### Scenario: On-chain field carries a non-http(s) scheme
 

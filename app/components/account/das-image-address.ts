@@ -1,6 +1,5 @@
+import { isRedactedTokenAddress, type TokenInfo } from '@entities/token-info';
 import { TokenProgramData } from '@providers/accounts';
-
-import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 /**
  * Returns the mint address to pass to `useDasImage`, or `undefined` to skip the DAS fetch.
@@ -9,7 +8,7 @@ import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-in
  */
 export function dasImageAddress(
     address: string,
-    tokenInfo: FullTokenInfo | undefined,
+    tokenInfo: TokenInfo | undefined,
     parsedData: TokenProgramData | undefined,
 ): string | undefined {
     const hasDefinitiveImage = Boolean(

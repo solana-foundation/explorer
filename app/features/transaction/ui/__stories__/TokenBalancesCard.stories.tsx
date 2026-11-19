@@ -1,7 +1,6 @@
 import { ClusterProvider } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { BigNumber } from 'bignumber.js';
@@ -80,11 +79,9 @@ export const Inner_MultipleRows: StoryObj<typeof TokenBalancesCardInner> = {
     },
     render: args => (
         <ClusterProvider>
-            <MockTokenInfoBatchProvider>
-                <MockAccountsProvider>
-                    <TokenBalancesCardInner {...args} />
-                </MockAccountsProvider>
-            </MockTokenInfoBatchProvider>
+            <MockAccountsProvider>
+                <TokenBalancesCardInner {...args} />
+            </MockAccountsProvider>
         </ClusterProvider>
     ),
 };
@@ -95,11 +92,9 @@ export const Inner_PositiveDelta: StoryObj<typeof TokenBalancesCardInner> = {
     },
     render: args => (
         <ClusterProvider>
-            <MockTokenInfoBatchProvider>
-                <MockAccountsProvider>
-                    <TokenBalancesCardInner {...args} />
-                </MockAccountsProvider>
-            </MockTokenInfoBatchProvider>
+            <MockAccountsProvider>
+                <TokenBalancesCardInner {...args} />
+            </MockAccountsProvider>
         </ClusterProvider>
     ),
 };
@@ -110,11 +105,9 @@ export const Inner_NegativeDelta: StoryObj<typeof TokenBalancesCardInner> = {
     },
     render: args => (
         <ClusterProvider>
-            <MockTokenInfoBatchProvider>
-                <MockAccountsProvider>
-                    <TokenBalancesCardInner {...args} />
-                </MockAccountsProvider>
-            </MockTokenInfoBatchProvider>
+            <MockAccountsProvider>
+                <TokenBalancesCardInner {...args} />
+            </MockAccountsProvider>
         </ClusterProvider>
     ),
 };
