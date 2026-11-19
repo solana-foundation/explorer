@@ -4,5 +4,5 @@
 # the validator auto-detects; locally we need to set the flag ourselves.
 export OPENSPEC_TELEMETRY=0
 
-# Mirrors the CI pipeline: format → lint → openspec → build → test
+# Mirrors the CI pipeline: format → lint → openspec → build → typecheck → test
 corepack pnpm check
