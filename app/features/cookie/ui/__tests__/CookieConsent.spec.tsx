@@ -32,7 +32,7 @@ describe('CookieConsent', () => {
         expect(setStoredValue).not.toHaveBeenCalled();
     });
 
-    describe('with an answer saved in the legacy cookie', () => {
+    describe('with an answer saved in the consent cookie', () => {
         afterEach(() => {
             document.cookie = 'solana_cookie_consent=; max-age=0';
         });
@@ -64,7 +64,11 @@ describe('CookieConsent', () => {
         render(<CookieConsent />);
         await waitFor(() => expect(fetch).toHaveBeenCalled());
         expect(screen.queryByText('ACCEPT')).toBeNull();
-        expect(setStoredValue).toHaveBeenCalledWith(CONSENT_STORAGE_KEY, EConsentStatus.Granted, expect.any(Number));
+        expect(setStoredValue).toHaveBeenCalledWith({
+            maxAgeSeconds: expect.any(Number),
+            name: CONSENT_STORAGE_KEY,
+            value: EConsentStatus.Granted,
+        });
     });
 
     it('should auto-grant consent when geo-location fails', async () => {
@@ -75,11 +79,11 @@ describe('CookieConsent', () => {
         render(<CookieConsent />);
         await waitFor(() => expect(fetch).toHaveBeenCalled());
         await waitFor(() => {
-            expect(setStoredValue).toHaveBeenCalledWith(
-                CONSENT_STORAGE_KEY,
-                EConsentStatus.Granted,
-                expect.any(Number),
-            );
+            expect(setStoredValue).toHaveBeenCalledWith({
+                maxAgeSeconds: expect.any(Number),
+                name: CONSENT_STORAGE_KEY,
+                value: EConsentStatus.Granted,
+            });
         });
         expect(screen.queryByText('ACCEPT')).toBeNull();
     });
@@ -103,6 +107,34 @@ describe('CookieConsent', () => {
         render(<CookieConsent />);
         const btn = await screen.findByText(label, {}, { timeout: 3000 });
         await userEvent.click(btn);
-        expect(setStoredValue).toHaveBeenCalledWith(CONSENT_STORAGE_KEY, consent, expect.any(Number));
+        expect(setStoredValue).toHaveBeenCalledWith({
+            maxAgeSeconds: expect.any(Number),
+            name: CONSENT_STORAGE_KEY,
+            value: consent,
+        });
+    });
+
+    describe('with real storage', () => {
+        beforeEach(async () => {
+            const storage = await vi.importActual<typeof import('../../lib/stored-value')>('../../lib/stored-value');
+            vi.mocked(getStoredValue).mockImplementation(storage.getStoredValue);
+            vi.mocked(setStoredValue).mockImplementation(storage.setStoredValue);
+        });
+
+        afterEach(() => {
+            localStorage.clear();
+            vi.mocked(setStoredValue).mockReset();
+        });
+
+        it('should not ask again after an opt-out', async () => {
+            const { unmount } = render(<CookieConsent />);
+            await userEvent.click(await screen.findByText('OPT-OUT'));
+            unmount();
+
+            render(<CookieConsent />);
+
+            expect(fetch).toHaveBeenCalledOnce();
+            expect(screen.queryByText('OPT-OUT')).toBeNull();
+        });
     });
 });
