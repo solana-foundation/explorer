@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
+import { useSearchParams } from 'next/navigation';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { searchAnalytics } from '@/app/shared/lib/analytics';
 
@@ -7,6 +8,15 @@ import type { SearchOptions } from '../../lib/types';
 import { useSearch } from '../../model/use-search';
 import { useSearchNavigation } from '../../model/use-search-navigation';
 import { SEARCH_DEBOUNCE_MS, SearchBar } from '../SearchBar';
+
+beforeAll(() => {
+    global.ResizeObserver = class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+    };
+    global.HTMLElement.prototype.scrollIntoView = vi.fn();
+});
 
 beforeEach(() => {
     vi.useFakeTimers();
@@ -19,6 +29,7 @@ afterEach(() => {
 
 vi.mock('../../model/use-search', () => ({ useSearch: vi.fn() }));
 vi.mock('../../model/use-search-navigation', () => ({ useSearchNavigation: vi.fn() }));
+vi.mock('next/navigation', () => ({ useSearchParams: vi.fn() }));
 vi.mock('@/app/shared/lib/analytics', () => ({
     searchAnalytics: {
         trackPerformed: vi.fn(),
@@ -51,6 +62,16 @@ const tokenResults: SearchOptions[] = [
 ];
 
 describe('SearchBar', () => {
+    it('should run a search from the q URL parameter', () => {
+        setup(tokenResults, false, 'token');
+
+        act(() => vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS));
+
+        expect(screen.getByRole('combobox')).toHaveValue('token');
+        expect(useSearch).toHaveBeenLastCalledWith('token');
+        expect(screen.getByText('Token A')).toBeInTheDocument();
+    });
+
     it('should navigate and reset state when a result is selected', () => {
         setup();
 
@@ -164,9 +185,10 @@ describe('SearchBar', () => {
     });
 });
 
-function setup(results: SearchOptions[] = tokenResults, isLoading = false) {
+function setup(results: SearchOptions[] = tokenResults, isLoading = false, urlQuery = '') {
     (useSearch as Mock).mockReturnValue({ data: results, isLoading });
     (useSearchNavigation as Mock).mockReturnValue(mockNavigate);
+    (useSearchParams as Mock).mockReturnValue(new URLSearchParams(urlQuery ? `q=${urlQuery}` : ''));
 
     render(<SearchBar />);
 }
