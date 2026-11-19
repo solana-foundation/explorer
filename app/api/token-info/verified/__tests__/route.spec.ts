@@ -1,34 +1,33 @@
 import { gen } from '@__fixtures__/gen';
-import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
+import { resolved, tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import { JUPITER_ROUTE_TIMEOUT_MS } from '@entities/token-info/api/lookup-token-info';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { lookupVerifiedTokenInfos } from '@entities/token-info/server';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { maxDuration, POST } from '../route';
 
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
 
-const mocks = vi.hoisted(() => ({ lookupVerifiedTokenInfos: vi.fn() }));
+vi.mock('@entities/token-info/server', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/token-info/server')>()),
+    lookupVerifiedTokenInfos: vi.fn(),
+}));
 
-vi.mock('@entities/token-info/server', async () => {
-    const actual = await vi.importActual<typeof import('@entities/token-info/server')>('@entities/token-info/server');
-    return { ...actual, lookupVerifiedTokenInfos: mocks.lookupVerifiedTokenInfos };
+afterEach(() => {
+    vi.clearAllMocks();
 });
 
 describe('POST /api/token-info/verified', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     it('should return the verified token info of the addresses without a cache header', async () => {
-        mocks.lookupVerifiedTokenInfos.mockResolvedValueOnce({ kind: 'resolved', tokens: [tokenInfo(MINT_A, true)] });
+        vi.mocked(lookupVerifiedTokenInfos).mockResolvedValue(resolved(tokenInfo(MINT_A, true)));
 
         const response = await post(JSON.stringify({ addresses: [MINT_A, MINT_B] }));
 
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ content: [tokenInfo(MINT_A, true)] });
         expect(response.headers.get('Cache-Control')).toBeNull();
-        expect(mocks.lookupVerifiedTokenInfos).toHaveBeenCalledWith({ addresses: [MINT_A, MINT_B] });
+        expect(lookupVerifiedTokenInfos).toHaveBeenCalledWith({ addresses: [MINT_A, MINT_B] });
     });
 
     it.each([
@@ -39,7 +38,7 @@ describe('POST /api/token-info/verified', () => {
         const response = await post(body);
 
         expect(response.status).toBe(400);
-        expect(mocks.lookupVerifiedTokenInfos).not.toHaveBeenCalled();
+        expect(lookupVerifiedTokenInfos).not.toHaveBeenCalled();
     });
 
     it('should keep the function duration under the browser timeout', () => {

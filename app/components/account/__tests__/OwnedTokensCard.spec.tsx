@@ -9,16 +9,14 @@ import userEvent from '@testing-library/user-event';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { OwnedTokensCard } from '../OwnedTokensCard';
+
 // next/navigation is used by OwnedTokensCard's display dropdown, which selects the summary vs detail body.
 const { useSearchParamsMock } = vi.hoisted(() => ({ useSearchParamsMock: vi.fn() }));
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(() => '/address/x/tokens'),
     useSearchParams: useSearchParamsMock,
 }));
-
-function searchParams(display: string | null) {
-    return { get: vi.fn(() => display), has: vi.fn(), toString: () => '' };
-}
 
 const { useAccountOwnedTokensMock, useFetchAccountOwnedTokensMock } = vi.hoisted(() => ({
     useAccountOwnedTokensMock: vi.fn(),
@@ -75,8 +73,6 @@ vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', 
     ),
 }));
 
-import { OwnedTokensCard } from '../OwnedTokensCard';
-
 const OWNER = '11111111111111111111111111111111';
 const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const LOGO = 'https://example.test/usdc.png';
@@ -96,73 +92,18 @@ type TokenAmount = { amount: string; decimals: number; uiAmountString: string };
 /** One base unit at zero decimals, for specs that assert on order rather than on balances. */
 const UNIT_AMOUNT: TokenAmount = { amount: '1', decimals: 0, uiAmountString: '1' };
 
-function makeTokenAccount(tokenAmount: TokenAmount, pubkey: string = TOKEN_ACCOUNT_A, mint: string = MINT) {
-    return { info: { mint: new PublicKey(mint), tokenAmount }, pubkey: new PublicKey(pubkey) };
-}
-
-// One mint held in two accounts, each scaled by 2: the row totals 8, so the tooltip must show 4 pre-scaling.
-function twoAccountsOfOneMint() {
-    return makeEntryWith([
-        makeTokenAccount({ amount: '1000000', decimals: 6, uiAmountString: '2' }, TOKEN_ACCOUNT_A),
-        makeTokenAccount({ amount: '3000000', decimals: 6, uiAmountString: '6' }, TOKEN_ACCOUNT_B),
-    ]);
-}
-
-function makeEntryWith(tokens: ReturnType<typeof makeTokenAccount>[]) {
-    return { data: { tokens }, status: FetchStatus.Fetched };
-}
-
-function makeEntry() {
-    return makeEntryWith([makeTokenAccount({ amount: '1234560000', decimals: 6, uiAmountString: '1234.56' })]);
-}
-
-function verified(...tokens: TokenInfo[]) {
-    return { isLoading: false, tokenInfos: new Map(tokens.map(token => [token.address, token])) };
-}
-
-function listTokens(...tokens: TokenInfo[]) {
-    useTokenInfoMock.mockImplementation(({ mint }: { mint: string }) => {
-        const tokenInfo = tokens.find(token => token.address === mint);
-        return tokenInfo
-            ? { isLoading: false, kind: 'listed', tokenInfo }
-            : { isLoading: false, kind: 'not-listed', tokenInfo: undefined };
-    });
-}
-
-// GridTable renders the desktop grid (role="table") and a label-stacked mobile copy (also role="table")
-// at once, so every value appears twice in jsdom. Scope row/content assertions to the desktop table,
-// which renders first.
-function grid() {
-    return within(screen.getAllByRole('table')[0]);
-}
-
-/**
- * Mints in the order they are on screen. Summary display only — detail display renders an
- * account Address ahead of the mint on every row, so this would return both.
- */
-function visibleMints() {
-    return grid()
-        .getAllByTestId('address')
-        .map(node => node.textContent);
-}
-
-function lookedUpMints() {
-    return new Set(useTokenInfoMock.mock.calls.map(([{ mint }]) => mint).filter(mint => mint !== undefined));
-}
-
-/** Undefined once every holding is on screen, since the footer renders nothing then. */
-function loadMoreButton() {
-    return screen.queryAllByRole('button').find(button => button.textContent?.startsWith('Load More'));
-}
-
 beforeEach(() => {
     useClusterMock.mockReturnValue({
         cluster: Cluster.Mainnet,
         genesisHash: GENESIS_HASHES.MAINNET,
         url: 'http://rpc',
     });
-    useVerifiedTokenInfosMock.mockReturnValue(verified());
+    listVerified();
     listTokens();
+});
+
+afterEach(() => {
+    vi.clearAllMocks();
 });
 
 describe('should render OwnedTokensCard', () => {
@@ -171,12 +112,8 @@ describe('should render OwnedTokensCard', () => {
         useSearchParamsMock.mockReturnValue(searchParams(null));
     });
 
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     it('should render a verified mint from the verified lookup, without a token info request of its own', () => {
-        useVerifiedTokenInfosMock.mockReturnValue(verified(USDC));
+        listVerified(USDC);
 
         render(<OwnedTokensCard address={OWNER} />);
 
@@ -260,10 +197,6 @@ describe('should render OwnedTokensCard', () => {
 });
 
 describe('should order holdings by verification', () => {
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     it('should render the verified mints first, then the rest in RPC order', () => {
         const [first, second, third, fourth] = [gen.address(1), gen.address(2), gen.address(3), gen.address(4)];
         useSearchParamsMock.mockReturnValue(searchParams(null));
@@ -272,7 +205,7 @@ describe('should order holdings by verification', () => {
                 [first, second, third, fourth].map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint)),
             ),
         );
-        useVerifiedTokenInfosMock.mockReturnValue(verified(tokenInfo(fourth, true), tokenInfo(second, true)));
+        listVerified(tokenInfo(fourth, true), tokenInfo(second, true));
 
         render(<OwnedTokensCard address={OWNER} />);
 
@@ -295,11 +228,7 @@ describe('should page the ordered holdings', () => {
         useAccountOwnedTokensMock.mockReturnValue(
             makeEntryWith(allMints.map(mint => makeTokenAccount(UNIT_AMOUNT, TOKEN_ACCOUNT_A, mint))),
         );
-        useVerifiedTokenInfosMock.mockReturnValue(verified(...verifiedMints.map(mint => tokenInfo(mint, true))));
-    });
-
-    afterEach(() => {
-        vi.clearAllMocks();
+        listVerified(...verifiedMints.map(mint => tokenInfo(mint, true)));
     });
 
     it('should fill the first page from the top of the ordered list, not from RPC order', () => {
@@ -343,10 +272,6 @@ describe('should page the ordered holdings', () => {
 describe('should render the account address column only in detail display', () => {
     beforeEach(() => {
         useAccountOwnedTokensMock.mockReturnValue(makeEntry());
-    });
-
-    afterEach(() => {
-        vi.clearAllMocks();
     });
 
     it('should render the account address ahead of the mint in detail display', () => {
@@ -393,10 +318,6 @@ describe('should project holdings into the mobile stack', () => {
         listTokens(USDC);
     });
 
-    afterEach(() => {
-        vi.clearAllMocks();
-    });
-
     // `mobile="stack"` renders the desktop grid and the mobile stack together, so counting occurrences
     // across both layouts shows the mobile projection without reaching into the DOM.
     it('should inline the logo into the Mint field and drop the standalone Logo field on mobile', () => {
@@ -410,3 +331,69 @@ describe('should project holdings into the mobile stack', () => {
         expect(screen.getByText('Mint')).toBeInTheDocument();
     });
 });
+
+function searchParams(display: string | null) {
+    return { get: vi.fn(() => display), has: vi.fn(), toString: () => '' };
+}
+
+function makeTokenAccount(tokenAmount: TokenAmount, pubkey: string = TOKEN_ACCOUNT_A, mint: string = MINT) {
+    return { info: { mint: new PublicKey(mint), tokenAmount }, pubkey: new PublicKey(pubkey) };
+}
+
+// One mint held in two accounts, each scaled by 2: the row totals 8, so the tooltip must show 4 pre-scaling.
+function twoAccountsOfOneMint() {
+    return makeEntryWith([
+        makeTokenAccount({ amount: '1000000', decimals: 6, uiAmountString: '2' }, TOKEN_ACCOUNT_A),
+        makeTokenAccount({ amount: '3000000', decimals: 6, uiAmountString: '6' }, TOKEN_ACCOUNT_B),
+    ]);
+}
+
+function makeEntryWith(tokens: ReturnType<typeof makeTokenAccount>[]) {
+    return { data: { tokens }, status: FetchStatus.Fetched };
+}
+
+function makeEntry() {
+    return makeEntryWith([makeTokenAccount({ amount: '1234560000', decimals: 6, uiAmountString: '1234.56' })]);
+}
+
+function listVerified(...tokens: TokenInfo[]) {
+    useVerifiedTokenInfosMock.mockImplementation(({ mints }: { mints: readonly string[] }) => ({
+        isLoading: false,
+        tokenInfos: new Map(tokens.filter(token => mints.includes(token.address)).map(token => [token.address, token])),
+    }));
+}
+
+function listTokens(...tokens: TokenInfo[]) {
+    useTokenInfoMock.mockImplementation(({ mint }: { mint: string }) => {
+        const tokenInfo = tokens.find(token => token.address === mint);
+        return tokenInfo
+            ? { isLoading: false, kind: 'listed', tokenInfo }
+            : { isLoading: false, kind: 'not-listed', tokenInfo: undefined };
+    });
+}
+
+// GridTable renders the desktop grid (role="table") and a label-stacked mobile copy (also role="table")
+// at once, so every value appears twice in jsdom. Scope row/content assertions to the desktop table,
+// which renders first.
+function grid() {
+    return within(screen.getAllByRole('table')[0]);
+}
+
+/**
+ * Mints in the order they are on screen. Summary display only — detail display renders an
+ * account Address ahead of the mint on every row, so this would return both.
+ */
+function visibleMints() {
+    return grid()
+        .getAllByTestId('address')
+        .map(node => node.textContent);
+}
+
+function lookedUpMints() {
+    return new Set(useTokenInfoMock.mock.calls.map(([{ mint }]) => mint).filter(mint => mint !== undefined));
+}
+
+/** Undefined once every holding is on screen, since the footer renders nothing then. */
+function loadMoreButton() {
+    return screen.queryAllByRole('button').find(button => button.textContent?.startsWith('Load More'));
+}

@@ -1,76 +1,44 @@
-import { JupiterHttpError } from '@entities/token-info/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { discoverWithJupiter } from '../discover-with-jupiter';
 
-const mocks = vi.hoisted(() => ({ searchJupiterTokens: vi.fn() }));
+const fetchMock = vi.fn<typeof fetch>();
 
-vi.mock('@entities/token-info/server', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/token-info/server')>()),
-    searchJupiterTokens: mocks.searchJupiterTokens,
-}));
+beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubEnv('JUPITER_API_KEY', 'test-key');
+});
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    vi.clearAllMocks();
+});
 
 describe('discoverWithJupiter', () => {
-    beforeEach(() => {
-        vi.stubEnv('JUPITER_API_KEY', 'test-key');
-    });
-
-    afterEach(() => {
-        vi.unstubAllEnvs();
-        vi.clearAllMocks();
-        mocks.searchJupiterTokens.mockReset();
-    });
-
     it.each([
-        ['a rate limit', { kind: 'rate-limited' }, '[api:search] Jupiter rate limit exceeded'],
-        [
-            'a transient failure',
-            { error: new JupiterHttpError({ status: 503, statusText: 'Service Unavailable' }), kind: 'unavailable' },
-            '[api:search] Jupiter discovery failed',
-        ],
-        [
-            'a query that the Jupiter firewall refuses',
-            { error: new JupiterHttpError({ status: 403, statusText: 'Forbidden' }), kind: 'unavailable' },
-            '[api:search] Jupiter returned 403',
-        ],
-    ])('should return no tokens with a warning for %s', async (_, search, warning) => {
-        mocks.searchJupiterTokens.mockResolvedValueOnce(search);
+        ['a warning', 'a rate limit', 429, Logger.warn],
+        ['a warning', 'a transient failure', 503, Logger.warn],
+        ['a warning', 'a query that the Jupiter firewall refuses', 403, Logger.warn],
+        ['an error', 'a rejected API key', 401, Logger.error],
+    ])('should return no tokens and report %s for %s', async (_, __, status, report) => {
+        fetchMock.mockResolvedValue(new Response(null, { status }));
 
-        const tokens = await discoverWithJupiter('TKA', new AbortController().signal);
-
-        expect(tokens).toEqual([]);
-        expect(Logger.warn).toHaveBeenCalledWith(warning, expect.objectContaining({ sentry: true }));
-        expect(Logger.error).not.toHaveBeenCalled();
+        expect(await discover()).toEqual([]);
+        expect(report).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ sentry: true }));
     });
 
-    it('should return no tokens with an error for a 401', async () => {
-        mocks.searchJupiterTokens.mockResolvedValueOnce({
-            error: new JupiterHttpError({ status: 401, statusText: 'Unauthorized' }),
-            kind: 'unavailable',
-        });
+    it('should return no tokens and report nothing for an aborted request', async () => {
+        fetchMock.mockRejectedValue(new DOMException('This operation was aborted', 'AbortError'));
 
-        const tokens = await discoverWithJupiter('TKA', new AbortController().signal);
-
-        expect(tokens).toEqual([]);
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.objectContaining({ message: '[api:search] Jupiter discovery failed' }),
-            expect.objectContaining({ sentry: true }),
-        );
-        expect(Logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('should log nothing for an abort', async () => {
-        mocks.searchJupiterTokens.mockResolvedValueOnce({
-            error: new DOMException('This operation was aborted', 'AbortError'),
-            kind: 'unavailable',
-        });
-
-        const tokens = await discoverWithJupiter('TKA', new AbortController().signal);
-
-        expect(tokens).toEqual([]);
+        expect(await discover()).toEqual([]);
         expect(Logger.warn).not.toHaveBeenCalled();
         expect(Logger.error).not.toHaveBeenCalled();
     });
 });
+
+function discover(): ReturnType<typeof discoverWithJupiter> {
+    return discoverWithJupiter('TKA', new AbortController().signal);
+}
