@@ -16,7 +16,7 @@ afterEach(() => {
 describe('stored-value', () => {
     it('should return a stored value until its max age passes', () => {
         vi.useFakeTimers({ now: 0 });
-        setStoredValue('consent', 'granted', DAY_SECONDS);
+        setStoredValue({ maxAgeSeconds: DAY_SECONDS, name: 'consent', value: 'granted' });
 
         vi.setSystemTime(DAY_SECONDS * 1000 - 1);
         expect(getStoredValue('consent', Consent)).toBe('granted');
@@ -44,7 +44,7 @@ describe('stored-value', () => {
             throw new DOMException('blocked', 'SecurityError');
         });
 
-        expect(() => setStoredValue('consent', 'granted', DAY_SECONDS)).not.toThrow();
+        expect(() => setStoredValue({ maxAgeSeconds: DAY_SECONDS, name: 'consent', value: 'granted' })).not.toThrow();
         expect(getStoredValue('consent', Consent)).toBeUndefined();
     });
 });

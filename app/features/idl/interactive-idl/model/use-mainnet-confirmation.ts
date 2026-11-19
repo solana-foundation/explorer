@@ -38,7 +38,7 @@ export function useMainnetConfirmation<T = unknown>() {
 
     const confirm = useCallback(async () => {
         if (pendingAction) {
-            setStoredValue(MAINNET_DISCLAIMER_KEY, 'true', ACCEPTANCE_MAX_AGE_SECONDS);
+            setStoredValue({ maxAgeSeconds: ACCEPTANCE_MAX_AGE_SECONDS, name: MAINNET_DISCLAIMER_KEY, value: 'true' });
             setIsOpen(false);
             try {
                 await pendingAction.action();

@@ -14,11 +14,19 @@ export function getStoredValue<T>(name: string, struct: Struct<T>): T | undefine
     }
 }
 
-export function setStoredValue(name: string, value: string, maxAgeSeconds: number): void {
+export function setStoredValue({
+    name,
+    value,
+    maxAgeSeconds,
+}: {
+    name: string;
+    value: string;
+    maxAgeSeconds: number;
+}): void {
     if (typeof window === 'undefined') return;
     try {
         localStorage.setItem(name, JSON.stringify({ expiresAt: Date.now() + maxAgeSeconds * 1000, value }));
     } catch {
-        // A browser that blocks storage keeps nothing, so the next visit asks again.
+        // When localStorage throws, no value is saved.
     }
 }

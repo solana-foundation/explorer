@@ -26,7 +26,11 @@ export function CookieConsent() {
     const [isEU, setIsEU] = useState<boolean | null>(null);
 
     const autoGrantConsent = () => {
-        setStoredValue(CONSENT_STORAGE_KEY, EConsentStatus.Granted, CONSENT_MAX_AGE_SECONDS);
+        setStoredValue({
+            maxAgeSeconds: CONSENT_MAX_AGE_SECONDS,
+            name: CONSENT_STORAGE_KEY,
+            value: EConsentStatus.Granted,
+        });
         setConsent(EConsentStatus.Granted);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: EConsentStatus.Granted }));
     };
@@ -42,7 +46,11 @@ export function CookieConsent() {
             .then(res => res.json())
             .then(data => {
                 if (data.country) {
-                    setStoredValue(COUNTRY_STORAGE_KEY, data.country, CONSENT_MAX_AGE_SECONDS);
+                    setStoredValue({
+                        maxAgeSeconds: CONSENT_MAX_AGE_SECONDS,
+                        name: COUNTRY_STORAGE_KEY,
+                        value: data.country,
+                    });
                 }
                 setIsEU(data.isEU);
                 if (!data.isEU) autoGrantConsent();
@@ -54,7 +62,7 @@ export function CookieConsent() {
     }, []);
 
     const handleConsent = (value: EConsentStatus) => {
-        setStoredValue(CONSENT_STORAGE_KEY, value, CONSENT_MAX_AGE_SECONDS);
+        setStoredValue({ maxAgeSeconds: CONSENT_MAX_AGE_SECONDS, name: CONSENT_STORAGE_KEY, value });
         setConsent(value);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: value }));
     };
@@ -100,8 +108,10 @@ export function getStoredConsent(): EConsentStatus | undefined {
 
 const LEGACY_CONSENT_COOKIE = 'solana_cookie_consent';
 
+// When `isEU` is true, a lost grant shows the banner again and keeps analytics off until the visitor accepts.
+// A lost denial becomes a grant when geo-location fails or `isEU` is false, so the denial is read from the cookie.
 function readLegacyDenial(): EConsentStatus.Denied | undefined {
-    // eslint-disable-next-line @microsoft/sdl/no-cookies -- The legacy cookie is read, never written, so every copy expires within the consent max age.
+    // eslint-disable-next-line @microsoft/sdl/no-cookies -- No code writes this cookie, so every copy expires within the consent max age.
     const cookies = document.cookie.split('; ');
     return cookies.includes(`${LEGACY_CONSENT_COOKIE}=${EConsentStatus.Denied}`) ? EConsentStatus.Denied : undefined;
 }
