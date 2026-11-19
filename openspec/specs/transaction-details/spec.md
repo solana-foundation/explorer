@@ -53,7 +53,7 @@ The priority fee SHALL be labelled as a total amount so it is not read as v0's p
 
 The raw transaction provider SHALL retain the message bytes exactly as served by the RPC, and the download action SHALL write those bytes rather than re-serializing a parsed message. This keeps the download byte-identical to the transaction on chain for every version.
 
-The web3.js `VersionedMessage` and decompiled `TransactionMessage` views SHALL be populated for legacy and v0 only. The inspector SHALL report that a version is unsupported rather than render a substitute message shape, because a substitute would serialize to bytes that differ from the transaction on chain.
+The web3.js `VersionedMessage` and decompiled `TransactionMessage` views SHALL be populated for legacy and v0 only. The inspector SHALL render a v1 transaction through the bridged view that the `transaction-inspector` spec defines, which serializes to the original wire bytes. When the inspector cannot build such a view, it SHALL report that the version is unsupported rather than render a substitute message that serializes to different bytes.
 
 #### Scenario: Downloading a v1 transaction
 
@@ -63,7 +63,12 @@ The web3.js `VersionedMessage` and decompiled `TransactionMessage` views SHALL b
 #### Scenario: Inspecting a v1 transaction
 
 - **WHEN** a user opens the inspector for a v1 transaction
-- **THEN** the inspector SHALL state that it does not yet support that version, rather than render accounts and instructions from a substituted message
+- **THEN** the inspector SHALL render it through the bridged v1 view that the `transaction-inspector` spec defines
+
+#### Scenario: Inspecting a version the inspector cannot render
+
+- **WHEN** the inspector cannot build a view of the transaction's message
+- **THEN** the inspector SHALL state that it does not support that version
 
 ### Requirement: Transaction wire bytes SHALL be decoded through kit's introspection helpers
 
