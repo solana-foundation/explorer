@@ -1,6 +1,5 @@
 import { address, defineInstructionCard } from '@entities/instruction-card';
-
-import { AuthorizeNonceInfo } from './types';
+import { AuthorizeNonceInfo } from '@explorer/parsers/programs/system';
 
 export const NonceAuthorizeDetailsCard = defineInstructionCard<AuthorizeNonceInfo>({
     fields: info => [

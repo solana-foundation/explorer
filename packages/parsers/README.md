@@ -2,7 +2,9 @@
 
 Instruction-parsing contract shared by the explorer app and sibling packages: the `InstructionParser` interface, the `createInstructionParserDispatcher` factory (dual-path — raw kit-shaped bytes via `fromTransaction`, RPC-pre-parsed instructions via `fromParsed`), and the `KitInstruction` shape parsers implement against.
 
-The transitional pieces — `toParsedInstruction`/`toParsedTransaction` shims and the web3.js ↔ kit conversions (`toKitInstruction`, `toLegacyPublicKey`, `toKitAddress`) — live in the separate `@explorer/parsers/compat` entry. New code should build against the root contract and not depend on `/compat`; it exists for consumers not yet on kit shapes and shrinks as they migrate.
+A dispatch result that a slice produced carries that slice's `parser`. `isParsedBy(result, parsers)` checks it and narrows `parsed` to the slice's type, so a card does not validate the payload again.
+
+The transitional pieces — the `toParsedTransaction` shim and the web3.js ↔ kit conversions (`toKitInstruction`, `toLegacyPublicKey`, `toKitAddress`) — live in the separate `@explorer/parsers/compat` entry. New code should build against the root contract and not depend on `/compat`; it exists for consumers not yet on kit shapes and shrinks as they migrate.
 
 The design and rationale live in the OpenSpec proposal [`unify-instruction-parsing`](../../openspec/changes/unify-instruction-parsing/proposal.md) — one parser per program, one canonical `SliceParsed` shape, one place to add a program. This package hosts the _contract_; the per-program parser slices (`app/features/decode-instruction-*`) and the React provider stay in the app.
 

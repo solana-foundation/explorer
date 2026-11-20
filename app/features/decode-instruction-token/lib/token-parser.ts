@@ -24,7 +24,7 @@ export const TOKEN_PROGRAM_LABEL = 'spl-token' satisfies ParserProgramLabel;
  * instruction types; consumers narrow via the existing per-type superstruct
  * validators in `app/components/instruction/token/types.ts`. `type` is a
  * free-form string because the RPC layer reports types as strings and the
- * compat wrap erases the discriminator before cards read it anyway.
+ * router passes `parsed` to the Token card as `unknown` anyway.
  */
 export type TokenParsed = { type: string; info: unknown };
 

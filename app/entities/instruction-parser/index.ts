@@ -4,11 +4,11 @@ export {
     type DispatchResult,
     type InstructionParser,
     type InstructionParserDispatcher,
+    isParsedBy,
     isParsedInstruction,
     type ParsedInstructionInfo,
     type ParserProgramLabel,
     type UnparsedInstruction,
 } from '@explorer/parsers';
-export { toParsedInstruction } from '@explorer/parsers/compat';
 
 export { InstructionParserProvider, useInstructionParser } from './model/provider';

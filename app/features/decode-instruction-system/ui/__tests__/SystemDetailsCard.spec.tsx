@@ -1,7 +1,7 @@
 import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
-import { systemInstructionParser } from '@features/decode-instruction-system';
-import { SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
+import { systemInstructionParser } from '@explorer/parsers/programs/system';
+import { type ParsedInstruction, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
@@ -9,7 +9,7 @@ import { type CardRow, readCardRows, renderTxCard } from '@/app/__tests__/card-h
 import * as stubs from '@/app/__tests__/mock-stubs';
 import { decompileStubInstruction } from '@/app/__tests__/mocks';
 
-import { SystemDetailsCard } from '../system/SystemDetailsCard';
+import { SystemDetailsCard } from '../SystemDetailsCard';
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
@@ -130,6 +130,33 @@ const CASES: Array<{ fixture: Fixture; rows: CardRow[]; title: string }> = [
     },
 ];
 
+const NEW_ACCOUNT = 'AoSjHSCqppFdfTQQ8WKcNybUhRqE1f1k7u1oTornq5HQ';
+
+const ALLOW_PREFUND_CASES: Array<{ name: string; info: Record<string, unknown>; rows: CardRow[] }> = [
+    {
+        info: { lamports: 2_000_000, newAccount: NEW_ACCOUNT, owner: ATA_PROGRAM, source: PAYER, space: 96 },
+        name: 'with lamports',
+        rows: [
+            ['Program', PROGRAM],
+            ['From Address', PAYER],
+            ['New Address', NEW_ACCOUNT],
+            ['Transfer Amount (SOL)', '◎0.002'],
+            ['Allocated Data Size', '96 byte(s)'],
+            ['Assigned Program Id', ATA_PROGRAM],
+        ],
+    },
+    {
+        info: { newAccount: NEW_ACCOUNT, owner: ATA_PROGRAM, space: 96 },
+        name: 'without lamports',
+        rows: [
+            ['Program', PROGRAM],
+            ['New Address', NEW_ACCOUNT],
+            ['Allocated Data Size', '96 byte(s)'],
+            ['Assigned Program Id', ATA_PROGRAM],
+        ],
+    },
+];
+
 describe('instruction::SystemDetailsCard', () => {
     it.each(CASES)('should render $title', async ({ fixture: { instruction }, rows, title }) => {
         const parsedIx = dispatcher.fromTransactionInstruction(instruction);
@@ -147,7 +174,24 @@ describe('instruction::SystemDetailsCard', () => {
         });
         expect(readCardRows()).toEqual(rows);
     });
+
+    it.each(ALLOW_PREFUND_CASES)('should render createAccountAllowPrefund $name', async ({ info, rows }) => {
+        const parsedIx = dispatcher.fromParsedInstruction(rpcInstruction('createAccountAllowPrefund', info));
+
+        renderTxCard(
+            <SystemDetailsCard node={toInstructionNode({ index: 0, ix: parsedIx })} parsed={parsedIx.parsed} />,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('System Program: Create Account (Allow Prefund)')).toBeInTheDocument();
+        });
+        expect(readCardRows()).toEqual(rows);
+    });
 });
+
+function rpcInstruction(type: string, info: unknown): ParsedInstruction {
+    return { parsed: { info, type }, program: 'system', programId: SystemProgram.programId };
+}
 
 type Fixture = ReturnType<typeof fromJson>;
 

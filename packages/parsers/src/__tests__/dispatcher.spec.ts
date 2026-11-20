@@ -1,7 +1,7 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it, vi } from 'vitest';
 
-import { createInstructionParserDispatcher, isParsedInstruction } from '../dispatcher.js';
+import { createInstructionParserDispatcher, isParsedBy, isParsedInstruction } from '../dispatcher.js';
 import type { InstructionParser, ParsedInstructionInfo } from '../dispatcher.js';
 import { gen } from './gen.js';
 
@@ -59,13 +59,15 @@ describe('createInstructionParserDispatcher', () => {
         expect(dispatcher.fromTransactionInstruction(makeTransactionInstruction())).toBeUndefined();
     });
 
-    it('should wrap byte-path slice output into the canonical ParsedInstruction shape', () => {
-        const dispatcher = createInstructionParserDispatcher([makeParser()]);
+    it('should tag byte-path slice output with the parser that produced it', () => {
+        const parser = makeParser();
+        const dispatcher = createInstructionParserDispatcher([parser]);
 
         const result = dispatcher.fromTransactionInstruction(makeTransactionInstruction());
 
         expect(result).toEqual({
             parsed: { info: { amount: 1 }, type: 'transfer' },
+            parser,
             program: 'spl-token',
             programId: new PublicKey(PROGRAM_ID),
         });
@@ -122,17 +124,40 @@ describe('createInstructionParserDispatcher', () => {
 
     it('should normalize RPC-parsed input through the slice fromParsed', () => {
         const sliceParsed: ParsedInstructionInfo = { info: { normalized: true }, type: 'transfer' };
-        const dispatcher = createInstructionParserDispatcher([
-            makeParser({ fromParsed: vi.fn().mockReturnValue(sliceParsed) }),
-        ]);
+        const parser = makeParser({ fromParsed: vi.fn().mockReturnValue(sliceParsed) });
+        const dispatcher = createInstructionParserDispatcher([parser]);
 
         const result = dispatcher.fromParsedInstruction(makeRpcParsedInstruction() as never);
 
         expect(result).toEqual({
             parsed: { info: { normalized: true }, type: 'transfer' },
+            parser,
             program: 'spl-token',
             programId: new PublicKey(PROGRAM_ID),
         });
+    });
+});
+
+describe('isParsedBy', () => {
+    const parser = makeParser();
+    const otherParser = makeParser({ programId: OTHER_PROGRAM_ID });
+    const dispatcher = createInstructionParserDispatcher([parser, otherParser]);
+
+    it('should accept output that one of the given parsers produced', () => {
+        const result = dispatcher.fromTransactionInstruction(makeTransactionInstruction());
+
+        expect(isParsedBy(result, [otherParser, parser])).toBe(true);
+    });
+
+    it('should reject results that none of the given parsers produced', () => {
+        const results = [
+            makeRpcParsedInstruction() as never,
+            dispatcher.fromTransactionInstruction(makeTransactionInstruction(OTHER_PROGRAM_ID)),
+            { programId: new PublicKey(PROGRAM_ID), programLabel: 'spl-token' as const, unknown: true as const },
+            undefined,
+        ];
+
+        expect(results.map(result => isParsedBy(result, [parser]))).toEqual([false, false, false, false]);
     });
 });
 
