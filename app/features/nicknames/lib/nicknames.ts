@@ -1,5 +1,7 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
+
 import { Logger } from '@/app/shared/lib/logger';
 
 /**
@@ -14,7 +16,7 @@ export const getNickname = (address: string): string | null => {
 
     try {
         const nicknames = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        return nicknames[address] || null;
+        return getOwn(nicknames, address) || null;
     } catch (error) {
         Logger.error(error);
         return null;
@@ -25,15 +27,15 @@ export const setNickname = (address: string, nickname: string): void => {
     if (typeof window === 'undefined') return;
 
     try {
-        const nicknames = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        const nicknames = new Map(Object.entries(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')));
         const trimmedNickname = nickname.trim();
         if (trimmedNickname) {
             // Truncate to max length
-            nicknames[address] = trimmedNickname.slice(0, MAX_NICKNAME_LENGTH);
+            nicknames.set(address, trimmedNickname.slice(0, MAX_NICKNAME_LENGTH));
         } else {
-            delete nicknames[address];
+            nicknames.delete(address);
         }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nicknames));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(nicknames)));
 
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('nicknameUpdated', { detail: { address } }));
@@ -46,9 +48,9 @@ export const removeNickname = (address: string): void => {
     if (typeof window === 'undefined') return;
 
     try {
-        const nicknames = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        delete nicknames[address];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nicknames));
+        const nicknames = new Map(Object.entries(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')));
+        nicknames.delete(address);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(nicknames)));
 
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('nicknameUpdated', { detail: { address } }));

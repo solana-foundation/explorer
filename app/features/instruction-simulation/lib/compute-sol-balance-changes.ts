@@ -23,8 +23,8 @@ export function computeSolBalanceChanges(
             // guarantees pre/postBalances arrays match accountKeys in length; for simulation
             // data, a missing account genuinely has 0 lamports.
             const [pre, post] = knownBalances
-                ? [knownBalances.preBalances[i] ?? 0, knownBalances.postBalances[i] ?? 0]
-                : [parsedAccountsPre[i]?.lamports ?? 0, accountsPost.at(i)?.lamports ?? 0];
+                ? [knownBalances.preBalances.at(i) ?? 0, knownBalances.postBalances.at(i) ?? 0]
+                : [parsedAccountsPre.at(i)?.lamports ?? 0, accountsPost.at(i)?.lamports ?? 0];
 
             const delta = new BN(post).sub(new BN(pre));
 

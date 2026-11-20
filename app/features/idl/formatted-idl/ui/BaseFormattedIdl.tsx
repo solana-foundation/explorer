@@ -25,9 +25,10 @@ export function BaseFormattedIdl({
         setActiveTabIndex(tabs.findIndex(tab => !tab.disabled));
     }, [tabs, activeTabIndex]);
 
-    if (!tabs || activeTabIndex === null || !idl) return null;
+    if (!tabs || activeTabIndex === null || activeTabIndex < 0 || !idl) return null;
 
-    const activeTab = tabs[activeTabIndex];
+    const activeTab = tabs.at(activeTabIndex);
+    if (!activeTab) return null;
 
     return (
         <SearchHighlightProvider searchStr={searchStr || ''}>

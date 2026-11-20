@@ -1,4 +1,5 @@
 import { LIGHTHOUSE_INSTRUCTION_NAMES } from '@entities/lighthouse';
+import { getOwn } from '@shared/lib/object';
 import type { AccountMeta } from '@solana/kit';
 import {
     identifyLighthouseInstruction,
@@ -89,5 +90,8 @@ type RawCodamaParsed = {
 
 /** Project a lighthouse-sdk parse result onto the slice's canonical `{ type, info }`. */
 function toParsed(instruction: LighthouseInstruction, parsed: RawCodamaParsed): LighthouseParsed {
-    return { info: { accounts: parsed.accounts, data: parsed.data }, type: LIGHTHOUSE_INSTRUCTION_NAMES[instruction] };
+    return {
+        info: { accounts: parsed.accounts, data: parsed.data },
+        type: getOwn(LIGHTHOUSE_INSTRUCTION_NAMES, instruction),
+    };
 }

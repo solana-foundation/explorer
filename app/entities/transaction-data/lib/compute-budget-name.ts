@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import {
     COMPUTE_BUDGET_PROGRAM_ADDRESS,
     ComputeBudgetInstruction,
@@ -40,5 +41,5 @@ export function resolveComputeBudgetInstructionName(lookup: InstructionNameLooku
     // Widened to allow the numeric index: the map is total over the enum, so the miss case is
     // unreachable while the two agree, and a bump that breaks that fails to compile above.
     const names: Record<number, string | undefined> = COMPUTE_BUDGET_INSTRUCTION_NAMES;
-    return names[index];
+    return getOwn(names, index);
 }

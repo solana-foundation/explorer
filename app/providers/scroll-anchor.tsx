@@ -26,9 +26,7 @@ export const ScrollAnchorProvider =
               const pathname = usePathname();
               const searchParams = useSearchParams();
               const queryString = searchParams.toString();
-              const registeredScrollTargets = useRef<{
-                  [fragment: URLFragment]: WeakRef<HTMLElement>[] | undefined;
-              }>({});
+              const registeredScrollTargets = useRef(new Map<URLFragment, WeakRef<HTMLElement>[]>());
               const scrollEnabled = useRef<boolean>(false);
               const maybeScroll = useCallback(() => {
                   if (scrollEnabled.current === false) {
@@ -37,9 +35,7 @@ export const ScrollAnchorProvider =
                   const targetsByFragment = registeredScrollTargets.current;
                   // eslint-disable-next-line no-restricted-syntax -- strip leading hash from URL fragment
                   const fragment = window.location.hash.replace(/^#/, '');
-                  // The fragment comes from the URL; an own-property check keeps `#constructor` or
-                  // `#__proto__` from resolving to inherited members and crashing the root layout.
-                  const targets = Object.hasOwn(targetsByFragment, fragment) ? targetsByFragment[fragment] : undefined;
+                  const targets = targetsByFragment.get(fragment);
                   if (!targets) {
                       return;
                   }
@@ -57,7 +53,8 @@ export const ScrollAnchorProvider =
                   (fragment: string, element: HTMLElement) => {
                       element.setAttribute('id', fragment);
                       const targetsByFragment = registeredScrollTargets.current;
-                      const targets = (targetsByFragment[fragment] = targetsByFragment[fragment] || []);
+                      const targets = targetsByFragment.get(fragment) ?? [];
+                      targetsByFragment.set(fragment, targets);
                       targets.unshift(new WeakRef(element));
                       maybeScroll();
                   },

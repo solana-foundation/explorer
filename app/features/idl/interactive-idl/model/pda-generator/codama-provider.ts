@@ -82,7 +82,7 @@ async function deriveInstructionPdas(
     formAccounts: PdaFormAccounts,
 ): Promise<Record<string, PdaGenerationResult>> {
     const pdaMap = new Map<string, PdaNode>(arrayOrEmpty(root.program.pdas).map(p => [p.name, p]));
-    const results: Record<string, PdaGenerationResult> = {};
+    const results: Array<[string, PdaGenerationResult]> = [];
     const recursiveAccounts = findRecursivePdaAccounts(instruction);
 
     for (const acc of arrayOrEmpty(instruction.accounts)) {
@@ -93,7 +93,7 @@ async function deriveInstructionPdas(
         const accountName = camelCase(acc.name);
 
         if (recursiveAccounts.has(accountName)) {
-            results[accountName] = { generated: null, seeds: [] };
+            results.push([accountName, { generated: null, seeds: [] }]);
             continue;
         }
 
@@ -106,18 +106,18 @@ async function deriveInstructionPdas(
         );
 
         if (!allResolved) {
-            results[accountName] = { generated: null, seeds: seedInfo };
+            results.push([accountName, { generated: null, seeds: seedInfo }]);
             continue;
         }
 
         try {
             const pdaFn = client.pdas?.[pdaNode.name];
             if (!pdaFn) {
-                results[accountName] = { generated: null, seeds: seedInfo };
+                results.push([accountName, { generated: null, seeds: seedInfo }]);
                 continue;
             }
             const [address] = await pdaFn(seedInputs);
-            results[accountName] = { generated: String(address), seeds: seedInfo };
+            results.push([accountName, { generated: String(address), seeds: seedInfo }]);
         } catch (e) {
             Logger.error(
                 new Error(
@@ -126,11 +126,11 @@ async function deriveInstructionPdas(
                 ),
                 { sentry: true },
             );
-            results[accountName] = { generated: null, seeds: seedInfo };
+            results.push([accountName, { generated: null, seeds: seedInfo }]);
         }
     }
 
-    return results;
+    return Object.fromEntries(results);
 }
 
 // ---------------------------------------------------------------------------

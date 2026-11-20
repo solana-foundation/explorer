@@ -1,3 +1,5 @@
+import { getOwn } from '@shared/lib/object';
+
 export type CtaFieldTuning = {
     density: number;
 
@@ -55,5 +57,5 @@ const CTA_FIELD_SCOPE_DEFAULTS: Record<Exclude<CtaFieldScope, 'base'>, CtaFieldT
 export function resolveCtaField(scope: CtaFieldScope): CtaFieldTuning {
     return scope === 'base'
         ? CTA_FIELD_TUNING_DEFAULTS
-        : { ...CTA_FIELD_TUNING_DEFAULTS, ...CTA_FIELD_SCOPE_DEFAULTS[scope] };
+        : { ...CTA_FIELD_TUNING_DEFAULTS, ...getOwn(CTA_FIELD_SCOPE_DEFAULTS, scope) };
 }

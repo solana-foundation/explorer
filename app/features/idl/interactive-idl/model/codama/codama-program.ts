@@ -85,9 +85,8 @@ export class CodamaUnifiedProgram implements UnifiedProgram {
         const userArgs = getUserFacingArguments(instructionNode);
         const namedArgs: Record<string, unknown> = {};
 
-        for (let i = 0; i < userArgs.length; i++) {
-            const argDef = userArgs[i];
-            const rawValue = args[i];
+        for (const [i, argDef] of userArgs.entries()) {
+            const rawValue = args.at(i);
 
             try {
                 namedArgs[argDef.name] = convertValue(rawValue, argDef.type, root);
@@ -97,13 +96,19 @@ export class CodamaUnifiedProgram implements UnifiedProgram {
         }
 
         // Convert UnifiedAccounts (Record<string, PublicKey | null>) to string addresses
-        const accountsInput: Record<string, string | null> = {};
-        for (const [key, value] of Object.entries(accounts)) {
-            accountsInput[key] = value ? value.toBase58() : null;
-        }
+        const accountsInput: Record<string, string | null> = Object.fromEntries(
+            Object.entries(accounts).map(([key, value]): [string, string | null] => [
+                key,
+                value ? value.toBase58() : null,
+            ]),
+        );
 
         // Build the instruction
-        const methodFn = this.client.methods[instructionName];
+        // `methods` is a Proxy with no own keys. Its `get` trap resolves IDL names and skips inherited ones.
+        const methodFn: ProgramClient['methods'][string] | undefined = Reflect.get(
+            this.client.methods,
+            instructionName,
+        );
         if (!methodFn) {
             throw new Error(`Method "${instructionName}" not found on program client`);
         }

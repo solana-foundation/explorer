@@ -1,4 +1,5 @@
 import { truncateAddress } from '@entities/address';
+import { getOwn } from '@shared/lib/object';
 
 import { Logo } from '@/app/shared/components/SolanaLogo';
 
@@ -260,7 +261,7 @@ function ProgramBody({ data }: { data: ProgramCardData }) {
             <Identity address={data.address} />
             <div style={{ alignItems: 'center', display: 'flex', gap: '26px', paddingTop: '12px' }}>
                 {MARKER_KEYS.map(key => {
-                    const { icon, label, tone } = MARKER_DISPLAY[key][data.markers[key]];
+                    const { icon, label, tone } = getOwn(getOwn(MARKER_DISPLAY, key), getOwn(data.markers, key));
                     return <Marker icon={icon} key={key} label={label} tone={tone} />;
                 })}
             </div>
@@ -436,7 +437,7 @@ function NotFoundBody({ address, reason }: { address: string; reason: NotFoundRe
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', position: 'relative', width: '100%' }}>
             <Headline>
                 <span style={{ color: COLORS.emphasis, fontWeight: 500, ...TYPO.headline }}>
-                    {NOT_FOUND_COPY[reason].headline}
+                    {getOwn(NOT_FOUND_COPY, reason).headline}
                 </span>
             </Headline>
             <Identity address={address} />
@@ -455,7 +456,7 @@ function NotFoundFooter({ reason }: { reason: NotFoundReason }) {
                 // About half the content width, so the sentence wraps to two short lines as the design does.
                 style={{ color: COLORS.secondary, maxWidth: '620px', ...TYPO.caption, lineHeight: '33px' }}
             >
-                {NOT_FOUND_COPY[reason].reason}
+                {getOwn(NOT_FOUND_COPY, reason).reason}
             </span>
         </div>
     );

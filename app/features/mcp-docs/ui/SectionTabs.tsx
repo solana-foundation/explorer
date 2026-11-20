@@ -19,10 +19,13 @@ export function SectionTabs() {
         wrapperRef: barRef,
     });
 
-    const { onKeyDown, tabRefs } = useTablistKeyboard<HTMLAnchorElement>(
+    const { onKeyDown, setTabRef } = useTablistKeyboard<HTMLAnchorElement>(
         SECTIONS.length,
         SECTIONS.findIndex(section => section.id === active),
-        index => scrollToSection(SECTIONS[index].id),
+        index => {
+            const section = SECTIONS.at(index);
+            if (section) scrollToSection(section.id);
+        },
     );
 
     return (
@@ -49,9 +52,7 @@ export function SectionTabs() {
                         return (
                             <a
                                 key={section.id}
-                                ref={node => {
-                                    tabRefs.current[index] = node;
-                                }}
+                                ref={setTabRef(index)}
                                 href={`#${section.id}`}
                                 role="tab"
                                 aria-selected={isActive}

@@ -48,7 +48,7 @@ export function formatInstructionLogs({
         const programId = instruction.programId.toBase58();
 
         return {
-            computeUnits: invocations[index]?.computeUnits ?? 0,
+            computeUnits: invocations.at(index)?.computeUnits ?? 0,
             defaultUnits: getDefaultComputeUnits(programId),
             name: instruction.name,
             programId,

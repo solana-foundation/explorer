@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 import { camelCase } from 'change-case';
@@ -69,7 +70,7 @@ function processArgSeed(
     instruction: PdaInstruction,
 ): ProcessedSeed {
     const camelPath = camelCase(seed.path);
-    const value = args[camelPath];
+    const value = getOwn(args, camelPath);
     if (value === undefined) {
         return { buffer: null, info: { name: camelPath, value: null } };
     }
@@ -87,7 +88,7 @@ function processAccountSeed(
     accounts: Record<string, string | Record<string, string | undefined> | undefined>,
 ): ProcessedSeed {
     const camelPath = camelCase(seed.path);
-    const raw = accounts[camelPath];
+    const raw = getOwn(accounts, camelPath);
     const value = typeof raw === 'string' ? raw : null;
     if (!value) {
         return { buffer: null, info: { name: camelPath, value: null } };
@@ -185,14 +186,14 @@ function parseIntegerArray(value: string, elementType: string, length: number): 
     }
     if (arr.length !== length) return null;
 
-    const size = INTEGER_SEED_SIZES[elementType];
+    const size = getOwn(INTEGER_SEED_SIZES, elementType);
     if (size === undefined) return null;
 
     const bytes: number[] = [];
     for (const item of arr) {
         try {
             const buf = bnToBytes(new BN(item), 'le', size);
-            for (let i = 0; i < buf.length; i++) bytes.push(buf[i]);
+            for (const byte of buf) bytes.push(byte);
         } catch {
             return null;
         }

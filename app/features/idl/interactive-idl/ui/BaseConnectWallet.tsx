@@ -75,11 +75,9 @@ export function BaseConnectWallet({
     };
 
     const displayLabel = useMemo(() => {
-        if (buttonState === 'connecting' || buttonState === 'has-wallet') {
-            return labels?.[buttonState];
-        } else {
-            return labels?.['no-wallet'];
-        }
+        if (buttonState === 'connecting') return labels?.connecting;
+        if (buttonState === 'has-wallet') return labels?.['has-wallet'];
+        return labels?.['no-wallet'];
     }, [buttonState, labels]);
 
     const content = (

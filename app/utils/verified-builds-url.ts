@@ -1,3 +1,5 @@
+import { stripWebScheme } from '@shared/lib/url';
+
 import { Cluster } from './cluster';
 
 // Canonical docs link for verified builds, shared by every card that explains the feature.
@@ -61,9 +63,7 @@ export function trimTrailingSlashes(value: string): string {
 // Compact, readable repository label: drop the scheme and any trailing slash or `.git`. Display only
 // — the clickable href is still built from the full URL via composeOnchainRepoUrl.
 export function repoLabel(repository: string): string {
-    let label = trimTrailingSlashes(repository);
-    if (label.startsWith('https://')) label = label.slice('https://'.length);
-    else if (label.startsWith('http://')) label = label.slice('http://'.length);
+    let label = stripWebScheme(trimTrailingSlashes(repository));
     if (label.endsWith('.git')) label = label.slice(0, -'.git'.length);
     return label;
 }

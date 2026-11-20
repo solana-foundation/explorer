@@ -129,7 +129,7 @@ function ResourceCardRow({ resources }: { resources: Resource[] }) {
                 // In place of the arrows below `lg`: one dot per card, lit while it is on screen.
                 <div aria-hidden className="flex gap-1.5 pb-3 pt-4 lg:hidden">
                     {resources.map((resource, index) => (
-                        <span key={resource.link} className={dotVariants({ visible: visible[index] ?? false })} />
+                        <span key={resource.link} className={dotVariants({ visible: visible.at(index) ?? false })} />
                     ))}
                 </div>
             )}
@@ -220,12 +220,10 @@ function useVisibleItems<T extends HTMLElement>(count: number): [RefObject<T | n
         const observer = new IntersectionObserver(
             entries => {
                 setVisible(previous => {
-                    const next = items.map((_item, index) => previous[index] ?? true);
-                    for (const entry of entries) {
-                        const index = items.indexOf(entry.target);
-                        if (index >= 0) next[index] = entry.intersectionRatio >= VISIBLE_RATIO;
-                    }
-                    return next;
+                    const observed = new Map(
+                        entries.map(entry => [entry.target, entry.intersectionRatio >= VISIBLE_RATIO]),
+                    );
+                    return items.map((item, index) => observed.get(item) ?? previous.at(index) ?? true);
                 });
             },
             { root, threshold: VISIBLE_RATIO },

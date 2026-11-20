@@ -297,7 +297,7 @@ function AccountFromLookupTableRow({
     const lookupTable = lookupTableInfo && lookupTableInfo[0];
     const pubkey =
         lookupTable && typeof lookupTable !== 'string' && lookupTableIndex < lookupTable.state.addresses.length
-            ? lookupTable.state.addresses[lookupTableIndex]
+            ? lookupTable.state.addresses.at(lookupTableIndex)
             : undefined;
 
     return (

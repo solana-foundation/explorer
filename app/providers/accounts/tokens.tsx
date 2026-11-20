@@ -5,6 +5,7 @@ import { useAccountInfo, useFetchAccountInfo, useMintAccountInfo } from '@provid
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenAccountInfo } from '@validators/accounts/token';
@@ -108,7 +109,7 @@ export function useAccountOwnedTokens(address: string): Cache.CacheEntry<Account
         throw new Error(`useAccountOwnedTokens must be used within a AccountsProvider`);
     }
 
-    return context.entries[address];
+    return getOwn(context.entries, address);
 }
 
 export function useFetchAccountOwnedTokens() {

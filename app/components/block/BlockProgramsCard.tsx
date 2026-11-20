@@ -47,7 +47,7 @@ function computeProgramStats(block: BlockData): ProgramStats {
         const accountKeys = getBlockTransactionAccounts(tx);
         const trackProgram = (index: number) => {
             if (index >= accountKeys.length) return;
-            const programId = accountKeys[index];
+            const programId = accountKeys.at(index);
             invariant(programId, `account key index ${index} out of range`);
             const programAddress = programId;
             programUsed.add(programAddress);

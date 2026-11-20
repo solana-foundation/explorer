@@ -28,6 +28,8 @@ import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCacheEntries, useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
+import { invariant } from '@shared/lib/invariant';
+import { getOwn } from '@shared/lib/object';
 import type { AccountInfoWithJsonData } from '@solana/kit';
 import {
     AddressLookupTableAccount,
@@ -290,9 +292,9 @@ async function fetchMultipleAccounts({
                           })
                           .send();
 
-            for (let i = 0; i < batch.length; i++) {
-                const pubkey = batch[i];
-                const result = results[i];
+            for (const [i, pubkey] of batch.entries()) {
+                const result = results.at(i);
+                invariant(result !== undefined, 'getMultipleAccounts returned fewer accounts than requested');
 
                 let account: Account;
                 if (result === null) {
@@ -611,9 +613,7 @@ function parseAddressLookupTableFromCache(
 export function useAddressLookupTables(addresses: string[]) {
     const accountInfos = useAccountInfos(addresses);
     return React.useMemo(() => {
-        return accountInfos.map((accountInfo, index) =>
-            parseAddressLookupTableFromCache(accountInfo, addresses[index]),
-        );
+        return addresses.map((address, index) => parseAddressLookupTableFromCache(accountInfos.at(index), address));
     }, [accountInfos, addresses]);
 }
 
@@ -632,7 +632,7 @@ export function useFetchAccountInfo() {
 
     return React.useCallback(
         (pubkey: PublicKey, dataMode: FetchAccountDataMode) => {
-            fetchers[dataMode].fetch(pubkey);
+            getOwn(fetchers, dataMode).fetch(pubkey);
         },
         [fetchers],
     );

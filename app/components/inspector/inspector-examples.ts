@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { enums, is } from 'superstruct';
 
 export const EXAMPLE_ENCODINGS = ['base64', 'base58'] as const;
@@ -59,10 +60,10 @@ const RUST_CARGO: Record<ExampleEncoding, string> = {
 };
 
 export function rustExample(encoding: ExampleEncoding): CodeSample {
-    const focus = RUST_PRINT_LINE[encoding];
+    const focus = getOwn(RUST_PRINT_LINE, encoding);
     return {
         // `transfer` moved out of `solana_sdk` into `solana-system-interface` in solana-sdk 3.0.
-        code: `${RUST_CARGO[encoding]}${RUST_ENCODING_USE[encoding]}use solana_sdk::{hash::Hash, message::Message, pubkey, transaction::Transaction};
+        code: `${getOwn(RUST_CARGO, encoding)}${getOwn(RUST_ENCODING_USE, encoding)}use solana_sdk::{hash::Hash, message::Message, pubkey, transaction::Transaction};
 use solana_system_interface::instruction::transfer;
 use std::str::FromStr;
 
@@ -106,11 +107,11 @@ const KIT_ENCODE_IMPORTS: Record<ExampleEncoding, string> = {
  * transaction carries an empty signature slot, which the inspector accepts.
  */
 export function kitExample(encoding: ExampleEncoding): CodeSample {
-    const focus = TS_PRINT_LINES[encoding].wire.replace('(tx)', '(compileTransaction(message))');
+    const focus = getOwn(TS_PRINT_LINES, encoding).wire.replace('(tx)', '(compileTransaction(message))');
     return {
         code: `import {
   address, appendTransactionMessageInstruction, blockhash, compileTransaction, createNoopSigner,
-  createTransactionMessage, ${KIT_ENCODE_IMPORTS[encoding]}, lamports, pipe,
+  createTransactionMessage, ${getOwn(KIT_ENCODE_IMPORTS, encoding)}, lamports, pipe,
   setTransactionMessageFeePayerSigner, setTransactionMessageLifetimeUsingBlockhash,
 } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";

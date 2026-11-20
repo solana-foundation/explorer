@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { IntegerOperator } from 'lighthouse-sdk';
 
 // `IntegerOperator` is a superset of `EquatableOperator` and the two agree on
@@ -25,13 +26,14 @@ export function withFormattedOperators<T>(value: T): T {
         return value.map(item => withFormattedOperators(item)) as T;
     }
     if (isPlainObject(value)) {
-        const formatted: Record<string, unknown> = {};
-        for (const [key, item] of Object.entries(value)) {
-            formatted[key] =
+        const formatted = Object.fromEntries(
+            Object.entries(value).map(([key, item]) => [
+                key,
                 key === 'operator' && typeof item === 'number'
-                    ? (OPERATOR_SYMBOLS[item] ?? item)
-                    : withFormattedOperators(item);
-        }
+                    ? (getOwn(OPERATOR_SYMBOLS, item) ?? item)
+                    : withFormattedOperators(item),
+            ]),
+        );
         return formatted as T;
     }
     return value;

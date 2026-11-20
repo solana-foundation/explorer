@@ -45,7 +45,7 @@ export async function fetchBlock(url: string, slot: number): Promise<BlockData |
                 index,
                 rpcTransaction,
                 slot,
-                transactionToValidate: block.transactions[index],
+                transactionToValidate: block.transactions.at(index),
             }),
         ),
     };

@@ -3,6 +3,8 @@
 // by re-`fetch`ing the same proxied URL and reading `response.status`. See
 // `model/useImageFailureReason` for the React wiring.
 
+import { getOwn } from '@shared/lib/object';
+
 export type ImageFailure = {
     /** Proxy HTTP status, or 0 when it couldn't be read (network/opaque/abort). */
     status: number;
@@ -33,7 +35,7 @@ const REASON_BY_STATUS: Record<number, string> = {
 };
 
 export function reasonForStatus(status: number): string {
-    return REASON_BY_STATUS[status] ?? GENERIC_REASON;
+    return getOwn(REASON_BY_STATUS, status) ?? GENERIC_REASON;
 }
 
 // Only the same-origin proxy returns a status we can read; a raw cross-origin

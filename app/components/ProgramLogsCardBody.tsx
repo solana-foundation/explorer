@@ -121,7 +121,7 @@ export function ProgramLogsCardBody({
         <TableCardBody className={className} density={density} layout="expanded">
             {instructionProgramIds.map((programId, index) => {
                 const programAddress = programId.toBase58();
-                let programLogs: InstructionLogs | undefined = logs[logIndex];
+                let programLogs: InstructionLogs | undefined = logs.at(logIndex);
                 if (programLogs?.invokedProgram === programAddress) {
                     logIndex++;
                 } else if (
@@ -149,7 +149,7 @@ export function ProgramLogsCardBody({
                         programLogs={programLogs}
                         url={url}
                         message={message}
-                        instruction={instructions[index]}
+                        instruction={instructions.at(index)}
                     />
                 );
             })}
@@ -200,7 +200,7 @@ function ProgramLogRow({
                     message.header;
 
                 const accounts = instruction.accountKeyIndexes.map((accountIndex: number) => {
-                    const pubkey = message.staticAccountKeys[accountIndex];
+                    const pubkey = message.staticAccountKeys.at(accountIndex);
 
                     // Determine if account is signer and writable based on message header
                     let isSigner = false;

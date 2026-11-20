@@ -3,6 +3,7 @@ import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { getAnchorIdls, useAnchorProgram } from '@entities/idl';
 import type { InstructionArg } from '@entities/instruction-card';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
@@ -42,7 +43,7 @@ export function decodeEventWithCustomDiscriminator(eventData: string, program: P
         }
 
         // Compare discriminator bytes
-        const matches = discriminator.every((byte, index) => data[index] === byte);
+        const matches = discriminator.every((byte, index) => data.at(index) === byte);
 
         if (matches) {
             // Found matching event
@@ -139,7 +140,7 @@ export function decodeInstructionWithCustomDiscriminator(ixData: Uint8Array, pro
         }
 
         // Compare discriminator bytes
-        const matches = discriminator.every((byte, index) => data[index] === byte);
+        const matches = discriminator.every((byte, index) => data.at(index) === byte);
 
         if (matches) {
             // Found matching instruction
@@ -448,8 +449,8 @@ function definedArg({
         if (!variantFields) {
             return leaf(name, { enum: type.defined.name }, { kind: 'text', value: camelToTitleCase(enumVariantName) });
         }
-        const children = Object.entries(value[enumVariantName]).map(([innerKey, innerValue], index) => {
-            const innerFieldType = variantFields[index];
+        const children = Object.entries(getOwn(value, enumVariantName)).map(([innerKey, innerValue], index) => {
+            const innerFieldType = variantFields.at(index);
             if (!innerFieldType) {
                 throw Error(`Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`);
             }

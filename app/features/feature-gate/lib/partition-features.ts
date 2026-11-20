@@ -1,4 +1,5 @@
 import { FEATURE_GATES, type FeatureInfoType } from '@entities/feature-gate';
+import { getOwn } from '@shared/lib/object';
 
 import { Cluster } from '@/app/utils/cluster';
 
@@ -30,7 +31,7 @@ const OTHER_CLUSTERS: Partial<Record<Cluster, Exclude<Cluster, Cluster.Custom>[]
  * and "active elsewhere but not yet here". Pure — safe to call from a memo.
  */
 export function partitionFeatures(cluster: Cluster): FeaturePartition {
-    const others = OTHER_CLUSTERS[cluster] ?? [];
+    const others = getOwn(OTHER_CLUSTERS, cluster) ?? [];
     const activated: ActivatedFeature[] = [];
     const upcoming: UpcomingFeature[] = [];
 
@@ -94,7 +95,7 @@ function activationEpochFor(feature: FeatureInfoType, cluster: Cluster): number 
 function pairSimdLinks(simds: string[], links: string[]): SimdEntry[] {
     const out: SimdEntry[] = [];
     for (const [index, simd] of simds.entries()) {
-        const link = links[index];
+        const link = links.at(index);
         if (simd && link) out.push({ link, simd });
     }
     return out;

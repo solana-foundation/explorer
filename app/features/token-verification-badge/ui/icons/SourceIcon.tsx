@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import Image from 'next/image';
 
 import { EVerificationSource } from '../../lib/types';
@@ -14,7 +15,7 @@ const SOURCE_ICONS = {
 };
 
 export function SourceIcon({ source }: { source: EVerificationSource }) {
-    const icon = SOURCE_ICONS[source];
+    const icon = getOwn(SOURCE_ICONS, source);
 
     return <Image src={icon} alt={source} width={ICON_SIZE} height={ICON_SIZE} className="rounded-full" />;
 }

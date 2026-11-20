@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { Cluster } from '@utils/cluster';
 
 type RouteMapping = {
@@ -120,5 +121,5 @@ function extractIdentifier(rawSegment: string): string | undefined {
 
 function resolveCluster(explorer: ExternalExplorer, rawCluster: string | null): Cluster {
     if (!rawCluster) return Cluster.Mainnet;
-    return explorer.clusters[rawCluster] ?? Cluster.Mainnet;
+    return getOwn(explorer.clusters, rawCluster) ?? Cluster.Mainnet;
 }

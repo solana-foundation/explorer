@@ -51,10 +51,10 @@ function isGroup(name: AccountName): name is NestedAccountName {
 }
 
 function accountLabel(names: readonly AccountName[], position: number): string {
-    if (position >= names.length) {
+    const name = names.at(position);
+    if (name === undefined) {
         return remainingAccountLabel(position, names.length);
     }
-    const name = names[position];
     const text = typeof name === 'string' ? name : name.name;
     return text ? capitalizeFirstLetter(text) : `Account #${position + 1}`;
 }

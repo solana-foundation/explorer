@@ -1,4 +1,6 @@
 import type { Idl as AnchorIdl, Program as AnchorProgram } from '@coral-xyz/anchor';
+import { invariant } from '@shared/lib/invariant';
+import { getOwn } from '@shared/lib/object';
 import type { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import type { UnifiedAccounts, UnifiedArguments, UnifiedProgram } from '../unified-program.d';
@@ -20,7 +22,8 @@ export class AnchorUnifiedProgram implements UnifiedProgram {
         args: UnifiedArguments,
     ): Promise<TransactionInstruction> {
         try {
-            const instruction = this.program.methods[instructionName];
+            const instruction = getOwn(this.program.methods, instructionName);
+            invariant(instruction, `Instruction "${instructionName}" not found`);
 
             return instruction(...args)
                 .accounts(accounts as Record<string, PublicKey>) // keep null for optional accounts as opposit breaks account resolution

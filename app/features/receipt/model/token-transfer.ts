@@ -107,8 +107,7 @@ function buildTokenTransfers(
     let totalRaw = BigInt(primary.amount.rawAmount);
     const decimals = primary.amount.decimals;
 
-    for (let i = 1; i < located.length; i++) {
-        const { instruction, innerIndex, topLevelIndex } = located[i];
+    for (const { instruction, innerIndex, topLevelIndex } of located.slice(1)) {
         const payload = extractTokenTransferPayload(transaction, instruction);
         const [err, v] = validate(payload, TokenTransferPayload, { coerce: true });
         if (err) {

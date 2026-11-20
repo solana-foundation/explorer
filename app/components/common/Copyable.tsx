@@ -1,5 +1,6 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
 import { type ReactNode, useEffect, useState } from 'react';
 import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
@@ -45,7 +46,7 @@ export function Copyable({ text, children }: CopyableProps) {
     };
 
     function CopyIcon() {
-        return copyStrategy[state] || null;
+        return getOwn(copyStrategy, state) || null;
     }
 
     let textColor = '';

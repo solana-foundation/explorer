@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { enums } from 'superstruct';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { cn } from '@/app/components/shared/utils';
 
-import { getCookie, setCookie } from '../lib/cookie';
+import { getStoredValue, setStoredValue } from '../lib/stored-value';
 
-export const COOKIE_CONSENT_NAME = 'solana_cookie_consent';
-export const COOKIE_COUNTRY_NAME = 'solana_country';
+export const CONSENT_STORAGE_KEY = 'solana_cookie_consent';
+export const COUNTRY_STORAGE_KEY = 'solana_country';
 export const COOKIE_CONSENT_CHANGE_EVENT = 'cookie-consent-change';
-const COOKIE_MAX_AGE = 15778476; // 6 months in seconds
+const CONSENT_MAX_AGE_SECONDS = 15778476; // 6 months in seconds
 const PRIVACY_POLICY_URL = 'https://solana.com/privacy-policy#collection-of-information';
 
 export enum EConsentStatus {
@@ -20,19 +21,23 @@ export enum EConsentStatus {
 }
 
 export function CookieConsent() {
-    const [consent, setConsent] = useState<EConsentStatus | null>(null);
+    const [consent, setConsent] = useState<EConsentStatus>();
     const [isMounted, setIsMounted] = useState(false);
     const [isEU, setIsEU] = useState<boolean | null>(null);
 
     const autoGrantConsent = () => {
-        setCookie(COOKIE_CONSENT_NAME, EConsentStatus.Granted, COOKIE_MAX_AGE);
+        setStoredValue({
+            maxAgeSeconds: CONSENT_MAX_AGE_SECONDS,
+            name: CONSENT_STORAGE_KEY,
+            value: EConsentStatus.Granted,
+        });
         setConsent(EConsentStatus.Granted);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: EConsentStatus.Granted }));
     };
 
     useEffect(() => {
         setIsMounted(true);
-        const storedConsent = getCookie(COOKIE_CONSENT_NAME) as EConsentStatus | null;
+        const storedConsent = getStoredConsent();
         setConsent(storedConsent);
 
         if (storedConsent) return;
@@ -41,7 +46,11 @@ export function CookieConsent() {
             .then(res => res.json())
             .then(data => {
                 if (data.country) {
-                    setCookie(COOKIE_COUNTRY_NAME, data.country, COOKIE_MAX_AGE);
+                    setStoredValue({
+                        maxAgeSeconds: CONSENT_MAX_AGE_SECONDS,
+                        name: COUNTRY_STORAGE_KEY,
+                        value: data.country,
+                    });
                 }
                 setIsEU(data.isEU);
                 if (!data.isEU) autoGrantConsent();
@@ -53,12 +62,12 @@ export function CookieConsent() {
     }, []);
 
     const handleConsent = (value: EConsentStatus) => {
-        setCookie(COOKIE_CONSENT_NAME, value, COOKIE_MAX_AGE);
+        setStoredValue({ maxAgeSeconds: CONSENT_MAX_AGE_SECONDS, name: CONSENT_STORAGE_KEY, value });
         setConsent(value);
         window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT, { detail: value }));
     };
 
-    if (!isMounted || consent !== null || isEU === null) {
+    if (!isMounted || consent !== undefined || isEU === null) {
         return null;
     }
 
@@ -91,6 +100,20 @@ export function CookieConsent() {
     }
 
     return null;
+}
+
+export function getStoredConsent(): EConsentStatus | undefined {
+    return getStoredValue(CONSENT_STORAGE_KEY, enums(Object.values(EConsentStatus))) ?? readLegacyDenial();
+}
+
+const LEGACY_CONSENT_COOKIE = 'solana_cookie_consent';
+
+// When `isEU` is true, a lost grant shows the banner again and keeps analytics off until the visitor accepts.
+// A lost denial becomes a grant when geo-location fails or `isEU` is false, so the denial is read from the cookie.
+function readLegacyDenial(): EConsentStatus.Denied | undefined {
+    // eslint-disable-next-line @microsoft/sdl/no-cookies -- No code writes this cookie, so every copy expires within the consent max age.
+    const cookies = document.cookie.split('; ');
+    return cookies.includes(`${LEGACY_CONSENT_COOKIE}=${EConsentStatus.Denied}`) ? EConsentStatus.Denied : undefined;
 }
 
 export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {

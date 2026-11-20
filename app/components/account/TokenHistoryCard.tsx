@@ -20,6 +20,7 @@ import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@p
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
+import { getOwn } from '@shared/lib/object';
 import { getBase58Encoder } from '@solana/kit';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -112,7 +113,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             const newTokens = tokensToFetch.slice(prevTokensToFetchCount.current);
             newTokens.forEach(token => {
                 const address = token.pubkey.toBase58();
-                if (!accountHistories[address]) {
+                if (!getOwn(accountHistories, address)) {
                     fetchAccountHistory(toKitAddress(token.pubkey), false, true);
                 }
             });

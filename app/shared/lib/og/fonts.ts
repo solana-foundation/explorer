@@ -10,60 +10,57 @@ type OgFont = {
     weight: OgFontWeight;
 };
 
-const WEIGHTS = [
-    { file: 'Regular', weight: 400 },
-    { file: 'Medium', weight: 500 },
-    { file: 'SemiBold', weight: 600 },
+const FONTS_DIR = join(process.cwd(), 'public', 'fonts');
+
+// Each face names its file in a literal, so this module can read only these files.
+const FACES = [
+    { name: 'Rubik', read: () => readFile(join(FONTS_DIR, 'Rubik-Regular.ttf')), weight: 400 },
+    { name: 'Rubik', read: () => readFile(join(FONTS_DIR, 'Rubik-Medium.ttf')), weight: 500 },
+    { name: 'Rubik', read: () => readFile(join(FONTS_DIR, 'Rubik-SemiBold.ttf')), weight: 600 },
+    { name: 'Roboto Mono', read: () => readFile(join(FONTS_DIR, 'RobotoMono-Regular.ttf')), weight: 400 },
+    { name: 'Roboto Mono', read: () => readFile(join(FONTS_DIR, 'RobotoMono-Medium.ttf')), weight: 500 },
+    { name: 'Roboto Mono', read: () => readFile(join(FONTS_DIR, 'RobotoMono-SemiBold.ttf')), weight: 600 },
 ] as const;
 
-const FAMILIES = [
-    { file: 'Rubik', name: 'Rubik' },
-    { file: 'RobotoMono', name: 'Roboto Mono' },
-] as const;
-
-export type OgFontFamily = (typeof FAMILIES)[number]['name'];
-export type OgFontWeight = (typeof WEIGHTS)[number]['weight'];
+type OgFontFace = (typeof FACES)[number];
+export type OgFontFamily = OgFontFace['name'];
+export type OgFontWeight = OgFontFace['weight'];
 export type OgFontOption = {
     family: OgFontFamily;
     weights?: readonly OgFontWeight[];
 };
 
-const FILE_PREFIX = new Map<OgFontFamily, string>(FAMILIES.map(({ file, name }) => [name, file]));
-const ALL_FONTS: readonly OgFontOption[] = FAMILIES.map(({ name }) => ({ family: name }));
-const cache = new Map<string, Promise<ArrayBuffer>>();
+const ALL_FONTS: readonly OgFontOption[] = [...new Set(FACES.map(({ name }) => name))].map(family => ({ family }));
+const cache = new Map<OgFontFace, Promise<ArrayBuffer>>();
 
 export async function loadOgFonts(fontOptions: readonly OgFontOption[] = ALL_FONTS): Promise<OgFont[]> {
     const faces = fontOptions.flatMap(({ family, weights }) =>
-        WEIGHTS.filter(({ weight }) => weights?.includes(weight) ?? true).map(({ file, weight }) => ({
-            name: family,
-            path: join(process.cwd(), 'public', 'fonts', `${FILE_PREFIX.get(family)}-${file}.ttf`),
-            weight,
+        FACES.filter(face => face.name === family && (weights?.includes(face.weight) ?? true)),
+    );
+    return Promise.all(
+        faces.map(async (face): Promise<OgFont> => ({
+            data: await readFontCached(face),
+            name: face.name,
+            style: 'normal',
+            weight: face.weight,
         })),
     );
-    const data = await Promise.all(faces.map(({ path }) => readFontCached(path)));
-
-    return faces.map((face, index) => ({
-        data: data[index],
-        name: face.name,
-        style: 'normal',
-        weight: face.weight,
-    }));
 }
 
-function readFontCached(path: string): Promise<ArrayBuffer> {
-    const cached = cache.get(path);
+function readFontCached(face: OgFontFace): Promise<ArrayBuffer> {
+    const cached = cache.get(face);
     if (cached) return cached;
 
-    const bytes = readFont(path).catch(error => {
-        cache.delete(path);
+    const bytes = readFont(face).catch(error => {
+        cache.delete(face);
         throw error;
     });
-    cache.set(path, bytes);
+    cache.set(face, bytes);
 
     return bytes;
 }
 
-async function readFont(path: string): Promise<ArrayBuffer> {
-    const bytes = await readFile(path);
+async function readFont(face: OgFontFace): Promise<ArrayBuffer> {
+    const bytes = await face.read();
     return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
 }

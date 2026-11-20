@@ -22,9 +22,10 @@ export async function fetchAccountSizes(
 
     const sizes = new Map<string, number>();
     infos.forEach((info, i) => {
+        const accountAddress = addresses.at(i);
         const size = info === null ? 0 : toSafeUint(info.space);
-        if (size !== undefined) {
-            sizes.set(addresses[i], size);
+        if (accountAddress !== undefined && size !== undefined) {
+            sizes.set(accountAddress, size);
         }
     });
     return sizes;

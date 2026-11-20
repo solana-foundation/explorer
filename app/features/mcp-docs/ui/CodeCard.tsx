@@ -1,5 +1,6 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
 import React, { useEffect, useRef, useState } from 'react';
 import { Check, Copy, XCircle } from 'react-feather';
 
@@ -42,11 +43,14 @@ export function CodeCard({
         return () => observer.disconnect();
     }, [collapsible, code]);
 
-    const icon = {
-        copied: <Check size={14} aria-hidden />,
-        copy: <Copy size={14} aria-hidden />,
-        errored: <XCircle size={14} aria-hidden />,
-    }[state];
+    const icon = getOwn(
+        {
+            copied: <Check size={14} aria-hidden />,
+            copy: <Copy size={14} aria-hidden />,
+            errored: <XCircle size={14} aria-hidden />,
+        },
+        state,
+    );
 
     const clamped = collapsible && isMobile && !expanded;
     const preMaxHeight = collapsible && isMobile ? (expanded ? fullHeight : CODE_CARD_COLLAPSED) : undefined;

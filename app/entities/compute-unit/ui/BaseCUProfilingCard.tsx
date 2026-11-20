@@ -95,7 +95,7 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                         if (!tooltipEl) {
                             tooltipEl = document.createElement('div');
                             tooltipEl.id = TOOLTIP_ELEMENT_ID;
-                            tooltipEl.innerHTML = '<div class="content"></div>';
+                            tooltipEl.append(createDiv('', 'content'));
                             document.body.appendChild(tooltipEl);
                         }
 
@@ -128,62 +128,33 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                 return;
                             }
 
+                            const swatchEl = createDiv(
+                                'width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; margin-top: 3px;',
+                                'cu-tooltip-swatch',
+                            );
+                            swatchEl.style.backgroundColor = String(color);
                             // An IDL-derived name has no length limit. `overflow-wrap: anywhere` on the
                             // title wraps it, and `max-width` on the outer div is what keeps the wrapped
                             // tooltip from stretching off-screen — neither works without the other.
-                            tooltipContent.innerHTML = `
-                                <div style="
-                                    background: rgba(30, 30, 30, 0.95);
-                                    backdrop-filter: blur(10px);
-                                    border-radius: 8px;
-                                    padding: 12px 16px;
-                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                                    min-width: 180px;
-                                    max-width: min(320px, calc(100vw - 32px));
-                                ">
-                                    <div style="
-                                        display: flex;
-                                        align-items: flex-start;
-                                        gap: 8px;
-                                        margin-bottom: 6px;
-                                    ">
-                                        <div style="
-                                            width: 12px;
-                                            height: 12px;
-                                            border-radius: 2px;
-                                            background-color: ${color};
-                                            flex-shrink: 0;
-                                            margin-top: 3px;
-                                        "></div>
-                                        <div class="cu-tooltip-title" style="
-                                            color: white;
-                                            font-size: 14px;
-                                            font-weight: 600;
-                                            overflow-wrap: anywhere;
-                                        "></div>
-                                    </div>
-                                    <div class="cu-tooltip-cu" style="
-                                        color: rgba(255, 255, 255, 0.9);
-                                        font-size: 13px;
-                                        padding-left: 20px;
-                                    "></div>
-                                </div>
-                            `;
-                            // An instruction name can come from program-authored on-chain IDL metadata, so
-                            // it is written as text. Interpolating it into the markup above would let an
-                            // IDL author inject HTML into this page.
-                            const titleEl = tooltipContent.querySelector('.cu-tooltip-title');
-                            const cuEl = tooltipContent.querySelector('.cu-tooltip-cu');
-                            if (!titleEl || !cuEl) {
-                                // Unreachable unless the template above is edited to drop these class
-                                // names. Kept so that edit degrades to a hidden tooltip rather than one
-                                // showing the previous instruction's figures.
-                                Logger.warn('[compute-unit] CU tooltip markup is missing its text nodes');
-                                tooltipEl.style.opacity = '0';
-                                return;
-                            }
+                            const titleEl = createDiv(
+                                'color: white; font-size: 14px; font-weight: 600; overflow-wrap: anywhere;',
+                                'cu-tooltip-title',
+                            );
                             titleEl.textContent = title;
+                            const headerEl = createDiv(
+                                'display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px;',
+                            );
+                            headerEl.append(swatchEl, titleEl);
+                            const cuEl = createDiv(
+                                'color: rgba(255, 255, 255, 0.9); font-size: 13px; padding-left: 20px;',
+                                'cu-tooltip-cu',
+                            );
                             cuEl.textContent = `${dataset.displayValue} ${cuText}`;
+                            const cardEl = createDiv(
+                                'background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px); border-radius: 8px; padding: 12px 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); min-width: 180px; max-width: min(320px, calc(100vw - 32px));',
+                            );
+                            cardEl.append(headerEl, cuEl);
+                            tooltipContent.replaceChildren(cardEl);
                         }
 
                         // Use captured mouse position with edge detection
@@ -230,6 +201,13 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
         }),
         [totalCU],
     );
+}
+
+function createDiv(cssText: string, className?: string): HTMLDivElement {
+    const div = document.createElement('div');
+    div.style.cssText = cssText;
+    if (className) div.className = className;
+    return div;
 }
 
 type BaseCUProfilingCardProps = {

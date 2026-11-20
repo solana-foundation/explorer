@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
     AddressLookupTableInstruction,
@@ -140,7 +141,7 @@ export function resolveProgramClientInstructionName(lookup: InstructionNameLooku
     const index = identifyInstruction(client.identify, normalize(client, lookup));
     if (index === undefined) return undefined;
 
-    const name = client.names[index];
+    const name = getOwn(client.names, index);
     if (name === undefined) return undefined;
 
     return camelToTitleCase(rpcInstructionType(client, name));
@@ -156,7 +157,7 @@ function normalize(client: ProgramClient, lookup: InstructionNameLookup): Instru
  * they do not, the RPC spelling wins so both paths word the instruction identically.
  */
 function rpcInstructionType(client: ProgramClient, enumName: string): string {
-    const override = client.rpcTypeOverrides?.[enumName];
+    const override = client.rpcTypeOverrides && getOwn(client.rpcTypeOverrides, enumName);
     if (override !== undefined) return override;
 
     // The enum names are PascalCase and `parsed.type` is camelCase. camelToTitleCase inserts a space

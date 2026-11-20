@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { Cluster } from '@utils/cluster';
 
 /* eslint-disable sort-keys-fix/sort-keys-fix */
@@ -169,7 +170,7 @@ const MARKET_REGISTRY: { [key: string]: string } = {
 /* eslint-enable sort-keys-fix/sort-keys-fix */
 
 function get(address: string, cluster: Cluster): string | undefined {
-    if (cluster === Cluster.Mainnet) return MARKET_REGISTRY[address];
+    if (cluster === Cluster.Mainnet) return getOwn(MARKET_REGISTRY, address);
 }
 
 export const SerumMarketRegistry = {

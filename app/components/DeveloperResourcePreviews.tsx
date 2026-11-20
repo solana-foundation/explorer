@@ -1,9 +1,10 @@
+import { getOwn } from '@shared/lib/object';
 import type { ComponentType, ReactNode } from 'react';
 
 export type ResourcePreviewName = 'coreConcepts' | 'developerTools' | 'jobs' | 'quickStart' | 'transactions';
 
 export function ResourcePreview({ name }: { name: ResourcePreviewName }) {
-    const Preview = PREVIEWS[name];
+    const Preview = getOwn(PREVIEWS, name);
     return <Preview />;
 }
 

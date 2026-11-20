@@ -2,6 +2,7 @@ import { truncateAddress } from '@entities/address';
 import { getRpc, type SolanaRpc } from '@entities/cluster/server';
 import { hashProgramBytes } from '@explorer/entity-inspector/verification';
 import { formatBytes } from '@shared/lib/format-bytes';
+import { getOwn } from '@shared/lib/object';
 import { type Address, address as toAddress, getAddressDecoder } from '@solana/kit';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { Cluster, type ServerCluster, serverClusterUrl } from '@utils/cluster';
@@ -145,7 +146,7 @@ async function buildProgram(args: {
     return {
         address,
         // Any `unknown` marker means a signal could not be resolved, so the card caches briefly.
-        incomplete: MARKER_KEYS.some(key => markers[key] === 'unknown'),
+        incomplete: MARKER_KEYS.some(key => getOwn(markers, key) === 'unknown'),
         kind: 'program',
         markers,
         name,
@@ -357,7 +358,7 @@ function base64Data(data: unknown): string | undefined {
 /** The deploy slot and optional upgrade authority from the program-data account's fixed-layout header. */
 function parseProgramDataHeader(bytes: Buffer): { authority: string | undefined; slot: number } {
     const slot = Number(bytes.readBigUInt64LE(PROGRAM_DATA_SLOT_OFFSET));
-    const hasAuthority = bytes[PROGRAM_DATA_AUTHORITY_FLAG_OFFSET] === 1;
+    const hasAuthority = bytes.at(PROGRAM_DATA_AUTHORITY_FLAG_OFFSET) === 1;
     const authority =
         hasAuthority && bytes.length >= PROGRAM_DATA_AUTHORITY_OFFSET + PUBKEY_LENGTH
             ? getAddressDecoder().decode(

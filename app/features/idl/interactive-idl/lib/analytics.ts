@@ -1,4 +1,5 @@
 import type { IdlStandard } from '@entities/idl';
+import { getOwn } from '@shared/lib/object';
 
 import { type GA4EventName, trackEvent } from '@/app/shared/lib/analytics';
 
@@ -49,7 +50,7 @@ export type IdlAnalytics = {
  * - 'Codama' -> iidl_codama_*
  */
 export function createIdlAnalytics(standard: IdlStandard): IdlAnalytics {
-    const idlType = IDL_TYPE_LABELS[standard];
+    const idlType = getOwn(IDL_TYPE_LABELS, standard);
     return {
         trackIdlViewed(programId) {
             trackEvent(eventName(idlType, IIDL_ACTIONS.IdlViewed), {

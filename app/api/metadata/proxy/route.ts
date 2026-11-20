@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -105,5 +106,5 @@ function respondWithError(status: StatusCode, retryAfter?: string) {
     // so ProxiedImage's on-error reason probe re-reads the status from cache
     // rather than re-invoking the proxy. Browser-only and short-lived by design.
     const headers = retryAfter ? { ...ERROR_CACHE_HEADERS, 'Retry-After': retryAfter } : ERROR_CACHE_HEADERS;
-    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers, status });
+    return NextResponse.json({ error: getOwn(STATUS_MESSAGES, status) }, { headers, status });
 }

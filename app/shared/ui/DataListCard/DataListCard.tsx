@@ -1,5 +1,6 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
 import { createContext, forwardRef, type ReactNode, useContext } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/ui/collapsible-section';
@@ -67,7 +68,7 @@ export function DataListCard({
                 belowTitle={belowTitle}
                 collapsible={collapsible}
                 defaultExpanded={defaultExpanded}
-                className={cn(SECTION_FRAME[breakpoint], className)}
+                className={cn(getOwn(SECTION_FRAME, breakpoint), className)}
                 titleClassName={titleClassName}
                 sectionClassName={sectionClassName}
             >
@@ -85,7 +86,7 @@ export const DataListRow = forwardRef<
 >(function DataListRow({ className, onClick, children }, ref) {
     const breakpoint = useContext(BreakpointContext);
     return (
-        <div ref={ref} onClick={onClick} className={cn(ROW_CHROME[breakpoint], className)}>
+        <div ref={ref} onClick={onClick} className={cn(getOwn(ROW_CHROME, breakpoint), className)}>
             {children}
         </div>
     );

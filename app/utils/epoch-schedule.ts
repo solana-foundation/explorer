@@ -1,3 +1,5 @@
+import { getOwn } from '@shared/lib/object';
+
 import { Cluster } from '@/app/utils/cluster';
 
 const MINIMUM_SLOT_PER_EPOCH = BigInt(32);
@@ -162,7 +164,7 @@ export function getMaxComputeUnitsInBlock({ epoch = 0n, cluster }: { epoch?: big
     let highestActivationEpoch = -1;
 
     for (const config of COMPUTE_UNIT_CONFIGS) {
-        const activationEpoch = config.activations[cluster];
+        const activationEpoch = getOwn(config.activations, cluster);
         // `>=` so that when several configs share an activation epoch on a cluster, the latest one wins.
         if (activationEpoch <= epochNumber && activationEpoch >= highestActivationEpoch) {
             applicableConfig = config;

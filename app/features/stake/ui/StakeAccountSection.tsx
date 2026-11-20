@@ -5,6 +5,7 @@ import { useRefreshAccount } from '@entities/account';
 import { formatUsdValue, PriceStatus, useTokenPrice } from '@entities/token-price';
 import { AccountCard } from '@features/account';
 import type { Account } from '@providers/accounts';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { capitalizeFirstLetter, lamportsToSol } from '@utils/index';
@@ -129,7 +130,7 @@ function StakeOverviewCard({
             value: <SolWithUsd lamports={account.lamports} solPrice={solPrice} />,
             valueClassName: 'uppercase',
         },
-        { label: 'Type', value: STAKE_TYPE_LABELS[stakeAccountType] },
+        { label: 'Type', value: getOwn(STAKE_TYPE_LABELS, stakeAccountType) },
         state !== undefined && { label: 'State', value: state },
         { label: 'Rent Reserve (SOL)', value: <SolBalance lamports={stakeAccount.meta.rentExemptReserve} /> },
         { label: 'Is On Curve', value: isOnCurve ? 'Yes' : 'No' },

@@ -114,9 +114,9 @@ describe('parseExplorerUrl', () => {
             expect(result?.cluster).toBe(Cluster.Mainnet);
         });
 
-        it('should default to Mainnet for unrecognised cluster values', () => {
+        it.each(['unknown', 'constructor'])('should default to Mainnet for the cluster value %s', cluster => {
             const result = parseExplorerUrl(
-                'https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E?cluster=unknown',
+                `https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E?cluster=${cluster}`,
             );
             expect(result?.cluster).toBe(Cluster.Mainnet);
         });

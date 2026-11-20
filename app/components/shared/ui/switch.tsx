@@ -1,5 +1,6 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as SwitchPrimitives from '@radix-ui/react-switch';
+import { getOwn } from '@shared/lib/object';
 import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
@@ -34,8 +35,12 @@ interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimit
 
 const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, SwitchProps>(
     ({ className, size = 'default', ...props }, ref) => (
-        <SwitchPrimitives.Root className={cn(rootVariants, rootSizeVariants[size], className)} {...props} ref={ref}>
-            <SwitchPrimitives.Thumb className={cn(thumbVariants, thumbSizeVariants[size])} />
+        <SwitchPrimitives.Root
+            className={cn(rootVariants, getOwn(rootSizeVariants, size), className)}
+            {...props}
+            ref={ref}
+        >
+            <SwitchPrimitives.Thumb className={cn(thumbVariants, getOwn(thumbSizeVariants, size))} />
         </SwitchPrimitives.Root>
     ),
 );

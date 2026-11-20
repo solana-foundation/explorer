@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import type { Connection, PublicKey } from '@solana/web3.js';
 
 import { AnchorInterpreter } from './anchor/anchor-interpreter';
@@ -122,13 +123,11 @@ export function populateAccounts(
     accounts: Record<string, string>,
     instructionName: string,
 ): Record<string, string> | UnifiedAccounts {
-    return Object.keys(accounts).reduce(
-        (acc, k) => {
+    return Object.fromEntries(
+        Object.keys(accounts).map((k): [string, string] => {
             const { field, value } = populateValue(accounts, k, instructionName);
-            acc[field] = String(value);
-            return acc;
-        },
-        {} as Record<string, string>,
+            return [field, String(value)];
+        }),
     );
 }
 
@@ -150,7 +149,7 @@ function populateValue(data: Record<string, unknown>, key: string, instructionNa
     const [name, field] = key.split('.');
     if (name !== instructionName) throw new Error(`Could not populate data for ${instructionName}`);
 
-    return { field, value: data[key] };
+    return { field, value: getOwn(data, key) };
 }
 
 /**

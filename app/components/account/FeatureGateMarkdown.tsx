@@ -137,7 +137,8 @@ function MarkdownLink({ children, href }: { children: ReactNode; href?: string }
         <a
             href={href || undefined}
             className="text-dark-accent hover:text-dark-accent-hover"
-            {...(external && { rel: 'noopener noreferrer', target: '_blank' })}
+            rel={external ? 'noopener noreferrer' : undefined}
+            target={external ? '_blank' : undefined}
         >
             {children}
         </a>

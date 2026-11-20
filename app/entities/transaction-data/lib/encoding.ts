@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { getBase58Decoder, type ReadonlyUint8Array } from '@solana/kit';
 
 import { toBase64, toHex } from '@/app/shared/lib/bytes';
@@ -32,5 +33,5 @@ export function encodeTransactionData(data: ReadonlyUint8Array, format: Encoding
     if (!(data instanceof Uint8Array)) {
         throw new Error('encodeTransactionData expects Uint8Array or Buffer');
     }
-    return providers[format].encode(data);
+    return getOwn(providers, format).encode(data);
 }
