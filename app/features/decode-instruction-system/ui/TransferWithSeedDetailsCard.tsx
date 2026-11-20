@@ -1,6 +1,5 @@
 import { address, defineInstructionCard, sol, string } from '@entities/instruction-card';
-
-import { TransferWithSeedInfo } from './types';
+import { TransferWithSeedInfo } from '@explorer/parsers/programs/system';
 
 export const TransferWithSeedDetailsCard = defineInstructionCard<TransferWithSeedInfo>({
     fields: info => [

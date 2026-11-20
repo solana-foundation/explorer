@@ -1,5 +1,4 @@
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
-import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import {
     type InstructionNode,
@@ -13,12 +12,15 @@ import {
 } from '@entities/instruction-card';
 import {
     type DispatchResult,
+    type InstructionParser,
+    isParsedBy,
     isParsedInstruction,
     type ParsedInstructionInfo,
     type ParserProgramLabel,
     useInstructionParser,
 } from '@entities/instruction-parser';
 import type { STAKE_PROGRAM_LABEL, VOTE_PROGRAM_LABEL } from '@explorer/parsers';
+import { systemInstructionParser } from '@explorer/parsers/programs/system';
 import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { BpfLoaderDetailsCard } from '@features/decode-instruction-bpf-loader';
@@ -28,6 +30,7 @@ import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MemoDetailsCard } from '@features/decode-instruction-memo';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { SolanaAttestationDetailsCard } from '@features/decode-instruction-sas';
+import { SystemDetailsCard } from '@features/decode-instruction-system';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
@@ -41,6 +44,7 @@ import {
     TokenBatchCard,
 } from '@features/token-batch';
 import { VoteDetailsCard } from '@features/vote';
+import type { ParsedInstruction } from '@solana/web3.js';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -146,7 +150,7 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
     'spl-token': tokenCard,
     'spl-token-2022': tokenCard,
     stake: decoded(StakeDetailsCard),
-    system: decoded(SystemDetailsCard),
+    system: parsedBy([systemInstructionParser], SystemDetailsCard),
     'token-swap': nameOnly('Token Swap'),
     vote: decoded(VoteDetailsCard),
     wormhole: nameOnly('Wormhole'),
@@ -164,16 +168,36 @@ function parsedOf(dispatched: DispatchResult): ParsedInstructionInfo | undefined
     return isParsedInstruction(dispatched) ? dispatched.parsed : undefined;
 }
 
-/** The card node holds the dispatch result to show its parsed payload in the Raw view. */
 function decoded(Card: React.ComponentType<{ node: InstructionNode; parsed: unknown }>): ProgramRoute {
     return function decodedRoute({ node, dispatched, rawNode }) {
         return isParsedInstruction(dispatched) ? (
-            <Card
-                node={toInstructionNode({ ...node, ix: dispatched, raw: rawNode?.raw ?? node.raw })}
-                parsed={dispatched.parsed}
-            />
+            <Card node={dispatchedNode(node, dispatched, rawNode)} parsed={dispatched.parsed} />
         ) : undefined;
     };
+}
+
+/** Renders the card only for output that one of `parsers` produced, so the card takes the slice type unchecked. */
+function parsedBy<P extends ParsedInstructionInfo>(
+    parsers: readonly InstructionParser<P>[],
+    Card: React.ComponentType<{ node: InstructionNode; parsed: P }>,
+): ProgramRoute {
+    return function parsedByRoute({ node, dispatched, rawNode }) {
+        if (isParsedBy(dispatched, parsers)) {
+            return <Card node={dispatchedNode(node, dispatched, rawNode)} parsed={dispatched.parsed} />;
+        }
+        if (!isParsedInstruction(dispatched)) return undefined;
+        // Throws so that the error boundary reports the payload and renders the Unknown card.
+        throw new Error(`Unexpected ${dispatched.program} instruction payload: ${dispatched.parsed?.type}`);
+    };
+}
+
+/** The card node holds the dispatch result to show its parsed payload in the Raw view. */
+function dispatchedNode(
+    node: InstructionNode,
+    dispatched: ParsedInstruction,
+    rawNode: RawInstructionNode | undefined,
+): InstructionNode {
+    return toInstructionNode({ ...node, ix: dispatched, raw: rawNode?.raw ?? node.raw });
 }
 
 function nameOnly(programName?: string): ProgramRoute {

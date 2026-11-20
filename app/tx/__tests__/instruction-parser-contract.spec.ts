@@ -1,9 +1,8 @@
-import { TransferInfo } from '@components/instruction/system/types';
 import { getTokenIxValidator, TransferChecked } from '@components/instruction/token/types';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
+import { systemInstructionParser, TransferInfo } from '@explorer/parsers/programs/system';
 import { associatedTokenInstructionParser, CreateAccountsInfo } from '@features/decode-instruction-associated-token';
 import { lighthouseInstructionParser } from '@features/decode-instruction-lighthouse';
-import { systemInstructionParser } from '@features/decode-instruction-system';
 import { tokenInstructionParser } from '@features/decode-instruction-token';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022';
 import { address } from '@solana/kit';
@@ -70,17 +69,17 @@ describe('instruction-parser contract', () => {
         expect(rpcParsed.parsed.type).toBe('transfer');
 
         // Both info payloads satisfy the TransferInfo superstruct validator
-        // and produce equivalent PublicKey / lamport values.
+        // and produce equal address / lamport values.
         const byteInfo = create(byteParsed.parsed.info, TransferInfo);
         const rpcInfo = create(rpcParsed.parsed.info, TransferInfo);
 
         expect(byteInfo.lamports).toBe(rpcInfo.lamports);
-        expect(byteInfo.source.equals(rpcInfo.source)).toBe(true);
-        expect(byteInfo.destination.equals(rpcInfo.destination)).toBe(true);
+        expect(byteInfo.source).toBe(rpcInfo.source);
+        expect(byteInfo.destination).toBe(rpcInfo.destination);
 
         expect(byteInfo.lamports).toBe(lamports);
-        expect(byteInfo.source.equals(source)).toBe(true);
-        expect(byteInfo.destination.equals(destination)).toBe(true);
+        expect(byteInfo.source).toBe(source.toBase58());
+        expect(byteInfo.destination).toBe(destination.toBase58());
     });
 
     test('should produce equivalent info for byte-parsed and RPC-parsed SPL Token TransferChecked paths', () => {

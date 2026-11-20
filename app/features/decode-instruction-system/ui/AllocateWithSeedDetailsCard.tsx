@@ -1,6 +1,5 @@
 import { address, bytes, defineInstructionCard, string } from '@entities/instruction-card';
-
-import { AllocateWithSeedInfo } from './types';
+import { AllocateWithSeedInfo } from '@explorer/parsers/programs/system';
 
 export const AllocateWithSeedDetailsCard = defineInstructionCard<AllocateWithSeedInfo>({
     fields: info => [

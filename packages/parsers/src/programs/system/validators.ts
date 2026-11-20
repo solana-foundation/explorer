@@ -1,117 +1,113 @@
-import { PublicKeyFromString } from '../../compat/pubkey.js';
-import { enums, Infer, number, string, type } from 'superstruct';
+import { AddressFromString } from '../../address.js';
+import { Infer, never, number, optional, string, type, union } from 'superstruct';
 
 export type CreateAccountInfo = Infer<typeof CreateAccountInfo>;
 export const CreateAccountInfo = type({
     lamports: number(),
-    newAccount: PublicKeyFromString,
-    owner: PublicKeyFromString,
-    source: PublicKeyFromString,
+    newAccount: AddressFromString,
+    owner: AddressFromString,
+    source: AddressFromString,
     space: number(),
 });
 
 export type AssignInfo = Infer<typeof AssignInfo>;
 export const AssignInfo = type({
-    account: PublicKeyFromString,
-    owner: PublicKeyFromString,
+    account: AddressFromString,
+    owner: AddressFromString,
 });
 
 export type TransferInfo = Infer<typeof TransferInfo>;
 export const TransferInfo = type({
-    destination: PublicKeyFromString,
+    destination: AddressFromString,
     lamports: number(),
-    source: PublicKeyFromString,
+    source: AddressFromString,
 });
 
 export type CreateAccountWithSeedInfo = Infer<typeof CreateAccountWithSeedInfo>;
 export const CreateAccountWithSeedInfo = type({
-    base: PublicKeyFromString,
+    base: AddressFromString,
     lamports: number(),
-    newAccount: PublicKeyFromString,
-    owner: PublicKeyFromString,
+    newAccount: AddressFromString,
+    owner: AddressFromString,
     seed: string(),
-    source: PublicKeyFromString,
+    source: AddressFromString,
     space: number(),
 });
 
+// The RPC sends `source` and `lamports` only when the instruction moves lamports.
+export type CreateAccountAllowPrefundInfo = Infer<typeof CreateAccountAllowPrefundInfo>;
+export const CreateAccountAllowPrefundInfo = union([
+    CreateAccountInfo,
+    type({
+        lamports: optional(never()),
+        newAccount: AddressFromString,
+        owner: AddressFromString,
+        source: optional(never()),
+        space: number(),
+    }),
+]);
+
 export type AdvanceNonceInfo = Infer<typeof AdvanceNonceInfo>;
 export const AdvanceNonceInfo = type({
-    nonceAccount: PublicKeyFromString,
-    nonceAuthority: PublicKeyFromString,
+    nonceAccount: AddressFromString,
+    nonceAuthority: AddressFromString,
 });
 
 export type WithdrawNonceInfo = Infer<typeof WithdrawNonceInfo>;
 export const WithdrawNonceInfo = type({
-    destination: PublicKeyFromString,
+    destination: AddressFromString,
     lamports: number(),
-    nonceAccount: PublicKeyFromString,
-    nonceAuthority: PublicKeyFromString,
+    nonceAccount: AddressFromString,
+    nonceAuthority: AddressFromString,
 });
 
 export type InitializeNonceInfo = Infer<typeof InitializeNonceInfo>;
 export const InitializeNonceInfo = type({
-    nonceAccount: PublicKeyFromString,
-    nonceAuthority: PublicKeyFromString,
+    nonceAccount: AddressFromString,
+    nonceAuthority: AddressFromString,
 });
 
 export type AuthorizeNonceInfo = Infer<typeof AuthorizeNonceInfo>;
 export const AuthorizeNonceInfo = type({
-    newAuthorized: PublicKeyFromString,
-    nonceAccount: PublicKeyFromString,
-    nonceAuthority: PublicKeyFromString,
+    newAuthorized: AddressFromString,
+    nonceAccount: AddressFromString,
+    nonceAuthority: AddressFromString,
 });
 
 export type AllocateInfo = Infer<typeof AllocateInfo>;
 export const AllocateInfo = type({
-    account: PublicKeyFromString,
+    account: AddressFromString,
     space: number(),
 });
 
 export type AllocateWithSeedInfo = Infer<typeof AllocateWithSeedInfo>;
 export const AllocateWithSeedInfo = type({
-    account: PublicKeyFromString,
-    base: PublicKeyFromString,
-    owner: PublicKeyFromString,
+    account: AddressFromString,
+    base: AddressFromString,
+    owner: AddressFromString,
     seed: string(),
     space: number(),
 });
 
 export type AssignWithSeedInfo = Infer<typeof AssignWithSeedInfo>;
 export const AssignWithSeedInfo = type({
-    account: PublicKeyFromString,
-    base: PublicKeyFromString,
-    owner: PublicKeyFromString,
+    account: AddressFromString,
+    base: AddressFromString,
+    owner: AddressFromString,
     seed: string(),
 });
 
 export type TransferWithSeedInfo = Infer<typeof TransferWithSeedInfo>;
 export const TransferWithSeedInfo = type({
-    destination: PublicKeyFromString,
+    destination: AddressFromString,
     lamports: number(),
-    source: PublicKeyFromString,
-    sourceBase: PublicKeyFromString,
-    sourceOwner: PublicKeyFromString,
+    source: AddressFromString,
+    sourceBase: AddressFromString,
+    sourceOwner: AddressFromString,
     sourceSeed: string(),
 });
 
 export type UpgradeNonceInfo = Infer<typeof UpgradeNonceInfo>;
 export const UpgradeNonceInfo = type({
-    nonceAccount: PublicKeyFromString,
+    nonceAccount: AddressFromString,
 });
-
-export type SystemInstructionType = Infer<typeof SystemInstructionType>;
-export const SystemInstructionType = enums([
-    'createAccount',
-    'createAccountWithSeed',
-    'allocate',
-    'allocateWithSeed',
-    'assign',
-    'assignWithSeed',
-    'transfer',
-    'advanceNonce',
-    'withdrawNonce',
-    'authorizeNonce',
-    'initializeNonce',
-    'transferWithSeed',
-    'upgradeNonce',
-]);
