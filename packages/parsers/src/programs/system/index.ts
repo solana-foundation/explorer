@@ -1,10 +1,5 @@
 export { systemInstructionParser } from './client.js';
-export {
-    parseSystemInstruction,
-    parseSystemRpcInstruction,
-    SYSTEM_PROGRAM_LABEL,
-    type SystemParsed,
-} from './parser.js';
+export { parseSystemInstruction, parseSystemRpcInstruction, type SystemParsed } from './parser.js';
 export {
     AdvanceNonceInfo,
     AllocateInfo,
@@ -12,10 +7,10 @@ export {
     AssignInfo,
     AssignWithSeedInfo,
     AuthorizeNonceInfo,
+    CreateAccountAllowPrefundInfo,
     CreateAccountInfo,
     CreateAccountWithSeedInfo,
     InitializeNonceInfo,
-    SystemInstructionType,
     TransferInfo,
     TransferWithSeedInfo,
     UpgradeNonceInfo,

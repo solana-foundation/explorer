@@ -1,6 +1,5 @@
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
-import { toParsedInstruction } from './compat/to-parsed.js';
 import { toKitInstruction } from './compat/web3js.js';
 import type { KitInstruction } from './kit-instruction.js';
 import type { ParserProgramLabel } from './program-registry.js';
@@ -24,10 +23,28 @@ export interface UnparsedInstruction {
     programId: PublicKey;
 }
 
-export type DispatchResult = ParsedInstruction | UnparsedInstruction;
+export type DispatchResult = SliceParsedInstruction | ParsedInstruction | UnparsedInstruction;
 
 export function isParsedInstruction(result: DispatchResult | undefined): result is ParsedInstruction {
     return result !== undefined && !('unknown' in result);
+}
+
+/** A `ParsedInstruction` whose `parsed` came from `parser`, so `isParsedBy` can type it without a second check. */
+export type SliceParsedInstruction<P extends ParsedInstructionInfo = ParsedInstructionInfo> = Omit<
+    ParsedInstruction,
+    'parsed'
+> & {
+    parsed: P;
+    parser: InstructionParser<P>;
+};
+
+/** Only the dispatcher sets `parser`, so an RPC object it passed through never matches. */
+export function isParsedBy<P extends ParsedInstructionInfo>(
+    result: DispatchResult | undefined,
+    parsers: readonly InstructionParser<P>[],
+): result is SliceParsedInstruction<P> {
+    if (result === undefined || !('parser' in result)) return false;
+    return parsers.some(parser => parser === result.parser);
 }
 
 /**
@@ -64,17 +81,16 @@ export interface InstructionParserDispatcher {
     /** `undefined` → no parser registered. `UnparsedInstruction` → registered but discriminator failed. */
     fromTransactionInstruction(ix: TransactionInstruction): DispatchResult | undefined;
     /** Passes through unchanged when no slice handles the program. */
-    fromParsedInstruction(ix: ParsedInstruction): ParsedInstruction;
+    fromParsedInstruction(ix: ParsedInstruction): SliceParsedInstruction | ParsedInstruction;
     getInstructionParser(programId: string): InstructionParser | undefined;
 }
 
 /**
  * Build a dispatcher that routes TransactionInstructions and pre-parsed
- * ParsedInstructions through their per-program slice and produces the
- * canonical ParsedInstruction shape that cards consume. Both entry points
- * pass through the slice's `SliceParsed` shape and are wrapped back into
- * ParsedInstruction via `toParsedInstruction` (transitional compat — Phase 5
- * deletes the wrap when cards consume `SliceParsed` directly).
+ * ParsedInstructions through their per-program slice. Each entry point returns
+ * slice output as a `SliceParsedInstruction`, tagged with the parser that
+ * produced it. `fromParsedInstruction` returns the RPC object unchanged when
+ * no slice accepts it.
  *
  * No global state: each call site composes its own dispatcher with exactly
  * the parsers it needs. Throws on duplicate `programId` so misconfiguration
@@ -110,7 +126,7 @@ export function createInstructionParserDispatcher(parsers: readonly InstructionP
                 // Fall back to RPC's view so the tx page still renders.
                 return ix;
             }
-            return toParsedInstruction(sliceParsed, parser.programLabel, ix.programId);
+            return { parsed: sliceParsed, parser, program: parser.programLabel, programId: ix.programId };
         },
         fromTransactionInstruction(ix) {
             const parser = byProgramId.get(ix.programId.toBase58());
@@ -126,7 +142,7 @@ export function createInstructionParserDispatcher(parsers: readonly InstructionP
                     unknown: true,
                 };
             }
-            return toParsedInstruction(sliceParsed, parser.programLabel, ix.programId);
+            return { parsed: sliceParsed, parser, program: parser.programLabel, programId: ix.programId };
         },
         getInstructionParser(programId) {
             return byProgramId.get(programId);

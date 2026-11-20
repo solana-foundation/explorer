@@ -1,6 +1,5 @@
 import { address, bytes, defineInstructionCard, sol, string } from '@entities/instruction-card';
-
-import { CreateAccountWithSeedInfo } from './types';
+import { CreateAccountWithSeedInfo } from '@explorer/parsers/programs/system';
 
 export const CreateWithSeedDetailsCard = defineInstructionCard<CreateAccountWithSeedInfo>({
     fields: info => [

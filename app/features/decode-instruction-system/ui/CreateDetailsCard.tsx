@@ -1,6 +1,5 @@
 import { address, bytes, defineInstructionCard, sol } from '@entities/instruction-card';
-
-import { CreateAccountInfo } from './types';
+import { CreateAccountInfo } from '@explorer/parsers/programs/system';
 
 export const CreateDetailsCard = defineInstructionCard<CreateAccountInfo>({
     fields: info => [

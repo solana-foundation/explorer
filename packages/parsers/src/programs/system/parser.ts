@@ -1,37 +1,4 @@
 import {
-    type AdvanceNonceInfo,
-    AdvanceNonceInfo as AdvanceNonceInfoStruct,
-    type AllocateInfo,
-    AllocateInfo as AllocateInfoStruct,
-    type AllocateWithSeedInfo,
-    AllocateWithSeedInfo as AllocateWithSeedInfoStruct,
-    type AssignInfo,
-    AssignInfo as AssignInfoStruct,
-    type AssignWithSeedInfo,
-    AssignWithSeedInfo as AssignWithSeedInfoStruct,
-    type AuthorizeNonceInfo,
-    AuthorizeNonceInfo as AuthorizeNonceInfoStruct,
-    type CreateAccountInfo,
-    CreateAccountInfo as CreateAccountInfoStruct,
-    type CreateAccountWithSeedInfo,
-    CreateAccountWithSeedInfo as CreateAccountWithSeedInfoStruct,
-    type InitializeNonceInfo,
-    InitializeNonceInfo as InitializeNonceInfoStruct,
-    type TransferInfo,
-    TransferInfo as TransferInfoStruct,
-    type TransferWithSeedInfo,
-    TransferWithSeedInfo as TransferWithSeedInfoStruct,
-    type UpgradeNonceInfo,
-    UpgradeNonceInfo as UpgradeNonceInfoStruct,
-    type WithdrawNonceInfo,
-    WithdrawNonceInfo as WithdrawNonceInfoStruct,
-} from './validators.js';
-import type { ParserProgramLabel } from '../../program-registry.js';
-// TODO(kit-native): drop web3.js — emit kit Address strings from the byte path (pubkey-parameterized
-// validator factories give the app its PublicKey flavor) and take a structural RPC-parsed input
-// instead of web3.js ParsedInstruction.
-import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import {
     getCreateAccountWithSeedInstructionDataDecoder,
     identifySystemInstruction,
     parseAdvanceNonceAccountInstruction,
@@ -40,6 +7,7 @@ import {
     parseAssignInstruction,
     parseAssignWithSeedInstruction,
     parseAuthorizeNonceAccountInstruction,
+    parseCreateAccountAllowPrefundInstruction,
     parseCreateAccountInstruction,
     parseInitializeNonceAccountInstruction,
     parseTransferSolInstruction,
@@ -48,32 +16,50 @@ import {
     parseWithdrawNonceAccountInstruction,
     SystemInstruction,
 } from '@solana-program/system';
-import { create } from 'superstruct';
+import type { Infer } from 'superstruct';
 
 import type { KitInstruction } from '../../kit-instruction.js';
+import { isParsedInstructionProgram, SYSTEM_PROGRAM_LABEL } from '../../program-registry.js';
+import {
+    AdvanceNonceInfo,
+    AllocateInfo,
+    AllocateWithSeedInfo,
+    AssignInfo,
+    AssignWithSeedInfo,
+    AuthorizeNonceInfo,
+    CreateAccountAllowPrefundInfo,
+    CreateAccountInfo,
+    CreateAccountWithSeedInfo,
+    InitializeNonceInfo,
+    TransferInfo,
+    TransferWithSeedInfo,
+    UpgradeNonceInfo,
+    WithdrawNonceInfo,
+} from './validators.js';
 
-/** RPC `parsed.program` discriminator for the System program; also the slice's `programLabel`. */
-export const SYSTEM_PROGRAM_LABEL = 'system' satisfies ParserProgramLabel;
+const INFO_BY_TYPE = {
+    advanceNonce: AdvanceNonceInfo,
+    allocate: AllocateInfo,
+    allocateWithSeed: AllocateWithSeedInfo,
+    assign: AssignInfo,
+    assignWithSeed: AssignWithSeedInfo,
+    authorizeNonce: AuthorizeNonceInfo,
+    createAccount: CreateAccountInfo,
+    createAccountAllowPrefund: CreateAccountAllowPrefundInfo,
+    createAccountWithSeed: CreateAccountWithSeedInfo,
+    initializeNonce: InitializeNonceInfo,
+    transfer: TransferInfo,
+    transferWithSeed: TransferWithSeedInfo,
+    upgradeNonce: UpgradeNonceInfo,
+    withdrawFromNonce: WithdrawNonceInfo,
+};
 
-/**
- * Canonical shape of a parsed System Program instruction. Both the inspector
- * (raw bytes path) and the tx page (RPC pre-parsed path) normalise to this
- * shape via `parseSystemInstruction` / `parseSystemRpcInstruction`.
- */
-export type SystemParsed =
-    | { type: 'createAccount'; info: CreateAccountInfo }
-    | { type: 'createAccountWithSeed'; info: CreateAccountWithSeedInfo }
-    | { type: 'allocate'; info: AllocateInfo }
-    | { type: 'allocateWithSeed'; info: AllocateWithSeedInfo }
-    | { type: 'assign'; info: AssignInfo }
-    | { type: 'assignWithSeed'; info: AssignWithSeedInfo }
-    | { type: 'transfer'; info: TransferInfo }
-    | { type: 'transferWithSeed'; info: TransferWithSeedInfo }
-    | { type: 'advanceNonce'; info: AdvanceNonceInfo }
-    | { type: 'withdrawNonce'; info: WithdrawNonceInfo }
-    | { type: 'authorizeNonce'; info: AuthorizeNonceInfo }
-    | { type: 'initializeNonce'; info: InitializeNonceInfo }
-    | { type: 'upgradeNonce'; info: UpgradeNonceInfo };
+type SystemInstructionType = keyof typeof INFO_BY_TYPE;
+
+/** Shape of a parsed System Program instruction on the byte path and on the RPC path. */
+export type SystemParsed = {
+    [T in SystemInstructionType]: { type: T; info: Infer<(typeof INFO_BY_TYPE)[T]> };
+}[SystemInstructionType];
 
 export function parseSystemInstruction(ix: KitInstruction): SystemParsed | undefined {
     try {
@@ -89,6 +75,11 @@ export function parseSystemInstruction(ix: KitInstruction): SystemParsed | undef
                 return {
                     info: parseCreateAccountWithSeed(ix),
                     type: 'createAccountWithSeed',
+                };
+            case SystemInstruction.CreateAccountAllowPrefund:
+                return {
+                    info: toCreateAccountAllowPrefundInfo(parseCreateAccountAllowPrefundInstruction(ix)),
+                    type: 'createAccountAllowPrefund',
                 };
             case SystemInstruction.Allocate:
                 return {
@@ -123,7 +114,7 @@ export function parseSystemInstruction(ix: KitInstruction): SystemParsed | undef
             case SystemInstruction.WithdrawNonceAccount:
                 return {
                     info: toWithdrawNonceInfo(parseWithdrawNonceAccountInstruction(ix)),
-                    type: 'withdrawNonce',
+                    type: 'withdrawFromNonce',
                 };
             case SystemInstruction.AuthorizeNonceAccount:
                 return {
@@ -153,61 +144,26 @@ export function parseSystemInstruction(ix: KitInstruction): SystemParsed | undef
     }
 }
 
-/**
- * Normalise an RPC-pre-parsed ParsedInstruction into the slice's canonical
- * `SystemParsed` shape. Uses the same superstruct validators the cards used
- * to call directly — `create()` coerces RPC's string pubkeys into PublicKey
- * instances. Returns undefined when the input isn't a recognised system
- * instruction, which causes the dispatcher to pass RPC's value through
- * unchanged so the tx-page render is preserved.
- */
-export function parseSystemRpcInstruction(ix: ParsedInstruction): SystemParsed | undefined {
-    if (ix.program !== SYSTEM_PROGRAM_LABEL) return undefined;
-    try {
-        switch (ix.parsed.type) {
-            case 'createAccount':
-                return { info: create(ix.parsed.info, CreateAccountInfoStruct), type: 'createAccount' };
-            case 'createAccountWithSeed':
-                return {
-                    info: create(ix.parsed.info, CreateAccountWithSeedInfoStruct),
-                    type: 'createAccountWithSeed',
-                };
-            case 'allocate':
-                return { info: create(ix.parsed.info, AllocateInfoStruct), type: 'allocate' };
-            case 'allocateWithSeed':
-                return { info: create(ix.parsed.info, AllocateWithSeedInfoStruct), type: 'allocateWithSeed' };
-            case 'assign':
-                return { info: create(ix.parsed.info, AssignInfoStruct), type: 'assign' };
-            case 'assignWithSeed':
-                return { info: create(ix.parsed.info, AssignWithSeedInfoStruct), type: 'assignWithSeed' };
-            case 'transfer':
-                return { info: create(ix.parsed.info, TransferInfoStruct), type: 'transfer' };
-            case 'transferWithSeed':
-                return { info: create(ix.parsed.info, TransferWithSeedInfoStruct), type: 'transferWithSeed' };
-            case 'advanceNonce':
-                return { info: create(ix.parsed.info, AdvanceNonceInfoStruct), type: 'advanceNonce' };
-            case 'withdrawNonce':
-                return { info: create(ix.parsed.info, WithdrawNonceInfoStruct), type: 'withdrawNonce' };
-            case 'authorizeNonce':
-                return { info: create(ix.parsed.info, AuthorizeNonceInfoStruct), type: 'authorizeNonce' };
-            case 'initializeNonce':
-                return { info: create(ix.parsed.info, InitializeNonceInfoStruct), type: 'initializeNonce' };
-            case 'upgradeNonce':
-                return { info: create(ix.parsed.info, UpgradeNonceInfoStruct), type: 'upgradeNonce' };
-            default:
-                return undefined;
-        }
-    } catch {
-        return undefined;
-    }
+export function parseSystemRpcInstruction(ix: { program: string; parsed: unknown }): SystemParsed | undefined {
+    if (!isParsedInstructionProgram(ix, SYSTEM_PROGRAM_LABEL)) return undefined;
+    return isSystemParsed(ix.parsed) ? ix.parsed : undefined;
+}
+
+function isSystemParsed(value: unknown): value is SystemParsed {
+    if (typeof value !== 'object' || value === null || !('type' in value) || !('info' in value)) return false;
+    return isSystemInstructionType(value.type) && INFO_BY_TYPE[value.type].is(value.info);
+}
+
+function isSystemInstructionType(type: unknown): type is SystemInstructionType {
+    return typeof type === 'string' && Object.prototype.hasOwnProperty.call(INFO_BY_TYPE, type);
 }
 
 function toCreateAccountInfo(parsed: ReturnType<typeof parseCreateAccountInstruction>): CreateAccountInfo {
     return {
         lamports: safeNumber(parsed.data.lamports),
-        newAccount: new PublicKey(parsed.accounts.newAccount.address),
-        owner: new PublicKey(parsed.data.programAddress),
-        source: new PublicKey(parsed.accounts.payer.address),
+        newAccount: parsed.accounts.newAccount.address,
+        owner: parsed.data.programAddress,
+        source: parsed.accounts.payer.address,
         space: safeNumber(parsed.data.space),
     };
 }
@@ -221,21 +177,36 @@ function toCreateAccountInfo(parsed: ReturnType<typeof parseCreateAccountInstruc
 function parseCreateAccountWithSeed(ix: KitInstruction): CreateAccountWithSeedInfo {
     const decoded = getCreateAccountWithSeedInstructionDataDecoder().decode(ix.data);
     return {
-        base: new PublicKey(decoded.base.toString()),
+        base: decoded.base,
         lamports: safeNumber(decoded.amount),
-        newAccount: new PublicKey(ix.accounts[1].address),
-        owner: new PublicKey(decoded.programAddress.toString()),
+        newAccount: ix.accounts[1].address,
+        owner: decoded.programAddress,
         seed: decoded.seed,
-        source: new PublicKey(ix.accounts[0].address),
+        source: ix.accounts[0].address,
         space: safeNumber(decoded.space),
     };
+}
+
+// Matches the RPC, which reads the payer only when lamports is non-zero.
+function toCreateAccountAllowPrefundInfo(
+    parsed: ReturnType<typeof parseCreateAccountAllowPrefundInstruction>,
+): CreateAccountAllowPrefundInfo {
+    const { data, accounts } = parsed;
+    const info = {
+        newAccount: accounts.newAccount.address,
+        owner: data.programAddress,
+        space: safeNumber(data.space),
+    };
+    if (data.lamports === 0n) return info;
+    if (!accounts.payer) throw new Error('CreateAccountAllowPrefund moves lamports without a payer');
+    return { ...info, lamports: safeNumber(data.lamports), source: accounts.payer.address };
 }
 
 function toAllocateInfo(parsed: ReturnType<typeof parseAllocateInstruction>): AllocateInfo {
     return {
         // @solana-program/system names this account `newAccount`; the RPC-pre-parsed
         // shape calls it `account`. Same underlying pubkey.
-        account: new PublicKey(parsed.accounts.newAccount.address),
+        account: parsed.accounts.newAccount.address,
         space: safeNumber(parsed.data.space),
     };
 }
@@ -243,9 +214,9 @@ function toAllocateInfo(parsed: ReturnType<typeof parseAllocateInstruction>): Al
 function toAllocateWithSeedInfo(parsed: ReturnType<typeof parseAllocateWithSeedInstruction>): AllocateWithSeedInfo {
     return {
         // @solana-program/system names this `newAccount`; RPC pre-parsed shape uses `account`.
-        account: new PublicKey(parsed.accounts.newAccount.address),
-        base: new PublicKey(parsed.accounts.baseAccount.address),
-        owner: new PublicKey(parsed.data.programAddress),
+        account: parsed.accounts.newAccount.address,
+        base: parsed.accounts.baseAccount.address,
+        owner: parsed.data.programAddress,
         seed: parsed.data.seed,
         space: safeNumber(parsed.data.space),
     };
@@ -253,73 +224,73 @@ function toAllocateWithSeedInfo(parsed: ReturnType<typeof parseAllocateWithSeedI
 
 function toAssignInfo(parsed: ReturnType<typeof parseAssignInstruction>): AssignInfo {
     return {
-        account: new PublicKey(parsed.accounts.account.address),
-        owner: new PublicKey(parsed.data.programAddress),
+        account: parsed.accounts.account.address,
+        owner: parsed.data.programAddress,
     };
 }
 
 function toAssignWithSeedInfo(parsed: ReturnType<typeof parseAssignWithSeedInstruction>): AssignWithSeedInfo {
     return {
-        account: new PublicKey(parsed.accounts.account.address),
-        base: new PublicKey(parsed.accounts.baseAccount.address),
-        owner: new PublicKey(parsed.data.programAddress),
+        account: parsed.accounts.account.address,
+        base: parsed.accounts.baseAccount.address,
+        owner: parsed.data.programAddress,
         seed: parsed.data.seed,
     };
 }
 
 function toTransferInfo(parsed: ReturnType<typeof parseTransferSolInstruction>): TransferInfo {
     return {
-        destination: new PublicKey(parsed.accounts.destination.address),
+        destination: parsed.accounts.destination.address,
         lamports: safeNumber(parsed.data.amount),
-        source: new PublicKey(parsed.accounts.source.address),
+        source: parsed.accounts.source.address,
     };
 }
 
 function toAdvanceNonceInfo(parsed: ReturnType<typeof parseAdvanceNonceAccountInstruction>): AdvanceNonceInfo {
     return {
-        nonceAccount: new PublicKey(parsed.accounts.nonceAccount.address),
-        nonceAuthority: new PublicKey(parsed.accounts.nonceAuthority.address),
+        nonceAccount: parsed.accounts.nonceAccount.address,
+        nonceAuthority: parsed.accounts.nonceAuthority.address,
     };
 }
 
 function toWithdrawNonceInfo(parsed: ReturnType<typeof parseWithdrawNonceAccountInstruction>): WithdrawNonceInfo {
     return {
-        destination: new PublicKey(parsed.accounts.recipientAccount.address),
+        destination: parsed.accounts.recipientAccount.address,
         lamports: safeNumber(parsed.data.withdrawAmount),
-        nonceAccount: new PublicKey(parsed.accounts.nonceAccount.address),
-        nonceAuthority: new PublicKey(parsed.accounts.nonceAuthority.address),
+        nonceAccount: parsed.accounts.nonceAccount.address,
+        nonceAuthority: parsed.accounts.nonceAuthority.address,
     };
 }
 
 function toAuthorizeNonceInfo(parsed: ReturnType<typeof parseAuthorizeNonceAccountInstruction>): AuthorizeNonceInfo {
     return {
-        newAuthorized: new PublicKey(parsed.data.newNonceAuthority),
-        nonceAccount: new PublicKey(parsed.accounts.nonceAccount.address),
-        nonceAuthority: new PublicKey(parsed.accounts.nonceAuthority.address),
+        newAuthorized: parsed.data.newNonceAuthority,
+        nonceAccount: parsed.accounts.nonceAccount.address,
+        nonceAuthority: parsed.accounts.nonceAuthority.address,
     };
 }
 
 function toInitializeNonceInfo(parsed: ReturnType<typeof parseInitializeNonceAccountInstruction>): InitializeNonceInfo {
     return {
-        nonceAccount: new PublicKey(parsed.accounts.nonceAccount.address),
-        nonceAuthority: new PublicKey(parsed.data.nonceAuthority),
+        nonceAccount: parsed.accounts.nonceAccount.address,
+        nonceAuthority: parsed.data.nonceAuthority,
     };
 }
 
 function toTransferWithSeedInfo(parsed: ReturnType<typeof parseTransferSolWithSeedInstruction>): TransferWithSeedInfo {
     return {
-        destination: new PublicKey(parsed.accounts.destination.address),
+        destination: parsed.accounts.destination.address,
         lamports: safeNumber(parsed.data.amount),
-        source: new PublicKey(parsed.accounts.source.address),
-        sourceBase: new PublicKey(parsed.accounts.baseAccount.address),
-        sourceOwner: new PublicKey(parsed.data.fromOwner),
+        source: parsed.accounts.source.address,
+        sourceBase: parsed.accounts.baseAccount.address,
+        sourceOwner: parsed.data.fromOwner,
         sourceSeed: parsed.data.fromSeed,
     };
 }
 
 function toUpgradeNonceInfo(parsed: ReturnType<typeof parseUpgradeNonceAccountInstruction>): UpgradeNonceInfo {
     return {
-        nonceAccount: new PublicKey(parsed.accounts.nonceAccount.address),
+        nonceAccount: parsed.accounts.nonceAccount.address,
     };
 }
 

@@ -69,13 +69,13 @@ describe('parseSystemInstruction', () => {
             invariant(result, 'expected parser to return an instruction for a valid CreateAccountWithSeed payload');
             expect(result.type).toBe('createAccountWithSeed');
             const info = infoAsCreateAccountWithSeed(result.info);
-            expect(info.source.equals(payer)).toBe(true);
-            expect(info.newAccount.equals(newAccount)).toBe(true);
-            expect(info.base.equals(baseAccount)).toBe(true);
+            expect(info.source).toBe(payer.toBase58());
+            expect(info.newAccount).toBe(newAccount.toBase58());
+            expect(info.base).toBe(baseAccount.toBase58());
             expect(info.seed).toBe(seed);
             expect(info.lamports).toBe(lamports);
             expect(info.space).toBe(space);
-            expect(info.owner.equals(tokenProgram)).toBe(true);
+            expect(info.owner).toBe(tokenProgram.toBase58());
         });
 
         it('should parse 2-account variant (payer === baseAccount)', () => {
@@ -104,13 +104,13 @@ describe('parseSystemInstruction', () => {
             );
             expect(result.type).toBe('createAccountWithSeed');
             const info = infoAsCreateAccountWithSeed(result.info);
-            expect(info.source.equals(payer)).toBe(true);
-            expect(info.newAccount.equals(newAccount)).toBe(true);
-            expect(info.base.equals(payer)).toBe(true);
+            expect(info.source).toBe(payer.toBase58());
+            expect(info.newAccount).toBe(newAccount.toBase58());
+            expect(info.base).toBe(payer.toBase58());
             expect(info.seed).toBe(seed);
             expect(info.lamports).toBe(lamports);
             expect(info.space).toBe(space);
-            expect(info.owner.equals(tokenProgram)).toBe(true);
+            expect(info.owner).toBe(tokenProgram.toBase58());
         });
 
         it('should handle different seed lengths correctly', () => {
