@@ -427,7 +427,6 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
 }
 
 function cmpExtension(a: TokenExtension, b: TokenExtension) {
-    // be sure that extensions with a header row always come later
     const sortedExtensionTypes: TokenExtensionType[] = [
         'transferFeeAmount',
         'mintCloseAuthority',
@@ -445,7 +444,6 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'metadataPointer',
         'groupPointer',
         'groupMemberPointer',
-        // everything below this comment includes a header row
         'confidentialTransferAccount',
         'confidentialTransferFeeConfig',
         'confidentialTransferFeeAmount',
@@ -464,17 +462,6 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
     return sortedExtensionTypes.indexOf(a.extension) - sortedExtensionTypes.indexOf(b.extension);
 }
 
-function HHeader({ name }: { name: string }) {
-    return (
-        <BaseTable.Row>
-            {/*use important here as there is rule from .table-sm that affects all the underline elements*/}
-            <BaseTable.HeaderCell colSpan={2} className="mb-2 !p-4 text-[15px] font-normal">
-                {name}
-            </BaseTable.HeaderCell>
-        </BaseTable.Row>
-    );
-}
-
 /* Do not move component to keep commit history.
     NOTE: Needs to be separated at closest refactoring
     Also check whether it is needed to keep it as function and not a proper React component
@@ -484,7 +471,6 @@ export function TokenExtensionRow(
     maybeEpoch: bigint | undefined,
     decimals: number,
     symbol: string | undefined,
-    headerStyle: 'header' | 'omit' = 'header',
 ) {
     const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
     switch (tokenExtension.extension) {
@@ -520,7 +506,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TransferFeeConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Transfer Fee Config" /> : null}
                     {extension.transferFeeConfigAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Transfer Fee Authority</BaseTable.Cell>
@@ -604,7 +589,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferMint);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer Mint" /> : null}
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
@@ -632,7 +616,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialMintBurn);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Confidential Mint and Burn" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Supply Elgamal Pubkey</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">{extension.supplyElgamalPubkey}</BaseTable.Cell>
@@ -656,7 +639,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferFeeConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer Fee" /> : null}
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
@@ -709,7 +691,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, InterestBearingConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Interest-Bearing" /> : null}
                     {extension.rateAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
@@ -745,7 +726,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ScaledUiAmountConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Scaled UI Amount Config" /> : null}
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
@@ -783,7 +763,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, PausableConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Pausable Config" /> : null}
                     <>
                         {extension.authority && (
                             <BaseTable.Row>
@@ -929,7 +908,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TokenMetadata);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Metadata" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Mint</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
@@ -999,7 +977,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferAccount);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer Account" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Status</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
@@ -1120,7 +1097,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TokenGroup);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Group" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Mint</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
@@ -1150,7 +1126,6 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, TokenGroupMember);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Group Member" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Mint</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">

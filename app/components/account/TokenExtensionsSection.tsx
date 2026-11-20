@@ -140,7 +140,7 @@ function TokenExtensionAccordionItem({
                 {!showRaw ? (
                     <Card ui="dashkit" className="m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
-                            {TokenExtensionRow(extension, undefined, decimals, symbol, 'omit')}
+                            {TokenExtensionRow(extension, undefined, decimals, symbol)}
                         </TableCardBodyHeaded>
                     </Card>
                 ) : (
