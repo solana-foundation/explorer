@@ -176,6 +176,12 @@ describe('useScaledUiAmountMultiplier', () => {
 
         expect(result.current).toEqual({ status: 'unknown' });
     });
+
+    it('should return a multiplier of 1 when the mint is not fetched', () => {
+        const { result } = renderScaledUiAmountMultiplier();
+
+        expect(result.current).toEqual({ multiplier: '1', status: 'known' });
+    });
 });
 
 const MINT_INFO = {
@@ -192,16 +198,9 @@ const SCALED_UI_AMOUNT_EXTENSION = {
 };
 
 function renderScaledUiAmountMultiplier(
-    mintInfo: Record<string, unknown>,
+    mintInfo?: Record<string, unknown>,
 ): RenderHookResult<ScaledUiAmountMultiplier, unknown> {
-    const account: Account = {
-        data: { parsed: { parsed: { info: mintInfo, type: 'mint' }, program: 'spl-token-2022' } },
-        executable: false,
-        lamports: 1,
-        owner: TOKEN_2022_PROGRAM_ID,
-        pubkey: new PublicKey(MINT),
-    };
-    const accounts = { [MINT]: { data: account, status: FetchStatus.Fetched } };
+    const accounts = mintInfo ? { [MINT]: { data: toMintAccount(mintInfo), status: FetchStatus.Fetched } } : {};
     return renderHook(() => useScaledUiAmountMultiplier(MINT), {
         wrapper: ({ children }) => (
             <MockClusterProvider>
@@ -209,4 +208,14 @@ function renderScaledUiAmountMultiplier(
             </MockClusterProvider>
         ),
     });
+}
+
+function toMintAccount(mintInfo: Record<string, unknown>): Account {
+    return {
+        data: { parsed: { parsed: { info: mintInfo, type: 'mint' }, program: 'spl-token-2022' } },
+        executable: false,
+        lamports: 1,
+        owner: TOKEN_2022_PROGRAM_ID,
+        pubkey: new PublicKey(MINT),
+    };
 }
