@@ -17,7 +17,6 @@ export {
     useClusterInfo,
     useEpochInfo,
     useEpochSchedule,
-    useEpochScheduleResult,
     useFirstAvailableBlock,
 } from './model/use-cluster-info';
 export { clusterModalOpenAtom, useClusterModal } from './model/use-cluster-modal';

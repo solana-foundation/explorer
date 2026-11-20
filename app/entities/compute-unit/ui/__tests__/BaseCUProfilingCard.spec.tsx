@@ -74,6 +74,26 @@ describe('BaseCUProfilingCard', () => {
         });
     });
 
+    describe('chart axis', () => {
+        // The figures are from devnet transaction 2VdCBG9TRfSftWmRe6c5px61Fu46v2mbZqyVKBoQzJ47hPXRxqS1MhZPHoqpAaRZHT2xSBcFozS5bN2bkxBJZTDJ.
+        it('should end at the transaction total when a row has no figure', () => {
+            render(
+                <BaseCUProfilingCard
+                    instructions={[cuData({ computeUnits: 14702 }), cuData({ computeUnits: undefined })]}
+                    unitsConsumed={247852}
+                />,
+            );
+
+            expect(xAxisMax()).toBe(247852);
+        });
+
+        it('should end at the sum of the rows when no total is given', () => {
+            render(<BaseCUProfilingCard instructions={transferAndComputeBudget()} />);
+
+            expect(xAxisMax()).toBe(255);
+        });
+    });
+
     /**
      * The tooltip builds its shell with innerHTML, so the one thing that must never be interpolated is
      * the instruction name — it can come from program-authored on-chain IDL metadata, which makes it
@@ -95,9 +115,9 @@ describe('BaseCUProfilingCard', () => {
         });
 
         it('should show the same CU figure the legend shows', () => {
-            render(<BaseCUProfilingCard instructions={[cuData({ computeUnits: 0, scheduledUnits: 200000 })]} />);
+            render(<BaseCUProfilingCard instructions={[cuData({ computeUnits: 159483 })]} />);
 
-            expect(textOf(showTooltip().tooltip, '.cu-tooltip-cu')).toBe('~200,000 CU reserved');
+            expect(textOf(showTooltip().tooltip, '.cu-tooltip-cu')).toBe('159,483 CU consumed');
         });
 
         it('should qualify the instruction name with its program', () => {
@@ -129,6 +149,12 @@ function datasets(): ChartData<'bar'>['datasets'] {
     const props = Bar.mock.calls.at(-1)?.[0] as { data: ChartData<'bar'> } | undefined;
     if (!props) throw new Error('BaseCUProfilingCard rendered no chart');
     return props.data.datasets;
+}
+
+function xAxisMax(): unknown {
+    const props = Bar.mock.calls.at(-1)?.[0] as { options: ChartOptions<'bar'> } | undefined;
+    if (!props) throw new Error('BaseCUProfilingCard rendered no chart');
+    return props.options.scales?.x?.max;
 }
 
 /**

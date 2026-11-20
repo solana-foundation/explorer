@@ -45,32 +45,18 @@ describe('toInstructionCUDisplay', () => {
             expect(display.displayCU).toBe(159483);
         });
 
-        it('should mark a reserved estimate with a tilde', () => {
-            const [display] = toInstructionCUDisplay([cuData({ computeUnits: 0, scheduledUnits: 200000 })]);
+        it('should show 0 for an instruction that consumed nothing', () => {
+            const [display] = toInstructionCUDisplay([cuData({ computeUnits: 0 })]);
 
-            expect(display.displayValue).toBe('~200,000');
-            expect(display.displayCU).toBe(200000);
+            expect(display.displayValue).toBe('0');
+            expect(display.displayCU).toBe(0);
         });
 
-        it('should not mark a known reserved value as an estimate', () => {
-            const [display] = toInstructionCUDisplay([
-                cuData({ computeUnits: 0, defaultUnits: 150, scheduledUnits: 150 }),
-            ]);
+        it('should show Unknown and size no bar for an instruction with no figure', () => {
+            const [display] = toInstructionCUDisplay([cuData({ computeUnits: undefined })]);
 
-            expect(display.displayValue).toBe('150');
-        });
-
-        // There is no "no figure at all" case to cover: `scheduledUnits` is never 0, so the fallback
-        // chain always resolves. format-instruction-logs.spec pins that at the one place that sets it.
-        it('should size the bar by the same figure it displays', () => {
-            const display = toInstructionCUDisplay([
-                cuData({ computeUnits: 5000 }),
-                cuData({ computeUnits: 0, defaultUnits: 150 }),
-                cuData({ computeUnits: 0, scheduledUnits: 3000 }),
-            ]);
-
-            expect(display.map(d => d.displayCU)).toEqual([5000, 150, 3000]);
-            expect(display.map(d => d.displayValue)).toEqual(['5,000', '150', '~3,000']);
+            expect(display.displayValue).toBe('Unknown');
+            expect(display.displayCU).toBe(0);
         });
     });
 });

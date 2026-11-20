@@ -1,35 +1,29 @@
-import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
 import { type InstructionLogs, parseProgramLogs } from '@entities/program-logs';
 import { type NamedInstruction, resolveInstructionNames, type TransactionWithMeta } from '@entities/transaction-data';
 import { useResolvedInstructionNames } from '@entities/transaction-data/client';
-import { useCluster, useEpochScheduleResult } from '@providers/cluster';
+import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import type { Cluster } from '@utils/cluster';
-import { getEpochForSlot } from '@utils/epoch-schedule';
 import type { SignatureProps } from '@utils/index';
 import { useMemo } from 'react';
-
-import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';
 
 // FIXME: missing Storybook story — needs useTransactionDetails provider + TransactionWithMeta fixture.
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { cluster } = useCluster();
-    const { data: epochSchedule, error: epochScheduleError } = useEpochScheduleResult();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const logMessages = transactionWithMeta?.meta?.logMessages || undefined;
     const unitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed || undefined;
-    const slot = transactionWithMeta?.slot;
 
     const instructionLogs: InstructionLogs[] = useMemo(
         () => formatTransactionLogs(transactionWithMeta, cluster),
         [transactionWithMeta, cluster],
     );
 
-    // Every top-level instruction produces a row, Compute Budget included, so rows stay aligned by index
-    // with the logs `instructionLogs` was parsed from.
+    // Every top-level instruction produces a row, Compute Budget included, so rows stay in the order of
+    // the logs `instructionLogs` was parsed from.
     const named: NamedInstruction[] = useMemo(
         () =>
             transactionWithMeta?.transaction.message.instructions.map(ix => ({
@@ -43,28 +37,12 @@ export function CUProfilingSection({ signature }: SignatureProps) {
     // IDL fetch is still in flight.
     const instructions = useResolvedInstructionNames(named);
 
-    const instructionsForCU = useMemo(() => {
-        if (!slot || !epochSchedule) return [];
-
-        const epoch = getEpochForSlot(epochSchedule, BigInt(slot));
-
-        return formatInstructionLogs({ cluster, epoch, instructionLogs, instructions });
-    }, [instructions, instructionLogs, cluster, slot, epochSchedule]);
+    const instructionsForCU = useMemo(
+        () => formatInstructionLogs({ instructionLogs, instructions }),
+        [instructions, instructionLogs],
+    );
 
     if (!logMessages || logMessages.length === 0) return undefined;
-
-    // The transaction logged something, so this section owes the user a card — saying why it is empty
-    // beats vanishing. Guarded on the value too: SWR keeps `error` beside a cached schedule, and a chart
-    // we can still draw beats an excuse.
-    if (epochScheduleError && !epochSchedule) {
-        return (
-            <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
-                <CardBody ui="dashkit">
-                    <div className="text-xs text-muted">Unavailable: the epoch schedule could not be loaded.</div>
-                </CardBody>
-            </CollapsibleCard>
-        );
-    }
 
     if (instructionsForCU.length === 0) return undefined;
 

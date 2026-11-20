@@ -83,7 +83,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         );
     }
 
-    const { logs, solBalanceChanges, epoch, unitsConsumed, error } = simulation.result;
+    const { logs, solBalanceChanges, unitsConsumed, error } = simulation.result;
     const succeeded = !error;
     const hasLogs = !!logs?.length;
     const hasErrorWithoutLogs = !hasLogs && !!error;
@@ -117,8 +117,6 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                         instructions={namedInstructions}
                         logs={logs}
                         unitsConsumed={unitsConsumed}
-                        cluster={cluster}
-                        epoch={epoch}
                     />
                 ))}
             {succeeded && !!solBalanceChanges?.length && <SolBalanceChangesCard balanceChanges={solBalanceChanges} />}

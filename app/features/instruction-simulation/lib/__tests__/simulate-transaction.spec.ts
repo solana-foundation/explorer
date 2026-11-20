@@ -251,16 +251,6 @@ describe('simulateTransaction', () => {
         expect(result.accountKeys).toEqual([ACCOUNT_KEY_1, ACCOUNT_KEY_2, lookupAddress]);
     });
 
-    it('should return epoch from epochInfo', async () => {
-        const rpc = createMockRpc({
-            getEpochInfo: rpcCall({ epoch: 42n }),
-        });
-
-        const result = await simulate(rpc);
-
-        expect(result.epoch).toBe(42n);
-    });
-
     describe('token balance parsing', () => {
         const TOKEN_ACCOUNT_KEY = Keypair.generate().publicKey;
         const MINT_KEY = MOCK_MINT;
@@ -656,7 +646,6 @@ function rpcReject(error: Error) {
 function createMockRpc(overrides?: Partial<Record<string, unknown>>): SolanaRpc {
     return {
         getAccountInfo: rpcCall({ value: null }),
-        getEpochInfo: rpcCall({ epoch: 100n }),
         getMultipleAccounts: rpcCall({
             value: [
                 { data: {}, lamports: 1_000_000_000n, owner: SYSTEM_PROGRAM_ADDRESS },

@@ -29,7 +29,6 @@ export type SimulationResult = {
     // `compiledInstructions` indexes into. Callers that need an instruction's program id must read it
     // from here: `message.staticAccountKeys` is missing any key sourced from a lookup table.
     accountKeys: readonly PublicKey[];
-    epoch: bigint;
     logs: InstructionLogs[] | undefined;
     error: string | undefined;
     solBalanceChanges: SolBalanceChange[] | undefined;
@@ -122,7 +121,6 @@ async function inactiveV1GateError(
 
 type RawSimulation = {
     accountKeys: PublicKey[];
-    epoch: bigint;
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | undefined)[];
     simResult: {
         accounts: (SimulatedTransactionAccountInfo | undefined)[];
@@ -141,10 +139,7 @@ async function runSimulation(rpc: SolanaRpc, message: VersionedMessage): Promise
     const accountKeys = message.getAccountKeys({ addressLookupTableAccounts: lookupTables }).keySegments().flat();
     const addresses = accountKeys.map(key => toKitAddress(key));
 
-    const [parsedAccountsPre, epochInfo] = await Promise.all([
-        getMultipleParsedAccounts(rpc, addresses),
-        rpc.getEpochInfo({ commitment: 'confirmed' }).send(),
-    ]);
+    const parsedAccountsPre = await getMultipleParsedAccounts(rpc, addresses);
 
     // A v1 message must be sent in the v1 wire envelope (message first); the stock
     // VersionedTransaction envelope is signatures-first and nodes reject it for v1.
@@ -174,7 +169,6 @@ async function runSimulation(rpc: SolanaRpc, message: VersionedMessage): Promise
 
     return {
         accountKeys,
-        epoch: epochInfo.epoch,
         parsedAccountsPre,
         simResult: {
             accounts: simResult.accounts.map(account => (account ? toLegacySimulatedAccountInfo(account) : undefined)),
@@ -253,7 +247,7 @@ function toLegacySimulatedAccountInfo(account: KitSimulatedAccount): SimulatedTr
  * SOL balance changes, and parsed program logs.
  */
 function interpretSimulation(
-    { accountKeys, epoch, parsedAccountsPre, simResult }: RawSimulation,
+    { accountKeys, parsedAccountsPre, simResult }: RawSimulation,
     cluster: Cluster,
     accountBalances?: { preBalances: number[]; postBalances: number[] },
 ): SimulationResult {
@@ -282,7 +276,6 @@ function interpretSimulation(
 
     return {
         accountKeys,
-        epoch,
         error,
         logs,
         solBalanceChanges: solChanges.length > 0 ? solChanges : undefined,

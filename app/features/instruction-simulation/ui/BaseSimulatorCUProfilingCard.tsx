@@ -1,7 +1,6 @@
 import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
 import type { InstructionLogs } from '@entities/program-logs';
 import type { NamedInstruction } from '@entities/transaction-data';
-import type { useCluster } from '@providers/cluster';
 import { useMemo } from 'react';
 
 type BaseSimulatorCUProfilingCardProps = {
@@ -9,8 +8,6 @@ type BaseSimulatorCUProfilingCardProps = {
     instructions: NamedInstruction[];
     logs: Array<InstructionLogs>;
     unitsConsumed?: number;
-    cluster: ReturnType<typeof useCluster>['cluster'];
-    epoch: bigint;
     /**
      * Render only the chart + legend body, without the built-in card chrome/header, so a caller can supply
      * its own section header (e.g. the inspector's header-outside layout). Defaults to false.
@@ -22,13 +19,11 @@ export function BaseSimulatorCUProfilingCard({
     instructions,
     logs,
     unitsConsumed,
-    cluster,
-    epoch,
     headerless = false,
 }: BaseSimulatorCUProfilingCardProps) {
     const instructionsForCU = useMemo(
-        () => formatInstructionLogs({ cluster, epoch, instructionLogs: logs, instructions }),
-        [instructions, logs, cluster, epoch],
+        () => formatInstructionLogs({ instructionLogs: logs, instructions }),
+        [instructions, logs],
     );
 
     return (

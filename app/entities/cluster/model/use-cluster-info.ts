@@ -28,7 +28,7 @@ export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSched
     return useEpochScheduleResult(options).data;
 }
 
-export function useEpochScheduleResult(options: Options = {}): ClusterQueryResult<ClusterInfo['epochSchedule']> {
+function useEpochScheduleResult(options: Options = {}): ClusterQueryResult<ClusterInfo['epochSchedule']> {
     return useClusterQuery('epoch-schedule', fetchEpochSchedule, { ...options, immutable: true });
 }
 
