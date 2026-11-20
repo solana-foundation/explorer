@@ -607,6 +607,7 @@ export default tseslint.config(
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
+            'app/features/transaction/ui/ProgramLogSection.tsx', // HOO-2951
 
             // app/shared reverse-layer imports
             'app/shared/components/DownloadDropdown.tsx',
