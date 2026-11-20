@@ -1,5 +1,5 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { any, array, boolean, coerce, enums, Infer, is, nullable, number, string, type } from 'superstruct';
+import { any, array, boolean, coerce, enums, Infer, is, nullable, number, optional, string, type } from 'superstruct';
 
 export type TokenExtensionType = Infer<typeof ExtensionType>;
 const ExtensionType = enums([
@@ -123,7 +123,7 @@ export const ConfidentialTransferFeeAmount = type({
 export const ConfidentialMintBurn = type({
     confidentialSupply: string(),
     decryptableSupply: string(),
-    pendingBurn: string(),
+    pendingBurn: optional(string()),
     supplyElgamalPubkey: string(),
 });
 

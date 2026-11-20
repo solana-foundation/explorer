@@ -201,10 +201,12 @@ export function TokenExtensionRow({
                         <BaseTable.Cell>Decryptable Supply</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">{extension.decryptableSupply}</BaseTable.Cell>
                     </BaseTable.Row>
-                    <BaseTable.Row>
-                        <BaseTable.Cell>Pending Burn</BaseTable.Cell>
-                        <BaseTable.Cell className="md:text-right">{extension.pendingBurn}</BaseTable.Cell>
-                    </BaseTable.Row>
+                    {extension.pendingBurn !== undefined && (
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Pending Burn</BaseTable.Cell>
+                            <BaseTable.Cell className="md:text-right">{extension.pendingBurn}</BaseTable.Cell>
+                        </BaseTable.Row>
+                    )}
                 </>
             );
         }
