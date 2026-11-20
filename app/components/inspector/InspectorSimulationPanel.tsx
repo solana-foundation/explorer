@@ -150,8 +150,6 @@ export function InspectorSimulationPanel({
                                 instructions={namedInstructions}
                                 logs={logs}
                                 unitsConsumed={result.unitsConsumed}
-                                cluster={cluster}
-                                epoch={result.epoch}
                                 headerless
                             />
                         )}

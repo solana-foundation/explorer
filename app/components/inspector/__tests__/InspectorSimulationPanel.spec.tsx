@@ -113,7 +113,6 @@ function createSimulationStateDone(overrides: Pick<SimulationResult, 'error' | '
     return {
         result: {
             accountKeys: [],
-            epoch: 0n,
             solBalanceChanges: undefined,
             tokenBalanceData: undefined,
             unitsConsumed: undefined,

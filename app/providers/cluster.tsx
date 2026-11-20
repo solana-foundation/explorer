@@ -52,7 +52,6 @@ export {
     useClusterModal,
     useEpochInfo,
     useEpochSchedule,
-    useEpochScheduleResult,
     useFirstAvailableBlock,
     useSolanaRpc,
 } from '@entities/cluster';

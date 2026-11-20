@@ -31,7 +31,6 @@ beforeEach(() => {
     useSimulation.mockReturnValue({
         result: {
             accountKeys: [],
-            epoch: 0n,
             error: undefined,
             logs: [{ computeUnits: 105, failed: false, invokedProgram: 'TokenProgram', logs: [] }],
             solBalanceChanges: [],
@@ -74,7 +73,7 @@ describe('SimulatorCard CU profiling', () => {
     // No logs means nothing to profile, so neither the chart nor an excuse belongs on the page.
     it('should render neither the chart nor a reason when the simulation produced no logs', () => {
         useSimulation.mockReturnValue({
-            result: { accountKeys: [], epoch: 0n, error: 'blockhash not found', logs: undefined },
+            result: { accountKeys: [], error: 'blockhash not found', logs: undefined },
             simulate: vi.fn(),
             status: 'done',
         });
@@ -90,7 +89,7 @@ describe('SimulatorCard CU profiling', () => {
     // so guarding on the array itself put the "unavailable" excuse on a page with nothing to profile.
     it('should render neither the chart nor a reason when the log list is empty', () => {
         useSimulation.mockReturnValue({
-            result: { accountKeys: [], epoch: 0n, error: undefined, logs: [] },
+            result: { accountKeys: [], error: undefined, logs: [] },
             simulate: vi.fn(),
             status: 'done',
         });

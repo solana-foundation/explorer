@@ -63,8 +63,8 @@ function resolveRows(
     for (const ix of message.compiledInstructions) {
         const programId = accountKeys[ix.programIdIndex];
         if (!programId) {
-            // Bail on the whole message, never drop the row: `formatInstructionLogs` pairs row `i` with
-            // `instructionLogs[i]`, so a gap shifts every later CU figure onto the wrong instruction.
+            // Bail on the whole message, never drop the row: `formatInstructionLogs` pairs the rows with the
+            // log entries in order, so a gap gives a later row no CU figure or another instruction's.
             // Reachable — web3.js checks lookup tables but never bounds-checks `programIdIndex`, and these
             // bytes come from the user — hence the report below rather than a silent skip.
             return { mismatch: { accountKeyCount: accountKeys.length, programIdIndex: ix.programIdIndex }, rows: [] };

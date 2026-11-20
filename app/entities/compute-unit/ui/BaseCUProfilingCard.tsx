@@ -25,7 +25,6 @@ type ExtendedBarDataset = ChartData<'bar'>['datasets'][number] & {
     // produces one, so the tooltip needs no empty-title branch.
     label: string;
     displayValue: string;
-    isEstimate: boolean;
     programName?: string;
 };
 
@@ -110,7 +109,6 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                             const color = dataPoint.dataset.backgroundColor;
                             const dataset = dataPoint.dataset as ExtendedBarDataset;
 
-                            const cuText = dataset.isEstimate ? 'CU reserved' : 'CU consumed';
                             const title = formatTooltipTitle({
                                 label: dataset.label,
                                 programName: dataset.programName,
@@ -149,7 +147,7 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                 'color: rgba(255, 255, 255, 0.9); font-size: 13px; padding-left: 20px;',
                                 'cu-tooltip-cu',
                             );
-                            cuEl.textContent = `${dataset.displayValue} ${cuText}`;
+                            cuEl.textContent = `${dataset.displayValue} CU consumed`;
                             const cardEl = createDiv(
                                 'background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px); border-radius: 8px; padding: 12px 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); min-width: 180px; max-width: min(320px, calc(100vw - 32px));',
                             );
@@ -228,7 +226,8 @@ export function BaseCUProfilingCard({ instructions, unitsConsumed, headerless = 
 
     useCUTooltipCleanup();
 
-    const chartOptions = useCUProfileChartOptions(totalDisplayCU);
+    // The axis ends at the transaction total, so the CU of rows with no figure stay an empty part of the bar.
+    const chartOptions = useCUProfileChartOptions(Math.max(totalDisplayCU, unitsConsumed ?? 0));
 
     const chartData: ChartData<'bar'> = useMemo(
         () => ({
@@ -250,7 +249,6 @@ export function BaseCUProfilingCard({ instructions, unitsConsumed, headerless = 
                 data: [item.displayCU],
                 displayValue: item.displayValue,
                 hoverBackgroundColor: getInstructionColor(i),
-                isEstimate: item.isEstimate,
                 label: item.label,
                 programName: item.programName,
             })),
