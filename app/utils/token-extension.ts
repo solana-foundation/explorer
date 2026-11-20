@@ -176,6 +176,19 @@ export function populatePartialParsedTokenExtension(
                 tooltip: description,
             };
         }
+        case 'confidentialMintBurn': {
+            const description =
+                'Keeps the mint supply confidential by minting and burning directly against confidential balances';
+            return {
+                description,
+                externalLinks: populateExternalLinks(
+                    'https://www.solana-program.com/docs/confidential-balances/mint-burn',
+                ),
+                name: 'Confidential Mint and Burn',
+                status: 'active',
+                tooltip: description,
+            };
+        }
         case 'interestBearingConfig': {
             const description = 'Allows the token balance to be displayed with accumulated interest';
             return {

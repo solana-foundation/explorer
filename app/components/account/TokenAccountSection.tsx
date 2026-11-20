@@ -16,6 +16,7 @@ import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
+    ConfidentialMintBurn,
     ConfidentialTransferAccount,
     ConfidentialTransferFeeAmount,
     ConfidentialTransferFeeConfig,
@@ -449,6 +450,7 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'confidentialTransferFeeConfig',
         'confidentialTransferFeeAmount',
         'confidentialTransferMint',
+        'confidentialMintBurn',
         'interestBearingConfig',
         'pausableConfig',
         'scaledUiAmountConfig',
@@ -622,6 +624,30 @@ export function TokenExtensionRow(
                         <BaseTable.Cell className="md:text-right">
                             {extension.autoApproveNewAccounts ? 'auto' : 'manual'}
                         </BaseTable.Cell>
+                    </BaseTable.Row>
+                </>
+            );
+        }
+        case 'confidentialMintBurn': {
+            const extension = create(tokenExtension.state, ConfidentialMintBurn);
+            return (
+                <>
+                    {headerStyle === 'header' ? <HHeader name="Confidential Mint and Burn" /> : null}
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Supply Elgamal Pubkey</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.supplyElgamalPubkey}</BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Confidential Supply</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.confidentialSupply}</BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Decryptable Supply</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.decryptableSupply}</BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Pending Burn</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.pendingBurn}</BaseTable.Cell>
                     </BaseTable.Row>
                 </>
             );

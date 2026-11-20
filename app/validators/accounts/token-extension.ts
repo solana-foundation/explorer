@@ -27,6 +27,7 @@ const ExtensionType = enums([
     'groupMemberPointer',
     'tokenGroup',
     'tokenGroupMember',
+    'confidentialMintBurn',
     'scaledUiAmountConfig',
     'pausableAccount',
     'pausableConfig',
@@ -117,6 +118,13 @@ export const ConfidentialTransferAccount = type({
 
 export const ConfidentialTransferFeeAmount = type({
     withheldAmount: string(),
+});
+
+export const ConfidentialMintBurn = type({
+    confidentialSupply: string(),
+    decryptableSupply: string(),
+    pendingBurn: string(),
+    supplyElgamalPubkey: string(),
 });
 
 export const MetadataPointer = type({

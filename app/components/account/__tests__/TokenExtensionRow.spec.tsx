@@ -307,6 +307,24 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('1000')).toBeInTheDocument();
     });
 
+    test('should render confidentialMintBurn extension', async () => {
+        renderRow({
+            extension: 'confidentialMintBurn',
+            state: {
+                confidentialSupply: 'confidential-supply',
+                decryptableSupply: 'decryptable-supply',
+                pendingBurn: 'pending-burn',
+                supplyElgamalPubkey: 'supply-elgamal-pubkey',
+            },
+        });
+
+        expect(await screen.findByText('Confidential Mint and Burn')).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Supply Elgamal Pubkey supply-elgamal-pubkey' })).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Confidential Supply confidential-supply' })).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Decryptable Supply decryptable-supply' })).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Pending Burn pending-burn' })).toBeInTheDocument();
+    });
+
     test('should render tokenGroup extension', async () => {
         const data = {
             extension: 'tokenGroup',
