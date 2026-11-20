@@ -61,7 +61,11 @@ vi.mock('@/app/features/metadata', () => ({
 // Stub the tooltip to echo its props - Radix only mounts content on hover, and the values are what we assert on.
 vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', () => ({
     default: ({ rawAmount, scaledUiAmountMultiplier }: any) => (
-        <span data-testid="scaled-tooltip" data-multiplier={scaledUiAmountMultiplier} data-raw-amount={rawAmount} />
+        <span
+            data-testid="scaled-tooltip"
+            data-multiplier={scaledUiAmountMultiplier.multiplier}
+            data-raw-amount={rawAmount}
+        />
     ),
 }));
 

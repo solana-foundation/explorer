@@ -1,6 +1,7 @@
+import { type Account, type State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, renderHook, type RenderHookResult, screen, waitFor } from '@testing-library/react';
 import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -22,12 +23,19 @@ vi.mock('@entities/cluster', async importOriginal => {
     return { ...actual, getRpc: () => rpcStub({ getTokenAccountsByOwner }) };
 });
 
+import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
+import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
+
 import {
+    getAmountMultiplier,
+    type ScaledUiAmountMultiplier,
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     TokensProvider,
+    toScaledUiAmountString,
     useAccountOwnedTokens,
     useFetchAccountOwnedTokens,
+    useScaledUiAmountMultiplier,
 } from '../tokens';
 
 const OWNER = PublicKey.default.toBase58();
@@ -153,3 +161,93 @@ describe('should fetch account token holdings without enrichment', () => {
         expect(screen.getByTestId('token-count').textContent).toBe('150');
     });
 });
+
+describe('useScaledUiAmountMultiplier', () => {
+    it('should return the multiplier of the mint', () => {
+        const { result } = renderScaledUiAmountMultiplier(
+            toFetchedMint({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION] }),
+        );
+
+        expect(result.current).toEqual({ multiplier: '2', status: 'known' });
+    });
+
+    it('should return an unknown multiplier when the mint does not parse', () => {
+        const { result } = renderScaledUiAmountMultiplier(
+            toFetchedMint({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION], supply: undefined }),
+        );
+
+        expect(result.current).toEqual({ status: 'unknown' });
+    });
+
+    it('should return an unknown multiplier when the mint fetch failed', () => {
+        const { result } = renderScaledUiAmountMultiplier({ [MINT]: { status: FetchStatus.FetchFailed } });
+
+        expect(result.current).toEqual({ status: 'unknown' });
+    });
+
+    it('should return a loading multiplier when the mint is not fetched', () => {
+        const { result } = renderScaledUiAmountMultiplier({});
+
+        expect(result.current).toEqual({ status: 'loading' });
+    });
+});
+
+describe('toScaledUiAmountString', () => {
+    it('should scale the amount as an exact decimal', () => {
+        expect(toScaledUiAmountString('0.1', { multiplier: '3', status: 'known' })).toBe('0.3');
+    });
+
+    it.each<ScaledUiAmountMultiplier>([
+        { multiplier: '1', status: 'known' },
+        { status: 'loading' },
+        { status: 'unknown' },
+    ])('should keep the formatted amount when the multiplier is %o', scaledUiAmountMultiplier => {
+        expect(toScaledUiAmountString('1,000.50', scaledUiAmountMultiplier)).toBe('1,000.50');
+    });
+});
+
+describe('getAmountMultiplier', () => {
+    it('should return the multiplier when the multiplier is known', () => {
+        expect(getAmountMultiplier({ multiplier: '2', status: 'known' })).toBe('2');
+    });
+
+    it.each(['loading', 'unknown'] as const)('should return 1 when the status is %s', status => {
+        expect(getAmountMultiplier({ status })).toBe('1');
+    });
+});
+
+const MINT_INFO = {
+    decimals: 0,
+    freezeAuthority: null,
+    isInitialized: true,
+    mintAuthority: null,
+    supply: '1000',
+};
+
+const SCALED_UI_AMOUNT_EXTENSION = {
+    extension: 'scaledUiAmountConfig',
+    state: { authority: null, multiplier: '2', newMultiplier: '2', newMultiplierEffectiveTimestamp: 0 },
+};
+
+function renderScaledUiAmountMultiplier(
+    accounts: State['entries'],
+): RenderHookResult<ScaledUiAmountMultiplier, unknown> {
+    return renderHook(() => useScaledUiAmountMultiplier(MINT), {
+        wrapper: ({ children }) => (
+            <MockClusterProvider>
+                <MockAccountsProvider accounts={accounts}>{children}</MockAccountsProvider>
+            </MockClusterProvider>
+        ),
+    });
+}
+
+function toFetchedMint(mintInfo: Record<string, unknown>): State['entries'] {
+    const account: Account = {
+        data: { parsed: { parsed: { info: mintInfo, type: 'mint' }, program: 'spl-token-2022' } },
+        executable: false,
+        lamports: 1,
+        owner: TOKEN_2022_PROGRAM_ID,
+        pubkey: new PublicKey(MINT),
+    };
+    return { [MINT]: { data: account, status: FetchStatus.Fetched } };
+}

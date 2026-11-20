@@ -3,6 +3,7 @@ import { gen } from '@__fixtures__/gen';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
+import { create } from 'superstruct';
 import { describe, vi } from 'vitest';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
@@ -11,7 +12,7 @@ import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
-import { TokenExtensionRow } from '../TokenAccountSection';
+import { TokenExtensionRow } from '../TokenExtensionRow';
 
 vi.mock('next/navigation');
 // @ts-expect-error does not contain `mockReturnValue`
@@ -53,8 +54,7 @@ describe('TokenExtensionRow', () => {
     test('should render transferFeeConfig extension', async () => {
         renderRow(mockExtensions.transferFeeConfig0, { epoch: 150n, symbol: 'TEST' });
 
-        expect(await screen.findByText('Transfer Fee Config')).toBeInTheDocument();
-        expect(screen.getByText(/Transfer Fee Authority/)).toBeInTheDocument();
+        expect(await screen.findByText(/Transfer Fee Authority/)).toBeInTheDocument();
 
         // Check for fee epoch labels within table cells
         const tableCells = screen.getAllByRole('cell');
@@ -78,9 +78,8 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data);
 
-        expect(await screen.findByText('Confidential Transfer Mint')).toBeInTheDocument();
+        expect(await screen.findByText(/Auditor Elgamal Pubkey/)).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
-        expect(screen.getByText(/Auditor Elgamal Pubkey/)).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
         expect(screen.getByText('auto')).toBeInTheDocument();
     });
@@ -98,7 +97,7 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data, { symbol: 'TEST' });
 
-        expect(await screen.findByText('Confidential Transfer Fee')).toBeInTheDocument();
+        expect(await screen.findByText('Harvest to Mint')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
         expect(screen.getByText(/Auditor Elgamal Pubkey/)).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
@@ -110,7 +109,7 @@ describe('TokenExtensionRow', () => {
         ['defaultAccountState', { accountState: 'frozen' }, 'DefaultAccountState', 'frozen'],
         ['nonTransferable', {}, 'Non-Transferable', 'enabled'],
         ['pausableAccount', {}, 'Pausable Account', 'enabled'],
-        ['pausableConfig', { authority: gen.publicKey(1), paused: true }, 'Pausable Config', 'paused'],
+        ['pausableConfig', { authority: gen.publicKey(1), paused: true }, 'Paused', 'paused'],
         [
             'transferHook',
             { authority: gen.publicKey(2), programId: gen.publicKey(1) },
@@ -140,13 +139,24 @@ describe('TokenExtensionRow', () => {
         ['memoTransfer', { requireIncomingTransferMemos: true }, 'Require Memo on Incoming Transfers', 'enabled'],
         ['transferHookAccount', { transferring: true }, 'Transfer Hook Status', 'transferring'],
         ['nonTransferableAccount', {}, 'Non-Transferable', 'enabled'],
-        ['tokenGroupMember', { group: gen.publicKey(2), memberNumber: 1, mint: gen.publicKey(1) }, 'Group Member', '1'],
+        [
+            'tokenGroupMember',
+            { group: gen.publicKey(2), memberNumber: 1, mint: gen.publicKey(1) },
+            'Member Number',
+            '1',
+        ],
         ['unparseableExtension', {}, 'Unknown Extension', 'unparseable'],
     ])('should render %s extension', async (extension, state, title, value) => {
         renderRow({ extension, state });
 
         expect(await screen.findByText(title)).toBeInTheDocument();
         expect(screen.getByText(value)).toBeInTheDocument();
+    });
+
+    test('should render the name of an unknown extension', async () => {
+        renderRow(create({ extension: 'futureExtension', state: {} }, TokenExtension));
+
+        expect(await screen.findByRole('row', { name: 'Unknown Extension futureExtension' })).toBeInTheDocument();
     });
 
     test('should render interestBearingConfig extension', async () => {
@@ -163,7 +173,7 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data);
 
-        expect(await screen.findByText('Interest-Bearing')).toBeInTheDocument();
+        expect(await screen.findByText('Current Rate')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
         expect(screen.getByText('5%')).toBeInTheDocument();
         expect(screen.getByText('4%')).toBeInTheDocument();
@@ -182,7 +192,7 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data);
 
-        expect(await screen.findByText('Scaled UI Amount Config')).toBeInTheDocument();
+        expect(await screen.findByText('New Multiplier')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('4.22')).toBeInTheDocument();
     });
@@ -243,7 +253,7 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data);
 
-        expect(await screen.findByText('Metadata')).toBeInTheDocument();
+        expect(await screen.findByText('Name')).toBeInTheDocument();
         expect(screen.getByText('Test Token')).toBeInTheDocument();
         expect(screen.getByText('TEST')).toBeInTheDocument();
         expect(screen.getByText('https://test.com')).toBeInTheDocument();
@@ -273,7 +283,7 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data);
 
-        expect(await screen.findByText('Confidential Transfer Account')).toBeInTheDocument();
+        expect(await screen.findByText('Elgamal Pubkey')).toBeInTheDocument();
         expect(screen.getByText('approved')).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
         expect(screen.getByText(/Confidential Credits/)).toBeInTheDocument();
@@ -307,6 +317,39 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('1000')).toBeInTheDocument();
     });
 
+    test('should render confidentialMintBurn extension', async () => {
+        renderRow({
+            extension: 'confidentialMintBurn',
+            state: {
+                confidentialSupply: 'confidential-supply',
+                decryptableSupply: 'decryptable-supply',
+                pendingBurn: 'pending-burn',
+                supplyElgamalPubkey: 'supply-elgamal-pubkey',
+            },
+        });
+
+        expect(
+            await screen.findByRole('row', { name: 'Supply Elgamal Pubkey supply-elgamal-pubkey' }),
+        ).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Confidential Supply confidential-supply' })).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Decryptable Supply decryptable-supply' })).toBeInTheDocument();
+        expect(screen.getByRole('row', { name: 'Pending Burn pending-burn' })).toBeInTheDocument();
+    });
+
+    test('should render confidentialMintBurn extension without the Pending Burn row when the state has no pendingBurn', async () => {
+        renderRow({
+            extension: 'confidentialMintBurn',
+            state: {
+                confidentialSupply: 'confidential-supply',
+                decryptableSupply: 'decryptable-supply',
+                supplyElgamalPubkey: 'supply-elgamal-pubkey',
+            },
+        });
+
+        expect(await screen.findByRole('row', { name: 'Confidential Supply confidential-supply' })).toBeInTheDocument();
+        expect(screen.queryByText('Pending Burn')).not.toBeInTheDocument();
+    });
+
     test('should render tokenGroup extension', async () => {
         const data = {
             extension: 'tokenGroup',
@@ -320,7 +363,7 @@ describe('TokenExtensionRow', () => {
 
         renderRow(data);
 
-        expect(await screen.findByText('Group')).toBeInTheDocument();
+        expect(await screen.findByText('Max Size')).toBeInTheDocument();
         expect(screen.getByText('10')).toBeInTheDocument();
         expect(screen.getByText('100')).toBeInTheDocument();
     });
@@ -331,7 +374,9 @@ function renderRow(data: TokenExtension, { epoch, symbol }: { epoch?: bigint; sy
         <ScrollAnchorProvider>
             <ClusterProvider>
                 <AccountsProvider>
-                    <TableCardBody>{TokenExtensionRow(data, epoch, 6, symbol)}</TableCardBody>
+                    <TableCardBody>
+                        <TokenExtensionRow decimals={6} epoch={epoch} symbol={symbol} tokenExtension={data} />
+                    </TableCardBody>
                 </AccountsProvider>
             </ClusterProvider>
         </ScrollAnchorProvider>,

@@ -1,13 +1,14 @@
 'use client';
 
 import { getRpc } from '@entities/cluster';
-import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
+import { useAccountInfo, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenAccountInfo } from '@validators/accounts/token';
+import { BigNumber } from 'bignumber.js';
 import React from 'react';
 import { create } from 'superstruct';
 
@@ -15,7 +16,6 @@ import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { Logger } from '@/app/shared/lib/logger';
 import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import { getCurrentTokenScaledUiAmountMultiplier } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
@@ -126,8 +126,12 @@ export function useFetchAccountOwnedTokens() {
     );
 }
 
-export function useScaledUiAmountForMint(address: string | undefined, rawAmount: string): [string, string] {
+export type ScaledUiAmountMultiplier =
+    { multiplier: string; status: 'known' } | { status: 'loading' } | { status: 'unknown' };
+
+export function useScaledUiAmountMultiplier(address: string | undefined): ScaledUiAmountMultiplier {
     const mint = useAccountInfo(address);
+    const mintInfo = useMintAccountInfo(address);
     const refresh = useFetchAccountInfo();
 
     React.useEffect(() => {
@@ -136,17 +140,22 @@ export function useScaledUiAmountForMint(address: string | undefined, rawAmount:
         }
     }, [address, refresh, mint]);
 
-    if (!mint) {
-        return [rawAmount, '1'];
+    if (mintInfo) {
+        return { multiplier: getCurrentTokenScaledUiAmountMultiplier(mintInfo.extensions), status: 'known' };
     }
-
-    const infoParsed = mint?.data?.data.parsed;
-    const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
-    const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
-
-    if (scaledUiAmountMultiplier === '1') {
-        return [rawAmount, '1'];
+    if (!mint || mint.status === FetchStatus.Fetching) {
+        return { status: 'loading' };
     }
+    return { status: 'unknown' };
+}
 
-    return [(Number(rawAmount) * Number(scaledUiAmountMultiplier)).toString(), scaledUiAmountMultiplier];
+// A formatted amount can hold a thousands separator, so it stays a string when no multiplier applies.
+export function toScaledUiAmountString(amount: string, scaledUiAmountMultiplier: ScaledUiAmountMultiplier): string {
+    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
+    return multiplier === '1' ? amount : new BigNumber(amount).multipliedBy(multiplier).toString();
+}
+
+// An amount stays raw when the multiplier is not known.
+export function getAmountMultiplier(scaledUiAmountMultiplier: ScaledUiAmountMultiplier): string {
+    return scaledUiAmountMultiplier.status === 'known' ? scaledUiAmountMultiplier.multiplier : '1';
 }

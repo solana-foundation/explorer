@@ -127,7 +127,7 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
                     {token.amount} {tokenInfo?.symbol}
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={new BigNumber(token.rawAmount).shiftedBy(-(token.decimals || 0)).toString()}
-                        scaledUiAmountMultiplier={token.scaledUiAmountMultiplier}
+                        scaledUiAmountMultiplier={{ multiplier: token.scaledUiAmountMultiplier, status: 'known' }}
                     />
                 </>
             ),

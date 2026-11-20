@@ -1,12 +1,12 @@
 import { ParsedTokenExtension } from '@/app/components/account/types';
-import { TokenExtensionType } from '@/app/validators/accounts/token-extension';
+import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 function populateSolanaDevelopersLink(component: string) {
     return `https://solana.com/developers/guides/token-extensions/${component}`;
 }
 
 export function populatePartialParsedTokenExtension(
-    extension: TokenExtensionType,
+    extension: TokenExtension['extension'],
 ): Omit<ParsedTokenExtension, 'parsed' | 'extension'> {
     function populateExternalLinks(url: string) {
         return [{ label: 'Docs', url }];
@@ -172,6 +172,19 @@ export function populatePartialParsedTokenExtension(
                 description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
                 name: 'Confidential Transfer Mint',
+                status: 'active',
+                tooltip: description,
+            };
+        }
+        case 'confidentialMintBurn': {
+            const description =
+                'Keeps the mint supply confidential by minting and burning directly against confidential balances';
+            return {
+                description,
+                externalLinks: populateExternalLinks(
+                    'https://www.solana-program.com/docs/confidential-balances/mint-burn',
+                ),
+                name: 'Confidential Mint and Burn',
                 status: 'active',
                 tooltip: description,
             };

@@ -1,7 +1,19 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { any, array, boolean, enums, Infer, nullable, number, string, type } from 'superstruct';
+import {
+    any,
+    array,
+    boolean,
+    define,
+    enums,
+    Infer,
+    nullable,
+    number,
+    optional,
+    string,
+    type,
+    union,
+} from 'superstruct';
 
-export type TokenExtensionType = Infer<typeof ExtensionType>;
 const ExtensionType = enums([
     'transferFeeConfig',
     'transferFeeAmount',
@@ -27,6 +39,7 @@ const ExtensionType = enums([
     'groupMemberPointer',
     'tokenGroup',
     'tokenGroupMember',
+    'confidentialMintBurn',
     'scaledUiAmountConfig',
     'pausableAccount',
     'pausableConfig',
@@ -34,9 +47,14 @@ const ExtensionType = enums([
     'unparseableExtension',
 ]);
 
+declare const unknownExtensionName: unique symbol;
+// The brand stops the union with ExtensionType from widening to string.
+type UnknownExtensionName = string & { [unknownExtensionName]: true };
+const UnknownExtensionName = define<UnknownExtensionName>('UnknownExtensionName', value => typeof value === 'string');
+
 export type TokenExtension = Infer<typeof TokenExtension>;
 export const TokenExtension = type({
-    extension: ExtensionType,
+    extension: union([ExtensionType, UnknownExtensionName]),
     state: any(),
 });
 
@@ -117,6 +135,13 @@ export const ConfidentialTransferAccount = type({
 
 export const ConfidentialTransferFeeAmount = type({
     withheldAmount: string(),
+});
+
+export const ConfidentialMintBurn = type({
+    confidentialSupply: string(),
+    decryptableSupply: string(),
+    pendingBurn: optional(string()),
+    supplyElgamalPubkey: string(),
 });
 
 export const MetadataPointer = type({
