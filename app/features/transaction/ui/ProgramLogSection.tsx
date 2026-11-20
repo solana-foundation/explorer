@@ -1,11 +1,10 @@
 import { TableCardBody } from '@components/common/TableCardBody';
-import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
+import { parseProgramLogs, ProgramLogsCardBody } from '@entities/program-logs';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureProps } from '@utils/index';
-import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';

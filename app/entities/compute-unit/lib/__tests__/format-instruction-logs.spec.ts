@@ -1,7 +1,7 @@
 import { Cluster } from '@utils/cluster';
-import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { type InstructionLogs, parseProgramLogs } from '@/app/entities/program-logs/model/parse-program-logs';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { formatInstructionLogs } from '../format-instruction-logs';

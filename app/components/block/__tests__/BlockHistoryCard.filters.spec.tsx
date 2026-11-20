@@ -35,7 +35,7 @@ vi.mock('@entities/compute-unit', () => ({
     estimateRequestedComputeUnits: () => 0,
 }));
 
-vi.mock('@utils/program-logs', () => ({
+vi.mock('@entities/program-logs', () => ({
     parseProgramLogs: () => [{ computeUnits: 0, truncated: false }],
 }));
 

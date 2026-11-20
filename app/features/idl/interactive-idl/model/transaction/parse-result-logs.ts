@@ -1,6 +1,6 @@
+import { parseProgramLogs } from '@entities/program-logs';
 import type { TransactionError } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { parseProgramLogs } from '@utils/program-logs';
 
 import { Logger } from '@/app/shared/lib/logger';
 

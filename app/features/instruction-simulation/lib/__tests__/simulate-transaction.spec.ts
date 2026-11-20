@@ -1,9 +1,9 @@
 import type { SolanaRpc } from '@entities/cluster';
+import type { InstructionLogs } from '@entities/program-logs';
 import { type AddressLookupTableAccount, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { Cluster } from '@utils/cluster';
-import type { InstructionLogs } from '@utils/program-logs';
 import BN from 'bn.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -27,7 +27,7 @@ vi.mock('@solana/web3.js', async () => {
 });
 
 const mockParseProgramLogs = vi.fn();
-vi.mock('@utils/program-logs', () => ({
+vi.mock('@entities/program-logs', () => ({
     parseProgramLogs: (...args: unknown[]) => mockParseProgramLogs(...args),
 }));
 

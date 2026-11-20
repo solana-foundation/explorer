@@ -1,5 +1,5 @@
+import type { InstructionLogs } from '@entities/program-logs';
 import type { SimulatedTransactionResponse } from '@solana/web3.js';
-import type { InstructionLogs } from '@utils/program-logs';
 
 // Options controlling how an instruction is executed.
 export type ExecutionOptions = {

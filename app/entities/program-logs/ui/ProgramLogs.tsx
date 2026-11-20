@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority';
 import { useState } from 'react';
 import { Code } from 'react-feather';
 
-import type { InstructionLogs } from '@/app/utils/program-logs';
+import type { InstructionLogs } from '../model/parse-program-logs';
 
 export function ProgramLogs({
     header,

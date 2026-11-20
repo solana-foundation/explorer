@@ -1,4 +1,5 @@
 import type { SolanaRpc } from '@entities/cluster';
+import { type InstructionLogs, parseProgramLogs } from '@entities/program-logs';
 import type { Address, Base64EncodedWireTransaction } from '@solana/kit';
 import type {
     AccountInfo,
@@ -9,7 +10,6 @@ import type {
 } from '@solana/web3.js';
 import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
-import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 
 import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { toBase64 } from '@/app/shared/lib/bytes';

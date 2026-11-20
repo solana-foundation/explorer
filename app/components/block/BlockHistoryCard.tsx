@@ -12,6 +12,7 @@ import {
     isBlockTransaction,
 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
+import { parseProgramLogs } from '@entities/program-logs';
 import {
     type HistoryStatus,
     isHistoryStatus,
@@ -26,7 +27,6 @@ import {
     type Signature as KitSignature,
     type TransactionVersion,
 } from '@solana/kit';
-import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
 import Link from 'next/link';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';

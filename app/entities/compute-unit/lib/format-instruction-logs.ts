@@ -1,5 +1,5 @@
+import type { InstructionLogs } from '@entities/program-logs/@x/compute-unit';
 import type { Cluster } from '@utils/cluster';
-import type { InstructionLogs } from '@utils/program-logs';
 
 import { Logger } from '@/app/shared/lib/logger';
 
