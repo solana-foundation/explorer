@@ -1,12 +1,11 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
-import { getAnchorIdls, useAnchorProgram } from '@entities/idl';
+import { getAnchorIdls, useAnchorProgram } from '@entities/idl/@x/program-logs';
 import { getBase58Encoder } from '@solana/kit';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { camelToTitleCase } from '@utils/index';
-import { InstructionLogs } from '@utils/program-logs';
 import { ProgramName } from '@utils/program-name';
 import { programLabel } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
@@ -20,6 +19,9 @@ import { toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { BaseTable } from '@/app/shared/ui/Table';
 
+import { pairLogsWithInstructions } from '../model/pair-logs-with-instructions';
+import type { InstructionLogs } from '../model/parse-program-logs';
+
 // Matches the compiled dashkit `.text-*` colors the legacy `text-${log.style}` template resolved to (dark theme).
 const logTextVariants = cva('', {
     variants: {
@@ -31,14 +33,6 @@ const logTextVariants = cva('', {
         },
     },
 });
-
-const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
-    'AddressLookupTab1e1111111111111111111111111',
-    'ZkTokenProof1111111111111111111111111111111',
-    'BPFLoader1111111111111111111111111111111111',
-    'BPFLoader2111111111111111111111111111111111',
-    'BPFLoaderUpgradeab1e11111111111111111111111',
-];
 
 function ProgramNameWithInstruction({
     programId,
@@ -103,7 +97,6 @@ export function ProgramLogsCardBody({
     /** Passed through to the underlying table — `"dense"` gives the compact rows the inspector panel uses. */
     density?: TableCardBodyProps['density'];
 }) {
-    let logIndex = 0;
     let instructionProgramIds: PublicKey[];
     let instructions: any[];
 
@@ -117,22 +110,15 @@ export function ProgramLogsCardBody({
         instructions = message.instructions;
     }
 
+    const pairedLogs = pairLogsWithInstructions(
+        logs,
+        instructionProgramIds.map(programId => programId.toBase58()),
+    );
+
     return (
         <TableCardBody className={className} density={density} layout="expanded">
             {instructionProgramIds.map((programId, index) => {
-                const programAddress = programId.toBase58();
-                let programLogs: InstructionLogs | undefined = logs.at(logIndex);
-                if (programLogs?.invokedProgram === programAddress) {
-                    logIndex++;
-                } else if (
-                    programLogs?.invokedProgram === null &&
-                    programLogs.logs.length > 0 &&
-                    NATIVE_PROGRAMS_MISSING_INVOKE_LOG.includes(programAddress)
-                ) {
-                    logIndex++;
-                } else {
-                    programLogs = undefined;
-                }
+                const programLogs = pairedLogs[index];
 
                 let badgeColor = 'white';
                 if (programLogs) {

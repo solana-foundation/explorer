@@ -1,14 +1,14 @@
 import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
+import type { InstructionLogs } from '@entities/program-logs';
 import type { VersionedMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import type { InstructionLogs } from '@utils/program-logs';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { SimulationResult } from '@/app/features/instruction-simulation/lib/simulate-transaction';
 import type { SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 
-vi.mock('@/app/components/ProgramLogsCardBody', () => ({
+vi.mock('@entities/program-logs', () => ({
     ProgramLogsCardBody: () => <div data-testid="program-logs" />,
 }));
 vi.mock('@/app/features/instruction-simulation/ui/BaseSimulatorCUProfilingCard', () => ({

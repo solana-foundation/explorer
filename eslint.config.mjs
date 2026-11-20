@@ -839,7 +839,6 @@ export default tseslint.config(
             'app/utils/cluster.ts',
             'app/utils/get-readable-title-from-address.ts',
             'app/utils/parseFeatureAccount.ts',
-            'app/utils/program-logs.ts',
             'app/utils/program-verification.tsx',
             'app/utils/verified-builds.tsx',
 
@@ -862,6 +861,7 @@ export default tseslint.config(
             'app/entities/idl/model/idl-version.ts',
             'app/entities/idl/model/use-format-codama-idl.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
+            'app/entities/program-logs/model/parse-program-logs.ts',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
             'app/entities/token-price/lib/parse-usd.ts',
@@ -965,7 +965,6 @@ export default tseslint.config(
     {
         files: [
             // app/components (pre-FSD legacy)
-            'app/components/ProgramLogsCardBody.tsx',
             'app/components/account/AccountHeader.tsx',
             'app/components/account/AnchorAccountCard.tsx',
             'app/components/account/MetaplexNFTAttributesCard.tsx',
@@ -991,6 +990,7 @@ export default tseslint.config(
             'app/entities/idl/model/formatters/format.ts',
             'app/entities/idl/model/formatters/formatted-idl.d.ts',
             'app/entities/nft/lib/get-metadata-json.ts',
+            'app/entities/program-logs/ui/ProgramLogsCardBody.tsx',
 
             // app/features (FSD features)
             'app/features/idl/interactive-idl/model/anchor/anchor-interpreter.ts',

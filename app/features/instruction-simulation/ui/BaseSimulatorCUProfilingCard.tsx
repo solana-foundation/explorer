@@ -1,7 +1,7 @@
 import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
+import type { InstructionLogs } from '@entities/program-logs';
 import type { NamedInstruction } from '@entities/transaction-data';
 import type { useCluster } from '@providers/cluster';
-import type { InstructionLogs } from '@utils/program-logs';
 import { useMemo } from 'react';
 
 type BaseSimulatorCUProfilingCardProps = {

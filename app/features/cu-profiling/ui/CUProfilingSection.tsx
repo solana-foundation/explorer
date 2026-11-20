@@ -1,5 +1,6 @@
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
+import { type InstructionLogs, parseProgramLogs } from '@entities/program-logs';
 import { type NamedInstruction, resolveInstructionNames, type TransactionWithMeta } from '@entities/transaction-data';
 import { useResolvedInstructionNames } from '@entities/transaction-data/client';
 import { useCluster, useEpochScheduleResult } from '@providers/cluster';
@@ -7,7 +8,6 @@ import { useTransactionDetails } from '@providers/transactions';
 import type { Cluster } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import type { SignatureProps } from '@utils/index';
-import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { useMemo } from 'react';
 
 import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';

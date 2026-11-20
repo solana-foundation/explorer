@@ -13,7 +13,7 @@ vi.mock('../../model/use-simulation', () => ({ useSimulation }));
 vi.mock('../../model/use-simulation-instruction-names', () => ({ useSimulationInstructionNames }));
 vi.mock('../BaseSimulatorCUProfilingCard', () => ({ BaseSimulatorCUProfilingCard: CUProfilingCard }));
 vi.mock('../SolBalanceChangesCard', () => ({ SolBalanceChangesCard: () => null }));
-vi.mock('@components/ProgramLogsCardBody', () => ({ ProgramLogsCardBody: () => null }));
+vi.mock('@entities/program-logs', () => ({ ProgramLogsCardBody: () => null }));
 vi.mock('@features/transaction', () => ({
     TokenBalancesCardInner: () => null,
     generateTokenBalanceRows: () => [],

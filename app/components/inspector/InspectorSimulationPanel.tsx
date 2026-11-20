@@ -6,11 +6,11 @@
 // column react to the same run.
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
+import { ProgramLogsCardBody } from '@entities/program-logs';
 import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
-import { ProgramLogsCardBody } from '@/app/components/ProgramLogsCardBody';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { type SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 import { useSimulationInstructionNames } from '@/app/features/instruction-simulation/model/use-simulation-instruction-names';

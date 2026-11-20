@@ -1,7 +1,7 @@
-import type { InstructionLogs } from '@/app/utils/program-logs';
+import type { InstructionLogs } from '../parse-program-logs';
 
 // TODO: These logs should be derived from the original logs (string[]),
-// but the current formatter (@/app/utils/program-logs) has too many dependencies.
+// but the current formatter (`parseProgramLogs`) has too many dependencies.
 export const parsedBaseLogs: InstructionLogs[] = [
     {
         computeUnits: 7617,
