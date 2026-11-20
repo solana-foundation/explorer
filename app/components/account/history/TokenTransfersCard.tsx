@@ -10,7 +10,7 @@ import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info'
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
-import { useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
+import { getAmountMultiplier, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
@@ -19,6 +19,7 @@ import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@sola
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
+import { BigNumber } from 'bignumber.js';
 import React, { useMemo } from 'react';
 import { create } from 'superstruct';
 import useSWR from 'swr';
@@ -64,10 +65,9 @@ function AmountCell({
     units: string;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(tokenAddress);
+    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
     const scaledAmount =
-        scaledUiAmountMultiplier.status === 'known' && scaledUiAmountMultiplier.multiplier !== '1'
-            ? (Number(amountString) * Number(scaledUiAmountMultiplier.multiplier)).toString()
-            : amountString;
+        multiplier === '1' ? amountString : new BigNumber(amountString).multipliedBy(multiplier).toString();
 
     return (
         <>

@@ -12,7 +12,7 @@ import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
 import useSWRImmutable from 'swr/immutable';
 
-import { useScaledUiAmountMultiplier } from '@/app/providers/accounts/tokens';
+import { getAmountMultiplier, useScaledUiAmountMultiplier } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
@@ -118,8 +118,7 @@ function TokenBalanceRow({
     index: number;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(mint);
-    // The amounts stay raw when the multiplier is not known.
-    const multiplier = scaledUiAmountMultiplier.status === 'known' ? scaledUiAmountMultiplier.multiplier : 1;
+    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
     const scaledBalance = new BigNumber(balance).multipliedBy(multiplier).toString();
     const scaledDelta = delta.multipliedBy(multiplier);
     const mintPubkey = new PublicKey(mint);

@@ -27,6 +27,7 @@ import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsPr
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 
 import {
+    getAmountMultiplier,
     type ScaledUiAmountMultiplier,
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
@@ -187,6 +188,16 @@ describe('useScaledUiAmountMultiplier', () => {
         const { result } = renderScaledUiAmountMultiplier({});
 
         expect(result.current).toEqual({ status: 'loading' });
+    });
+});
+
+describe('getAmountMultiplier', () => {
+    it('should return the multiplier when the multiplier is known', () => {
+        expect(getAmountMultiplier({ multiplier: '2', status: 'known' })).toBe('2');
+    });
+
+    it.each(['loading', 'unknown'] as const)('should return 1 when the status is %s', status => {
+        expect(getAmountMultiplier({ status })).toBe('1');
     });
 });
 

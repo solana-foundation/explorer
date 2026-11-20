@@ -147,3 +147,8 @@ export function useScaledUiAmountMultiplier(address: string | undefined): Scaled
     }
     return { status: 'unknown' };
 }
+
+// An amount stays raw when the multiplier is not known.
+export function getAmountMultiplier(scaledUiAmountMultiplier: ScaledUiAmountMultiplier): string {
+    return scaledUiAmountMultiplier.status === 'known' ? scaledUiAmountMultiplier.multiplier : '1';
+}
