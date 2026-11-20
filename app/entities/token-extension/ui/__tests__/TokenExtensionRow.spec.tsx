@@ -353,7 +353,9 @@ function renderRow(data: TokenExtension, { epoch, symbol }: { epoch?: bigint; sy
         <ScrollAnchorProvider>
             <ClusterProvider>
                 <AccountsProvider>
-                    <TableCardBody>{TokenExtensionRow(data, epoch, 6, symbol)}</TableCardBody>
+                    <TableCardBody>
+                        <TokenExtensionRow decimals={6} epoch={epoch} symbol={symbol} tokenExtension={data} />
+                    </TableCardBody>
                 </AccountsProvider>
             </ClusterProvider>
         </ScrollAnchorProvider>,

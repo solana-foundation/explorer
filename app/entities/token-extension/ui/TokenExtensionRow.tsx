@@ -35,13 +35,17 @@ import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-export function TokenExtensionRow(
-    tokenExtension: TokenExtension,
-    maybeEpoch: bigint | undefined,
-    decimals: number,
-    symbol: string | undefined,
-) {
-    const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
+export function TokenExtensionRow({
+    decimals,
+    epoch = 0n,
+    symbol,
+    tokenExtension,
+}: {
+    decimals: number;
+    epoch?: bigint;
+    symbol?: string;
+    tokenExtension: TokenExtension;
+}) {
     switch (tokenExtension.extension) {
         case 'mintCloseAuthority': {
             const extension = create(tokenExtension.state, MintCloseAuthority);
