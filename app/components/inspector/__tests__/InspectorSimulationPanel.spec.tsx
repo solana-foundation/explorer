@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SimulationResult } from '@/app/features/instruction-simulation/lib/simulate-transaction';
 import type { SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 
-vi.mock('@entities/program-logs', () => ({
+vi.mock('@entities/program-logs/ui/ProgramLogsCardBody', () => ({
     ProgramLogsCardBody: () => <div data-testid="program-logs" />,
 }));
 vi.mock('@/app/features/instruction-simulation/ui/BaseSimulatorCUProfilingCard', () => ({

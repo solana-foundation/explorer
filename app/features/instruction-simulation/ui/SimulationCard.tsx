@@ -1,4 +1,4 @@
-import { ProgramLogsCardBody } from '@entities/program-logs';
+import { ProgramLogsCardBody } from '@entities/program-logs/ui/ProgramLogsCardBody';
 import { generateTokenBalanceRows, TokenBalancesCardInner } from '@features/transaction';
 import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';

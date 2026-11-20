@@ -1,7 +1,8 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
-import { parseProgramLogs, ProgramLogsCardBody } from '@entities/program-logs';
+import { parseProgramLogs } from '@entities/program-logs';
+import { ProgramLogsCardBody } from '@entities/program-logs/ui/ProgramLogsCardBody';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureProps } from '@utils/index';
