@@ -1,5 +1,5 @@
+import type { LogRow } from '@entities/program-logs';
 import type { SimulatedTransactionResponse } from '@solana/web3.js';
-import type { InstructionLogs } from '@utils/program-logs';
 
 // Options controlling how an instruction is executed.
 export type ExecutionOptions = {
@@ -7,11 +7,11 @@ export type ExecutionOptions = {
     simulate: boolean;
 };
 
-// Program logs carried on a result, in both forms: raw RPC lines and parsed rows.
-// Parsed at result construction so the render layer only renders, never parses.
+// Program logs carried on a result, in both forms: raw RPC lines and the rows of the Logs card.
+// Built at result construction so the render layer only renders, never parses.
 export type ResultLogs = {
     raw: string[];
-    parsed: InstructionLogs[];
+    rows: LogRow[];
 };
 
 // Instruction Execution

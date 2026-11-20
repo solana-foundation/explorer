@@ -1,11 +1,14 @@
+import { SolarizedJsonViewer } from '@components/common/JsonViewer';
+import { Button } from '@components/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import { useExplorerLink } from '@entities/cluster';
 import { ProgramLogs, TxErrorStatus, TxExecutionStatus, TxSimulationStatus } from '@entities/program-logs';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
+import { Code } from 'react-feather';
 
 import { Card } from '@/app/shared/ui/Card';
 
-import type { InstructionExecutionResult, InstructionSimulationResult } from '../model/transaction/types';
+import type { InstructionExecutionResult, InstructionSimulationResult, ResultLogs } from '../model/transaction/types';
 
 type InstructionExecutionActivityProps = {
     lastResult?: InstructionExecutionResult;
@@ -15,10 +18,9 @@ export function InstructionExecutionActivity({ lastResult }: InstructionExecutio
     const tabs = [
         {
             component: (
-                <ProgramLogs
+                <ResultLogsView
                     header={lastResult && <InstructionExecutionStatusHeader lastResult={lastResult} />}
-                    rawLogs={lastResult?.logs.raw ?? []}
-                    parsedLogs={lastResult?.logs.parsed ?? []}
+                    logs={lastResult?.logs}
                 />
             ),
             id: 'program-logs',
@@ -37,10 +39,9 @@ export function InstructionSimulationActivity({ lastSimulation }: InstructionSim
     const tabs = [
         {
             component: (
-                <ProgramLogs
+                <ResultLogsView
                     header={lastSimulation && <SimulationStatusHeader lastSimulation={lastSimulation} />}
-                    rawLogs={logs?.raw ?? []}
-                    parsedLogs={logs?.parsed ?? []}
+                    logs={logs}
                 />
             ),
             id: 'program-logs',
@@ -71,6 +72,57 @@ function CardWithTabs({ tabs }: { tabs: { id: string; title: string; component: 
             </Tabs>
         </Card>
     );
+}
+
+function ResultLogsView({ header, logs }: { header?: ReactNode; logs: ResultLogs | undefined }) {
+    const [showRaw, setShowRaw] = useState(false);
+
+    return (
+        <div className="flex min-h-0 flex-col gap-1">
+            <div className="flex justify-end">
+                <Button variant={showRaw ? 'accent' : 'outline'} size="sm" onClick={() => setShowRaw(!showRaw)}>
+                    <Code size={12} />
+                    Raw
+                </Button>
+            </div>
+            <div className="flex min-h-0 flex-col gap-2 overflow-auto">
+                {header}
+
+                <div className="overflow-x-auto">
+                    {showRaw ? <RawLogs lines={logs?.raw ?? []} /> : <LogRows rows={logs?.rows ?? []} />}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function RawLogs({ lines }: { lines: string[] }) {
+    return (
+        <div className="overflow-hidden rounded-lg">
+            <SolarizedJsonViewer
+                src={lines}
+                name={false}
+                enableClipboard={true}
+                collapsed={false}
+                displayObjectSize={false}
+                displayDataTypes={false}
+                displayArrayKey={false}
+                style={{ padding: 25, wordBreak: 'break-word' }}
+            />
+        </div>
+    );
+}
+
+function LogRows({ rows }: { rows: ResultLogs['rows'] }) {
+    if (rows.length === 0) {
+        return (
+            <div className="flex items-center justify-center pb-6 text-center">
+                <p className="m-0 text-sm italic text-muted">No logs yet</p>
+            </div>
+        );
+    }
+
+    return <ProgramLogs rows={rows} density="dense" />;
 }
 
 function InstructionExecutionStatusHeader({ lastResult }: { lastResult: InstructionExecutionResult }) {

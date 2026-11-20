@@ -25,7 +25,6 @@ type ExtendedBarDataset = ChartData<'bar'>['datasets'][number] & {
     // produces one, so the tooltip needs no empty-title branch.
     label: string;
     displayValue: string;
-    isEstimate: boolean;
     programName?: string;
 };
 
@@ -110,7 +109,6 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                             const color = dataPoint.dataset.backgroundColor;
                             const dataset = dataPoint.dataset as ExtendedBarDataset;
 
-                            const cuText = dataset.isEstimate ? 'CU reserved' : 'CU consumed';
                             const title = formatTooltipTitle({
                                 label: dataset.label,
                                 programName: dataset.programName,
@@ -183,7 +181,7 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                 return;
                             }
                             titleEl.textContent = title;
-                            cuEl.textContent = `${dataset.displayValue} ${cuText}`;
+                            cuEl.textContent = `${dataset.displayValue} CU consumed`;
                         }
 
                         // Use captured mouse position with edge detection
@@ -250,7 +248,8 @@ export function BaseCUProfilingCard({ instructions, unitsConsumed, headerless = 
 
     useCUTooltipCleanup();
 
-    const chartOptions = useCUProfileChartOptions(totalDisplayCU);
+    // The axis ends at the transaction total, so the CU of rows with no figure stay an empty part of the bar.
+    const chartOptions = useCUProfileChartOptions(Math.max(totalDisplayCU, unitsConsumed ?? 0));
 
     const chartData: ChartData<'bar'> = useMemo(
         () => ({
@@ -272,7 +271,6 @@ export function BaseCUProfilingCard({ instructions, unitsConsumed, headerless = 
                 data: [item.displayCU],
                 displayValue: item.displayValue,
                 hoverBackgroundColor: getInstructionColor(i),
-                isEstimate: item.isEstimate,
                 label: item.label,
                 programName: item.programName,
             })),

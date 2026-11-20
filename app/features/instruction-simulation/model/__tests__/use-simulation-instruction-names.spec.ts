@@ -94,9 +94,9 @@ describe('useSimulationInstructionNames', () => {
         });
 
         /**
-         * The whole list goes, not just the offending row. `formatInstructionLogs` pairs row `i` with
-         * `instructionLogs[i]`, so dropping one row shifts every later instruction onto another
-         * instruction's CU figure — a chart of confidently wrong numbers. The mixed case below is what
+         * The whole list goes, not just the offending row. `toInstructionCUData` pairs the rows with the
+         * log entries in order, so dropping one row gives a later row no CU figure or another
+         * instruction's. The mixed case below is what
          * distinguishes bailing from dropping; a single-instruction case passes either way.
          */
         it('should discard every row when one program index is out of range', () => {

@@ -12,6 +12,7 @@ import {
     isBlockTransaction,
 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
+import { getLoggedComputeUnits, parseProgramLogs } from '@entities/program-logs';
 import {
     type HistoryStatus,
     isHistoryStatus,
@@ -26,7 +27,6 @@ import {
     type Signature as KitSignature,
     type TransactionVersion,
 } from '@solana/kit';
-import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
 import Link from 'next/link';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -179,16 +179,8 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                 invokedPrograms.set(programId, programTransactionCount + 1);
             });
 
-            let logTruncated = false;
-            let computeUnits: number | undefined = undefined;
-            try {
-                const parsedLogs = parseProgramLogs(tx.meta?.logMessages ?? [], tx.meta?.err ?? null, cluster);
-
-                logTruncated = parsedLogs[parsedLogs.length - 1].truncated;
-                computeUnits = parsedLogs.map(({ computeUnits }) => computeUnits).reduce((sum, next) => sum + next);
-            } catch (_err) {
-                // ignore parsing errors because some old logs aren't parsable
-            }
+            const logs = parseProgramLogs(tx.meta?.logMessages ?? []);
+            const computeUnits = getLoggedComputeUnits(logs);
 
             const costUnits = tx.meta?.costUnits;
 
@@ -200,7 +192,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                 costUnits,
                 index: tx.index,
                 invocations,
-                logTruncated,
+                logTruncated: logs.truncated,
                 meta: tx.meta,
                 reservedComputeUnits,
                 signature,

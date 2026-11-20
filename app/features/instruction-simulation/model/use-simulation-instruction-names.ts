@@ -18,7 +18,7 @@ export type SimulationInstructionNames = {
 };
 
 /**
- * One row per instruction — its program plus whatever names resolve — ready for `formatInstructionLogs`.
+ * One row per instruction — its program plus whatever names resolve — ready for `toInstructionCUData`.
  *
  * A message queued for simulation is never RPC-parsed, so every name comes from the raw instruction
  * data: Compute Budget and the built-in discriminator resolvers synchronously, IDL-derived names once
@@ -63,13 +63,13 @@ function resolveRows(
     for (const ix of message.compiledInstructions) {
         const programId = accountKeys[ix.programIdIndex];
         if (!programId) {
-            // Bail on the whole message, never drop the row: `formatInstructionLogs` pairs row `i` with
-            // `instructionLogs[i]`, so a gap shifts every later CU figure onto the wrong instruction.
+            // Bail on the whole message, never drop the row: `toInstructionCUData` pairs the rows with the
+            // log entries in order, so a gap gives a later row no CU figure or another instruction's.
             // Reachable — web3.js checks lookup tables but never bounds-checks `programIdIndex`, and these
             // bytes come from the user — hence the report below rather than a silent skip.
             return { mismatch: { accountKeyCount: accountKeys.length, programIdIndex: ix.programIdIndex }, rows: [] };
         }
-        rows.push({ ...resolveNamesFromData({ data: ix.data, programId }), programId });
+        rows.push({ ...resolveNamesFromData({ data: ix.data, programId }), data: ix.data, programId });
     }
 
     return { rows };

@@ -6,14 +6,14 @@
 // column react to the same run.
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
-import { useCluster } from '@providers/cluster';
+import { ProgramLogs } from '@entities/program-logs';
 import type { VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
-import { ProgramLogsCardBody } from '@/app/components/ProgramLogsCardBody';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { type SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 import { useSimulationInstructionNames } from '@/app/features/instruction-simulation/model/use-simulation-instruction-names';
+import { useSimulationLogRows } from '@/app/features/instruction-simulation/model/use-simulation-log-rows';
 import { BaseSimulatorCUProfilingCard } from '@/app/features/instruction-simulation/ui/BaseSimulatorCUProfilingCard';
 import { LastSimulatedAt } from '@/app/features/instruction-simulation/ui/LastSimulatedAt';
 import { SIM_ZONE_STYLE } from '@/app/features/instruction-simulation/ui/sim-zone-style';
@@ -54,17 +54,16 @@ export function InspectorSimulationPanel({
     simulation: SimulationState;
     message: VersionedMessage;
 }) {
-    const { cluster, url } = useCluster();
-
     const result = simulation.status === 'done' ? simulation.result : undefined;
-    const logs = result?.logs;
-    const hasLogs = !!logs?.length;
 
     // Lookup-table-resolved keys only exist once the simulation has run, so naming waits for them.
-    const { instructions: namedInstructions, unresolvable } = useSimulationInstructionNames({
+    const instructionNames = useSimulationInstructionNames({
         accountKeys: result?.accountKeys,
         message,
     });
+    const { instructions: namedInstructions, unresolvable } = instructionNames;
+
+    const logRows = useSimulationLogRows(result, instructionNames);
 
     return (
         <div className="flex flex-col space-y-9 lg:space-y-12">
@@ -109,17 +108,11 @@ export function InspectorSimulationPanel({
                 only added once real content is in the card. */}
             <div id="logs">
                 <CollapsibleSection
-                    title={hasLogs ? <SimulatedTitle>Logs</SimulatedTitle> : 'Logs'}
-                    className={cn(OUTLINE_ONLY_CARD, !hasLogs && 'group')}
+                    title={logRows ? <SimulatedTitle>Logs</SimulatedTitle> : 'Logs'}
+                    className={cn(OUTLINE_ONLY_CARD, !logRows && 'group')}
                 >
-                    {hasLogs ? (
-                        <ProgramLogsCardBody
-                            message={message}
-                            logs={logs}
-                            cluster={cluster}
-                            url={url}
-                            density="dense"
-                        />
+                    {logRows ? (
+                        <ProgramLogs rows={logRows} instructions={namedInstructions} density="dense" />
                     ) : (
                         <SimEmptyHint simulation={simulation}>
                             Run the simulation to view the program logs.
@@ -129,7 +122,7 @@ export function InspectorSimulationPanel({
             </div>
 
             <div id="cu-profiling">
-                {result && logs ? (
+                {result?.logs ? (
                     <CollapsibleSection
                         title={<SimulatedTitle>CU profiling</SimulatedTitle>}
                         className={OUTLINE_ONLY_CARD}
@@ -143,10 +136,8 @@ export function InspectorSimulationPanel({
                         ) : (
                             <BaseSimulatorCUProfilingCard
                                 instructions={namedInstructions}
-                                logs={logs}
+                                invocations={result.logs.invocations}
                                 unitsConsumed={result.unitsConsumed}
-                                cluster={cluster}
-                                epoch={result.epoch}
                                 headerless
                             />
                         )}

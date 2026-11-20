@@ -35,19 +35,20 @@ STAGE 3 — sync, no I/O                                        per instruction
 comment on `ResolvedNames` in `lib/types.ts` for why that distinction is load-bearing. Only `nameLookup`
 is optional, and its presence is invariant 3 below.
 
-Stages 2 and 3 are wrapped together by the two hooks the barrel exports, so a consumer writes one line:
+Stages 2 and 3 are wrapped together by the hooks the barrel exports, so a consumer writes one line:
 
 | Surface | Stage 1 | Stages 2 + 3 |
 | --- | --- | --- |
 | account-page transaction history | `getCompiledInstructionSummaries` | `useResolvedSummaryNames` |
-| CU profiling chart | `resolveInstructionNames` | `useResolvedInstructionNames` |
+| CU profiling chart and Logs card on the transaction page | `toNamedInstruction` | `useTransactionInstructionNames` |
 | instruction simulation | `resolveNamesFromData` | `useResolvedInstructionNames` |
 | transaction-share OG image | `getInstructionSummaries` | `getIdlNames` + `applyNameSourcesToSummaries` |
 
 Those four are the only consumers. `getInstructionSummaries` calls `resolveInstructionNames` per
 instruction and adds the sentinels. `getCompiledInstructionSummaries` does the same from a wire message
-with `resolveNamesFromData`, so every history-row name comes from a name source. The CU chart calls
-`resolveInstructionNames` itself, so it keeps the `undefined` and falls back to the row's position.
+with `resolveNamesFromData`, so every history-row name comes from a name source. The CU chart and the Logs
+card call `useTransactionInstructionNames`, which runs `toNamedInstruction` on each instruction, so they
+keep the `undefined` and show their own fallback.
 
 The OG image is the first consumer that runs **server side**. Every other one reaches stages 2 and 3
 through a hook, which a route handler cannot call, so it runs both itself: stage 2 through `getIdlNames`
@@ -85,8 +86,8 @@ Break one of these and something downstream misreads a transaction. They are wha
    `resolveInstructionNames`. So `!nameLookup` never means "this row has a name".
 4. **A name source returns `undefined` for "not mine", never a guess.** Program gate first, discriminator
    second. Every source has the shape `(lookup, idlNames) => string | undefined`.
-5. **Row count and order survive every stage.** Consumers pair row `i` with `instructionLogs[i]`, so a
-   dropped row shifts every later CU figure onto the wrong instruction. Three places change the row
+5. **Row count and order survive every stage.** Consumers pair the rows with the log
+   invocations in order, so a dropped row gives a later row no logs or another instruction's. Three places change the row
    count, and none can shift an index. Both summary builders filter Compute Budget out. That is safe because
    summary rows are never paired with logs at all, not because of where they run. `resolveRows` drops
    *every* row on an out-of-range `programIdIndex` rather than leaving a gap. The two surfaces that do

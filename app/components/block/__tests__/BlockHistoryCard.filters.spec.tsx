@@ -35,8 +35,9 @@ vi.mock('@entities/compute-unit', () => ({
     estimateRequestedComputeUnits: () => 0,
 }));
 
-vi.mock('@utils/program-logs', () => ({
-    parseProgramLogs: () => [{ computeUnits: 0, truncated: false }],
+vi.mock('@entities/program-logs', () => ({
+    getLoggedComputeUnits: () => 0,
+    parseProgramLogs: () => ({ invocations: [], truncated: false }),
 }));
 
 import { BlockHistoryCard } from '../BlockHistoryCard';

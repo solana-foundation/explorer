@@ -6,6 +6,6 @@ export {
     getReservedComputeUnits,
 } from './lib/compute-units-schedule';
 export { getDefaultComputeUnits, PROGRAM_DEFAULT_COMPUTE_UNITS } from './lib/default-compute-units';
-export { formatInstructionLogs } from './lib/format-instruction-logs';
+export { toInstructionCUData } from './lib/to-instruction-cu-data';
 export type { InstructionCUData } from './lib/types';
 export { BaseCUProfilingCard } from './ui/BaseCUProfilingCard';
