@@ -7,7 +7,7 @@ import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info'
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData } from '@providers/accounts';
-import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/accounts/tokens';
+import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -136,7 +136,7 @@ function FungibleTokenMintAccountCard({
                     </span>
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}
-                        scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                        scaledUiAmountMultiplier={{ multiplier: scaledUiAmountMultiplier, status: 'known' }}
                     />
                 </>
             ),
@@ -281,7 +281,7 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useRefreshAccount();
-    const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(info.mint.toBase58(), info.tokenAmount.amount);
+    const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(info.mint.toBase58());
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);

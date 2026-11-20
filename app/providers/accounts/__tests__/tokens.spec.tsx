@@ -27,12 +27,13 @@ import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsPr
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 
 import {
+    type ScaledUiAmountMultiplier,
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     TokensProvider,
     useAccountOwnedTokens,
     useFetchAccountOwnedTokens,
-    useScaledUiAmountForMint,
+    useScaledUiAmountMultiplier,
 } from '../tokens';
 
 const OWNER = PublicKey.default.toBase58();
@@ -159,21 +160,21 @@ describe('should fetch account token holdings without enrichment', () => {
     });
 });
 
-describe('useScaledUiAmountForMint', () => {
-    it('should scale the raw amount by the multiplier of the mint', () => {
-        const { result } = renderScaledUiAmount({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION] });
+describe('useScaledUiAmountMultiplier', () => {
+    it('should return the multiplier of the mint', () => {
+        const { result } = renderScaledUiAmountMultiplier({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION] });
 
-        expect(result.current).toEqual(['2000', '2']);
+        expect(result.current).toEqual({ multiplier: '2', status: 'known' });
     });
 
-    it('should return the raw amount when the mint does not parse', () => {
-        const { result } = renderScaledUiAmount({
+    it('should return an unknown multiplier when the mint does not parse', () => {
+        const { result } = renderScaledUiAmountMultiplier({
             ...MINT_INFO,
             extensions: [SCALED_UI_AMOUNT_EXTENSION],
             supply: undefined,
         });
 
-        expect(result.current).toEqual(['1000', '1']);
+        expect(result.current).toEqual({ status: 'unknown' });
     });
 });
 
@@ -190,7 +191,9 @@ const SCALED_UI_AMOUNT_EXTENSION = {
     state: { authority: null, multiplier: '2', newMultiplier: '2', newMultiplierEffectiveTimestamp: 0 },
 };
 
-function renderScaledUiAmount(mintInfo: Record<string, unknown>): RenderHookResult<[string, string], unknown> {
+function renderScaledUiAmountMultiplier(
+    mintInfo: Record<string, unknown>,
+): RenderHookResult<ScaledUiAmountMultiplier, unknown> {
     const account: Account = {
         data: { parsed: { parsed: { info: mintInfo, type: 'mint' }, program: 'spl-token-2022' } },
         executable: false,
@@ -199,7 +202,7 @@ function renderScaledUiAmount(mintInfo: Record<string, unknown>): RenderHookResu
         pubkey: new PublicKey(MINT),
     };
     const accounts = { [MINT]: { data: account, status: FetchStatus.Fetched } };
-    return renderHook(() => useScaledUiAmountForMint(MINT, '1000'), {
+    return renderHook(() => useScaledUiAmountMultiplier(MINT), {
         wrapper: ({ children }) => (
             <MockClusterProvider>
                 <MockAccountsProvider accounts={accounts}>{children}</MockAccountsProvider>

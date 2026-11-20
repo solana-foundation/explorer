@@ -10,7 +10,7 @@ import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info'
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
-import { useScaledUiAmountForMint } from '@providers/accounts/tokens';
+import { useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
@@ -63,14 +63,15 @@ function AmountCell({
     tokenAddress: string;
     units: string;
 }) {
-    const [amountWithScaledUiAmountMultiplier, scaledUiAmountMultiplier] = useScaledUiAmountForMint(
-        tokenAddress,
-        amountString,
-    );
+    const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(tokenAddress);
+    const scaledAmount =
+        scaledUiAmountMultiplier.status === 'known' && scaledUiAmountMultiplier.multiplier !== '1'
+            ? (Number(amountString) * Number(scaledUiAmountMultiplier.multiplier)).toString()
+            : amountString;
 
     return (
         <>
-            {amountWithScaledUiAmountMultiplier} {units}
+            {scaledAmount} {units}
             <ScaledUiAmountMultiplierTooltip
                 rawAmount={amountString}
                 scaledUiAmountMultiplier={scaledUiAmountMultiplier}

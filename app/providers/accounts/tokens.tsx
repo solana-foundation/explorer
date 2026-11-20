@@ -125,7 +125,10 @@ export function useFetchAccountOwnedTokens() {
     );
 }
 
-export function useScaledUiAmountForMint(address: string | undefined, rawAmount: string): [string, string] {
+// The multiplier is unknown when the fetched mint does not parse.
+export type ScaledUiAmountMultiplier = { multiplier: string; status: 'known' } | { status: 'unknown' };
+
+export function useScaledUiAmountMultiplier(address: string | undefined): ScaledUiAmountMultiplier {
     const mint = useAccountInfo(address);
     const mintInfo = useMintAccountInfo(address);
     const refresh = useFetchAccountInfo();
@@ -136,11 +139,9 @@ export function useScaledUiAmountForMint(address: string | undefined, rawAmount:
         }
     }, [address, refresh, mint]);
 
-    const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
-
-    if (scaledUiAmountMultiplier === '1') {
-        return [rawAmount, '1'];
+    if (mint?.data?.data.parsed && !mintInfo) {
+        return { status: 'unknown' };
     }
 
-    return [(Number(rawAmount) * Number(scaledUiAmountMultiplier)).toString(), scaledUiAmountMultiplier];
+    return { multiplier: getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions), status: 'known' };
 }

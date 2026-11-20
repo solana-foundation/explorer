@@ -21,7 +21,9 @@ vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
     fetchTokenInfosFromApi: mocks.fetchTokenInfosFromApi,
 }));
-vi.mock('@/app/providers/accounts/tokens', () => ({ useScaledUiAmountForMint: () => ['1', '1'] }));
+vi.mock('@/app/providers/accounts/tokens', () => ({
+    useScaledUiAmountMultiplier: () => ({ multiplier: '1', status: 'known' }),
+}));
 vi.mock('@components/common/Address', () => ({ Address: () => <span>address</span> }));
 vi.mock('@components/common/BalanceDelta', () => ({ BalanceDelta: () => <span>delta</span> }));
 vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', () => ({ default: () => null }));
