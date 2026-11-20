@@ -3,7 +3,7 @@
 ## Context
 
 - `ipfs.io` stopped serving content over HTTP on 2026-09-21 ([announcement](https://gatewaychanges.ipfs.io)). It returns `429` with `Retry-After: 900`.
-- [`resolve-ipfs-uris-to-http-gateway`](../archive/2026-10-07-resolve-ipfs-uris-to-http-gateway/proposal.md) rewrote `ipfs://` URIs to `ipfs.io`, and left http(s) gateway URIs unchanged.
+- [`resolve-ipfs-uris-to-http-gateway`](../2026-10-07-resolve-ipfs-uris-to-http-gateway/proposal.md) rewrote `ipfs://` URIs to `ipfs.io`, and left http(s) gateway URIs unchanged.
 - Many mints store `https://ipfs.io/ipfs/<cid>` on chain. pump.fun used this form for 20 of its 30 latest tokens on 2026-10-07.
 - One day of proxy logs, read on 2026-10-07, averaged 16 requests per minute to IPFS gateway URLs.
 
@@ -32,7 +32,7 @@ The rewrite also moves URIs that load from their own host. In a sample of 75 suc
 
 ## Impact
 
-- Supersedes [`resolve-ipfs-uris-to-http-gateway`](../archive/2026-10-07-resolve-ipfs-uris-to-http-gateway/proposal.md). Its requirements are the base `ipfs-uri-resolution` spec, and this delta modifies them.
+- Supersedes [`resolve-ipfs-uris-to-http-gateway`](../2026-10-07-resolve-ipfs-uris-to-http-gateway/proposal.md). Its requirements are the base `ipfs-uri-resolution` spec, and this delta modifies them.
 - `multiformats/basics` adds 1.9 kB gzipped to the client bundle.
 - All IPFS traffic shares the public rate limit of `ipfs.filebase.io`. The proxy logs give the daily average, not the busiest minute.
 - The first Filebase fetch of an uncached CID can reach the proxy timeout. The first viewer then sees the placeholder.
