@@ -25,11 +25,7 @@ type QueryOptions = Options & { immutable?: boolean };
 export const EPOCH_INFO_REFRESH_MS = 30_000;
 
 export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
-    return useEpochScheduleResult(options).data;
-}
-
-function useEpochScheduleResult(options: Options = {}): ClusterQueryResult<ClusterInfo['epochSchedule']> {
-    return useClusterQuery('epoch-schedule', fetchEpochSchedule, { ...options, immutable: true });
+    return useClusterQuery('epoch-schedule', fetchEpochSchedule, { ...options, immutable: true }).data;
 }
 
 /**

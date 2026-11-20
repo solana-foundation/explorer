@@ -31,6 +31,7 @@ const BASE58_DECODER = getBase58Decoder();
 const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const JUPITER_PROGRAM = new PublicKey('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4');
+const ZK_ELGAMAL_PROOF_PROGRAM = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
 
 afterEach(() => vi.clearAllMocks());
 
@@ -58,6 +59,15 @@ describe('CUProfilingSection', () => {
             expect(screen.getByText('#1 Set Compute Unit Price: 150')).toBeInTheDocument();
             expect(screen.getByText('#2 Transfer Checked: 105')).toBeInTheDocument();
         });
+    });
+
+    // ZK ElGamal Proof logs no "consumed" line, and its fixed cost depends on the instruction data.
+    it('should show the fixed cost of an instruction that the RPC returned unparsed', () => {
+        mockTransaction([verifyZeroCiphertext()], [invocation(ZK_ELGAMAL_PROOF_PROGRAM)]);
+
+        renderSection();
+
+        expect(screen.getByText('#1 Verify Zero Ciphertext: 6,000')).toBeInTheDocument();
     });
 
     describe('names resolvable only from an IDL', () => {
@@ -164,6 +174,10 @@ function setComputeUnitPrice(): PartiallyDecodedInstruction {
         data: BASE58_DECODER.decode(new Uint8Array([3, 0x90, 0x06, 0, 0, 0, 0, 0, 0])),
         programId: ComputeBudgetProgram.programId,
     };
+}
+
+function verifyZeroCiphertext(): PartiallyDecodedInstruction {
+    return { accounts: [], data: BASE58_DECODER.decode(new Uint8Array([1])), programId: ZK_ELGAMAL_PROOF_PROGRAM };
 }
 
 function jupiterRoute(): PartiallyDecodedInstruction {

@@ -4,20 +4,42 @@ import { useProgramIdlNames } from '@entities/idl/@x/transaction-data';
 import { useCluster } from '@providers/cluster';
 import { useMemo } from 'react';
 
+import { toNamedInstruction } from '../lib/instruction-summary';
 import { applyNameSources, applyNameSourcesToSummaries } from '../lib/name-sources';
 import type { InstructionNameLookup, InstructionSummary, NamedInstruction } from '../lib/types';
+import type { TransactionWithMeta } from './types';
+
+/**
+ * One row for each top-level instruction of an RPC-parsed transaction, Compute Budget included, so the
+ * rows stay in the order of the transaction's logs. No rows while the transaction loads.
+ */
+export function useTransactionInstructionNames(
+    transactionWithMeta: TransactionWithMeta | null | undefined,
+): NamedInstruction[] {
+    const rows = useMemo(
+        () => transactionWithMeta?.transaction.message.instructions.map(toNamedInstruction) ?? [],
+        [transactionWithMeta],
+    );
+
+    return useResolvedInstructionNames(rows);
+}
 
 /**
  * The second half of instruction naming: fetch the IDLs the unnamed rows need, then run every name
- * source. Row count and order are preserved, so a caller pairing row `i` with `instructionLogs[i]`
- * stays aligned.
+ * source. Row count and order are preserved, so a caller that pairs the rows with the log
+ * invocations in order gets the right invocation for each row.
  * @param instructions - Rows in transaction order, each carrying its program
  */
 export function useResolvedInstructionNames(instructions: readonly NamedInstruction[]): NamedInstruction[] {
     const idlNames = useIdlNames(instructions);
 
     return useMemo(
-        () => instructions.map(row => ({ ...applyNameSources(row, idlNames), programId: row.programId })),
+        () =>
+            instructions.map(row => ({
+                ...applyNameSources(row, idlNames),
+                data: row.data,
+                programId: row.programId,
+            })),
         [instructions, idlNames],
     );
 }

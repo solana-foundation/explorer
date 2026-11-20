@@ -1,14 +1,16 @@
 /**
- * One instruction as `formatInstructionLogs` takes it: its program, plus display names when the caller
+ * One instruction as `toInstructionCUData` takes it: its program, plus display names when the caller
  * resolved them. `programId` is structural rather than a `PublicKey` because only the base58 address is
  * read — that keeps this entity independent of any one key representation.
  *
- * Rows must stay in transaction order and must not be filtered. `formatInstructionLogs` pairs the rows
- * with the top-level invocations in order, so dropping a row can give a later row another instruction's
- * CU figure.
+ * Rows must stay in transaction order and must not be filtered. `toInstructionCUData` pairs the rows
+ * with the top-level invocations in order, so a dropped row can give a later row no CU figure or another
+ * instruction's.
  */
 export type InstructionCUInput = {
     programId: { toBase58(): string };
+    // The instruction data. The fixed cost of some programs depends on the instruction.
+    data?: Uint8Array;
     name?: string;
     programName?: string;
 };

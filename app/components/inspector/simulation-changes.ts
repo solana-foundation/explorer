@@ -12,6 +12,7 @@ export function hasReliableChanges(
 export function simulationFailureMessage(simulation: SimulationState): string | undefined {
     if (simulation.status === 'error') return simulation.error;
     if (simulation.status !== 'done' || !simulation.result.error) return undefined;
-    if (!simulation.result.logs?.some(instruction => instruction.failed)) return simulation.result.error;
+    // With logs, the Logs card shows the error on the instruction that the transaction error names.
+    if (!simulation.result.logs || !simulation.result.instructionError) return simulation.result.error;
     return 'Transaction reverted during simulation — see the Logs for the program error.';
 }

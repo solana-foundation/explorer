@@ -1,30 +1,34 @@
-import type { InstructionLogs } from './parse-program-logs';
+import type { Invocation } from './parse-program-logs';
 
 /**
- * Returns the log entry of each instruction, or `undefined` for an instruction with no entry.
- * Matches by program address because a precompile logs nothing, so the entries can be fewer than the instructions.
+ * Returns the top-level invocation of each instruction, or `undefined` for an instruction that logged nothing.
+ * Matches by program address because a precompile logs nothing, so the invocations can be fewer than the instructions.
  */
 export function pairLogsWithInstructions(
-    logs: readonly InstructionLogs[],
+    invocations: readonly Invocation[],
     programAddresses: readonly string[],
-): (InstructionLogs | undefined)[] {
-    let logIndex = 0;
+): (Invocation | undefined)[] {
+    let next = 0;
 
     return programAddresses.map(programAddress => {
-        const entry = logs[logIndex];
-        if (!entry || !isLoggedBy(entry, programAddress)) return undefined;
+        // Lines with no `invoke` line that this instruction cannot own belong to no instruction.
+        const skipsOrphan =
+            invocations[next]?.programAddress === undefined && !isLoggedBy(invocations[next], programAddress);
+        const index = skipsOrphan ? next + 1 : next;
+        if (!isLoggedBy(invocations[index], programAddress)) return undefined;
 
-        logIndex++;
-        return entry;
+        next = index + 1;
+        return invocations[index];
     });
 }
 
-function isLoggedBy(entry: InstructionLogs, programAddress: string): boolean {
-    if (entry.invokedProgram === null) {
-        return entry.logs.length > 0 && NATIVE_PROGRAMS_MISSING_INVOKE_LOG.includes(programAddress);
+function isLoggedBy(invocation: Invocation | undefined, programAddress: string): boolean {
+    if (!invocation) return false;
+    if (invocation.programAddress === undefined) {
+        return invocation.entries.length > 0 && NATIVE_PROGRAMS_MISSING_INVOKE_LOG.includes(programAddress);
     }
 
-    return entry.invokedProgram === programAddress;
+    return invocation.programAddress === programAddress;
 }
 
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: readonly string[] = [

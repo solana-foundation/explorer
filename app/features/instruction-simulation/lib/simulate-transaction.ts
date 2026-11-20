@@ -1,5 +1,5 @@
 import type { SolanaRpc } from '@entities/cluster';
-import { type InstructionLogs, parseProgramLogs } from '@entities/program-logs';
+import { type ParsedProgramLogs, parseProgramLogs } from '@entities/program-logs';
 import type { Address, Base64EncodedWireTransaction } from '@solana/kit';
 import type {
     AccountInfo,
@@ -10,6 +10,7 @@ import type {
 } from '@solana/web3.js';
 import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
+import { getTransactionInstructionError, type ProgramError } from '@utils/program-err';
 
 import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -29,7 +30,9 @@ export type SimulationResult = {
     // `compiledInstructions` indexes into. Callers that need an instruction's program id must read it
     // from here: `message.staticAccountKeys` is missing any key sourced from a lookup table.
     accountKeys: readonly PublicKey[];
-    logs: InstructionLogs[] | undefined;
+    logs: ParsedProgramLogs | undefined;
+    // The instruction that the transaction error names, for the Logs card.
+    instructionError: ProgramError | undefined;
     error: string | undefined;
     solBalanceChanges: SolBalanceChange[] | undefined;
     tokenBalanceData: TokenBalanceData | undefined;
@@ -255,7 +258,7 @@ function interpretSimulation(
 
     const solChanges = computeSolBalanceChanges(accountKeys, parsedAccountsPre, simResult.accounts, accountBalances);
 
-    const logs = simResult.logs.length > 0 ? parseProgramLogs(simResult.logs, simResult.err, cluster) : undefined;
+    const logs = simResult.logs.length > 0 ? parseProgramLogs(simResult.logs) : undefined;
 
     let error: string | undefined;
     if (simResult.err) {
@@ -265,6 +268,7 @@ function interpretSimulation(
     return {
         accountKeys,
         error,
+        instructionError: getTransactionInstructionError(simResult.err),
         logs,
         solBalanceChanges: solChanges.length > 0 ? solChanges : undefined,
         tokenBalanceData: tokenData,

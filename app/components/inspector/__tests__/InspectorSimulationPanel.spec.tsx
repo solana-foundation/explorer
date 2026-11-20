@@ -1,5 +1,5 @@
 import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
-import type { InstructionLogs } from '@entities/program-logs';
+import { parseProgramLogs } from '@entities/program-logs';
 import type { VersionedMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
@@ -8,8 +8,9 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SimulationResult } from '@/app/features/instruction-simulation/lib/simulate-transaction';
 import type { SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 
-vi.mock('@entities/program-logs/ui/ProgramLogsCardBody', () => ({
-    ProgramLogsCardBody: () => <div data-testid="program-logs" />,
+vi.mock('@entities/program-logs', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/program-logs')>()),
+    ProgramLogs: () => <div data-testid="program-logs" />,
 }));
 vi.mock('@/app/features/instruction-simulation/ui/BaseSimulatorCUProfilingCard', () => ({
     BaseSimulatorCUProfilingCard: () => <div data-testid="cu-profiling" />,
@@ -26,25 +27,17 @@ import { InspectorSimulationPanel } from '../InspectorSimulationPanel';
 const MESSAGE = { compiledInstructions: [] } as unknown as VersionedMessage;
 const NO_LOGS_HINT = 'The simulation produced no logs.';
 
-const FAILED_PROGRAM_LOGS: InstructionLogs[] = [
-    {
-        computeUnits: 43_950,
-        failed: true,
-        invokedProgram: gen.address(),
-        logs: [{ prefix: '> ', style: 'warning', text: 'Program returned error: "custom program error: 0x1771"' }],
-        truncated: false,
-    },
-];
+const PROGRAM_ADDRESS = gen.address();
 
-const SUCCEEDED_PROGRAM_LOGS: InstructionLogs[] = [
-    {
-        computeUnits: 150,
-        failed: false,
-        invokedProgram: gen.address(),
-        logs: [{ prefix: '> ', style: 'success', text: 'Program returned success' }],
-        truncated: false,
-    },
-];
+const FAILED_PROGRAM_LOGS = parseProgramLogs([
+    `Program ${PROGRAM_ADDRESS} invoke [1]`,
+    `Program ${PROGRAM_ADDRESS} failed: custom program error: 0x1771`,
+]);
+
+const SUCCEEDED_PROGRAM_LOGS = parseProgramLogs([
+    `Program ${PROGRAM_ADDRESS} invoke [1]`,
+    `Program ${PROGRAM_ADDRESS} success`,
+]);
 
 describe('inspector::InspectorSimulationPanel', () => {
     it('should show the failure reason when the simulation returns no logs', () => {
@@ -56,7 +49,11 @@ describe('inspector::InspectorSimulationPanel', () => {
 
     it('should point at the logs when a program fails during the simulation', () => {
         renderPanel(
-            createSimulationStateDone({ error: '{"InstructionError":[0,{"Custom":6001}]}', logs: FAILED_PROGRAM_LOGS }),
+            createSimulationStateDone({
+                error: '{"InstructionError":[0,{"Custom":6001}]}',
+                instructionError: { index: 0, message: 'custom program error: 0x1771' },
+                logs: FAILED_PROGRAM_LOGS,
+            }),
         );
 
         // eslint-disable-next-line no-restricted-syntax -- the failure text continues past this prefix
@@ -66,7 +63,7 @@ describe('inspector::InspectorSimulationPanel', () => {
         expect(screen.queryByText(NO_LOGS_HINT)).not.toBeInTheDocument();
     });
 
-    it('should show the failure reason when the logs mark no failed instruction', () => {
+    it('should show the failure reason when the transaction error names no instruction', () => {
         const reason = '{"InsufficientFundsForRent":{"account_index":2}}';
         renderPanel(createSimulationStateDone({ error: reason, logs: SUCCEEDED_PROGRAM_LOGS }));
 
@@ -85,11 +82,8 @@ describe('inspector::InspectorSimulationPanel', () => {
         expect(screen.queryByText('Simulation Failure:')).not.toBeInTheDocument();
     });
 
-    it.each([
-        { logs: undefined, name: 'no log list' },
-        { logs: [], name: 'an empty log list' },
-    ])('should display the message with empty logs and CU profiling after a simulation with $name', ({ logs }) => {
-        renderPanel(createSimulationStateDone({ error: 'InvalidAccountForFee', logs }));
+    it('should display the message with empty logs and CU profiling after a simulation with no logs', () => {
+        renderPanel(createSimulationStateDone({ error: 'InvalidAccountForFee', logs: undefined }));
 
         expect(screen.getAllByText(NO_LOGS_HINT)).toHaveLength(2);
         // eslint-disable-next-line no-restricted-syntax -- one pattern covers the logs and CU profiling placeholders
@@ -109,10 +103,13 @@ function renderPanel(simulation: SimulationState) {
     return render(<InspectorSimulationPanel simulation={simulation} message={MESSAGE} />);
 }
 
-function createSimulationStateDone(overrides: Pick<SimulationResult, 'error' | 'logs'>): SimulationState {
+function createSimulationStateDone(
+    overrides: Pick<SimulationResult, 'error' | 'logs'> & Partial<Pick<SimulationResult, 'instructionError'>>,
+): SimulationState {
     return {
         result: {
             accountKeys: [],
+            instructionError: undefined,
             solBalanceChanges: undefined,
             tokenBalanceData: undefined,
             unitsConsumed: undefined,

@@ -94,7 +94,7 @@ describe('useSimulationInstructionNames', () => {
         });
 
         /**
-         * The whole list goes, not just the offending row. `formatInstructionLogs` pairs the rows with the
+         * The whole list goes, not just the offending row. `toInstructionCUData` pairs the rows with the
          * log entries in order, so dropping one row gives a later row no CU figure or another
          * instruction's. The mixed case below is what
          * distinguishes bailing from dropping; a single-instruction case passes either way.

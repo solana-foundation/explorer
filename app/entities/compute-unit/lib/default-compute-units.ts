@@ -1,4 +1,5 @@
 import { getOwn } from '@shared/lib/object';
+import { ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
 
 // https://github.com/anza-xyz/agave/blob/v2.1.13/programs/system/src/system_processor.rs#L299
 const SYSTEM_PROGRAM_INSTRUCTION_COMPUTE_UNITS = 150;
@@ -45,6 +46,27 @@ export const PROGRAM_DEFAULT_COMPUTE_UNITS: Record<string, number> = {
     Vote111111111111111111111111111111111111111: VOTE_PROGRAM_COMPUTE_UNITS,
 };
 
-export function getDefaultComputeUnits(programId: string): number | undefined {
+/** Returns the fixed cost of an instruction, or `undefined` for a program whose cost is not fixed. */
+export function getDefaultComputeUnits(programId: string, data?: Uint8Array): number | undefined {
+    if (programId === ZK_ELGAMAL_PROOF_PROGRAM_ID) return data && ZK_ELGAMAL_PROOF_COMPUTE_UNITS[data[0]];
+
     return PROGRAM_DEFAULT_COMPUTE_UNITS[programId];
 }
+
+// The cost of each instruction, indexed by the first byte of the instruction data.
+// https://github.com/anza-xyz/agave/blob/v2.1.13/programs/zk-elgamal-proof/src/lib.rs#L20
+const ZK_ELGAMAL_PROOF_COMPUTE_UNITS: readonly (number | undefined)[] = [
+    3_300, // CloseContextState
+    6_000, // VerifyZeroCiphertext
+    8_000, // VerifyCiphertextCiphertextEquality
+    6_400, // VerifyCiphertextCommitmentEquality
+    2_600, // VerifyPubkeyValidity
+    6_500, // VerifyPercentageWithCap
+    111_000, // VerifyBatchedRangeProofU64
+    200_000, // VerifyBatchedRangeProofU128
+    368_000, // VerifyBatchedRangeProofU256
+    6_400, // VerifyGroupedCiphertext2HandlesValidity
+    13_000, // VerifyBatchedGroupedCiphertext2HandlesValidity
+    8_100, // VerifyGroupedCiphertext3HandlesValidity
+    16_400, // VerifyBatchedGroupedCiphertext3HandlesValidity
+];

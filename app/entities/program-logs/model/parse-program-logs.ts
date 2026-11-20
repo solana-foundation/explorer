@@ -1,179 +1,94 @@
-import { Cluster } from '@utils/cluster';
-import { getTransactionInstructionError, type SupportedTransactionError } from '@utils/program-err';
-import { getProgramName } from '@utils/tx';
-
-import { Logger } from '@/app/shared/lib/logger';
-
-export type LogMessage = {
-    text: string;
-    prefix: string;
-    style: 'muted' | 'info' | 'success' | 'warning';
-};
-
-export type InstructionLogs = {
-    invokedProgram: string | null;
-    logs: LogMessage[];
-    computeUnits: number;
+export type ParsedProgramLogs = {
+    // The top-level invocations, in log order.
+    invocations: Invocation[];
     truncated: boolean;
-    failed: boolean;
 };
 
-export function parseProgramLogs(
-    logs: readonly string[],
-    error: SupportedTransactionError | null | undefined,
-    cluster: Cluster,
-): InstructionLogs[] {
-    let depth = 0;
-    const prettyLogs: InstructionLogs[] = [];
-    function prefixBuilder(
-        // Indent level starts at 1.
-        indentLevel: number,
-    ) {
-        let prefix;
-        if (indentLevel <= 0) {
-            Logger.warn('[utils:program-logs] Tried to build a prefix for a program log at invalid indent level', {
-                indentLevel,
-            });
-            prefix = '';
-        } else {
-            prefix = new Array(indentLevel - 1).fill('\u00A0\u00A0').join('');
+export type Invocation = {
+    // `undefined` when no `invoke` line precedes the lines.
+    programAddress: string | undefined;
+    // The figure of the "consumed" line. A builtin logs no such line.
+    computeUnits: number | undefined;
+    entries: InvocationEntry[];
+};
+
+// An `invoke` line opens every inner invocation.
+type InnerInvocation = Invocation & { programAddress: string };
+
+export type InvocationEntry =
+    | { kind: 'invocation'; invocation: InnerInvocation }
+    | { kind: 'success' }
+    | { kind: 'consumed' | 'data' | 'error' | 'failed' | 'log' | 'text'; text: string };
+
+/** Builds the invocation tree of a transaction's log lines. Accepts any lines, in any order, without an error. */
+export function parseProgramLogs(lines: readonly string[]): ParsedProgramLogs {
+    const invocations: Invocation[] = [];
+    const stack: Invocation[] = [];
+    let truncated = false;
+
+    for (const line of lines) {
+        if (line.startsWith('Log truncated')) {
+            truncated = true;
+            continue;
         }
-        return `${prefix}> `;
-    }
 
-    let prettyError;
-    if (error) {
-        prettyError = getTransactionInstructionError(error);
-    }
-
-    logs.forEach(log => {
-        if (log.startsWith('Program log:')) {
-            // Use passive tense
-            // eslint-disable-next-line no-restricted-syntax -- extract program log message
-            log = log.replace(/Program log: (.*)/g, (match, p1) => {
-                return `Program logged: "${p1}"`;
-            });
-
-            prettyLogs[prettyLogs.length - 1].logs.push({
-                prefix: prefixBuilder(depth),
-                style: 'muted',
-                text: log,
-            });
-        } else if (log.startsWith('Program data:')) {
-            prettyLogs[prettyLogs.length - 1].logs.push({
-                prefix: prefixBuilder(depth),
-                style: 'muted',
-                text: log,
-            });
-        } else if (log.startsWith('Log truncated')) {
-            prettyLogs[prettyLogs.length - 1].truncated = true;
-        } else {
-            // eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
-            const regex = /Program (\w*) invoke \[(\d)\]/g;
-            const matches = Array.from(log.matchAll(regex));
-
-            if (matches.length > 0) {
-                const programAddress = matches[0][1];
-                const programName = getProgramName(programAddress, cluster);
-
-                if (depth === 0) {
-                    prettyLogs.push({
-                        computeUnits: 0,
-                        failed: false,
-                        invokedProgram: programAddress,
-                        logs: [],
-                        truncated: false,
-                    });
-                } else {
-                    prettyLogs[prettyLogs.length - 1].logs.push({
-                        prefix: prefixBuilder(depth),
-                        style: 'info',
-                        text: `Program invoked: ${programName}`,
-                    });
-                }
-
-                depth++;
-            } else if (log.includes('success')) {
-                prettyLogs[prettyLogs.length - 1].logs.push({
-                    prefix: prefixBuilder(depth),
-                    style: 'success',
-                    text: `Program returned success`,
-                });
-                depth--;
-            } else if (log.includes('failed')) {
-                const instructionLog = prettyLogs[prettyLogs.length - 1];
-                instructionLog.failed = true;
-
-                let currText = `Program returned error: "${log.slice(log.indexOf(': ') + 2)}"`;
-                // failed to verify log of previous program so reset depth and print full log
-                if (log.startsWith('failed')) {
-                    depth++;
-                    currText = log.charAt(0).toUpperCase() + log.slice(1);
-                }
-
-                instructionLog.logs.push({
-                    prefix: prefixBuilder(depth),
-                    style: 'warning',
-                    text: currText,
-                });
-                depth--;
-            } else {
-                if (depth === 0) {
-                    prettyLogs.push({
-                        computeUnits: 0,
-                        failed: false,
-                        invokedProgram: null,
-                        logs: [],
-                        truncated: false,
-                    });
-                    depth++;
-                }
-
-                // Remove redundant program address from logs
-                // eslint-disable-next-line no-restricted-syntax -- extract compute units consumed
-                log = log.replace(/Program \w* consumed (\d*) (.*)/g, (match, p1, p2) => {
-                    // Only aggregate compute units consumed from top-level tx instructions
-                    // because they include inner ix compute units as well.
-                    if (depth === 1) {
-                        prettyLogs[prettyLogs.length - 1].computeUnits += Number.parseInt(p1);
-                    }
-
-                    return `Program consumed: ${p1} ${p2}`;
-                });
-
-                // native program logs don't start with "Program log:"
-                prettyLogs[prettyLogs.length - 1].logs.push({
-                    prefix: prefixBuilder(depth),
-                    style: 'muted',
-                    text: log,
-                });
-            }
+        const invoke = line.match(INVOKE);
+        if (invoke) {
+            // The depth in the line closes an invocation that logged no status line.
+            stack.length = Math.max(0, Math.min(stack.length, Number(invoke[2]) - 1));
+            const invocation: InnerInvocation = { computeUnits: undefined, entries: [], programAddress: invoke[1] };
+            const parent = stack.at(-1);
+            if (parent) parent.entries.push({ invocation, kind: 'invocation' });
+            else invocations.push(invocation);
+            stack.push(invocation);
+            continue;
         }
-    });
 
-    // If the instruction's simulation returned an error without any logs then add an empty log entry for Runtime error
-    // For example BpfUpgradableLoader fails without returning any logs for Upgrade instruction with buffer that doesn't exist
-    if (prettyError && prettyLogs.length === 0) {
-        prettyLogs.push({
-            computeUnits: 0,
-            failed: true,
-            invokedProgram: null,
-            logs: [],
-            truncated: false,
-        });
-    }
-
-    if (prettyError && prettyError.index === prettyLogs.length - 1) {
-        const failedIx = prettyLogs[prettyError.index];
-        if (!failedIx.failed) {
-            failedIx.failed = true;
-            failedIx.logs.push({
-                prefix: prefixBuilder(1),
-                style: 'warning',
-                text: `Runtime error: ${prettyError.message}`,
-            });
+        const entry = toEntry(line);
+        // The runtime can write an error after the status line of the invocation that caused it.
+        let invocation = stack.at(-1) ?? (entry.kind === 'error' ? invocations.at(-1) : undefined);
+        if (!invocation) {
+            invocation = { computeUnits: undefined, entries: [], programAddress: undefined };
+            invocations.push(invocation);
+            stack.push(invocation);
         }
+
+        invocation.entries.push(entry);
+        if (entry.kind === 'consumed') invocation.computeUnits = Number.parseInt(entry.text);
+        if (entry.kind === 'success' || entry.kind === 'failed') stack.pop();
     }
 
-    return prettyLogs;
+    return { invocations, truncated };
+}
+
+/** Returns the compute units that the top-level invocations logged, or `undefined` for logs with no invocation. */
+export function getLoggedComputeUnits({ invocations }: ParsedProgramLogs): number | undefined {
+    if (invocations.length === 0) return undefined;
+
+    return invocations.reduce((sum, invocation) => sum + (invocation.computeUnits ?? 0), 0);
+}
+
+/* eslint-disable no-restricted-syntax -- the runtime writes these lines in a fixed format */
+const INVOKE = /^Program (\w+) invoke \[(\d+)\]/;
+const CONSUMED = /^Program \w+ consumed (\d+ .*)/;
+const SUCCESS = /^Program \w+ success/;
+const FAILED = /^Program \w+ failed: (.*)/;
+/* eslint-enable no-restricted-syntax */
+
+const LOG_PREFIX = 'Program log: ';
+const DATA_PREFIX = 'Program data: ';
+
+function toEntry(line: string): InvocationEntry {
+    if (line.startsWith(LOG_PREFIX)) return { kind: 'log', text: line.slice(LOG_PREFIX.length) };
+    if (line.startsWith(DATA_PREFIX)) return { kind: 'data', text: line.slice(DATA_PREFIX.length) };
+
+    const consumed = line.match(CONSUMED);
+    if (consumed) return { kind: 'consumed', text: consumed[1] };
+    if (SUCCESS.test(line)) return { kind: 'success' };
+
+    const failed = line.match(FAILED);
+    if (failed) return { kind: 'failed', text: failed[1] };
+
+    // The runtime writes an error outside the "failed" status line, for example "Program failed to complete".
+    return { kind: line.includes('failed') ? 'error' : 'text', text: line };
 }
