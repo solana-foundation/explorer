@@ -5,12 +5,15 @@ import {
     type InstructionNode,
     LoadingDetailsCard,
     NameOnlyDetailsCard,
+    parsedInstructionOf,
     type RawInstructionNode,
+    rawSourceOf,
     toInstructionNode,
     toRawInstructionNode,
     UnknownDetailsCard,
     useInstructionSurface,
 } from '@entities/instruction-card';
+import { type InstructionFetchResult, InstructionIntentProvider } from '@entities/instruction-intent';
 import {
     type DispatchResult,
     isParsedInstruction,
@@ -19,6 +22,7 @@ import {
     useInstructionParser,
 } from '@entities/instruction-parser';
 import type { STAKE_PROGRAM_LABEL, VOTE_PROGRAM_LABEL } from '@explorer/parsers';
+import { toKitInstruction } from '@explorer/parsers/compat';
 import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { BpfLoaderDetailsCard } from '@features/decode-instruction-bpf-loader';
@@ -57,23 +61,44 @@ const PmpDetailsCard = React.lazy(() =>
 export function InstructionNodeCard({ node }: { node: InstructionNode }) {
     const { signature } = useInstructionSurface();
     return (
-        <ErrorBoundary
-            resetKeys={[node]}
-            fallback={<UnknownDetailsCard node={node} />}
-            onError={error =>
-                Logger.error(error, {
-                    sentry: 'always',
-                    sentryExtras: {
-                        childIndex: node.childIndex,
-                        index: node.index,
-                        programId: node.programId.toBase58(),
-                        signature,
-                    },
-                })
-            }
-        >
-            <ProgramCard node={node} />
-        </ErrorBoundary>
+        <InstructionIntentScope node={node}>
+            <ErrorBoundary
+                resetKeys={[node]}
+                fallback={<UnknownDetailsCard node={node} />}
+                onError={error =>
+                    Logger.error(error, {
+                        sentry: 'always',
+                        sentryExtras: {
+                            childIndex: node.childIndex,
+                            index: node.index,
+                            programId: node.programId.toBase58(),
+                            signature,
+                        },
+                    })
+                }
+            >
+                <ProgramCard node={node} />
+            </ErrorBoundary>
+        </InstructionIntentScope>
+    );
+}
+
+function InstructionIntentScope({ node, children }: { node: InstructionNode; children: React.ReactNode }) {
+    const { rawInstructions } = useInstructionSurface();
+    const rawSource = rawSourceOf(node, rawInstructions);
+    const parsedIx = parsedInstructionOf(node, rawSource);
+    const ixFetchResult = React.useMemo<InstructionFetchResult>(
+        () =>
+            parsedIx
+                ? { instruction: toKitInstruction(parsedIx), status: 'success' }
+                : { status: rawSource.kind === 'fetchable' ? 'loading' : 'failed' },
+        [parsedIx, rawSource.kind],
+    );
+
+    return (
+        <InstructionIntentProvider programId={node.programId.toBase58()} ixFetchResult={ixFetchResult}>
+            {children}
+        </InstructionIntentProvider>
     );
 }
 
