@@ -19,6 +19,8 @@ import { LastSimulatedAt } from '@/app/features/instruction-simulation/ui/LastSi
 import { SIM_ZONE_STYLE } from '@/app/features/instruction-simulation/ui/sim-zone-style';
 import { SimulateButton } from '@/app/features/instruction-simulation/ui/SimulateButton';
 
+import { simulationFailureMessage } from './simulation-changes';
+
 function SimulatedTitle({ children }: { children: React.ReactNode }) {
     return (
         <span className="inline-flex items-center gap-1.5">
@@ -32,8 +34,10 @@ function SimulatedTitle({ children }: { children: React.ReactNode }) {
 
 const OUTLINE_ONLY_CARD = 'rounded-lg border border-solid border-outer-space-800';
 
-// Empty state for a Logs / CU profiling card before a simulation has run: the card exists so its tab has
-// a scroll target. The Simulate button is revealed on hover/focus of the enclosing card (the `group`).
+const NO_LOGS_HINT = 'The simulation produced no logs.';
+
+// Empty state for a Logs / CU profiling card with no simulation logs to show: the card exists so its tab
+// has a scroll target. The Simulate button is revealed on hover/focus of the enclosing card (the `group`).
 function SimEmptyHint({ children, simulation }: { children: React.ReactNode; simulation: SimulationState }) {
     return (
         <div className="flex items-center justify-between gap-3 px-3 py-4 text-left text-sm text-outer-space-300">
@@ -57,8 +61,9 @@ export function InspectorSimulationPanel({
     const { cluster, url } = useCluster();
 
     const result = simulation.status === 'done' ? simulation.result : undefined;
-    const logs = result?.logs;
-    const hasLogs = !!logs?.length;
+    const logs = result?.logs?.length ? result.logs : undefined;
+    const hasLogs = !!logs;
+    const failureMessage = simulationFailureMessage(simulation);
 
     // Lookup-table-resolved keys only exist once the simulation has run, so naming waits for them.
     const { instructions: namedInstructions, unresolvable } = useSimulationInstructionNames({
@@ -92,13 +97,13 @@ export function InspectorSimulationPanel({
                         <SimulateButton simulation={simulation} className="px-4" />
                         <LastSimulatedAt simulation={simulation} />
                     </div>
-                    {simulation.status === 'error' && (
+                    {failureMessage && (
                         // Full-bleed to the card edges (negative margins cancel the card padding, incl. the
                         // bottom so it reaches the rounded corner). A top border draws the full-width divider;
                         // below it sits the failure text.
                         <div className="-mx-4 -mb-4 mt-1 border-0 border-t border-solid border-outer-space-800 px-4 py-3 lg:-mx-6 lg:-mb-6 lg:mt-3 lg:px-6">
                             <span className="text-sm text-white">Simulation Failure:</span>
-                            <span className="ml-2 break-all text-sm text-yellow-500">{simulation.error}</span>
+                            <span className="ml-2 break-all text-sm text-yellow-500">{failureMessage}</span>
                         </div>
                     )}
                 </div>
@@ -122,7 +127,7 @@ export function InspectorSimulationPanel({
                         />
                     ) : (
                         <SimEmptyHint simulation={simulation}>
-                            Run the simulation to view the program logs.
+                            {result ? NO_LOGS_HINT : 'Run the simulation to view the program logs.'}
                         </SimEmptyHint>
                     )}
                 </CollapsibleSection>
@@ -153,7 +158,9 @@ export function InspectorSimulationPanel({
                     </CollapsibleSection>
                 ) : (
                     <CollapsibleSection title="CU profiling" className={cn(OUTLINE_ONLY_CARD, 'group')}>
-                        <SimEmptyHint simulation={simulation}>Run the simulation to view CU profiling.</SimEmptyHint>
+                        <SimEmptyHint simulation={simulation}>
+                            {result ? NO_LOGS_HINT : 'Run the simulation to view CU profiling.'}
+                        </SimEmptyHint>
                     </CollapsibleSection>
                 )}
             </div>

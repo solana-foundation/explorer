@@ -126,7 +126,54 @@ describe('simulateTransaction', () => {
         expect(result).toMatchObject({ error: 'AccountNotFound', logs: undefined });
     });
 
-    it('should return TransactionError when simulation has logs and an error', async () => {
+    it('should return the raw error when an object-shaped error comes without logs', async () => {
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
+                createSimulationResponse({
+                    err: { InsufficientFundsForRent: { account_index: 0n } },
+                    logs: [],
+                }),
+            ),
+        });
+
+        const result = await simulate(rpc);
+
+        expect(result.error).toBe('{"InsufficientFundsForRent":{"account_index":0}}');
+    });
+
+    it.each([
+        {
+            err: { InsufficientFundsForRent: { account_index: 2n } },
+            expected: '{"InsufficientFundsForRent":{"account_index":2}}',
+        },
+        { err: 'UnbalancedTransaction', expected: 'UnbalancedTransaction' },
+    ])('should return the raw error $expected when the logs mark no failed instruction', async ({ err, expected }) => {
+        const succeededLogs: InstructionLogs[] = [
+            {
+                computeUnits: 150,
+                failed: false,
+                invokedProgram: SYSTEM_PROGRAM_ADDRESS,
+                logs: [{ prefix: '> ', style: 'success', text: 'Program returned success' }],
+                truncated: false,
+            },
+        ];
+        mockParseProgramLogs.mockReturnValue(succeededLogs);
+
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
+                createSimulationResponse({
+                    err,
+                    logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, `Program ${SYSTEM_PROGRAM_ADDRESS} success`],
+                }),
+            ),
+        });
+
+        const result = await simulate(rpc);
+
+        expect(result).toMatchObject({ error: expected, logs: succeededLogs });
+    });
+
+    it('should return the raw error when the parsed logs mark a failed instruction', async () => {
         const mockLogs: InstructionLogs[] = [
             {
                 computeUnits: 100,
@@ -149,7 +196,92 @@ describe('simulateTransaction', () => {
 
         const result = await simulate(rpc);
 
-        expect(result).toMatchObject({ error: 'TransactionError', logs: mockLogs });
+        expect(result).toMatchObject({ error: '{"InstructionError":[0,"Custom"]}', logs: mockLogs });
+    });
+
+    describe('parseProgramLogs', () => {
+        beforeEach(async () => {
+            const actual = await vi.importActual<typeof import('@utils/program-logs')>('@utils/program-logs');
+            mockParseProgramLogs.mockImplementation(actual.parseProgramLogs);
+        });
+
+        it('should mark the failed instruction when a logged instruction fails', async () => {
+            const rpc = createMockRpc({
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({
+                        err: { InstructionError: [0n, { Custom: 6001n }] },
+                        logs: [
+                            `Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`,
+                            `Program ${SYSTEM_PROGRAM_ADDRESS} failed: custom program error: 0x1771`,
+                        ],
+                    }),
+                ),
+            });
+
+            const result = await simulate(rpc);
+
+            expect(result.error).toBe('{"InstructionError":[0,{"Custom":6001}]}');
+            expect(result.logs).toEqual([expect.objectContaining({ failed: true })]);
+        });
+
+        it('should mark no failed instruction when every logged instruction succeeds', async () => {
+            const rpc = createMockRpc({
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({ err: { InsufficientFundsForRent: { account_index: 1n } } }),
+                ),
+            });
+
+            const result = await simulate(rpc);
+
+            expect(result.error).toBe('{"InsufficientFundsForRent":{"account_index":1}}');
+            expect(result.logs).toEqual([expect.objectContaining({ failed: false })]);
+        });
+
+        it('should return no logs when an instruction fails without logs', async () => {
+            const rpc = createMockRpc({
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({
+                        err: { InstructionError: [0n, 'InvalidAccountData'] },
+                        logs: [],
+                    }),
+                ),
+            });
+
+            const result = await simulate(rpc);
+
+            expect(result).toMatchObject({ error: '{"InstructionError":[0,"InvalidAccountData"]}', logs: undefined });
+        });
+
+        it('should mark the last logged instruction failed when the error points at it', async () => {
+            const rpc = createMockRpc({
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({
+                        err: { InstructionError: [0n, 'InvalidAccountData'] },
+                        logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, 'Log truncated'],
+                    }),
+                ),
+            });
+
+            const result = await simulate(rpc);
+
+            expect(result.logs).toEqual([expect.objectContaining({ failed: true })]);
+            expect(result.logs?.[0].logs).toContainEqual(
+                expect.objectContaining({ text: expect.stringContaining('Runtime error') }),
+            );
+        });
+
+        it('should mark no instruction failed when the failed instruction is missing from the logs', async () => {
+            const rpc = createMockRpc({
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({ err: { InstructionError: [1n, { Custom: 1n }] } }),
+                ),
+            });
+
+            const result = await simulate(rpc);
+
+            expect(result.error).toBe('{"InstructionError":[1,{"Custom":1}]}');
+            expect(result.logs).toEqual([expect.objectContaining({ failed: false })]);
+        });
     });
 
     it('should replace bigints inside a transaction error with numbers', async () => {
