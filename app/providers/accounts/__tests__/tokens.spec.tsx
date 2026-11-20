@@ -23,8 +23,9 @@ vi.mock('@entities/cluster', async importOriginal => {
     return { ...actual, getRpc: () => rpcStub({ getTokenAccountsByOwner }) };
 });
 
-import { MockAccountsProvider } from '../../../../.storybook/__mocks__/MockAccountsProvider';
-import { MockClusterProvider } from '../../../../.storybook/__mocks__/MockClusterProvider';
+import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
+import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
+
 import {
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
