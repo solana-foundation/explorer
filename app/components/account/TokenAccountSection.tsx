@@ -15,7 +15,7 @@ import { normalizeTokenAmount } from '@utils/index';
 import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
-import { TokenExtension, TokenExtensionType } from '@validators/accounts/token-extension';
+import { TokenExtension } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
 import { useEffect, useMemo, useState } from 'react';
@@ -397,7 +397,7 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
 }
 
 function cmpExtension(a: TokenExtension, b: TokenExtension) {
-    const sortedExtensionTypes: TokenExtensionType[] = [
+    const sortedExtensionTypes: TokenExtension['extension'][] = [
         'transferFeeAmount',
         'mintCloseAuthority',
         'defaultAccountState',
@@ -426,8 +426,12 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'tokenGroup',
         'tokenGroupMember',
         'tokenMetadata',
-        // always keep this last
         'unparseableExtension',
     ];
-    return sortedExtensionTypes.indexOf(a.extension) - sortedExtensionTypes.indexOf(b.extension);
+    // An unknown name has no index, so it sorts after every listed name.
+    const rank = ({ extension }: TokenExtension): number => {
+        const index = sortedExtensionTypes.indexOf(extension);
+        return index === -1 ? sortedExtensionTypes.length : index;
+    };
+    return rank(a) - rank(b);
 }

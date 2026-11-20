@@ -3,6 +3,7 @@ import { gen } from '@__fixtures__/gen';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
+import { create } from 'superstruct';
 import { describe, vi } from 'vitest';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
@@ -150,6 +151,12 @@ describe('TokenExtensionRow', () => {
 
         expect(await screen.findByText(title)).toBeInTheDocument();
         expect(screen.getByText(value)).toBeInTheDocument();
+    });
+
+    test('should render the name of an unknown extension', async () => {
+        renderRow(create({ extension: 'futureExtension', state: {} }, TokenExtension));
+
+        expect(await screen.findByRole('row', { name: 'Unknown Extension futureExtension' })).toBeInTheDocument();
     });
 
     test('should render interestBearingConfig extension', async () => {

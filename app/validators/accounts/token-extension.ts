@@ -1,7 +1,19 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { any, array, boolean, coerce, enums, Infer, is, nullable, number, optional, string, type } from 'superstruct';
+import {
+    any,
+    array,
+    boolean,
+    define,
+    enums,
+    Infer,
+    nullable,
+    number,
+    optional,
+    string,
+    type,
+    union,
+} from 'superstruct';
 
-export type TokenExtensionType = Infer<typeof ExtensionType>;
 const ExtensionType = enums([
     'transferFeeConfig',
     'transferFeeAmount',
@@ -35,9 +47,14 @@ const ExtensionType = enums([
     'unparseableExtension',
 ]);
 
+declare const unknownExtensionName: unique symbol;
+// The brand stops the union with ExtensionType from widening to string.
+type UnknownExtensionName = string & { [unknownExtensionName]: true };
+const UnknownExtensionName = define<UnknownExtensionName>('UnknownExtensionName', value => typeof value === 'string');
+
 export type TokenExtension = Infer<typeof TokenExtension>;
 export const TokenExtension = type({
-    extension: coerce(ExtensionType, string(), name => (is(name, ExtensionType) ? name : 'unparseableExtension')),
+    extension: union([ExtensionType, UnknownExtensionName]),
     state: any(),
 });
 

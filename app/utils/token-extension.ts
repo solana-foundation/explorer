@@ -1,12 +1,12 @@
 import { ParsedTokenExtension } from '@/app/components/account/types';
-import { TokenExtensionType } from '@/app/validators/accounts/token-extension';
+import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 function populateSolanaDevelopersLink(component: string) {
     return `https://solana.com/developers/guides/token-extensions/${component}`;
 }
 
 export function populatePartialParsedTokenExtension(
-    extension: TokenExtensionType,
+    extension: TokenExtension['extension'],
 ): Omit<ParsedTokenExtension, 'parsed' | 'extension'> {
     function populateExternalLinks(url: string) {
         return [{ label: 'Docs', url }];

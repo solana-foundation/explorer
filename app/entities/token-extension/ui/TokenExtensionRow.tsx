@@ -721,11 +721,17 @@ export function TokenExtensionRow({
             );
         }
         case 'unparseableExtension':
-        default:
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Unknown Extension</BaseTable.Cell>
                     <BaseTable.Cell className="md:text-right">unparseable</BaseTable.Cell>
+                </BaseTable.Row>
+            );
+        default:
+            return (
+                <BaseTable.Row>
+                    <BaseTable.Cell>Unknown Extension</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">{tokenExtension.extension}</BaseTable.Cell>
                 </BaseTable.Row>
             );
     }
