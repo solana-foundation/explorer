@@ -1,11 +1,12 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
-import { parseProgramLogs } from '@entities/program-logs';
-import { ProgramLogsCardBody } from '@entities/program-logs/ui/ProgramLogsCardBody';
+import { parseProgramLogs, ProgramLogs, toInstructionLogRows } from '@entities/program-logs';
+import { useTransactionInstructionNames } from '@entities/transaction-data/client';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureProps } from '@utils/index';
+import { getTransactionInstructionError } from '@utils/program-err';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
@@ -28,20 +29,27 @@ export function Chip({ children, className, active, ...props }: ChipProps) {
 
 export function ProgramLogSection({ signature }: SignatureProps) {
     const [showRaw, setShowRaw] = React.useState(false);
-    const { cluster, url } = useCluster();
+    const { cluster } = useCluster();
     const details = useTransactionDetails(signature);
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
+    const logMessages = transactionWithMeta?.meta?.logMessages || undefined;
+
+    const instructions = useTransactionInstructionNames(transactionWithMeta);
+
+    const logRows = React.useMemo(
+        () =>
+            logMessages &&
+            toInstructionLogRows({
+                cluster,
+                error: getTransactionInstructionError(transactionWithMeta?.meta?.err),
+                instructions,
+                logs: parseProgramLogs(logMessages),
+            }),
+        [cluster, instructions, logMessages, transactionWithMeta],
+    );
+
     if (!transactionWithMeta) return null;
-    const message = transactionWithMeta.transaction.message;
-
-    const logMessages = transactionWithMeta.meta?.logMessages || null;
-    const err = transactionWithMeta.meta?.err || undefined;
-
-    let prettyLogs = null;
-    if (logMessages !== null) {
-        prettyLogs = parseProgramLogs(logMessages, err, cluster);
-    }
 
     const chips = (
         <>
@@ -61,11 +69,11 @@ export function ProgramLogSection({ signature }: SignatureProps) {
             sectionClassName="xxl:!gap-0"
             titleClassName="xxl:sticky xxl:top-0 xxl:z-10 xxl:bg-[var(--background)] xxl:pb-3"
         >
-            {prettyLogs !== null && logMessages !== null ? (
+            {logRows && logMessages ? (
                 showRaw ? (
                     <RawProgramLogs raw={logMessages} />
                 ) : (
-                    <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
+                    <ProgramLogs rows={logRows} instructions={instructions} />
                 )
             ) : (
                 <BaseCardBody className="text-sm text-muted">Logs not supported for this transaction</BaseCardBody>

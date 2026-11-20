@@ -34,7 +34,7 @@ describe('useResolvedInstructionNames', () => {
         expect(result.current[0]).not.toHaveProperty('nameLookup');
     });
 
-    // Callers pair row `i` with `instructionLogs[i]`, so a dropped row shifts every later CU figure.
+    // Callers pair the rows with the log invocations in order, so a dropped row shifts every later one.
     it('should preserve row count and order, named rows included', () => {
         const rows = [unnamed(JUPITER, 1), named('Transfer'), unnamed(WHIRLPOOL, 1)];
 
@@ -80,6 +80,7 @@ describe('useResolvedSummaryNames', () => {
 
 function unnamed(programId: string, disc: number): NamedInstruction {
     return {
+        data: undefined,
         name: undefined,
         nameLookup: { data: Uint8Array.from([disc]), programId },
         programId: new PublicKey(programId),
@@ -88,7 +89,7 @@ function unnamed(programId: string, disc: number): NamedInstruction {
 }
 
 function named(name: string): NamedInstruction {
-    return { name, programId: new PublicKey(SYSTEM_PROGRAM), programName: 'System Program' };
+    return { data: undefined, name, programId: new PublicKey(SYSTEM_PROGRAM), programName: 'System Program' };
 }
 
 function unnamedSummary(programId: string, disc: number): InstructionSummary {

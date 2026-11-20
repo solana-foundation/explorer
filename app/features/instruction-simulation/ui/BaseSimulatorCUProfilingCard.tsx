@@ -1,12 +1,13 @@
-import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
-import type { InstructionLogs } from '@entities/program-logs';
+import { BaseCUProfilingCard, toInstructionCUData } from '@entities/compute-unit';
+import type { Invocation } from '@entities/program-logs';
 import type { NamedInstruction } from '@entities/transaction-data';
 import { useMemo } from 'react';
 
 type BaseSimulatorCUProfilingCardProps = {
     /** One row per instruction, in `compiledInstructions` order — see useSimulationInstructionNames. */
     instructions: NamedInstruction[];
-    logs: Array<InstructionLogs>;
+    /** The top-level invocations of the simulation's logs. */
+    invocations: readonly Invocation[];
     unitsConsumed?: number;
     /**
      * Render only the chart + legend body, without the built-in card chrome/header, so a caller can supply
@@ -17,13 +18,13 @@ type BaseSimulatorCUProfilingCardProps = {
 
 export function BaseSimulatorCUProfilingCard({
     instructions,
-    logs,
+    invocations,
     unitsConsumed,
     headerless = false,
 }: BaseSimulatorCUProfilingCardProps) {
     const instructionsForCU = useMemo(
-        () => formatInstructionLogs({ instructionLogs: logs, instructions }),
-        [instructions, logs],
+        () => toInstructionCUData({ instructions, invocations }),
+        [instructions, invocations],
     );
 
     return (

@@ -20,7 +20,7 @@ const SIGNATURE = 'sig_abc123';
 const SERIALIZED = 'base64encodedmessage==';
 const ENCODED = encodeURIComponent(SERIALIZED);
 const FINISHED_AT = new Date('2026-01-01T00:00:00Z');
-const NO_LOGS = { parsed: [], raw: [] };
+const NO_LOGS = { raw: [], rows: [] };
 
 describe('InstructionExecutionActivity', () => {
     it('should not render a status header when lastResult is undefined', () => {

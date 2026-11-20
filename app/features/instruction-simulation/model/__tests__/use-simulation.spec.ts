@@ -103,7 +103,8 @@ function createSuccessResult(overrides?: Partial<SimulationResult>): SimulationR
     return {
         accountKeys: [],
         error: undefined,
-        logs: [],
+        instructionError: undefined,
+        logs: { invocations: [], truncated: false },
         solBalanceChanges: undefined,
         tokenBalanceData: undefined,
         unitsConsumed: 150,

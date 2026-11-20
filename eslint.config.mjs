@@ -607,7 +607,6 @@ export default tseslint.config(
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
-            'app/features/transaction/ui/ProgramLogSection.tsx', // HOO-2951
 
             // app/shared reverse-layer imports
             'app/shared/components/DownloadDropdown.tsx',
@@ -835,7 +834,6 @@ export default tseslint.config(
             'app/entities/idl/model/idl-version.ts',
             'app/entities/idl/model/use-format-codama-idl.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
-            'app/entities/program-logs/model/parse-program-logs.ts',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
             'app/entities/token-price/lib/parse-usd.ts',
@@ -965,7 +963,6 @@ export default tseslint.config(
             'app/entities/idl/model/formatters/format.ts',
             'app/entities/idl/model/formatters/formatted-idl.d.ts',
             'app/entities/nft/lib/get-metadata-json.ts',
-            'app/entities/program-logs/ui/ProgramLogsCardBody.tsx',
 
             // app/features (FSD features)
             'app/features/idl/interactive-idl/model/anchor/anchor-interpreter.ts',

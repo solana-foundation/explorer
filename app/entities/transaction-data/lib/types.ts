@@ -44,7 +44,11 @@ export type InstructionNames = ResolvedNames & {
 };
 
 /** One instruction's names paired with the program they belong to, in transaction order. */
-export type NamedInstruction = InstructionNames & { programId: PublicKey };
+export type NamedInstruction = InstructionNames & {
+    programId: PublicKey;
+    // `undefined` for an instruction that the RPC returned parsed.
+    data: Uint8Array | undefined;
+};
 
 /**
  * A render-ready summary row. Both names are always a displayable string: where `InstructionNames`

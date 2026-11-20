@@ -1,5 +1,4 @@
 import type { SolanaRpc } from '@entities/cluster';
-import type { InstructionLogs } from '@entities/program-logs';
 import { type AddressLookupTableAccount, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
@@ -26,11 +25,6 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
-const mockParseProgramLogs = vi.fn();
-vi.mock('@entities/program-logs', () => ({
-    parseProgramLogs: (...args: unknown[]) => mockParseProgramLogs(...args),
-}));
-
 import { simulateTransaction } from '../simulate-transaction';
 
 const ACCOUNT_KEY_1 = Keypair.generate().publicKey;
@@ -42,24 +36,13 @@ const MOCK_OWNER = Keypair.generate().publicKey;
 describe('simulateTransaction', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockParseProgramLogs.mockReturnValue([]);
     });
 
     it('should return parsed logs, units consumed, and SOL balance changes after successful simulation', async () => {
-        const mockLogs: InstructionLogs[] = [
-            {
-                computeUnits: 150,
-                failed: false,
-                invokedProgram: SYSTEM_PROGRAM_ADDRESS,
-                logs: [{ prefix: 'Program', style: 'success', text: 'success' }],
-                truncated: false,
-            },
-        ];
-        mockParseProgramLogs.mockReturnValue(mockLogs);
-
         const result = await simulate(createMockRpc());
 
-        expect(result).toMatchObject({ error: undefined, logs: mockLogs, unitsConsumed: 150 });
+        expect(result).toMatchObject({ error: undefined, unitsConsumed: 150 });
+        expect(result.logs?.invocations.map(invocation => invocation.programAddress)).toEqual([SYSTEM_PROGRAM_ADDRESS]);
         expect(result.solBalanceChanges).toHaveLength(2);
 
         const change1 = result.solBalanceChanges?.find(c => c.pubkey.equals(ACCOUNT_KEY_1));
@@ -127,17 +110,6 @@ describe('simulateTransaction', () => {
     });
 
     it('should return TransactionError when simulation has logs and an error', async () => {
-        const mockLogs: InstructionLogs[] = [
-            {
-                computeUnits: 100,
-                failed: true,
-                invokedProgram: SYSTEM_PROGRAM_ADDRESS,
-                logs: [{ prefix: 'Program', style: 'warning', text: 'failed' }],
-                truncated: false,
-            },
-        ];
-        mockParseProgramLogs.mockReturnValue(mockLogs);
-
         const rpc = createMockRpc({
             simulateTransaction: rpcCall(
                 createSimulationResponse({
@@ -149,12 +121,11 @@ describe('simulateTransaction', () => {
 
         const result = await simulate(rpc);
 
-        expect(result).toMatchObject({ error: 'TransactionError', logs: mockLogs });
+        expect(result).toMatchObject({ error: 'TransactionError', instructionError: { index: 0 } });
+        expect(result.logs?.invocations).toHaveLength(1);
     });
 
-    it('should replace bigints inside a transaction error with numbers', async () => {
-        mockParseProgramLogs.mockReturnValue([]);
-
+    it('should return the instruction that the transaction error names', async () => {
         const rpc = createMockRpc({
             simulateTransaction: rpcCall(
                 createSimulationResponse({
@@ -164,20 +135,9 @@ describe('simulateTransaction', () => {
             ),
         });
 
-        await simulate(rpc);
+        const result = await simulate(rpc);
 
-        expect(mockParseProgramLogs).toHaveBeenCalledWith(
-            expect.any(Array),
-            { InstructionError: [2, { Custom: 6001 }] },
-            Cluster.Devnet,
-        );
-    });
-
-    it('should pass logs, error, and cluster to parseProgramLogs', async () => {
-        const rpc = createMockRpc();
-        await simulate(rpc);
-
-        expect(mockParseProgramLogs).toHaveBeenCalledWith(expect.any(Array), null, Cluster.Devnet);
+        expect(result.instructionError).toEqual({ index: 2, message: 'custom program error: 6001' });
     });
 
     it('should request simulation with replaceRecentBlockhash and account addresses', async () => {

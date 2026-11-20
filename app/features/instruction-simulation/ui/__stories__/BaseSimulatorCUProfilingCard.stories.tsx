@@ -23,24 +23,12 @@ type Story = StoryObj<typeof meta>;
 export const TwoInstructions: Story = {
     args: {
         instructions: [
-            { name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
-            { name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
+            { data: undefined, name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
+            { data: undefined, name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        logs: [
-            {
-                computeUnits: 45000,
-                failed: false,
-                invokedProgram: SYSTEM_PROGRAM.toBase58(),
-                logs: [],
-                truncated: false,
-            },
-            {
-                computeUnits: 30000,
-                failed: false,
-                invokedProgram: TOKEN_PROGRAM.toBase58(),
-                logs: [],
-                truncated: false,
-            },
+        invocations: [
+            { computeUnits: 45000, entries: [], programAddress: SYSTEM_PROGRAM.toBase58() },
+            { computeUnits: 30000, entries: [], programAddress: TOKEN_PROGRAM.toBase58() },
         ],
         unitsConsumed: 75000,
     },
@@ -51,10 +39,10 @@ export const TwoInstructions: Story = {
 export const WithoutResolvedNames: Story = {
     args: {
         instructions: [
-            { name: undefined, programId: SYSTEM_PROGRAM, programName: 'System Program' },
-            { name: undefined, programId: TOKEN_PROGRAM, programName: 'Token Program' },
+            { data: undefined, name: undefined, programId: SYSTEM_PROGRAM, programName: 'System Program' },
+            { data: undefined, name: undefined, programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        logs: TwoInstructions.args?.logs ?? [],
+        invocations: TwoInstructions.args?.invocations ?? [],
         unitsConsumed: 75000,
     },
 };
@@ -63,9 +51,9 @@ export const WithoutResolvedNames: Story = {
 export const NoLogs: Story = {
     args: {
         instructions: [
-            { name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
-            { name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
+            { data: undefined, name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
+            { data: undefined, name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        logs: [],
+        invocations: [],
     },
 };
