@@ -1,5 +1,5 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { any, array, boolean, enums, Infer, nullable, number, string, type } from 'superstruct';
+import { any, array, boolean, coerce, enums, Infer, is, nullable, number, string, type } from 'superstruct';
 
 export type TokenExtensionType = Infer<typeof ExtensionType>;
 const ExtensionType = enums([
@@ -36,7 +36,7 @@ const ExtensionType = enums([
 
 export type TokenExtension = Infer<typeof TokenExtension>;
 export const TokenExtension = type({
-    extension: ExtensionType,
+    extension: coerce(ExtensionType, string(), name => (is(name, ExtensionType) ? name : 'unparseableExtension')),
     state: any(),
 });
 
