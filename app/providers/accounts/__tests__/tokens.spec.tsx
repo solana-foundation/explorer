@@ -1,4 +1,4 @@
-import { type Account } from '@providers/accounts';
+import { type Account, type State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { render, renderHook, type RenderHookResult, screen, waitFor } from '@testing-library/react';
@@ -162,25 +162,31 @@ describe('should fetch account token holdings without enrichment', () => {
 
 describe('useScaledUiAmountMultiplier', () => {
     it('should return the multiplier of the mint', () => {
-        const { result } = renderScaledUiAmountMultiplier({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION] });
+        const { result } = renderScaledUiAmountMultiplier(
+            toFetchedMint({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION] }),
+        );
 
         expect(result.current).toEqual({ multiplier: '2', status: 'known' });
     });
 
     it('should return an unknown multiplier when the mint does not parse', () => {
-        const { result } = renderScaledUiAmountMultiplier({
-            ...MINT_INFO,
-            extensions: [SCALED_UI_AMOUNT_EXTENSION],
-            supply: undefined,
-        });
+        const { result } = renderScaledUiAmountMultiplier(
+            toFetchedMint({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION], supply: undefined }),
+        );
 
         expect(result.current).toEqual({ status: 'unknown' });
     });
 
-    it('should return a multiplier of 1 when the mint is not fetched', () => {
-        const { result } = renderScaledUiAmountMultiplier();
+    it('should return an unknown multiplier when the mint fetch failed', () => {
+        const { result } = renderScaledUiAmountMultiplier({ [MINT]: { status: FetchStatus.FetchFailed } });
 
-        expect(result.current).toEqual({ multiplier: '1', status: 'known' });
+        expect(result.current).toEqual({ status: 'unknown' });
+    });
+
+    it('should return a loading multiplier when the mint is not fetched', () => {
+        const { result } = renderScaledUiAmountMultiplier({});
+
+        expect(result.current).toEqual({ status: 'loading' });
     });
 });
 
@@ -198,9 +204,8 @@ const SCALED_UI_AMOUNT_EXTENSION = {
 };
 
 function renderScaledUiAmountMultiplier(
-    mintInfo?: Record<string, unknown>,
+    accounts: State['entries'],
 ): RenderHookResult<ScaledUiAmountMultiplier, unknown> {
-    const accounts = mintInfo ? { [MINT]: { data: toMintAccount(mintInfo), status: FetchStatus.Fetched } } : {};
     return renderHook(() => useScaledUiAmountMultiplier(MINT), {
         wrapper: ({ children }) => (
             <MockClusterProvider>
@@ -210,12 +215,13 @@ function renderScaledUiAmountMultiplier(
     });
 }
 
-function toMintAccount(mintInfo: Record<string, unknown>): Account {
-    return {
+function toFetchedMint(mintInfo: Record<string, unknown>): State['entries'] {
+    const account: Account = {
         data: { parsed: { parsed: { info: mintInfo, type: 'mint' }, program: 'spl-token-2022' } },
         executable: false,
         lamports: 1,
         owner: TOKEN_2022_PROGRAM_ID,
         pubkey: new PublicKey(MINT),
     };
+    return { [MINT]: { data: account, status: FetchStatus.Fetched } };
 }

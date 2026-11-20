@@ -125,8 +125,8 @@ export function useFetchAccountOwnedTokens() {
     );
 }
 
-// The multiplier is unknown when the fetched mint does not parse.
-export type ScaledUiAmountMultiplier = { multiplier: string; status: 'known' } | { status: 'unknown' };
+export type ScaledUiAmountMultiplier =
+    { multiplier: string; status: 'known' } | { status: 'loading' } | { status: 'unknown' };
 
 export function useScaledUiAmountMultiplier(address: string | undefined): ScaledUiAmountMultiplier {
     const mint = useAccountInfo(address);
@@ -139,9 +139,11 @@ export function useScaledUiAmountMultiplier(address: string | undefined): Scaled
         }
     }, [address, refresh, mint]);
 
-    if (mint?.data?.data.parsed && !mintInfo) {
-        return { status: 'unknown' };
+    if (mintInfo) {
+        return { multiplier: getCurrentTokenScaledUiAmountMultiplier(mintInfo.extensions), status: 'known' };
     }
-
-    return { multiplier: getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions), status: 'known' };
+    if (!mint || mint.status === FetchStatus.Fetching) {
+        return { status: 'loading' };
+    }
+    return { status: 'unknown' };
 }

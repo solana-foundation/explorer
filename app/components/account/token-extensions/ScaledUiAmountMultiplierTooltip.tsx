@@ -9,6 +9,9 @@ function ScaledUiAmountMultiplierTooltip({
     rawAmount?: string;
     scaledUiAmountMultiplier: ScaledUiAmountMultiplier;
 }) {
+    if (scaledUiAmountMultiplier.status === 'loading') {
+        return null;
+    }
     if (scaledUiAmountMultiplier.status === 'known' && scaledUiAmountMultiplier.multiplier === '1') {
         return null;
     }
@@ -21,7 +24,7 @@ function ScaledUiAmountMultiplierTooltip({
             <TooltipContent>
                 <div className="min-w-36 max-w-16">
                     {scaledUiAmountMultiplier.status === 'unknown'
-                        ? 'The mint did not parse, so the scaled ui amount multiplier is unknown'
+                        ? 'The scaled ui amount multiplier is unknown'
                         : `Scaled ${rawAmount ? `${rawAmount} ` : ''}by ${scaledUiAmountMultiplier.multiplier} due to the scaled ui amount extension on the mint`}
                 </div>
             </TooltipContent>

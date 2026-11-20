@@ -118,7 +118,7 @@ function TokenBalanceRow({
     index: number;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(mint);
-    // The amounts stay raw when the multiplier is unknown.
+    // The amounts stay raw when the multiplier is not known.
     const multiplier = scaledUiAmountMultiplier.status === 'known' ? scaledUiAmountMultiplier.multiplier : 1;
     const scaledBalance = new BigNumber(balance).multipliedBy(multiplier).toString();
     const scaledDelta = delta.multipliedBy(multiplier);
