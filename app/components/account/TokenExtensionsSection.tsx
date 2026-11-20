@@ -1,4 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
+import { TokenExtensionRow } from '@entities/token-extension';
 import { useCallback, useMemo, useState } from 'react';
 import { Code, ExternalLink as ExternalLinkIcon } from 'react-feather';
 
@@ -15,7 +16,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
 import { TokenExtensionBadge } from './token-extensions/TokenExtensionBadge';
-import { TokenExtensionRow } from './TokenAccountSection';
 import { ParsedTokenExtension } from './types';
 
 export function TokenExtensionsSection({

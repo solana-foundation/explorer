@@ -11,7 +11,7 @@ import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
 
-import { TokenExtensionRow } from '../TokenAccountSection';
+import { TokenExtensionRow } from '../TokenExtensionRow';
 
 vi.mock('next/navigation');
 // @ts-expect-error does not contain `mockReturnValue`
