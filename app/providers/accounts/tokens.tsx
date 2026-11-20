@@ -1,7 +1,7 @@
 'use client';
 
 import { getRpc } from '@entities/cluster';
-import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
+import { useAccountInfo, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -15,7 +15,6 @@ import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { Logger } from '@/app/shared/lib/logger';
 import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import { getCurrentTokenScaledUiAmountMultiplier } from '@/app/utils/token-info';
-import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
@@ -128,6 +127,7 @@ export function useFetchAccountOwnedTokens() {
 
 export function useScaledUiAmountForMint(address: string | undefined, rawAmount: string): [string, string] {
     const mint = useAccountInfo(address);
+    const mintInfo = useMintAccountInfo(address);
     const refresh = useFetchAccountInfo();
 
     React.useEffect(() => {
@@ -136,12 +136,6 @@ export function useScaledUiAmountForMint(address: string | undefined, rawAmount:
         }
     }, [address, refresh, mint]);
 
-    if (!mint) {
-        return [rawAmount, '1'];
-    }
-
-    const infoParsed = mint?.data?.data.parsed;
-    const mintInfo = infoParsed && create(infoParsed?.parsed.info, MintAccountInfo);
     const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintInfo?.extensions);
 
     if (scaledUiAmountMultiplier === '1') {

@@ -1,6 +1,7 @@
+import { type Account } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, renderHook, type RenderHookResult, screen, waitFor } from '@testing-library/react';
 import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -22,12 +23,15 @@ vi.mock('@entities/cluster', async importOriginal => {
     return { ...actual, getRpc: () => rpcStub({ getTokenAccountsByOwner }) };
 });
 
+import { MockAccountsProvider } from '../../../../.storybook/__mocks__/MockAccountsProvider';
+import { MockClusterProvider } from '../../../../.storybook/__mocks__/MockClusterProvider';
 import {
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     TokensProvider,
     useAccountOwnedTokens,
     useFetchAccountOwnedTokens,
+    useScaledUiAmountForMint,
 } from '../tokens';
 
 const OWNER = PublicKey.default.toBase58();
@@ -153,3 +157,52 @@ describe('should fetch account token holdings without enrichment', () => {
         expect(screen.getByTestId('token-count').textContent).toBe('150');
     });
 });
+
+describe('useScaledUiAmountForMint', () => {
+    it('should scale the raw amount by the multiplier of the mint', () => {
+        const { result } = renderScaledUiAmount({ ...MINT_INFO, extensions: [SCALED_UI_AMOUNT_EXTENSION] });
+
+        expect(result.current).toEqual(['2000', '2']);
+    });
+
+    it('should return the raw amount when the mint does not parse', () => {
+        const { result } = renderScaledUiAmount({
+            ...MINT_INFO,
+            extensions: [SCALED_UI_AMOUNT_EXTENSION],
+            supply: undefined,
+        });
+
+        expect(result.current).toEqual(['1000', '1']);
+    });
+});
+
+const MINT_INFO = {
+    decimals: 0,
+    freezeAuthority: null,
+    isInitialized: true,
+    mintAuthority: null,
+    supply: '1000',
+};
+
+const SCALED_UI_AMOUNT_EXTENSION = {
+    extension: 'scaledUiAmountConfig',
+    state: { authority: null, multiplier: '2', newMultiplier: '2', newMultiplierEffectiveTimestamp: 0 },
+};
+
+function renderScaledUiAmount(mintInfo: Record<string, unknown>): RenderHookResult<[string, string], unknown> {
+    const account: Account = {
+        data: { parsed: { parsed: { info: mintInfo, type: 'mint' }, program: 'spl-token-2022' } },
+        executable: false,
+        lamports: 1,
+        owner: TOKEN_2022_PROGRAM_ID,
+        pubkey: new PublicKey(MINT),
+    };
+    const accounts = { [MINT]: { data: account, status: FetchStatus.Fetched } };
+    return renderHook(() => useScaledUiAmountForMint(MINT, '1000'), {
+        wrapper: ({ children }) => (
+            <MockClusterProvider>
+                <MockAccountsProvider accounts={accounts}>{children}</MockAccountsProvider>
+            </MockClusterProvider>
+        ),
+    });
+}
