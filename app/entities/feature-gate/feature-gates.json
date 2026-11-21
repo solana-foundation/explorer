@@ -2354,7 +2354,7 @@
     "simds": [
       "0599"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1081,
     "title": "SIMD-0599: Remove inactive stakes from stake delegations"
   },
   {
@@ -2380,7 +2380,7 @@
     "simds": [
       "0437"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1093,
     "title": "SIMD-0437-3: Set lamports per byte to 2575"
   },
   {
@@ -2406,7 +2406,7 @@
     "simds": [
       "0317"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1092,
     "title": "SIMD-0317: Enforce the Merkle proof size of a fixed 32:32 FEC set"
   },
   {
@@ -2432,7 +2432,59 @@
     "simds": [
       "0433"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1094,
     "title": "SIMD-0433: Loader V3 Set Program Data to ELF Length"
+  },
+  {
+    "comms_required": null,
+    "description": "This proposal aims to relax the handling of invalid fee-payers for blockhash transactions in Solana. Currently, if a transaction with an invalid fee-payer is included in a block, the entire block is rejected. This proposal suggests that instead of rejecting the entire block, the\u2026",
+    "devnet_activation_epoch": null,
+    "key": "FEEXbxUuKobtrt1qNK5pjtzbPQhsppBTrNNG74xu4mai",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.5.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "2501babe"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0290-relax-fee-payer-constraint.md"
+    ],
+    "simds": [
+      "0290"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0290: Relax block constraint requiring valid fee-payer"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
+    "devnet_activation_epoch": null,
+    "key": "rntD7invRBswCAdKtRsh1G4psKjrPdS3BKqtnA78C7N",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.5.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.10.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "brooksprumo"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0437-incremental-rent-reduction.md"
+    ],
+    "simds": [
+      "0437"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0437-4: Set lamports per byte to 1322"
   }
 ]
