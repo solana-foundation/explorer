@@ -1,22 +1,30 @@
-import { type Invocation, pairLogsWithInstructions } from '@entities/program-logs/@x/compute-unit';
+import {
+    type Invocation,
+    pairLogsWithInstructions,
+    type ParsedProgramLogs,
+} from '@entities/program-logs/@x/compute-unit';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getDefaultComputeUnits, isPrecompile } from './default-compute-units';
-import type { InstructionCUData, InstructionCUInput } from './types';
+import { getDefaultComputeUnits, getNonMigratingBuiltinComputeUnits, isPrecompile } from './default-compute-units';
+import type { InstructionComputeUnits, InstructionCUData, InstructionCUInput, TransactionOutcome } from './types';
 
 /**
- * Returns the compute units of each instruction: the figure from the logs, or the fixed cost of the program.
+ * Returns the compute units of each instruction.
  * @param instructions - Every top-level instruction, in transaction order and unfiltered. See InstructionCUInput.
- * @param invocations - The top-level invocations of the transaction's logs, as `parseProgramLogs` returns them
+ * @param logs - The logs of the transaction, as `parseProgramLogs` returns them
+ * @param outcome - Whether the transaction or the simulation failed, and at which instruction
  */
 export function toInstructionCUData({
     instructions,
-    invocations,
+    logs,
+    outcome,
 }: {
     instructions: readonly InstructionCUInput[];
-    invocations: readonly Invocation[];
+    logs: ParsedProgramLogs;
+    outcome: TransactionOutcome;
 }): InstructionCUData[] {
+    const { invocations } = logs;
     // Lines that no `invoke` line precedes can belong to no instruction, so the count leaves them out.
     const invocationCount = invocations.filter(invocation => invocation.programAddress !== undefined).length;
 
@@ -37,21 +45,50 @@ export function toInstructionCUData({
     const pairedInvocations = pairLogsWithInstructions(invocations, programIds);
 
     return instructions.map((instruction, index) => ({
-        computeUnits: toComputeUnits(pairedInvocations[index], programIds[index], instruction.data),
+        computeUnits: toComputeUnits({
+            data: instruction.data,
+            execution: toExecution(index, outcome),
+            invocation: pairedInvocations[index],
+            logsTruncated: logs.truncated,
+            programId: programIds[index],
+        }),
         name: instruction.name,
         programId: programIds[index],
         programName: instruction.programName,
     }));
 }
 
-function toComputeUnits(
-    invocation: Invocation | undefined,
-    programId: string,
-    data: Uint8Array | undefined,
-): number | undefined {
+function toComputeUnits({
+    data,
+    execution,
+    invocation,
+    logsTruncated,
+    programId,
+}: {
+    data: Uint8Array | undefined;
+    execution: Execution;
+    invocation: Invocation | undefined;
+    logsTruncated: boolean;
+    programId: string;
+}): InstructionComputeUnits {
     if (isPrecompile(programId)) return 0;
-    // The logs do not show that an instruction with no invocation ran, so its fixed cost does not apply.
-    if (!invocation) return undefined;
+    if (execution === 'not-executed') return 'not-executed';
+    if (invocation?.computeUnits !== undefined) return invocation.computeUnits;
 
-    return invocation.computeUnits ?? getDefaultComputeUnits(programId, data);
+    const ran = invocation !== undefined || execution === 'completed';
+    if (!ran) return undefined;
+
+    // Complete logs hold the figure of every on-chain program, so a program with no figure ran as a builtin.
+    // Truncated logs can drop that figure, so they show nothing about a builtin that a feature gate moved on chain.
+    return logsTruncated ? getNonMigratingBuiltinComputeUnits(programId) : getDefaultComputeUnits(programId, data);
+}
+
+// The instruction that failed ran in part, and an error that names no instruction gives no position.
+type Execution = 'completed' | 'not-executed' | 'unknown';
+
+function toExecution(index: number, outcome: TransactionOutcome): Execution {
+    if (outcome.status === 'succeeded') return 'completed';
+    if (outcome.failedInstructionIndex === undefined || index === outcome.failedInstructionIndex) return 'unknown';
+
+    return index < outcome.failedInstructionIndex ? 'completed' : 'not-executed';
 }

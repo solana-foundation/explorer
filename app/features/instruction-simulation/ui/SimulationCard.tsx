@@ -1,4 +1,4 @@
-import { ProgramLogs } from '@entities/program-logs';
+import { type ParsedProgramLogs, ProgramLogs } from '@entities/program-logs';
 import { generateTokenBalanceRows, TokenBalancesCardInner } from '@features/transaction';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
@@ -88,7 +88,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         );
     }
 
-    const { logs, solBalanceChanges, unitsConsumed, error } = simulation.result;
+    const { logs, outcome, solBalanceChanges, unitsConsumed, error } = simulation.result;
     const succeeded = !error;
     const hasLogs = !!logRows;
     const hasErrorWithoutLogs = !hasLogs && !!error;
@@ -120,7 +120,8 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                 ) : (
                     <BaseSimulatorCUProfilingCard
                         instructions={namedInstructions}
-                        invocations={logs?.invocations ?? []}
+                        logs={logs ?? NO_LOGS}
+                        outcome={outcome}
                         unitsConsumed={unitsConsumed}
                     />
                 ))}
@@ -131,6 +132,8 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         </>
     );
 }
+
+const NO_LOGS: ParsedProgramLogs = { invocations: [], truncated: false };
 
 function SimulateButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (

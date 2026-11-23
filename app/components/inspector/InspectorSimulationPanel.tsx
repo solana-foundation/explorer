@@ -141,7 +141,8 @@ export function InspectorSimulationPanel({
                         ) : (
                             <BaseSimulatorCUProfilingCard
                                 instructions={namedInstructions}
-                                invocations={result.logs.invocations}
+                                logs={result.logs}
+                                outcome={result.outcome}
                                 unitsConsumed={result.unitsConsumed}
                                 headerless
                             />

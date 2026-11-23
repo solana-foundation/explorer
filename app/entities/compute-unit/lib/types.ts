@@ -15,11 +15,17 @@ export type InstructionCUInput = {
     programName?: string;
 };
 
+// A failed transaction stops at the instruction that failed. `failedInstructionIndex` is `undefined`
+// when the transaction error names no instruction.
+export type TransactionOutcome =
+    { status: 'succeeded' } | { status: 'failed'; failedInstructionIndex: number | undefined };
+
+// `undefined` when the logs give no figure and no fixed cost applies.
+export type InstructionComputeUnits = number | 'not-executed' | undefined;
+
 export type InstructionCUData = {
     programId: string;
-    // The figure from the logs, the fixed cost of a builtin that ran, or 0 for a precompile. `undefined`
-    // when the logs have no invocation for the instruction, or no figure and the program has no fixed cost.
-    computeUnits: number | undefined;
+    computeUnits: InstructionComputeUnits;
     // Resolved display names, when the caller knows them: the instruction name ("Transfer Checked") and
     // the program's display name ("Token Program"). Undefined when nothing named it — see
     // toInstructionCUDisplay for what the card shows instead.

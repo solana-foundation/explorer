@@ -145,6 +145,26 @@ export const WithUnknownComputeUnits: Story = {
     },
 };
 
+export const WithNotExecutedInstruction: Story = {
+    args: {
+        instructions: [
+            {
+                computeUnits: 150,
+                programId: '11111111111111111111111111111111',
+            },
+            {
+                computeUnits: 45683,
+                programId: '22222222222222222222222222222222',
+            },
+            {
+                computeUnits: 'not-executed',
+                programId: '33333333333333333333333333333333',
+            },
+        ],
+        unitsConsumed: 45833,
+    },
+};
+
 // Empty case (should render nothing)
 export const EmptyInstructions: Story = {
     args: {

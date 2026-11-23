@@ -58,6 +58,13 @@ describe('toInstructionCUDisplay', () => {
             expect(display.displayValue).toBe('Unknown');
             expect(display.displayCU).toBe(0);
         });
+
+        it('should show Not executed and size no bar for an instruction that did not run', () => {
+            const [display] = toInstructionCUDisplay([cuData({ computeUnits: 'not-executed' })]);
+
+            expect(display.displayValue).toBe('Not executed');
+            expect(display.displayCU).toBe(0);
+        });
     });
 });
 

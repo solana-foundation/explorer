@@ -110,6 +110,9 @@ function createSimulationStateDone(
         result: {
             accountKeys: [],
             instructionError: undefined,
+            outcome: overrides.error
+                ? { failedInstructionIndex: overrides.instructionError?.index, status: 'failed' }
+                : { status: 'succeeded' },
             solBalanceChanges: undefined,
             tokenBalanceData: undefined,
             unitsConsumed: undefined,

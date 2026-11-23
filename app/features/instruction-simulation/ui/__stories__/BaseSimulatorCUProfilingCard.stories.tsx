@@ -26,10 +26,14 @@ export const TwoInstructions: Story = {
             { data: undefined, name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
             { data: undefined, name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        invocations: [
-            { computeUnits: 45000, entries: [], programAddress: SYSTEM_PROGRAM.toBase58() },
-            { computeUnits: 30000, entries: [], programAddress: TOKEN_PROGRAM.toBase58() },
-        ],
+        logs: {
+            invocations: [
+                { computeUnits: 45000, entries: [], programAddress: SYSTEM_PROGRAM.toBase58() },
+                { computeUnits: 30000, entries: [], programAddress: TOKEN_PROGRAM.toBase58() },
+            ],
+            truncated: false,
+        },
+        outcome: { status: 'succeeded' },
         unitsConsumed: 75000,
     },
 };
@@ -42,7 +46,8 @@ export const WithoutResolvedNames: Story = {
             { data: undefined, name: undefined, programId: SYSTEM_PROGRAM, programName: 'System Program' },
             { data: undefined, name: undefined, programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        invocations: TwoInstructions.args?.invocations ?? [],
+        logs: TwoInstructions.args?.logs ?? { invocations: [], truncated: false },
+        outcome: { status: 'succeeded' },
         unitsConsumed: 75000,
     },
 };
@@ -54,6 +59,7 @@ export const NoLogs: Story = {
             { data: undefined, name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
             { data: undefined, name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        invocations: [],
+        logs: { invocations: [], truncated: false },
+        outcome: { status: 'succeeded' },
     },
 };

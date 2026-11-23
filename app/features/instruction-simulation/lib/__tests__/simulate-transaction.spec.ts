@@ -41,7 +41,7 @@ describe('simulateTransaction', () => {
     it('should return parsed logs, units consumed, and SOL balance changes after successful simulation', async () => {
         const result = await simulate(createMockRpc());
 
-        expect(result).toMatchObject({ error: undefined, unitsConsumed: 150 });
+        expect(result).toMatchObject({ error: undefined, outcome: { status: 'succeeded' }, unitsConsumed: 150 });
         expect(result.logs?.invocations.map(invocation => invocation.programAddress)).toEqual([SYSTEM_PROGRAM_ADDRESS]);
         expect(result.solBalanceChanges).toHaveLength(2);
 
@@ -106,7 +106,11 @@ describe('simulateTransaction', () => {
 
         const result = await simulate(rpc);
 
-        expect(result).toMatchObject({ error: 'AccountNotFound', logs: undefined });
+        expect(result).toMatchObject({
+            error: 'AccountNotFound',
+            logs: undefined,
+            outcome: { failedInstructionIndex: undefined, status: 'failed' },
+        });
     });
 
     it('should return the raw error when an object-shaped error comes without logs', async () => {
@@ -194,6 +198,7 @@ describe('simulateTransaction', () => {
         const result = await simulate(rpc);
 
         expect(result.instructionError).toEqual({ index: 2, message: 'custom program error: 6001' });
+        expect(result.outcome).toEqual({ failedInstructionIndex: 2, status: 'failed' });
     });
 
     it('should request simulation with replaceRecentBlockhash and account addresses', async () => {

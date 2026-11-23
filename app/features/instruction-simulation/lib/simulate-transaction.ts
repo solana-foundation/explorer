@@ -1,4 +1,5 @@
 import type { SolanaRpc } from '@entities/cluster';
+import type { TransactionOutcome } from '@entities/compute-unit';
 import { type ParsedProgramLogs, parseProgramLogs } from '@entities/program-logs';
 import type { Address, Base64EncodedWireTransaction } from '@solana/kit';
 import type {
@@ -34,6 +35,7 @@ export type SimulationResult = {
     // The instruction that the transaction error names, for the Logs card.
     instructionError: ProgramError | undefined;
     error: string | undefined;
+    outcome: TransactionOutcome;
     solBalanceChanges: SolBalanceChange[] | undefined;
     tokenBalanceData: TokenBalanceData | undefined;
     unitsConsumed: number | undefined;
@@ -265,11 +267,16 @@ function interpretSimulation(
         error = typeof simResult.err === 'string' ? simResult.err : JSON.stringify(simResult.err);
     }
 
+    const instructionError = getTransactionInstructionError(simResult.err);
+
     return {
         accountKeys,
         error,
-        instructionError: getTransactionInstructionError(simResult.err),
+        instructionError,
         logs,
+        outcome: simResult.err
+            ? { failedInstructionIndex: instructionError?.index, status: 'failed' }
+            : { status: 'succeeded' },
         solBalanceChanges: solChanges.length > 0 ? solChanges : undefined,
         tokenBalanceData: tokenData,
         unitsConsumed: simResult.unitsConsumed,

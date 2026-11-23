@@ -1,18 +1,18 @@
-import type { InstructionCUData } from './types';
+import type { InstructionComputeUnits, InstructionCUData } from './types';
 
 /**
  * One chart row, with every string it renders already derived. `name` is dropped so a consumer reads
  * `label` or `legendLabel` and cannot bypass the positional fallback those apply.
  */
 export type InstructionCUDisplay = Omit<InstructionCUData, 'name'> & {
-    // The CU figure the bar is sized by. 0 when `computeUnits` is unknown, so the row has no segment.
+    // The CU figure the bar is sized by. 0 when `computeUnits` is not a figure, so the row has no segment.
     displayCU: number;
     // Chart tooltip title, before the program qualifier.
     label: string;
     // Legend entry: the instruction's position, then its name — `Unknown Instruction` when nothing
     // resolved one, so every row in the list reads the same shape.
     legendLabel: string;
-    // The CU figure as shown, or `Unknown`.
+    // The CU figure as shown, `Not executed`, or `Unknown`.
     displayValue: string;
 };
 
@@ -24,8 +24,8 @@ export function toInstructionCUDisplay(instructions: InstructionCUData[]): Instr
     return instructions.map((item, i) => {
         return {
             ...item,
-            displayCU: item.computeUnits ?? 0,
-            displayValue: item.computeUnits?.toLocaleString() ?? UNKNOWN_CU_LABEL,
+            displayCU: typeof item.computeUnits === 'number' ? item.computeUnits : 0,
+            displayValue: toDisplayValue(item.computeUnits),
             // The tooltip shows one row at a time, so an unnamed instruction is identified by its
             // position alone — `Unknown Instruction` there would read the same on every unnamed row.
             label: item.name ?? positionLabel(i),
@@ -49,7 +49,12 @@ export function formatTooltipTitle({ label, programName }: { label: string; prog
 // its own fallback by design — see "Two row shapes" in the transaction-data README.
 const UNKNOWN_INSTRUCTION_LABEL = 'Unknown Instruction';
 
-const UNKNOWN_CU_LABEL = 'Unknown';
+function toDisplayValue(computeUnits: InstructionComputeUnits): string {
+    if (computeUnits === undefined) return 'Unknown';
+    if (computeUnits === 'not-executed') return 'Not executed';
+
+    return computeUnits.toLocaleString();
+}
 
 function positionLabel(index: number): string {
     return `Instruction #${index + 1}`;

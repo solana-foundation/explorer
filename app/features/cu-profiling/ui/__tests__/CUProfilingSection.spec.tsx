@@ -5,6 +5,7 @@ import {
     type ParsedTransactionWithMeta,
     type PartiallyDecodedInstruction,
     PublicKey,
+    type TransactionError,
 } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
@@ -68,6 +69,28 @@ describe('CUProfilingSection', () => {
         renderSection();
 
         expect(screen.getByText('#1 Verify Zero Ciphertext: 6,000')).toBeInTheDocument();
+    });
+
+    // The logs of a successful transaction can be truncated before a builtin instruction.
+    it('should show the fixed cost of a builtin with no log lines in a successful transaction', () => {
+        mockTransaction([transferChecked(), setComputeUnitPrice()], [invocation(TOKEN_PROGRAM, 105)]);
+
+        renderSection();
+
+        expect(screen.getByText('#2 Set Compute Unit Price: 150')).toBeInTheDocument();
+    });
+
+    it('should show an instruction after the one that failed as not executed', () => {
+        const token = TOKEN_PROGRAM.toBase58();
+        mockTransaction(
+            [transferChecked(), setComputeUnitPrice()],
+            [[`Program ${token} invoke [1]`, `Program ${token} failed: custom program error: 0x1`]],
+            { InstructionError: [0, { Custom: 1 }] },
+        );
+
+        renderSection();
+
+        expect(screen.getByText('#2 Set Compute Unit Price: Not executed')).toBeInTheDocument();
     });
 
     describe('names resolvable only from an IDL', () => {
@@ -137,10 +160,11 @@ function renderSection() {
 function mockTransaction(
     instructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
     logLines: string[][],
+    err: TransactionError | null = null,
 ): void {
     useProgramIdlNames.mockReturnValue(new Map());
     const transactionWithMeta = {
-        meta: { computeUnitsConsumed: 405, err: null, logMessages: logLines.flat() },
+        meta: { computeUnitsConsumed: 405, err, logMessages: logLines.flat() },
         transaction: { message: { accountKeys: [], instructions } },
     } as unknown as ParsedTransactionWithMeta;
     useTransactionDetails.mockReturnValue({ data: { transactionWithMeta } });

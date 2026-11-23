@@ -105,6 +105,7 @@ function createSuccessResult(overrides?: Partial<SimulationResult>): SimulationR
         error: undefined,
         instructionError: undefined,
         logs: { invocations: [], truncated: false },
+        outcome: { status: 'succeeded' },
         solBalanceChanges: undefined,
         tokenBalanceData: undefined,
         unitsConsumed: 150,
