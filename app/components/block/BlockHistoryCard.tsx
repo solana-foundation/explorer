@@ -181,7 +181,9 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
             });
 
             const logs = parseProgramLogs(tx.meta?.logMessages ?? []);
-            const computeUnits = getLoggedComputeUnits(logs);
+            // One transaction with no figure hides the column for the whole block, so a failed transaction
+            // that logged nothing counts as 0.
+            const computeUnits = getLoggedComputeUnits(logs) ?? (tx.meta?.err ? 0 : undefined);
 
             const costUnits = tx.meta?.costUnits;
 

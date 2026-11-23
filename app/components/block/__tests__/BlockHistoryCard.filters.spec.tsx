@@ -8,6 +8,7 @@ const PROGRAM_A = '11111111111111111111111111111111';
 const PROGRAM_B = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ACCOUNT = 'Stake11111111111111111111111111111111111111';
 let search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
+let loggedComputeUnits: number | undefined = 0;
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/block/123',
@@ -36,7 +37,7 @@ vi.mock('@entities/compute-unit', () => ({
 }));
 
 vi.mock('@entities/program-logs', () => ({
-    getLoggedComputeUnits: () => 0,
+    getLoggedComputeUnits: () => loggedComputeUnits,
     parseProgramLogs: () => ({ invocations: [], truncated: false }),
 }));
 
@@ -45,6 +46,7 @@ import { BlockHistoryCard } from '../BlockHistoryCard';
 describe('BlockHistoryCard filters', () => {
     beforeEach(() => {
         search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
+        loggedComputeUnits = 0;
     });
 
     it('should combine version, program, and account filters while preserving URL parameters', () => {
@@ -108,6 +110,13 @@ describe('BlockHistoryCard filters', () => {
     it('should keep the CUs Consumed column when an unavailable transaction is listed', () => {
         search = 'filter=all';
         render(<BlockHistoryCard block={makeBlockWithUnavailable()} epoch={500n} />);
+        expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
+    });
+
+    it('should keep the CUs Consumed column when a failed transaction logged nothing', () => {
+        search = 'filter=all&status=failed';
+        loggedComputeUnits = undefined;
+        render(<BlockHistoryCard block={makeMixedBlock()} epoch={500n} />);
         expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
     });
 });
