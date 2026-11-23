@@ -1,6 +1,6 @@
 import { generateKeyPairSigner, getBase58Decoder, type ReadonlyUint8Array, signBytes } from '@solana/kit';
 import { PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { TransactionSignatures } from '../SignaturesCard';
@@ -37,8 +37,12 @@ describe('TransactionSignatures', () => {
             />,
         );
 
-        expect(await screen.findByText('Valid')).toBeInTheDocument();
-        expect(screen.getByText('Fee Payer')).toBeInTheDocument();
+        // GridTable's `mobile="stack"` renders the desktop grid and the mobile stack in the DOM at once,
+        // so each value appears twice; scope the assertions to the first (desktop) table.
+        await screen.findAllByText('Valid');
+        const table = screen.getAllByRole('table')[0];
+        expect(within(table).getByText('Valid')).toBeInTheDocument();
+        expect(within(table).getByText('Fee Payer')).toBeInTheDocument();
     });
 
     it.each([
@@ -47,13 +51,17 @@ describe('TransactionSignatures', () => {
     ])('should render an Invalid badge for $name', async ({ signature }) => {
         render(<TransactionSignatures signatures={[await signature()]} message={message} rawMessage={rawMessage} />);
 
-        expect(await screen.findByText('Invalid')).toBeInTheDocument();
+        await screen.findAllByText('Invalid');
+        const table = screen.getAllByRole('table')[0];
+        expect(within(table).getByText('Invalid')).toBeInTheDocument();
     });
 
     it('should render N/A for a missing signature', async () => {
         render(<TransactionSignatures signatures={[undefined]} message={message} rawMessage={rawMessage} />);
 
-        expect(await screen.findByText('Missing Signature')).toBeInTheDocument();
-        expect(await screen.findByText('N/A')).toBeInTheDocument();
+        await screen.findAllByText('Missing Signature');
+        const table = screen.getAllByRole('table')[0];
+        expect(within(table).getByText('Missing Signature')).toBeInTheDocument();
+        expect(within(table).getByText('N/A')).toBeInTheDocument();
     });
 });

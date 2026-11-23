@@ -22,7 +22,7 @@ export function buildExplorerLink(selection: ClusterSelection, path: string): st
             // Unconditional: a Custom selection always carries an endpoint.
             params.append('customUrl', selection.endpoint.href);
             break;
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
         default:
             // Mainnet doesn't need cluster parameter
             break;

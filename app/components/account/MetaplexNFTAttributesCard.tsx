@@ -6,13 +6,23 @@ import React from 'react';
 import { useCluster } from '@/app/providers/cluster';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 interface Attribute {
     trait_type: string;
     value: string;
 }
+
+const COLUMNS: ReadonlyArray<GridTableColumn<Attribute>> = [
+    {
+        header: 'Trait type',
+        render: ({ trait_type }) => trait_type,
+    },
+    {
+        header: 'Value',
+        render: ({ value }) => value,
+    },
+];
 
 export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
     const { url } = useCluster();
@@ -83,32 +93,14 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
         return <ErrorCard retry={retryAttributes} text="Failed to fetch attributes" />;
     }
 
-    const attributesList: React.ReactNode[] = attributes.map(({ trait_type, value }) => {
-        return (
-            <BaseTable.Row key={`${trait_type}:${value}`}>
-                <BaseTable.Cell>{trait_type}</BaseTable.Cell>
-                <BaseTable.Cell>{value}</BaseTable.Cell>
-            </BaseTable.Row>
-        );
-    });
-
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit">
-                    Attributes
-                </CardTitle>
-            </CardHeader>
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    {/* w-[1%] (not the usual w-px): two shrink columns share this table, and 1px vs 1% distributes leftover width differently */}
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-[1%] text-dk-gray-700">Trait type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="w-[1%] text-dk-gray-700">Value</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>{attributesList}</BaseTable.Body>
-            </BaseTable>
-        </Card>
+        <GridTableCard
+            title="Attributes"
+            ariaLabel="Attributes"
+            gridTemplate="grid-cols-[auto_1fr]"
+            columns={COLUMNS}
+            rows={attributes}
+            getRowKey={({ trait_type, value }) => `${trait_type}:${value}`}
+        />
     );
 }

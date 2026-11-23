@@ -38,12 +38,28 @@ const sampleCompressedNft = {
 } as unknown as CompressedNft;
 
 // Tree account isn't seeded in MockAccountsProvider, so canopyDepth resolves to 0 and
-// proofSize === proof.length. Adjust the proof length to exercise the "Composability
-// Hazard" badge (>8 entries) if desired.
+// proofSize === proof.length. The stories pick the proof length to reach each Proof Size badge.
 const meta = {
     component: DasCompressionInfoCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
+    parameters: {
+        ...nextjsParameters,
+        docs: {
+            description: {
+                component: [
+                    'Compression Info card on the Compression tab of a compressed NFT: the Merkle tree, the current root, the proof size and the leaf hashes.',
+                    'The proof badges sit under their values, like the badges in the transaction Accounts table: they wrap onto their own line and the wrapper collapses when there is no badge.',
+                    '',
+                    '## References',
+                    '',
+                    '- [OverviewCard](?path=/docs/shared-overviewcard--docs) — the card surface and its "Compression Info" title.',
+                    '- [KeyValueRows](?path=/docs/shared-keyvaluerows--docs) — the label/value rows.',
+                    '- [Address](?path=/docs/components-common-address--docs) (`raw`, `link` for the tree) — the tree, root and hash values.',
+                    '- [Badge](?path=/docs/components-shared-badge--docs) — `Proof Verified` / `Proof Not Verified` under the root, `No Proof Required` / `Composability Hazard` under the proof size.',
+                ].join('\n'),
+            },
+        },
+    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/CompressedNFTInfoCard',
 } satisfies Meta<typeof DasCompressionInfoCard>;
@@ -55,6 +71,19 @@ export const Default: Story = {
     args: {
         compressedNft: sampleCompressedNft,
         proof: sampleProof,
+    },
+};
+
+// An empty proof hashes to the leaf itself, so root === asset_hash verifies, and the zero
+// proof size adds the "No Proof Required" badge.
+export const ProofVerified: Story = {
+    args: {
+        compressedNft: sampleCompressedNft,
+        proof: {
+            ...sampleProof,
+            proof: [],
+            root: sampleCompressedNft.compression.asset_hash,
+        },
     },
 };
 

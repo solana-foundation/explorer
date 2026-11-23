@@ -44,6 +44,7 @@ export {
     getRpc,
     type SolanaRpc,
     StateContext,
+    EPOCH_INFO_REFRESH_MS,
     useCluster,
     useClusterConnectionFailed,
     useClusterInfo,

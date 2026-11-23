@@ -43,6 +43,19 @@ export const Json: Story = {
     },
 };
 
+export const Rendered: Story = {
+    args: {
+        caption: 'Terminal',
+        code: (
+            <>
+                claude mcp add <span className="text-accent">--transport http</span> solana-explorer
+                https://explorer.solana.com/mcp
+            </>
+        ),
+        onCopy: fn(),
+    },
+};
+
 export const Copied: Story = {
     args: {
         caption: '.mcp.json',

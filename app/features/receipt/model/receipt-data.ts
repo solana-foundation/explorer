@@ -1,4 +1,5 @@
 import { truncateAddress } from '@entities/address';
+import type { TokenInfo } from '@entities/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { lamportsToSolString } from '@utils/index';
 
@@ -6,10 +7,9 @@ import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { displayTimestampUtc } from '@/app/utils/date';
 
-import { getTokenInfo, type TokenInfo } from '../api/get-token-info';
 import type { FormattedReceipt } from '../types';
 import { createSolTransferReceipt } from './sol-transfer';
-import { createTokenTransferReceipt } from './token-transfer';
+import { createTokenTransferReceipt, type GetTokenInfo } from './token-transfer';
 import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './types';
 
 /**
@@ -25,10 +25,16 @@ export type ReceiptUnavailabilityReason = 'inner-transfers' | 'mixed-mint' | 'no
 export type ReceiptResult =
     { kind: 'ok'; receipt: FormattedReceipt } | { kind: 'unavailable'; reason: ReceiptUnavailabilityReason };
 
-export async function extractReceiptData(tx: TransactionWithMeta, cluster: Cluster): Promise<ReceiptResult> {
-    const tokenOutcome = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
-        getParsedTokenInfo(mint, cluster),
-    );
+export async function extractReceiptData({
+    cluster,
+    getTokenInfo,
+    tx,
+}: {
+    cluster: Cluster;
+    getTokenInfo: GetTokenInfo;
+    tx: TransactionWithMeta;
+}): Promise<ReceiptResult> {
+    const tokenOutcome = await createTokenTransferReceipt(tx, mint => getParsedTokenInfo(mint, getTokenInfo));
     if (tokenOutcome.kind === 'ok') {
         return { kind: 'ok', receipt: formatReceiptData(tokenOutcome.receipt, cluster) };
     }
@@ -94,10 +100,9 @@ export function formatReceiptData(receipt: Receipt, cluster: Cluster): Formatted
     return { ...base, kind: 'sol' as const };
 }
 
-async function getParsedTokenInfo(mint: string | undefined, cluster: Cluster): Promise<TokenInfo | undefined> {
-    if (!mint) return undefined;
+async function getParsedTokenInfo(mint: string, getTokenInfo: GetTokenInfo): Promise<TokenInfo | undefined> {
     try {
-        const tokenInfo = await getTokenInfo(mint, cluster);
+        const tokenInfo = await getTokenInfo(mint);
         return tokenInfo;
     } catch (error) {
         Logger.error(error);

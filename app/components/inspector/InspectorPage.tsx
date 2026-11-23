@@ -37,7 +37,6 @@ import {
     V1_TRANSACTION_SIZE_LIMIT,
     type V1TransactionConfig,
 } from '@/app/shared/lib/v1-message-bridge';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
@@ -319,26 +318,22 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
     return (
         <>
             {messages.length > 1 && (
-                <Card ui="dashkit" className="mb-4">
-                    <CardHeader ui="dashkit" className="flex-wrap gap-2">
-                        <CardTitle as="h3" ui="dashkit">
-                            Batch · {messages.length} transactions
-                        </CardTitle>
-                        <div className="flex flex-wrap gap-2">
-                            {messages.map((_unused, i) => (
-                                <Button
-                                    key={i}
-                                    ui="dashkit"
-                                    size="sm"
-                                    variant={i === activeIndex ? 'primary' : 'white'}
-                                    onClick={() => setSelected(i)}
-                                >
-                                    {i + 1}
-                                </Button>
-                            ))}
-                        </div>
-                    </CardHeader>
-                </Card>
+                <section className="flex flex-col gap-3">
+                    <h2 className="m-0 text-lg font-normal text-white">Batch · {messages.length} transactions</h2>
+                    <div className="flex flex-wrap gap-2">
+                        {messages.map((_unused, i) => (
+                            <Button
+                                key={i}
+                                size="sm"
+                                variant={i === activeIndex ? 'accent' : 'outline'}
+                                aria-pressed={i === activeIndex}
+                                onClick={() => setSelected(i)}
+                            >
+                                {i + 1}
+                            </Button>
+                        ))}
+                    </div>
+                </section>
             )}
             {message ? (
                 <LoadedView
@@ -660,6 +655,7 @@ function LoadedView({
                 scrollSpy
                 tabs={tabs}
                 buildHref={path => `#${path}`}
+                className="gap-5"
                 disabledHint="Run the simulation to load this tab's content."
             />
             {signatures && (

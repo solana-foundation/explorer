@@ -45,10 +45,13 @@ const buttonVariants = cva([], {
             variant: 'compact',
         },
         {
-            class: 'border border-neutral-700 bg-neutral-900 text-neutral-50 shadow hover:bg-neutral-900/90',
+            class: 'border bg-neutral-900 text-neutral-50 shadow hover:bg-neutral-900/90',
             ui: 'tw',
             variant: 'default',
         },
+        // Border colour owned by the active toggle so only one colour is ever applied (no `!important`).
+        { active: false, class: 'border-neutral-700', ui: 'tw', variant: 'default' },
+        { active: true, class: 'border-accent', ui: 'tw', variant: 'default' },
         {
             // border-0 (here and below): UA buttons carry a 2px border and @tailwind base is skipped
             class: 'border-0 bg-red-500 text-neutral-50 shadow-sm hover:bg-red-500/90',

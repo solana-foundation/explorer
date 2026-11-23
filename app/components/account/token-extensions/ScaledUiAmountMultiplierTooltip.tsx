@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { type ScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { Info } from 'react-feather';
 
 function ScaledUiAmountMultiplierTooltip({
@@ -6,9 +7,12 @@ function ScaledUiAmountMultiplierTooltip({
     scaledUiAmountMultiplier,
 }: {
     rawAmount?: string;
-    scaledUiAmountMultiplier: string;
+    scaledUiAmountMultiplier: ScaledUiAmountMultiplier;
 }) {
-    if (scaledUiAmountMultiplier === '1') {
+    if (scaledUiAmountMultiplier.status === 'loading') {
+        return null;
+    }
+    if (scaledUiAmountMultiplier.status === 'known' && scaledUiAmountMultiplier.multiplier === '1') {
         return null;
     }
 
@@ -19,8 +23,9 @@ function ScaledUiAmountMultiplierTooltip({
             </TooltipTrigger>
             <TooltipContent>
                 <div className="min-w-36 max-w-16">
-                    Scaled {rawAmount ? `${rawAmount} ` : ''}by {scaledUiAmountMultiplier} due to the scaled ui amount
-                    extension on the mint
+                    {scaledUiAmountMultiplier.status === 'unknown'
+                        ? 'The scaled ui amount multiplier is unknown'
+                        : `Scaled ${rawAmount ? `${rawAmount} ` : ''}by ${scaledUiAmountMultiplier.multiplier} due to the scaled ui amount extension on the mint`}
                 </div>
             </TooltipContent>
         </Tooltip>

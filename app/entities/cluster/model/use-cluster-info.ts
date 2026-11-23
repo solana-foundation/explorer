@@ -1,7 +1,9 @@
 'use client';
 
+import { Logger } from '@shared/lib/logger';
 import { useMemo } from 'react';
-import useSWRImmutable from 'swr/immutable';
+import useSWR from 'swr';
+import { immutable } from 'swr/immutable';
 
 import { fetchEpochInfo } from '../api/fetch-epoch-info';
 import { fetchEpochSchedule } from '../api/fetch-epoch-schedule';
@@ -16,17 +18,24 @@ export type ClusterQueryResult<T> = {
     isLoading: boolean;
 };
 
-type Options = { enabled?: boolean };
+type Options = { enabled?: boolean; refreshInterval?: number };
+type QueryOptions = Options & { immutable?: boolean };
+
+/** A sensible interval for a caller that needs the epoch to tick, e.g. a page counting down to activation. */
+export const EPOCH_INFO_REFRESH_MS = 30_000;
 
 export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
     return useEpochScheduleResult(options).data;
 }
 
 export function useEpochScheduleResult(options: Options = {}): ClusterQueryResult<ClusterInfo['epochSchedule']> {
-    return useClusterQuery('epoch-schedule', fetchEpochSchedule, options);
+    return useClusterQuery('epoch-schedule', fetchEpochSchedule, { ...options, immutable: true });
 }
 
-/** Returns the epoch from the first successful fetch for the cluster URL. The hook never refetches it. */
+/**
+ * Refetches on mount, focus and reconnect, but polls on a timer only when the caller passes `refreshInterval`.
+ * Most callers read the epoch once; a page waiting for the epoch to roll over opts into polling.
+ */
 export function useEpochInfo(options: Options = {}): EpochInfo | undefined {
     return useEpochInfoResult(options).data;
 }
@@ -36,7 +45,7 @@ function useEpochInfoResult(options: Options = {}): ClusterQueryResult<EpochInfo
 }
 
 export function useFirstAvailableBlock(options: Options = {}): bigint | undefined {
-    return useClusterQuery('first-available-block', fetchFirstAvailableBlock, options).data;
+    return useClusterQuery('first-available-block', fetchFirstAvailableBlock, { ...options, immutable: true }).data;
 }
 
 export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
@@ -52,16 +61,16 @@ export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
 function useClusterQuery<T>(
     name: string,
     fetcher: (url: string) => Promise<T>,
-    { enabled = true }: Options,
+    { enabled = true, immutable: isImmutable = false, refreshInterval }: QueryOptions = {},
 ): ClusterQueryResult<T> {
     const { url, status } = useCluster();
     const shouldFetch = enabled && status === ClusterStatus.Connected && Boolean(url);
-    const { data, error, isLoading } = useSWRImmutable(
-        shouldFetch ? [name, url] : undefined,
-        () => fetcher(url),
-        // SWR retries a failed fetch without limit by default. The cap limits the requests to an unreachable RPC.
-        { errorRetryCount: 3 },
-    );
+    const { data, error, isLoading } = useSWR(shouldFetch ? [name, url] : undefined, () => fetcher(url), {
+        errorRetryCount: 3,
+        onError: err => Logger.error(err, { query: name }),
+        refreshInterval: isImmutable ? undefined : refreshInterval,
+        use: isImmutable ? [immutable] : [],
+    });
 
     return { data, error, isLoading: shouldFetch && isLoading };
 }

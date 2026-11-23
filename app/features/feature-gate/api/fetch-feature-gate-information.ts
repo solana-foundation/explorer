@@ -8,33 +8,33 @@ const REPO = 'solana-improvement-documents';
 const BRANCH = 'main';
 const PATH_COMPONENT = 'proposals';
 
-export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType): Promise<string[]> {
-    const empty: string[] = ['No data'];
+// A proposal's text, or a marker that it could not be fetched, so the page can tell a failed fetch from
+// proposal text instead of rendering the string 'No data' as markdown. `url` is the proposal's own link.
+export type FeatureGateProposal = { status: 'ok'; markdown: string } | { status: 'unavailable'; url: string };
 
+export async function fetchFeatureGateInformation(featureInfo?: FeatureInfoType): Promise<FeatureGateProposal[]> {
     const fileNames = featureInfo?.simd_link;
 
-    if (!fileNames) return empty;
+    if (!fileNames) return [];
 
-    const results = await Promise.all(
-        fileNames.map(async fileName => {
+    return Promise.all(
+        fileNames.map(async (fileName): Promise<FeatureGateProposal> => {
             const link = getLink(fileName);
             try {
                 const resp = await fetch(link, { method: 'GET' });
 
                 if (!resp.ok) {
                     Logger.warn('[feature-gate] SIMD fetch failed', { link, status: resp.status });
-                    return 'No data';
+                    return { status: 'unavailable', url: fileName };
                 }
 
-                return resp.text();
+                return { markdown: await resp.text(), status: 'ok' };
             } catch (e) {
                 Logger.warn('[feature-gate] Cannot fetch link', { cause: e, link });
-                return 'No data';
+                return { status: 'unavailable', url: fileName };
             }
         }),
     );
-
-    return results;
 }
 
 export function getLink(simdLink: string) {

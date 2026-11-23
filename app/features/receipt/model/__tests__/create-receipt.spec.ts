@@ -1,11 +1,15 @@
+import { gen } from '@__fixtures__/gen';
 import { truncateAddress } from '@entities/address';
+import { type TokenInfo, TokenInfoHttpError, TokenInfoInvalidResponseError } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
+import { getTokenInfo } from '@entities/token-info/server';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
-import { getTokenInfo } from '../../api/get-token-info';
 import { getTx } from '../../api/get-tx';
 import { MULTISIG_AUTHORITY, RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
 import { mockCustomFeePayerTransaction } from '../../mocks/custom-fee-payer';
@@ -38,7 +42,10 @@ import { createReceipt } from '../create-receipt';
 import { type ReceiptResult } from '../receipt-data';
 
 vi.mock('../../api/get-tx');
-vi.mock('../../api/get-token-info');
+vi.mock('@entities/token-info/server', async () => ({
+    ...(await vi.importActual<typeof import('@entities/token-info/server')>('@entities/token-info/server')),
+    getTokenInfo: vi.fn(),
+}));
 
 function unwrap(result: ReceiptResult) {
     expect(result.kind).toBe('ok');
@@ -61,7 +68,7 @@ describe('createReceipt', () => {
     describe('SOL transfer receipts', () => {
         it('should create a formatted SOL transfer receipt for a single transfer', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockSingleTransferTransaction,
             });
 
@@ -72,7 +79,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: truncateAddress(RECEIVER.publicKey.toBase58(), 5),
                 },
@@ -92,7 +99,7 @@ describe('createReceipt', () => {
 
         it('should create a formatted SOL receipt for multiple transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockMultipleTransfersTransaction,
             });
 
@@ -123,7 +130,7 @@ describe('createReceipt', () => {
 
         it('should handle custom fee payer transaction', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockCustomFeePayerTransaction,
             });
 
@@ -245,7 +252,7 @@ describe('createReceipt', () => {
                     }),
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -267,13 +274,10 @@ describe('createReceipt', () => {
 
     describe('token transfer receipts', () => {
         it('should create a formatted token transfer receipt for transferChecked', async () => {
-            const mockTokenInfo = {
-                logoURI: 'https://example.com/usdc.png',
-                symbol: 'USDC',
-            };
+            const mockTokenInfo = listedToken('USDC', 'https://example.com/usdc.png');
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcTransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -285,7 +289,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: 'Hd3f3..R3bD5',
                 },
@@ -300,17 +304,17 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(
                 '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-                Cluster.MainnetBeta,
+                Cluster.Mainnet,
+                undefined,
+                { onError: expect.any(Function), signal: expect.any(AbortSignal) },
             );
         });
 
         it('should create a formatted token transfer receipt for regular transfer', async () => {
-            const mockTokenInfo = {
-                symbol: 'USDC',
-            };
+            const mockTokenInfo = listedToken('USDC');
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcRegularTransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -336,15 +340,12 @@ describe('createReceipt', () => {
             });
         });
 
-        it.each([
-            ['returns undefined', () => vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined)],
-            ['throws an error', () => vi.mocked(getTokenInfo).mockRejectedValueOnce(new Error('Token info not found'))],
-        ])('should handle token transfer when getTokenInfo %s', async (_, mockTokenInfo) => {
+        it('should show TOKEN when getTokenInfo returns undefined', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcTransferTransaction,
             });
-            mockTokenInfo();
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined);
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -356,13 +357,10 @@ describe('createReceipt', () => {
         });
 
         it('should create a formatted token transfer receipt for Token-2022 transfer2', async () => {
-            const mockTokenInfo = {
-                logoURI: 'https://example.com/t22.png',
-                symbol: 'T22',
-            };
+            const mockTokenInfo = listedToken('T22', 'https://example.com/t22.png');
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockToken2022Transfer2Transaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -374,7 +372,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: '65MUM..L2Fhk',
                 },
@@ -389,18 +387,17 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(
                 '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-                Cluster.MainnetBeta,
+                Cluster.Mainnet,
+                undefined,
+                { onError: expect.any(Function), signal: expect.any(AbortSignal) },
             );
         });
 
         it('should create a formatted token transfer receipt for Token-2022 transferChecked', async () => {
-            const mockTokenInfo = {
-                logoURI: 'https://example.com/token-2022.png',
-                symbol: 'T2022',
-            };
+            const mockTokenInfo = listedToken('T2022', 'https://example.com/token-2022.png');
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockToken2022TransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -412,7 +409,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: '65MUM..L2Fhk',
                 },
@@ -427,16 +424,18 @@ describe('createReceipt', () => {
             });
             expect(getTokenInfo).toHaveBeenCalledWith(
                 'AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U',
-                Cluster.MainnetBeta,
+                Cluster.Mainnet,
+                undefined,
+                { onError: expect.any(Function), signal: expect.any(AbortSignal) },
             );
         });
 
         it('should create a receipt for multisig token transfer using multisigAuthority as sender', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcMultisigTransferTransaction,
             });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(listedToken('USDC'));
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -446,10 +445,10 @@ describe('createReceipt', () => {
 
         it('should create a multi-transfer token receipt summing totals and exposing per-instruction transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcMultipleTransfersTransaction,
             });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(listedToken('USDC'));
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -473,7 +472,43 @@ describe('createReceipt', () => {
                 receiver: { address: receiver2 },
                 sender: { address: authority },
             });
-            expect(getTokenInfo).toHaveBeenCalledWith(mint, Cluster.MainnetBeta);
+            expect(getTokenInfo).toHaveBeenCalledWith(mint, Cluster.Mainnet, undefined, {
+                onError: expect.any(Function),
+                signal: expect.any(AbortSignal),
+            });
+        });
+
+        it('should log a transient token info failure as a warning with the mint and the cluster', async () => {
+            const lookupError = new TokenInfoHttpError({ status: 503, statusText: 'Service Unavailable' });
+            mockTokenInfoFailure(lookupError);
+            const logWarn = vi.spyOn(Logger, 'warn');
+            const logError = vi.spyOn(Logger, 'error');
+
+            await createReceipt(mockSignature);
+
+            const [mint] = vi.mocked(getTokenInfo).mock.calls[0];
+            expect(logWarn).toHaveBeenCalledWith('[receipt] Token info lookup failed', {
+                cluster: Cluster.Devnet,
+                error: lookupError,
+                mint,
+            });
+            expect(logError).not.toHaveBeenCalled();
+        });
+
+        it('should log any other token info failure as an error with the mint and the cluster', async () => {
+            const lookupError = new TokenInfoInvalidResponseError();
+            mockTokenInfoFailure(lookupError);
+            const logWarn = vi.spyOn(Logger, 'warn');
+            const logError = vi.spyOn(Logger, 'error');
+
+            await createReceipt(mockSignature);
+
+            const [mint] = vi.mocked(getTokenInfo).mock.calls[0];
+            expect(logError).toHaveBeenCalledWith(
+                expect.objectContaining({ cause: lookupError, message: '[receipt] Token info lookup failed' }),
+                { sentry: true, sentryExtras: { cluster: Cluster.Devnet, mint } },
+            );
+            expect(logWarn).not.toHaveBeenCalled();
         });
     });
 
@@ -483,7 +518,7 @@ describe('createReceipt', () => {
             ['Jito-only SOL transfer', mockJitoOnlyTransferTransaction],
             ['transaction with no transfers', mockNoTransferTransaction],
         ])('should report no-transfers for %s', async (_, transaction) => {
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction });
 
             const result = await createReceipt(mockSignature);
 
@@ -523,7 +558,7 @@ describe('createReceipt', () => {
                 ],
                 instructions: [buildPartiallyDecodedIx({ programId: wrapperProgram })],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -601,8 +636,8 @@ describe('createReceipt', () => {
                     },
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(listedToken('USDC'));
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -649,7 +684,7 @@ describe('createReceipt', () => {
                     buildPartiallyDecodedIx({ programId: ataProgram }),
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -720,8 +755,8 @@ describe('createReceipt', () => {
                     },
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(listedToken('USDC'));
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -738,7 +773,7 @@ describe('createReceipt', () => {
     describe('mixed-mint token transfers', () => {
         it('should report mixed-mint when token transfers use different mints', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockMixedMintTransfersTransaction,
             });
 
@@ -749,10 +784,10 @@ describe('createReceipt', () => {
 
         it('should sum same-mint token transfers exactly (no float drift)', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcFpPrecisionTransfersTransaction,
             });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
+            vi.mocked(getTokenInfo).mockResolvedValueOnce(listedToken('USDC'));
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -762,3 +797,18 @@ describe('createReceipt', () => {
         });
     });
 });
+
+function listedToken(symbol: string, logoURI: string | null = null): TokenInfo {
+    return { ...tokenInfo(gen.address()), logoURI, symbol };
+}
+
+function mockTokenInfoFailure(lookupError: Error): void {
+    vi.mocked(getTx).mockResolvedValueOnce({
+        cluster: Cluster.Devnet,
+        transaction: mockUsdcTransferTransaction,
+    });
+    vi.mocked(getTokenInfo).mockImplementationOnce(async (_mint, _cluster, _genesisHash, config) => {
+        config?.onError?.(lookupError);
+        return undefined;
+    });
+}

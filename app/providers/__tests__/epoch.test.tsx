@@ -35,7 +35,7 @@ describe('fetchEpoch', () => {
             .mockResolvedValueOnce([LAST_SLOT - 1n, LAST_SLOT]);
         getBlockTime.mockResolvedValueOnce(1700000000n).mockResolvedValueOnce(1700100000n);
 
-        await fetchEpoch(dispatch, MOCK_URL, Cluster.MainnetBeta, SCHEDULE, 20n, EPOCH);
+        await fetchEpoch(dispatch, MOCK_URL, Cluster.Mainnet, SCHEDULE, 20n, EPOCH);
 
         expect(getRpc).toHaveBeenCalledWith(MOCK_URL);
         expect(getBlocks).toHaveBeenNthCalledWith(1, FIRST_SLOT, FIRST_SLOT + 100n);
@@ -56,7 +56,7 @@ describe('fetchEpoch', () => {
         getBlocks.mockResolvedValueOnce([0n]).mockResolvedValueOnce([31n]);
         getBlockTime.mockResolvedValue(1700000000n);
 
-        await fetchEpoch(dispatch, MOCK_URL, Cluster.MainnetBeta, tinySchedule, 20n, 0);
+        await fetchEpoch(dispatch, MOCK_URL, Cluster.Mainnet, tinySchedule, 20n, 0);
 
         expect(getBlocks).toHaveBeenNthCalledWith(2, 0n, 31n);
         expect(lastDispatch(dispatch).status).toBe(FetchStatus.Fetched);
@@ -66,7 +66,7 @@ describe('fetchEpoch', () => {
         getBlocks.mockResolvedValueOnce([FIRST_SLOT]).mockResolvedValueOnce([LAST_SLOT]);
         getBlockTime.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
 
-        await fetchEpoch(dispatch, MOCK_URL, Cluster.MainnetBeta, SCHEDULE, 20n, EPOCH);
+        await fetchEpoch(dispatch, MOCK_URL, Cluster.Mainnet, SCHEDULE, 20n, EPOCH);
 
         expect(lastDispatch(dispatch).data).toMatchObject({ firstTimestamp: null, lastTimestamp: null });
     });
@@ -76,7 +76,7 @@ describe('fetchEpoch', () => {
         getBlocks.mockResolvedValueOnce([0n]).mockResolvedValueOnce([0n]);
         getBlockTime.mockResolvedValue(1700000000n);
 
-        await fetchEpoch(dispatch, MOCK_URL, Cluster.MainnetBeta, tinySchedule, 20n, 0);
+        await fetchEpoch(dispatch, MOCK_URL, Cluster.Mainnet, tinySchedule, 20n, 0);
 
         expect(getBlockTime).toHaveBeenCalledTimes(2);
         expect(lastDispatch(dispatch).data).toMatchObject({ lastBlock: 0, lastTimestamp: 1700000000 });
@@ -85,7 +85,7 @@ describe('fetchEpoch', () => {
     it('should dispatch FetchFailed when no block is found at the start of the epoch', async () => {
         getBlocks.mockResolvedValue([]);
 
-        await fetchEpoch(dispatch, MOCK_URL, Cluster.MainnetBeta, SCHEDULE, 20n, EPOCH);
+        await fetchEpoch(dispatch, MOCK_URL, Cluster.Mainnet, SCHEDULE, 20n, EPOCH);
 
         expect(lastDispatch(dispatch)).toMatchObject({ data: undefined, status: FetchStatus.FetchFailed });
     });

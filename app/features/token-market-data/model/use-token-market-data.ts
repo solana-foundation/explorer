@@ -25,7 +25,7 @@ type SwrKey = ['token-market-data', string];
 function getSwrKey(cluster: Cluster, address: string, enabled: boolean): SwrKey | null {
     // Allow null for SWR key.
     // eslint-disable-next-line unicorn/no-null
-    if (!enabled || cluster !== Cluster.MainnetBeta) return null;
+    if (!enabled || cluster !== Cluster.Mainnet) return null;
     return ['token-market-data', address];
 }
 

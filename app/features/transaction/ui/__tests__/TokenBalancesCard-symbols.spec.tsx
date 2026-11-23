@@ -21,7 +21,10 @@ vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
     fetchTokenInfosFromApi: mocks.fetchTokenInfosFromApi,
 }));
-vi.mock('@/app/providers/accounts/tokens', () => ({ useScaledUiAmountForMint: () => ['1', '1'] }));
+vi.mock('@/app/providers/accounts/tokens', async importOriginal => ({
+    ...(await importOriginal<typeof import('@/app/providers/accounts/tokens')>()),
+    useScaledUiAmountMultiplier: () => ({ multiplier: '1', status: 'known' }),
+}));
 vi.mock('@components/common/Address', () => ({ Address: () => <span>address</span> }));
 vi.mock('@components/common/BalanceDelta', () => ({ BalanceDelta: () => <span>delta</span> }));
 vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', () => ({ default: () => null }));
@@ -29,7 +32,7 @@ vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', 
 describe('TokenBalancesCard token symbols', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.cluster = { cluster: Cluster.MainnetBeta, genesisHash: undefined };
+        mocks.cluster = { cluster: Cluster.Mainnet, genesisHash: undefined };
     });
 
     it('should label each balance with the symbol of its own mint', async () => {
@@ -52,7 +55,7 @@ describe('TokenBalancesCard token symbols', () => {
         await waitFor(() =>
             expect(mocks.fetchTokenInfosFromApi).toHaveBeenCalledWith({
                 addresses: [USDC, WSOL],
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 genesisHash: undefined,
                 includeOnChainFallback: true,
             }),

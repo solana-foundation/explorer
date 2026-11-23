@@ -21,7 +21,7 @@ export type WalletPlansData = {
     plans: PlanWithAddress[];
 };
 
-const ENABLED_CLUSTERS = new Set([Cluster.MainnetBeta, Cluster.Devnet, Cluster.Custom]);
+const ENABLED_CLUSTERS = new Set([Cluster.Mainnet, Cluster.Devnet, Cluster.Custom]);
 
 type HookOptions = {
     /**

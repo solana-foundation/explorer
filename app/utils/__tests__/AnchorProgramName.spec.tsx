@@ -28,7 +28,7 @@ describe('AnchorProgramName', () => {
 
         render(<AnchorProgramName programId={new PublicKey(anchorModernIdl.address)} url="http://localhost" />);
 
-        expect(useProgramIdls).toHaveBeenCalledWith(anchorModernIdl.address, 'http://localhost', Cluster.MainnetBeta);
+        expect(useProgramIdls).toHaveBeenCalledWith(anchorModernIdl.address, 'http://localhost', Cluster.Mainnet);
     });
 
     it.each([

@@ -1,52 +1,37 @@
 import { RecentBlockhashesEntry, RecentBlockhashesInfo } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
+
+const COLUMNS: ReadonlyArray<GridTableColumn<{ entry: RecentBlockhashesEntry; index: number }>> = [
+    {
+        header: 'Recency',
+        render: ({ index }) => index + 1,
+    },
+    {
+        cell: { font: 'mono' },
+        header: 'Blockhash',
+        render: ({ entry }) => entry.blockhash,
+    },
+    {
+        header: 'Fee Calculator',
+        render: ({ entry }) => `${entry.feeCalculator.lamportsPerSignature} lamports per signature`,
+    },
+];
 
 export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashesInfo }) {
-    return (
-        <>
-            <Card ui="dashkit">
-                <CardHeader ui="dashkit">
-                    <CardTitle as="h3" ui="dashkit">
-                        Blockhashes
-                    </CardTitle>
-                </CardHeader>
-                <BaseTable ui="dashkit" variant="card" nowrap>
-                    <BaseTable.Head>
-                        <BaseTable.Row>
-                            <BaseTable.HeaderCell className="w-px text-dk-gray-700">Recency</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="w-px text-dk-gray-700">Blockhash</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-dk-gray-700">Fee Calculator</BaseTable.HeaderCell>
-                        </BaseTable.Row>
-                    </BaseTable.Head>
-                    <BaseTable.Body>
-                        {blockhashes.length > 0 &&
-                            blockhashes.map((entry: RecentBlockhashesEntry, index) => {
-                                return renderAccountRow(entry, index);
-                            })}
-                    </BaseTable.Body>
-                </BaseTable>
+    const rows = blockhashes.map((entry, index) => ({ entry, index }));
 
-                <CardFooter ui="dashkit">
-                    <div className="text-center text-dk-gray-700">
-                        {blockhashes.length > 0 ? '' : 'No blockhashes found'}
-                    </div>
-                </CardFooter>
-            </Card>
-        </>
+    return (
+        <GridTableCard
+            title="Blockhashes"
+            ariaLabel="Blockhashes"
+            gridTemplate="grid-cols-[auto_1fr_auto]"
+            columns={COLUMNS}
+            rows={rows}
+            getRowKey={({ index }) => index}
+            empty="No blockhashes found"
+            mobile="stack"
+        />
     );
 }
-
-const renderAccountRow = (entry: RecentBlockhashesEntry, index: number) => {
-    return (
-        <BaseTable.Row key={index}>
-            <BaseTable.Cell className="w-px">{index + 1}</BaseTable.Cell>
-            <BaseTable.Cell className="w-px font-mono">{entry.blockhash}</BaseTable.Cell>
-            <BaseTable.Cell className="">
-                {entry.feeCalculator.lamportsPerSignature} lamports per signature
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-};

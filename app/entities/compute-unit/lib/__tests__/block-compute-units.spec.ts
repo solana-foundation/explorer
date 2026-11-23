@@ -35,7 +35,7 @@ function mockTransaction({
 }
 
 const EPOCH = 1000n;
-const CLUSTER = Cluster.MainnetBeta;
+const CLUSTER = Cluster.Mainnet;
 
 describe('summarizeBlockComputeUnits', () => {
     it('should sum consumed, requested and cost units across the block', () => {

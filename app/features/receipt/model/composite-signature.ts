@@ -36,7 +36,7 @@ export function buildCompositeSignature(signature: string, version?: string, clu
         parts.push(version);
     }
 
-    if (cluster !== undefined && cluster !== Cluster.MainnetBeta) {
+    if (cluster !== undefined && cluster !== Cluster.Mainnet) {
         if (!version) parts.push(''); // placeholder for version
         parts.push(String(cluster));
     }

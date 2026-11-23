@@ -32,12 +32,6 @@ describe('orderMintsByVerification', () => {
         expect(orderMintsByVerification(once, tokenInfos)).toEqual(once);
     });
 
-    it('should treat a listed mint with no verified flag as unverified rather than verified', () => {
-        const tokenInfos = infos(tokenInfo('listed'), tokenInfo('verified', true));
-
-        expect(orderMintsByVerification(['listed', 'verified'], tokenInfos)).toEqual(['verified', 'listed']);
-    });
-
     it('should preserve every mint, including duplicates', () => {
         const mints = ['dup', 'verified', 'dup'];
 

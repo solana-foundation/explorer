@@ -8,15 +8,33 @@ import { isParsedAccountProgram, STAKE_PROGRAM_LABEL } from '@explorer/parsers';
 import { useAccountInfo } from '@providers/accounts';
 import { useFetchRewards, useRewards } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey } from '@solana/web3.js';
+import { InflationReward, PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 const U64_MAX = BigInt('0xffffffffffffffff');
+
+const COLUMNS: ReadonlyArray<GridTableColumn<InflationReward>> = [
+    {
+        header: 'Epoch',
+        render: reward => <Epoch epoch={reward.epoch} link />,
+    },
+    {
+        header: 'Effective Slot',
+        render: reward => <Slot slot={reward.effectiveSlot} link />,
+    },
+    {
+        header: 'Reward Amount',
+        render: reward => lamportsToSolString(reward.amount),
+    },
+    {
+        header: 'Post Balance',
+        render: reward => lamportsToSolString(reward.postBalance),
+    },
+];
 
 export function RewardsCard({ address }: { address: string }) {
     const pubkey = React.useMemo(() => new PublicKey(address), [address]);
@@ -54,78 +72,46 @@ export function RewardsCard({ address }: { address: string }) {
         return <ErrorCard retry={loadMore} text="Failed to fetch rewards" />;
     }
 
-    const rewardsList = rewards.data.rewards.map(reward => {
-        if (!reward) {
-            return null;
-        }
-
-        return (
-            <BaseTable.Row key={reward.epoch}>
-                <BaseTable.Cell>
-                    <Epoch epoch={reward.epoch} link />
-                </BaseTable.Cell>
-                <BaseTable.Cell>
-                    <Slot slot={reward.effectiveSlot} link />
-                </BaseTable.Cell>
-                <BaseTable.Cell>{lamportsToSolString(reward.amount)}</BaseTable.Cell>
-                <BaseTable.Cell>{lamportsToSolString(reward.postBalance)}</BaseTable.Cell>
-            </BaseTable.Row>
-        );
-    });
-    const rewardsFound = rewardsList.some(r => r);
+    const rewardsRows = rewards.data.rewards.filter((reward): reward is InflationReward => Boolean(reward));
     const { foundOldest, lowestFetchedEpoch, highestFetchedEpoch } = rewards.data;
     const fetching = rewards.status === FetchStatus.Fetching;
 
-    return (
-        <>
-            <Card ui="dashkit">
-                <CardHeader ui="dashkit">
-                    <CardTitle as="h3" ui="dashkit">
-                        Rewards
-                    </CardTitle>
-                </CardHeader>
-
-                {rewardsFound ? (
-                    <BaseTable ui="dashkit" variant="card" nowrap>
-                        <BaseTable.Head>
-                            <BaseTable.Row>
-                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="text-dk-gray-700">Effective Slot</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="text-dk-gray-700">Reward Amount</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
-                            </BaseTable.Row>
-                        </BaseTable.Head>
-                        <BaseTable.Body>{rewardsList}</BaseTable.Body>
-                    </BaseTable>
-                ) : (
-                    <CardBody ui="dashkit">
-                        No rewards issued between epochs {lowestFetchedEpoch} and {highestFetchedEpoch}
-                    </CardBody>
-                )}
-
-                <CardFooter ui="dashkit">
-                    {foundOldest ? (
-                        <div className="text-center text-dk-gray-700">Fetched full reward history</div>
+    const footer = (
+        <div className="mt-2 w-full">
+            {foundOldest ? (
+                <div className="text-center text-outer-space-300">Fetched full reward history</div>
+            ) : (
+                <Button
+                    ui="dashkit"
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => loadMore()}
+                    disabled={fetching}
+                >
+                    {fetching ? (
+                        <>
+                            <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
+                            Loading
+                        </>
                     ) : (
-                        <Button
-                            ui="dashkit"
-                            variant="primary"
-                            className="w-full"
-                            onClick={() => loadMore()}
-                            disabled={fetching}
-                        >
-                            {fetching ? (
-                                <>
-                                    <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
-                                    Loading
-                                </>
-                            ) : (
-                                'Load More'
-                            )}
-                        </Button>
+                        'Load More'
                     )}
-                </CardFooter>
-            </Card>
-        </>
+                </Button>
+            )}
+        </div>
+    );
+
+    return (
+        <GridTableCard
+            title="Rewards"
+            ariaLabel="Rewards"
+            gridTemplate="grid-cols-[auto_auto_1fr_1fr]"
+            columns={COLUMNS}
+            rows={rewardsRows}
+            getRowKey={reward => reward.epoch}
+            empty={`No rewards issued between epochs ${lowestFetchedEpoch} and ${highestFetchedEpoch}`}
+            footer={footer}
+            mobile="stack"
+        />
     );
 }

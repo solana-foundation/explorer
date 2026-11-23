@@ -9,7 +9,7 @@ import {
 } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/use-scroll-spy';
-import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOverflow';
+import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/use-tab-overflow';
 import { useSticky } from '@/app/shared/ui/sticky-header/useSticky';
 
 import { MobileMoreDropdown } from './MobileMoreDropdown';
@@ -45,8 +45,6 @@ export function BaseNavigationTabs({
     scrollSpy,
     sticky,
 }: BaseNavigationTabsProps) {
-    // Scroll-spy tabs are always pinned; `sticky` pins route-based tabs too. Both share the same
-    // sticky wrapper + shadow-on-stuck; only the active-tab tracking below is scroll-spy specific.
     const isSticky = scrollSpy || Boolean(sticky);
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 

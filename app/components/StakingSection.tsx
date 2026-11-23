@@ -1,14 +1,12 @@
 'use client';
 
-import { ErrorCard } from '@components/common/ErrorCard';
+import { Button } from '@components/shared/ui/button';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { useSupply } from '@features/supply';
 import { useVoteAccounts, type VoteAccountsState } from '@features/vote/model/vote-accounts'; // deep import on purpose: the barrel pulls the vote instruction cards into the home bundle for one hook
 import { abbreviatedNumber, lamportsToSol } from '@utils/index';
 import { percentage } from '@utils/math';
-
-import { Card, CardBody } from '@/app/shared/ui/Card';
-
-import { SimpleCardSkeleton } from './shared/Skeletons';
+import React from 'react';
 
 // Stake is drawn against total supply, so it cannot render before supply does. The wait is one-way: once
 // supply is in hand its card stays up while stake is still coming.
@@ -18,20 +16,32 @@ export function StakingSection() {
 
     if (supplyState.kind === 'loading') {
         return (
-            <div className="flex flex-col md:flex-row md:gap-6">
-                <SimpleCardSkeleton title={<LoadingStatsCard title="Loading supply data" />} />
-                <SimpleCardSkeleton title={<LoadingStatsCard title="Loading staking data" />} />
+            <div className={GRID_CLASS}>
+                <StatsSection title="Circulating Supply">
+                    <LoadingStatsCard title="Loading supply data" />
+                </StatsSection>
+                <StatsSection title="Active Stake">
+                    <LoadingStatsCard title="Loading staking data" />
+                </StatsSection>
             </div>
         );
     }
 
     // Supply alone: the staking card owns its own retry, and it is not on screen in either branch.
     if (supplyState.kind === 'failed') {
-        return <ErrorCard text="Failed to fetch supply" retry={supplyState.retry} />;
+        return (
+            <StatsSection title="Circulating Supply">
+                <StatsMessage retry={supplyState.retry}>Failed to fetch supply</StatsMessage>
+            </StatsSection>
+        );
     }
 
     if (supplyState.kind === 'unavailable') {
-        return <ErrorCard text="Supply is unavailable for this cluster" />;
+        return (
+            <StatsSection title="Circulating Supply">
+                <StatsMessage>Supply is unavailable for this cluster</StatsMessage>
+            </StatsSection>
+        );
     }
 
     const { supply } = supplyState;
@@ -44,36 +54,35 @@ export function StakingSection() {
     const circulatingPercentage = percentage(supply.circulating, supply.total, 2).toFixed(1);
 
     return (
-        <div className="flex flex-col md:flex-row md:gap-6">
-            <div className="w-full md:w-1/2">
-                <Card ui="dashkit" className="mb-3 md:mb-6">
-                    <CardBody ui="dashkit">
-                        <h4>Circulating Supply</h4>
-                        <h1 className="mb-3">
-                            <em className="not-italic text-dark-accent">{displayLamports(supply.circulating)}</em> /{' '}
-                            <small className="text-base">{displayLamports(supply.total)}</small>
-                        </h1>
-                        <h5 className="mb-0">
-                            <em className="not-italic text-dark-accent">{circulatingPercentage}%</em> is circulating
-                        </h5>
-                    </CardBody>
-                </Card>
-            </div>
-            <div className="w-full md:w-1/2">
-                <ActiveStakeCard totalSupply={supply.total} voteAccounts={voteAccounts} />
-            </div>
+        <div className={GRID_CLASS}>
+            <StatsSection title="Circulating Supply">
+                <StatsFigure value={supply.circulating} total={supply.total}>
+                    {circulatingPercentage}% <span className="text-outer-space-300">is circulating</span>
+                </StatsFigure>
+            </StatsSection>
+            <ActiveStakeCard totalSupply={supply.total} voteAccounts={voteAccounts} />
         </div>
     );
 }
 
+const GRID_CLASS = 'grid gap-x-6 gap-y-9 sm:grid-cols-2';
+
 /** Nothing spins on a request that already failed. */
 function ActiveStakeCard({ totalSupply, voteAccounts }: { totalSupply: bigint; voteAccounts: VoteAccountsState }) {
     if (voteAccounts.kind === 'failed') {
-        return <ErrorCard text="Failed to fetch staking data" retry={voteAccounts.retry} />;
+        return (
+            <StatsSection title="Active Stake">
+                <StatsMessage retry={voteAccounts.retry}>Failed to fetch staking data</StatsMessage>
+            </StatsSection>
+        );
     }
 
     if (voteAccounts.kind === 'loading') {
-        return <SimpleCardSkeleton title={<LoadingStatsCard title="Loading staking data" />} />;
+        return (
+            <StatsSection title="Active Stake">
+                <LoadingStatsCard title="Loading staking data" />
+            </StatsSection>
+        );
     }
 
     const { active, delinquent } = voteAccounts.stake;
@@ -82,26 +91,55 @@ function ActiveStakeCard({ totalSupply, voteAccounts }: { totalSupply: bigint; v
     const delinquentStakePercentage = active > 0n ? percentage(delinquent, active, 2).toFixed(1) : undefined;
 
     return (
-        <Card ui="dashkit" className="mb-3 md:mb-6">
-            <CardBody ui="dashkit">
-                <h4>Active Stake</h4>
-                <h1 className="mb-3">
-                    <em className="not-italic text-dark-accent">{displayLamports(active)}</em> /{' '}
-                    <small className="text-base">{displayLamports(totalSupply)}</small>
-                </h1>
+        <StatsSection title="Active Stake">
+            <StatsFigure value={active} total={totalSupply}>
                 {delinquentStakePercentage && (
-                    <h5 className="mb-0">
-                        Delinquent stake: <em className="not-italic text-dark-accent">{delinquentStakePercentage}%</em>
-                    </h5>
+                    <>
+                        <span className="text-outer-space-300">Delinquent stake:</span> {delinquentStakePercentage}%
+                    </>
                 )}
-            </CardBody>
-        </Card>
+            </StatsFigure>
+        </StatsSection>
+    );
+}
+
+function StatsSection({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <CollapsibleSection title={title} collapsible={false} fill>
+            {children}
+        </CollapsibleSection>
+    );
+}
+
+/** The figure in the primary colour, the total it is measured against and the caption in the secondary one. */
+function StatsFigure({ value, total, children }: { value: bigint; total: bigint; children?: React.ReactNode }) {
+    return (
+        <div className="flex flex-col gap-2 px-3 py-4">
+            <div className="text-3xl leading-none">
+                {displayLamports(value)}{' '}
+                <span className="text-base text-outer-space-300">/ {displayLamports(total)}</span>
+            </div>
+            {children && <div className="text-sm">{children}</div>}
+        </div>
+    );
+}
+
+function StatsMessage({ retry, children }: { retry?: () => void; children: React.ReactNode }) {
+    return (
+        <div className="flex flex-wrap items-center justify-center gap-3 p-6 text-center text-sm">
+            {children}
+            {retry && (
+                <Button variant="outline" size="sm" onClick={retry}>
+                    Try Again
+                </Button>
+            )}
+        </div>
     );
 }
 
 const LoadingStatsCard = ({ title }: { title: string }) => {
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2 p-6 text-sm text-outer-space-300">
             <span className="spinner-grow spinner-grow-sm shrink-0" />
             {title}
         </div>

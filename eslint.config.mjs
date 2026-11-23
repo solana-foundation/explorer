@@ -349,15 +349,7 @@ export default tseslint.config(
 
     // Relax sort-keys in config/tooling files (not linted by next lint before)
     {
-        files: [
-            '*.config.*',
-            '**/*.mjs',
-            '**/*.cjs',
-            '.storybook/**',
-            'storybook-design/.storybook/**',
-            'scripts/**',
-            '.prettierrc.cjs',
-        ],
+        files: ['*.config.*', '**/*.mjs', '**/*.cjs', '.storybook/**', 'scripts/**', '.prettierrc.cjs'],
         rules: {
             'sort-keys-fix/sort-keys-fix': 'off',
         },
@@ -420,7 +412,6 @@ export default tseslint.config(
 
             // Storybook
             '.storybook/**',
-            'storybook-design/.storybook/**',
             '**/*.stories.[jt]s?(x)',
 
             // Generic config files (including nested ones, e.g. packages/*/vitest.config.ts)
@@ -797,7 +788,6 @@ export default tseslint.config(
             'app/components/common/InfoTooltip.tsx',
             'app/components/common/NFTArt.tsx',
             'app/components/common/TableCardBody.tsx',
-            'app/components/common/TimestampToggle.tsx',
             'app/components/inspector/AccountsCard.tsx',
             'app/components/inspector/AddressTableLookupsCard.tsx',
             'app/components/inspector/AddressWithContext.tsx',

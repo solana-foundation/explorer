@@ -10,7 +10,7 @@ export function trustedInnerInstructions<T>(
     { cluster, slot }: { cluster: Cluster; slot: number },
 ): T[] | undefined {
     if (!innerInstructions) return undefined;
-    if (cluster !== Cluster.MainnetBeta) return innerInstructions;
+    if (cluster !== Cluster.Mainnet) return innerInstructions;
     // A missing slot is `NaN`, and comparisons with `NaN` are always false.
     if (!Number.isFinite(slot) || slot < INNER_INSTRUCTIONS_START_SLOT) return undefined;
     return innerInstructions;

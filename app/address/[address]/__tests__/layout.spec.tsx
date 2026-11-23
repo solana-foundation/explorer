@@ -28,7 +28,7 @@ vi.mock('@providers/accounts', async importOriginal => ({
 }));
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         genesisHash: GENESIS_HASHES.MAINNET,
         status: ClusterStatus.Connected,
         url: 'https://api.mainnet-beta.solana.com',

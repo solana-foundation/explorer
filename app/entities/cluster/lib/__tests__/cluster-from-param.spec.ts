@@ -9,7 +9,7 @@ afterEach(() => vi.unstubAllEnvs());
 
 describe('clusterFromParam', () => {
     it('should parse each known cluster value', () => {
-        expect(clusterFromParam('0')).toBe(Cluster.MainnetBeta);
+        expect(clusterFromParam('0')).toBe(Cluster.Mainnet);
         expect(clusterFromParam('1')).toBe(Cluster.Testnet);
         expect(clusterFromParam('2')).toBe(Cluster.Devnet);
         expect(clusterFromParam('3')).toBe(Cluster.Custom);
@@ -33,7 +33,7 @@ describe('clusterFromParam', () => {
 describe('resolveServerClusterUrl', () => {
     it('should resolve a known cluster', () => {
         expect(resolveServerClusterUrl('0')).toEqual({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             kind: 'ok',
             url: expect.any(String),
         });
@@ -52,7 +52,7 @@ describe('resolveServerClusterUrl', () => {
     it('should name a cluster it serves with no endpoint set as ours to fix', () => {
         vi.stubEnv('MAINNET_RPC_URL', '');
 
-        expect(resolveServerClusterUrl('0')).toEqual({ cluster: Cluster.MainnetBeta, kind: 'unconfigured' });
+        expect(resolveServerClusterUrl('0')).toEqual({ cluster: Cluster.Mainnet, kind: 'unconfigured' });
     });
 });
 

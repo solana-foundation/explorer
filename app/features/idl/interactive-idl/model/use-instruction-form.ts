@@ -112,7 +112,9 @@ function createDefaultValues(instruction: InstructionData): InstructionFormData 
         accounts: accountsDefault,
         arguments: instruction.args.reduce(
             (acc, arg) => {
-                if (!acc[instruction.name]) {
+                // Instruction names come from an untrusted on-chain IDL; an own-property check keeps
+                // `__proto__` or `constructor` from writing argument defaults onto shared prototypes.
+                if (!Object.hasOwn(acc, instruction.name)) {
                     acc[instruction.name] = {};
                 }
                 acc[instruction.name][arg.name] = findDefaultValueForArgumentType(arg.rawType || arg.type);

@@ -2,7 +2,8 @@ import { FEATURE_GATES, type FeatureInfoType } from '@entities/feature-gate';
 
 import { Cluster } from '@/app/utils/cluster';
 
-export type ClusterActivation = { cluster: Cluster; epoch: number };
+// Activations are only ever read for the real clusters in `OTHER_CLUSTERS`, so the cluster is never `Custom`.
+export type ClusterActivation = { cluster: Exclude<Cluster, Cluster.Custom>; epoch: number };
 export type SimdEntry = { simd: string; link: string };
 
 type EnrichedBase = Omit<FeatureInfoType, 'simds' | 'simd_link'> & {
@@ -18,10 +19,10 @@ export type FeaturePartition = {
     upcoming: UpcomingFeature[];
 };
 
-const OTHER_CLUSTERS: Partial<Record<Cluster, Cluster[]>> = {
-    [Cluster.Devnet]: [Cluster.MainnetBeta, Cluster.Testnet],
-    [Cluster.MainnetBeta]: [Cluster.Devnet, Cluster.Testnet],
-    [Cluster.Testnet]: [Cluster.MainnetBeta, Cluster.Devnet],
+const OTHER_CLUSTERS: Partial<Record<Cluster, Exclude<Cluster, Cluster.Custom>[]>> = {
+    [Cluster.Devnet]: [Cluster.Mainnet, Cluster.Testnet],
+    [Cluster.Mainnet]: [Cluster.Devnet, Cluster.Testnet],
+    [Cluster.Testnet]: [Cluster.Mainnet, Cluster.Devnet],
 };
 
 /**
@@ -74,7 +75,7 @@ export function partitionFeatures(cluster: Cluster): FeaturePartition {
 function activationEpochFor(feature: FeatureInfoType, cluster: Cluster): number | undefined {
     const raw = (() => {
         switch (cluster) {
-            case Cluster.MainnetBeta:
+            case Cluster.Mainnet:
                 return feature.mainnet_activation_epoch;
             case Cluster.Devnet:
                 return feature.devnet_activation_epoch;

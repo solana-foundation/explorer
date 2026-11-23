@@ -1,9 +1,37 @@
-import { describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import type { InstructionData } from '@entities/idl';
+import { renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { AccountFormValueMap } from '../use-instruction-form';
-import { flattenNestedRecord } from '../use-instruction-form';
+import { flattenNestedRecord, useInstructionForm } from '../use-instruction-form';
 
 describe('useInstructionForm', () => {
+    describe('default values', () => {
+        afterEach(() => {
+            // Keep a regression in one case from polluting the next case and the rest of the worker.
+            delete (Object.prototype as Record<string, unknown>).pollutedArg;
+            delete (Object as unknown as Record<string, unknown>).pollutedArg;
+        });
+
+        it.each(['__proto__', 'constructor'])(
+            'should not write argument defaults onto shared objects for instruction named %s',
+            name => {
+                const instruction: InstructionData = {
+                    accounts: [],
+                    args: [{ docs: [], name: 'pollutedArg', type: 'u64' }],
+                    docs: [],
+                    name,
+                };
+
+                renderHook(() => useInstructionForm({ instruction, onSubmit: vi.fn() }));
+
+                expect(Object.hasOwn(Object.prototype, 'pollutedArg')).toBe(false);
+                expect(Object.hasOwn(Object, 'pollutedArg')).toBe(false);
+            },
+        );
+    });
+
     describe('flattenNestedRecord', () => {
         describe('flat records (single level)', () => {
             it('should flatten a simple flat record', () => {

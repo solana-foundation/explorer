@@ -25,13 +25,15 @@ export const FILLED_CONTROL_CLASSES = cn(OUTLINED_CONTROL_BASE, 'bg-heavy-metal-
 export function BrandLockup({ className }: { className?: string }) {
     const homePath = useClusterPath({ pathname: '/' });
     return (
-        <Link href={homePath} className={cn('flex min-w-0 shrink-0 flex-col items-start leading-none', className)}>
-            <span className="block overflow-hidden" style={{ width: 112 }}>
-                <Image alt="Solana" height={22} src={Logo} width={214} priority className="max-w-none" />
-            </span>
-            <span className="ml-[8px] mt-0.5 text-[9px] font-medium uppercase tracking-[0.12em] text-[#b4b4b4]">
-                Explorer (beta)
-            </span>
+        <Link href={homePath} className={cn('flex min-w-0 shrink-0 items-center', className)}>
+            <Image
+                alt="Solana Explorer"
+                height={111}
+                src={Logo}
+                width={427}
+                priority
+                className="h-8 w-auto max-w-none"
+            />
         </Link>
     );
 }

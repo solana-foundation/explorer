@@ -1,3 +1,4 @@
+import type { TokenInfo } from '@entities/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import {
     collectTransferInstructions,
@@ -10,7 +11,6 @@ import { validate } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import type { TokenInfo } from '../api/get-token-info';
 import { extractMemoFromTransaction } from './memo';
 import { TokenTransferPayload } from './schemas';
 import { type ReceiptToken, type Transfer } from './types';
@@ -26,9 +26,11 @@ function isMultisigTransfer(info: Record<string, unknown>): info is MultisigTran
 export type TokenReceiptOutcome =
     { kind: 'ok'; receipt: ReceiptToken } | { kind: 'rejected'; reason: 'mixed-mint' } | { kind: 'not-applicable' };
 
+export type GetTokenInfo = (mint: string) => Promise<TokenInfo | undefined>;
+
 export async function createTokenTransferReceipt(
     transaction: TransactionWithMeta,
-    getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>,
+    getTokenInfo: GetTokenInfo,
 ): Promise<TokenReceiptOutcome> {
     const located = getTokenTransferInstructions(transaction);
     if (located.length === 0) return { kind: 'not-applicable' };
@@ -64,7 +66,7 @@ export async function createTokenTransferReceipt(
         kind: 'ok',
         receipt: {
             ...validated,
-            logoURI: tokenInfo?.logoURI,
+            logoURI: tokenInfo?.logoURI ?? undefined,
             memo: raw.memo,
             symbol: tokenInfo?.symbol,
             total,

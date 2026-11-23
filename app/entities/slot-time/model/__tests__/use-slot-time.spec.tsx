@@ -41,7 +41,7 @@ vi.stubGlobal('fetch', fetchMock);
 describe('useSlotTime', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.cluster = connectingTo(Cluster.MainnetBeta, MAINNET_URL);
+        mocks.cluster = connectingTo(Cluster.Mainnet, MAINNET_URL);
         fetchMock.mockResolvedValue(routeResponse(314));
         mocks.getRpc.mockReturnValue({ getRecentPerformanceSamples: mocks.getRecentPerformanceSamples });
         mocks.getRecentPerformanceSamples.mockReturnValue({
@@ -66,7 +66,7 @@ describe('useSlotTime', () => {
 
         await waitForHook(() =>
             expect(fetchMock).toHaveBeenCalledWith(
-                `/api/slot-time?cluster=${Cluster.MainnetBeta}`,
+                `/api/slot-time?cluster=${Cluster.Mainnet}`,
                 expect.objectContaining({ signal: expect.any(AbortSignal) }),
             ),
         );
@@ -156,7 +156,7 @@ describe('useSlotTime', () => {
         const { rerender, result } = renderSlotTime();
         await waitForHook(() => expect(result.current).toBe(314));
 
-        mocks.cluster = connectingTo(Cluster.MainnetBeta, LOCAL_URL);
+        mocks.cluster = connectingTo(Cluster.Mainnet, LOCAL_URL);
         rerender();
 
         await waitForHook(() => expect(mocks.getRpc).toHaveBeenCalledWith(LOCAL_URL));
@@ -177,7 +177,7 @@ describe('useSlotTime', () => {
             expect.any(String),
             expect.objectContaining({
                 sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, status: 400 }),
+                sentryExtras: expect.objectContaining({ cluster: Cluster.Mainnet, status: 400 }),
             }),
         );
         // The bot gate ahead of the route refuses visitors it misjudges, and this fires once per visitor
@@ -208,7 +208,7 @@ describe('useSlotTime', () => {
             expect.objectContaining({
                 sentry: true,
                 sentryExtras: expect.objectContaining({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     parseError: expect.any(String),
                 }),
             }),

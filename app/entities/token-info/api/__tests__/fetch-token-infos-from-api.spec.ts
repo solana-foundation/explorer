@@ -1,15 +1,19 @@
+import { gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { tokenInfo } from '../../__fixtures__/token-info';
+import { type TokenInfo } from '../../lib/types';
 import { fetchTokenInfoFromApi, fetchTokenInfosFromApi } from '../fetch-token-infos-from-api';
 
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
-const USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const WSOL = 'So11111111111111111111111111111111111111112';
+const MINT_A = gen.address();
+const MINT_B = gen.address();
 
 describe('fetchTokenInfosFromApi', () => {
     beforeEach(() => {
@@ -18,16 +22,17 @@ describe('fetchTokenInfosFromApi', () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+        vi.clearAllMocks();
     });
 
     it('should post the addresses to the token info route and resolve its content', async () => {
-        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(USDC), tokenInfo(WSOL)] }));
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(MINT_A), tokenInfo(MINT_B)] }));
 
         const tokens = await fetchTokenInfosFromApi(request({ includeOnChainFallback: true }));
 
-        expect(tokens).toEqual([tokenInfo(USDC), tokenInfo(WSOL)]);
+        expect(tokens).toEqual([tokenInfo(MINT_A), tokenInfo(MINT_B)]);
         expect(sentRequest()).toEqual({
-            body: { addresses: [USDC, WSOL], cluster: Cluster.MainnetBeta, includeOnChainFallback: true },
+            body: { addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet, includeOnChainFallback: true },
             method: 'POST',
             url: '/api/token-info',
         });
@@ -39,7 +44,7 @@ describe('fetchTokenInfosFromApi', () => {
         await fetchTokenInfosFromApi(request({ cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET }));
 
         expect(sentRequest().body).toEqual({
-            addresses: [USDC, WSOL],
+            addresses: [MINT_A, MINT_B],
             cluster: Cluster.Custom,
             genesisHash: GENESIS_HASHES.MAINNET,
             includeOnChainFallback: false,
@@ -68,11 +73,61 @@ describe('fetchTokenInfosFromApi', () => {
         ['an object with string content', { content: 'not a list' }],
         ['a number', 42],
         ['null', null],
-        ['a bare array', [tokenInfo(USDC)]],
-    ])('should resolve undefined for a 200 body that is %s', async (_, body) => {
+        ['a bare array', [tokenInfo(MINT_A)]],
+    ])('should warn and resolve undefined for a 200 body that is %s', async (_, body) => {
         vi.mocked(fetch).mockResolvedValue(Response.json(body));
 
         await expect(fetchTokenInfosFromApi(request())).resolves.toBeUndefined();
+        expect(Logger.warn).toHaveBeenCalledWith(
+            '[token-info] Token info response was not a token array',
+            expect.anything(),
+        );
+        expect(Logger.error).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['null', null],
+        ['a string', MINT_A],
+        ['an array', [tokenInfo(MINT_A)]],
+        ['an entry with no address', withoutField('address')],
+        ['an entry with no decimals', withoutField('decimals')],
+        ['an entry with no logoURI', withoutField('logoURI')],
+        ['an entry with no name', withoutField('name')],
+        ['an entry with no symbol', withoutField('symbol')],
+        ['an entry with no verified flag', withoutField('verified')],
+        ['an entry with a null verified flag', { ...tokenInfo(MINT_A), verified: null }],
+        ['an entry with string decimals', { ...tokenInfo(MINT_A), decimals: '6' }],
+        ['an entry with a numeric symbol', { ...tokenInfo(MINT_A), symbol: 1 }],
+    ])('should drop %s, resolve the other entries and log the count', async (_, malformed) => {
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [malformed, tokenInfo(MINT_B, true)] }));
+
+        await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([tokenInfo(MINT_B, true)]);
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
+            sentry: 'always',
+            sentryExtras: { cluster: Cluster.Mainnet, malformed: 1, total: 2 },
+        });
+    });
+
+    it('should resolve no tokens and log the count once when every entry is malformed', async () => {
+        vi.mocked(fetch).mockResolvedValue(
+            Response.json({ content: [withoutField('verified'), withoutField('name')] }),
+        );
+
+        await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([]);
+        expect(Logger.warn).toHaveBeenCalledTimes(1);
+        expect(Logger.warn).toHaveBeenCalledWith('[token-info] Dropped malformed token info entries', {
+            sentry: 'always',
+            sentryExtras: { cluster: Cluster.Mainnet, malformed: 2, total: 2 },
+        });
+    });
+
+    it('should keep an entry with a logo URI and an entry with null decimals', async () => {
+        const withLogo = { ...tokenInfo(MINT_A), logoURI: 'https://example.com/logo.png' };
+        const withoutDecimals = { ...tokenInfo(MINT_B), decimals: null };
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [withLogo, withoutDecimals] }));
+
+        await expect(fetchTokenInfosFromApi(request())).resolves.toEqual([withLogo, withoutDecimals]);
+        expect(Logger.warn).not.toHaveBeenCalled();
     });
 
     it('should resolve undefined for a 200 body that is not JSON', async () => {
@@ -113,14 +168,14 @@ describe('fetchTokenInfoFromApi', () => {
     });
 
     it('should request one mint without the on-chain fallback and resolve its token', async () => {
-        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(USDC)] }));
+        vi.mocked(fetch).mockResolvedValue(Response.json({ content: [tokenInfo(MINT_A)] }));
 
-        const token = await fetchTokenInfoFromApi(new PublicKey(USDC), Cluster.MainnetBeta);
+        const token = await fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.Mainnet);
 
-        expect(token).toEqual(tokenInfo(USDC));
+        expect(token).toEqual(tokenInfo(MINT_A));
         expect(sentRequest().body).toEqual({
-            addresses: [USDC],
-            cluster: Cluster.MainnetBeta,
+            addresses: [MINT_A],
+            cluster: Cluster.Mainnet,
             includeOnChainFallback: false,
         });
     });
@@ -128,7 +183,7 @@ describe('fetchTokenInfoFromApi', () => {
     it('should resolve undefined when the route does not list the mint', async () => {
         vi.mocked(fetch).mockResolvedValue(Response.json({ content: [] }));
 
-        await expect(fetchTokenInfoFromApi(new PublicKey(USDC), Cluster.MainnetBeta)).resolves.toBeUndefined();
+        await expect(fetchTokenInfoFromApi(new PublicKey(MINT_A), Cluster.Mainnet)).resolves.toBeUndefined();
     });
 });
 
@@ -136,12 +191,16 @@ type Request = Parameters<typeof fetchTokenInfosFromApi>[0];
 
 function request(overrides: Partial<Request> = {}): Request {
     return {
-        addresses: [USDC, WSOL],
-        cluster: Cluster.MainnetBeta,
+        addresses: [MINT_A, MINT_B],
+        cluster: Cluster.Mainnet,
         genesisHash: undefined,
         includeOnChainFallback: false,
         ...overrides,
     };
+}
+
+function withoutField(field: keyof TokenInfo): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(tokenInfo(MINT_A)).filter(([key]) => key !== field));
 }
 
 function sentRequest(): { body: unknown; method: string | undefined; url: string } {

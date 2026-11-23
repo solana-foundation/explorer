@@ -13,6 +13,7 @@ export { useCluster } from './model/use-cluster';
 export { useClusterConnectionFailed } from './model/use-cluster-connection-failed';
 export {
     type ClusterQueryResult,
+    EPOCH_INFO_REFRESH_MS,
     useClusterInfo,
     useEpochInfo,
     useEpochSchedule,

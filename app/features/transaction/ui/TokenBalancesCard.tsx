@@ -12,7 +12,7 @@ import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
 import useSWRImmutable from 'swr/immutable';
 
-import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
+import { getAmountMultiplier, useScaledUiAmountMultiplier } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
@@ -117,9 +117,10 @@ function TokenBalanceRow({
     units: string;
     index: number;
 }) {
-    const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mint, balance);
-    const scaledBalance = new BigNumber(balance).multipliedBy(scaledUiAmountMultiplier).toString();
-    const scaledDelta = delta.multipliedBy(scaledUiAmountMultiplier);
+    const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(mint);
+    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
+    const scaledBalance = new BigNumber(balance).multipliedBy(multiplier).toString();
+    const scaledDelta = delta.multipliedBy(multiplier);
     const mintPubkey = new PublicKey(mint);
     const ownerPubkey = owner ? new PublicKey(owner) : undefined;
 

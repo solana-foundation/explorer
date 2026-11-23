@@ -156,82 +156,84 @@ export function BaseSearch({
 
                     {!open && <CommandList aria-hidden="true" className="hidden" />}
 
-                    <PopoverPrimitive.Content
-                        asChild
-                        align="start"
-                        sideOffset={4}
-                        data-search-panel
-                        className={cn(
-                            'z-50 rounded-md shadow-2xl [border-style:solid]',
-                            'w-[var(--radix-popover-trigger-width)]',
-                            'border border-outer-space-800 bg-outer-space-900',
-                        )}
-                        onInteractOutside={e => {
-                            if (e.target instanceof Element && e.target === inputRef.current) e.preventDefault();
-                        }}
-                        onOpenAutoFocus={e => e.preventDefault()}
-                    >
-                        <div onMouseDown={event => event.preventDefault()}>
-                            {/* Allow a single pill: hide-all rule can leave visibleTabs at length 1. */}
-                            {hasResults && visibleTabs.length >= 1 && (
-                                <SearchFilters
-                                    activeFilter={activeFilter}
-                                    counts={counts}
-                                    tabs={visibleTabs}
-                                    onFilterChange={onFilterChange}
-                                />
+                    <PopoverPrimitive.Portal>
+                        <PopoverPrimitive.Content
+                            asChild
+                            align="start"
+                            sideOffset={4}
+                            data-search-panel
+                            className={cn(
+                                'z-50 rounded-md shadow-2xl [border-style:solid]',
+                                'w-[var(--radix-popover-trigger-width)]',
+                                'border border-outer-space-800 bg-outer-space-900',
                             )}
-
-                            <CommandList
-                                className={cn(
-                                    'max-h-[420px] overflow-y-auto overflow-x-hidden p-1.5 pt-0',
-                                    '[&::-webkit-scrollbar]:w-2',
-                                    '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-outer-space-600 [&::-webkit-scrollbar-thumb]:hover:bg-outer-space-500',
-                                    '[&::-webkit-scrollbar-track]:rounded-md [&::-webkit-scrollbar-track]:bg-outer-space-900',
+                            onInteractOutside={e => {
+                                if (e.target instanceof Element && e.target === inputRef.current) e.preventDefault();
+                            }}
+                            onOpenAutoFocus={e => e.preventDefault()}
+                        >
+                            <div onMouseDown={event => event.preventDefault()}>
+                                {/* Allow a single pill: hide-all rule can leave visibleTabs at length 1. */}
+                                {hasResults && visibleTabs.length >= 1 && (
+                                    <SearchFilters
+                                        activeFilter={activeFilter}
+                                        counts={counts}
+                                        tabs={visibleTabs}
+                                        onFilterChange={onFilterChange}
+                                    />
                                 )}
-                            >
-                                {isLoading && (
-                                    <Command.Loading className="px-4 py-3 pb-1 text-sm text-outer-space-300">
-                                        Searching...
-                                    </Command.Loading>
-                                )}
 
-                                {!isLoading && hasResults
-                                    ? filteredResults.map(group =>
-                                          group.options.length > 0 ? (
-                                              <CommandGroup key={group.label}>
-                                                  <SearchGroupHeading label={group.label} />
-                                                  {group.options.map(option => (
-                                                      <CommandItem
-                                                          key={`${group.label}-${option.pathname}`}
-                                                          className={cn(
-                                                              'cursor-pointer rounded-md px-3 py-2',
-                                                              'border border-solid border-transparent',
-                                                              'transition-colors',
-                                                              'hover:bg-outer-space-800 aria-[selected=true]:bg-outer-space-800',
-                                                              'aria-[selected=true]:border-white/10',
-                                                          )}
-                                                          keywords={option.value}
-                                                          value={option.pathname}
-                                                          onMouseDown={e => e.preventDefault()}
-                                                          onSelect={() => onSelect(option)}
-                                                      >
-                                                          <SearchResultItem option={option} />
-                                                      </CommandItem>
-                                                  ))}
-                                              </CommandGroup>
-                                          ) : null,
-                                      )
-                                    : null}
+                                <CommandList
+                                    className={cn(
+                                        'max-h-[420px] overflow-y-auto overflow-x-hidden p-1.5 pt-0',
+                                        '[&::-webkit-scrollbar]:w-2',
+                                        '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-outer-space-600 [&::-webkit-scrollbar-thumb]:hover:bg-outer-space-500',
+                                        '[&::-webkit-scrollbar-track]:rounded-md [&::-webkit-scrollbar-track]:bg-outer-space-900',
+                                    )}
+                                >
+                                    {isLoading && (
+                                        <Command.Loading className="px-4 py-3 pb-1 text-sm text-outer-space-300">
+                                            Searching...
+                                        </Command.Loading>
+                                    )}
 
-                                {!isLoading && (
-                                    <CommandEmpty className="w-full px-4 py-3 pb-1 text-sm text-outer-space-300">
-                                        No results found
-                                    </CommandEmpty>
-                                )}
-                            </CommandList>
-                        </div>
-                    </PopoverPrimitive.Content>
+                                    {!isLoading && hasResults
+                                        ? filteredResults.map(group =>
+                                              group.options.length > 0 ? (
+                                                  <CommandGroup key={group.label}>
+                                                      <SearchGroupHeading label={group.label} />
+                                                      {group.options.map(option => (
+                                                          <CommandItem
+                                                              key={`${group.label}-${option.pathname}`}
+                                                              className={cn(
+                                                                  'cursor-pointer rounded-md px-3 py-2',
+                                                                  'border border-solid border-transparent',
+                                                                  'transition-colors',
+                                                                  'hover:bg-outer-space-800 aria-[selected=true]:bg-outer-space-800',
+                                                                  'aria-[selected=true]:border-white/10',
+                                                              )}
+                                                              keywords={option.value}
+                                                              value={option.pathname}
+                                                              onMouseDown={e => e.preventDefault()}
+                                                              onSelect={() => onSelect(option)}
+                                                          >
+                                                              <SearchResultItem option={option} />
+                                                          </CommandItem>
+                                                      ))}
+                                                  </CommandGroup>
+                                              ) : null,
+                                          )
+                                        : null}
+
+                                    {!isLoading && (
+                                        <CommandEmpty className="w-full px-4 py-3 pb-1 text-sm text-outer-space-300">
+                                            No results found
+                                        </CommandEmpty>
+                                    )}
+                                </CommandList>
+                            </div>
+                        </PopoverPrimitive.Content>
+                    </PopoverPrimitive.Portal>
                 </Command>
             </PopoverPrimitive.Root>
         </div>

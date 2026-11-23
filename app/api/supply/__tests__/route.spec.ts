@@ -54,7 +54,7 @@ describe('GET /api/supply', () => {
     // Otherwise a route that resolved every cluster to mainnet would pass the whole suite, and devnet
     // visitors would get mainnet's supply cached under their own key.
     it.each([
-        ['mainnet-beta', Cluster.MainnetBeta, MAINNET_RPC_URL],
+        ['mainnet-beta', Cluster.Mainnet, MAINNET_RPC_URL],
         ['testnet', Cluster.Testnet, TESTNET_RPC_URL],
     ])('should dial the endpoint configured for %s', async (_name, cluster, expectedUrl) => {
         await GET(createRequest(cluster));
@@ -63,7 +63,7 @@ describe('GET /api/supply', () => {
     });
 
     it('should return supply as decimal strings', async () => {
-        const response = await GET(createRequest(Cluster.MainnetBeta));
+        const response = await GET(createRequest(Cluster.Mainnet));
 
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({
@@ -73,7 +73,7 @@ describe('GET /api/supply', () => {
     });
 
     it('should skip the non-circulating account list, which the home page never reads', async () => {
-        await GET(createRequest(Cluster.MainnetBeta));
+        await GET(createRequest(Cluster.Mainnet));
 
         expect(mocks.getSupply).toHaveBeenCalledWith({
             commitment: 'finalized',
@@ -82,7 +82,7 @@ describe('GET /api/supply', () => {
     });
 
     it('should cache a successful response at the CDN', async () => {
-        const response = await GET(createRequest(Cluster.MainnetBeta));
+        const response = await GET(createRequest(Cluster.Mainnet));
 
         expect(response.headers.get('Cache-Control')).toBe(
             'public, max-age=60, s-maxage=600, stale-while-revalidate=3600',
@@ -94,7 +94,7 @@ describe('GET /api/supply', () => {
     it('should bound the scan with a deadline, so a wedged node cannot hold the function open', async () => {
         const timeout = vi.spyOn(AbortSignal, 'timeout');
 
-        await GET(createRequest(Cluster.MainnetBeta));
+        await GET(createRequest(Cluster.Mainnet));
 
         expect(mocks.send).toHaveBeenCalledWith({ abortSignal: expect.any(AbortSignal) });
         expect(timeout).toHaveBeenCalledWith(UPSTREAM_TIMEOUT_MS);
@@ -122,10 +122,10 @@ describe('GET /api/supply', () => {
         // The CDN keys on the whole URL, so every extra spelling of one request is another ledger scan a
         // caller can ask for. One shape gets answered, and nothing else reaches the node.
         it.each([
-            ['an unexpected extra param', `?cluster=${Cluster.MainnetBeta}&bust=1`],
-            ['a repeated param', `?cluster=${Cluster.MainnetBeta}&cluster=${Cluster.MainnetBeta}`],
+            ['an unexpected extra param', `?cluster=${Cluster.Mainnet}&bust=1`],
+            ['a repeated param', `?cluster=${Cluster.Mainnet}&cluster=${Cluster.Mainnet}`],
             ['a percent-encoded digit', '?cluster=%30'],
-            ['the param in another position', `?bust=1&cluster=${Cluster.MainnetBeta}`],
+            ['the param in another position', `?bust=1&cluster=${Cluster.Mainnet}`],
         ])('should refuse %s without asking the node', async (_reason, query) => {
             const response = await GET(new Request(`http://localhost:3000/api/supply${query}`));
 
@@ -154,7 +154,7 @@ describe('GET /api/supply', () => {
         // call shape rather than the level: a warning reaches Sentry too, the moment it is handed a
         // context, so asserting the level alone would let one be added here unnoticed.
         it.each([
-            ['a query that is not the canonical shape', `?cluster=${Cluster.MainnetBeta}&bust=1`],
+            ['a query that is not the canonical shape', `?cluster=${Cluster.Mainnet}&bust=1`],
             ['a cluster the server must not resolve', '?cluster=999'],
         ])('should keep the refusal for %s out of Sentry', async (_reason, query) => {
             await GET(new Request(`http://localhost:3000/api/supply${query}`));
@@ -199,7 +199,7 @@ describe('GET /api/supply', () => {
         ])('should refuse %s rather than serve it', async (_reason, overrides) => {
             mocks.send.mockResolvedValueOnce({ value: { ...SUPPLY, ...overrides } });
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             // Unclassified: one node behind a balancer may disagree with the next, so it stays re-askable.
             expect(response.status).toBe(503);
@@ -231,14 +231,14 @@ describe('GET /api/supply', () => {
                 new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
             );
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(503);
             expect(await response.json()).toEqual({ error: 'Upstream RPC error' });
             expect(response.headers.get('Cache-Control')).toBe(ERROR_CACHE);
             expect(Logger.warn).toHaveBeenCalledWith(
                 expect.any(String),
-                reported({ cluster: Cluster.MainnetBeta.toString(), rpcError: expect.any(String) }),
+                reported({ cluster: Cluster.Mainnet.toString(), rpcError: expect.any(String) }),
             );
             expect(Logger.error).not.toHaveBeenCalled();
             expect(Logger.panic).not.toHaveBeenCalled();
@@ -251,7 +251,7 @@ describe('GET /api/supply', () => {
                 new SolanaError(SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND, { __serverMessage: 'Method not found' }),
             );
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(502);
             expect(response.headers.get('Cache-Control')).toBe(ERROR_CACHE);
@@ -260,7 +260,7 @@ describe('GET /api/supply', () => {
                 expect.objectContaining({
                     sentry: true,
                     sentryExtras: expect.objectContaining({
-                        cluster: Cluster.MainnetBeta.toString(),
+                        cluster: Cluster.Mainnet.toString(),
                         reason: 'rpc-refused',
                     }),
                 }),
@@ -277,7 +277,7 @@ describe('GET /api/supply', () => {
         ])('should answer 502 for %s', async (_reason, statusCode) => {
             mocks.send.mockRejectedValueOnce(httpError(statusCode));
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(502);
             expect(Logger.error).toHaveBeenCalledWith(expect.anything(), reported({ reason: 'rpc-refused' }));
@@ -292,7 +292,7 @@ describe('GET /api/supply', () => {
         ])('should answer 503, not 502, for %s', async (_reason, statusCode) => {
             mocks.send.mockRejectedValueOnce(httpError(statusCode));
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(503);
             expect(Logger.warn).toHaveBeenCalledWith(expect.any(String), reported({ rpcError: expect.any(String) }));
@@ -306,7 +306,7 @@ describe('GET /api/supply', () => {
                 new SolanaError(SOLANA_ERROR__JSON_RPC__PARSE_ERROR, { __serverMessage: 'Parse error' }),
             );
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(await response.json()).toEqual({ error: 'Failed to fetch supply' });
             expect(Logger.error).toHaveBeenCalledWith(
@@ -327,7 +327,7 @@ describe('GET /api/supply', () => {
         ])('should report %s, and leave it re-askable', async (_reason, code) => {
             mocks.send.mockRejectedValueOnce(connectionFailure(code));
 
-            const response = await GET(createRequest(Cluster.MainnetBeta));
+            const response = await GET(createRequest(Cluster.Mainnet));
 
             expect(response.status).toBe(503);
             expect(await response.json()).toEqual({ error: 'Failed to fetch supply' });
@@ -342,7 +342,7 @@ describe('GET /api/supply', () => {
             async code => {
                 mocks.send.mockRejectedValueOnce(connectionFailure(code));
 
-                const response = await GET(createRequest(Cluster.MainnetBeta));
+                const response = await GET(createRequest(Cluster.Mainnet));
 
                 expect(response.status).toBe(503);
                 expect(Logger.warn).toHaveBeenCalledWith(

@@ -49,7 +49,7 @@ describe('useProgramIdls', () => {
             });
 
             const { result } = renderHook(
-                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
+                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.Mainnet),
                 { wrapper },
             );
 
@@ -73,7 +73,7 @@ describe('useProgramIdls', () => {
             mocks.fetch.mockResolvedValue({ ok: false, status: 502 });
 
             const { result } = renderHook(
-                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
+                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.Mainnet),
                 { wrapper },
             );
 
@@ -127,20 +127,19 @@ describe('useProgramIdls', () => {
         });
     });
 
-    // A known cluster can still point at a local validator (e.g. MainnetBeta + http://localhost:8899).
+    // A known cluster can still point at a local validator (e.g. Mainnet + http://localhost:8899).
     // `shouldUseDirectRpc` returns true for that combination, so resolution must run client-side against
     // the localhost RPC — loading from the local validator, never from real mainnet via the server route.
     describe('known cluster pointed at a local validator', () => {
-        it('should resolve client-side against localhost for MainnetBeta + http://localhost:8899', async () => {
+        it('should resolve client-side against localhost for Mainnet + http://localhost:8899', async () => {
             mocks.resolveProgramIdlsClient.mockResolvedValue({
                 anchorIdl: { name: 'local_anchor_idl' },
                 programMetadataIdl: undefined,
             });
 
-            const { result } = renderHook(
-                () => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.MainnetBeta),
-                { wrapper },
-            );
+            const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Mainnet), {
+                wrapper,
+            });
 
             await waitForHook(() =>
                 expect(idlBySource(result.current.idls)).toEqual({
@@ -161,7 +160,7 @@ describe('useProgramIdls', () => {
             mocks.fetch.mockReturnValue(new Promise(() => undefined));
 
             const { result } = renderHook(
-                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
+                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.Mainnet),
                 { wrapper },
             );
 

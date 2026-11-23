@@ -1,6 +1,4 @@
 // Registers a Tailwind breakpoint quick-select toolbar in the Storybook manager.
-// Uses React.createElement (no JSX) so this file is safe to import from both the
-// production Storybook manager and the design-sb manager, which has no JSX transform.
 // BREAKPOINTS are generated from tailwind.config in ./breakpoints (keys match viewport.options there).
 import React, { useCallback } from 'react';
 import { addons, types, useGlobals } from 'storybook/manager-api';
