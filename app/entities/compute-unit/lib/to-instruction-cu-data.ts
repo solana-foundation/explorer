@@ -2,7 +2,7 @@ import { type Invocation, pairLogsWithInstructions } from '@entities/program-log
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getDefaultComputeUnits } from './default-compute-units';
+import { getDefaultComputeUnits, isPrecompile } from './default-compute-units';
 import type { InstructionCUData, InstructionCUInput } from './types';
 
 /**
@@ -37,10 +37,21 @@ export function toInstructionCUData({
     const pairedInvocations = pairLogsWithInstructions(invocations, programIds);
 
     return instructions.map((instruction, index) => ({
-        computeUnits:
-            pairedInvocations[index]?.computeUnits ?? getDefaultComputeUnits(programIds[index], instruction.data),
+        computeUnits: toComputeUnits(pairedInvocations[index], programIds[index], instruction.data),
         name: instruction.name,
         programId: programIds[index],
         programName: instruction.programName,
     }));
+}
+
+function toComputeUnits(
+    invocation: Invocation | undefined,
+    programId: string,
+    data: Uint8Array | undefined,
+): number | undefined {
+    if (isPrecompile(programId)) return 0;
+    // The logs do not show that an instruction with no invocation ran, so its fixed cost does not apply.
+    if (!invocation) return undefined;
+
+    return invocation.computeUnits ?? getDefaultComputeUnits(programId, data);
 }

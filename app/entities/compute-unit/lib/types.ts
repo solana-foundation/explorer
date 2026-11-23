@@ -17,8 +17,8 @@ export type InstructionCUInput = {
 
 export type InstructionCUData = {
     programId: string;
-    // The figure from the logs, or the fixed cost of a builtin or a precompile. `undefined` when the
-    // logs have no figure and the program has no fixed cost.
+    // The figure from the logs, the fixed cost of a builtin that ran, or 0 for a precompile. `undefined`
+    // when the logs have no invocation for the instruction, or no figure and the program has no fixed cost.
     computeUnits: number | undefined;
     // Resolved display names, when the caller knows them: the instruction name ("Transfer Checked") and
     // the program's display name ("Token Program"). Undefined when nothing named it — see

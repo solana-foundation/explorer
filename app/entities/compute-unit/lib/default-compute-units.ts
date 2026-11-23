@@ -28,9 +28,6 @@ const LOADER_V4_COMPUTE_UNITS = 2000;
 // https://github.com/anza-xyz/agave/blob/v2.1.13/programs/compute-budget/src/lib.rs#L3
 const COMPUTE_BUDGET_PROGRAM_COMPUTE_UNITS = 150;
 
-// The runtime verifies a precompile outside the VM and charges no compute units for it.
-const PRECOMPILE_COMPUTE_UNITS = 0;
-
 export const PROGRAM_DEFAULT_COMPUTE_UNITS: Record<string, number> = {
     '11111111111111111111111111111111': SYSTEM_PROGRAM_INSTRUCTION_COMPUTE_UNITS,
     AddressLookupTab1e1111111111111111111111111: ADDRESS_LOOKUP_TABLE_INSTRUCTION_COMPUTE_UNITS,
@@ -38,10 +35,7 @@ export const PROGRAM_DEFAULT_COMPUTE_UNITS: Record<string, number> = {
     BPFLoader2111111111111111111111111111111111: BPF_LOADER_DEPRECATED_COMPUTE_UNITS,
     BPFLoaderUpgradeab1e11111111111111111111111: UPGRADEABLE_LOADER_COMPUTE_UNITS,
     ComputeBudget111111111111111111111111111111: COMPUTE_BUDGET_PROGRAM_COMPUTE_UNITS,
-    Ed25519SigVerify111111111111111111111111111: PRECOMPILE_COMPUTE_UNITS,
-    KeccakSecp256k11111111111111111111111111111: PRECOMPILE_COMPUTE_UNITS,
     LoaderV411111111111111111111111111111111111: LOADER_V4_COMPUTE_UNITS,
-    Secp256r1SigVerify1111111111111111111111111: PRECOMPILE_COMPUTE_UNITS,
     Stake11111111111111111111111111111111111111: STAKE_PROGRAM_COMPUTE_UNITS,
     Vote111111111111111111111111111111111111111: VOTE_PROGRAM_COMPUTE_UNITS,
 };
@@ -52,6 +46,17 @@ export function getDefaultComputeUnits(programId: string, data?: Uint8Array): nu
 
     return PROGRAM_DEFAULT_COMPUTE_UNITS[programId];
 }
+
+// The runtime verifies a precompile outside the VM, so a precompile writes no logs and costs no compute units.
+export function isPrecompile(programId: string): boolean {
+    return PRECOMPILE_ADDRESSES.includes(programId);
+}
+
+const PRECOMPILE_ADDRESSES: readonly string[] = [
+    'Ed25519SigVerify111111111111111111111111111',
+    'KeccakSecp256k11111111111111111111111111111',
+    'Secp256r1SigVerify1111111111111111111111111',
+];
 
 // The cost of each instruction, indexed by the first byte of the instruction data.
 // https://github.com/anza-xyz/agave/blob/v2.1.13/programs/zk-elgamal-proof/src/lib.rs#L20

@@ -42,13 +42,27 @@ describe('toInstructionCUData', () => {
             expect(result[0].computeUnits).toBe(150);
         });
 
-        it('should report 0 for a precompile', () => {
+        // A precompile logs nothing, so the invocations are fewer than the instructions.
+        it('should report 0 for a precompile and keep the next figure on its instruction', () => {
             const result = toInstructionCUData({
-                instructions: [mockInstruction(ED25519)],
-                invocations: [],
+                instructions: [mockInstruction(ED25519), mockInstruction(TOKEN)],
+                invocations: [mockInvocation(TOKEN, 5000)],
             });
 
-            expect(result[0].computeUnits).toBe(0);
+            expect(result.map(r => r.computeUnits)).toEqual([0, 5000]);
+        });
+
+        it('should report no figure for an instruction after the one that failed', () => {
+            const result = toInstructionCUData({
+                instructions: [
+                    mockInstruction(TOKEN),
+                    mockInstruction(SYSTEM),
+                    { ...mockInstruction(ZK_ELGAMAL_PROOF), data: new Uint8Array([7]) },
+                ],
+                invocations: [mockInvocation(TOKEN, 1200)],
+            });
+
+            expect(result.map(r => r.computeUnits)).toEqual([1200, undefined, undefined]);
         });
 
         it('should report no figure for a program with no fixed cost that logged no figure', () => {
@@ -79,7 +93,7 @@ describe('toInstructionCUData', () => {
                     mockInstruction(ZK_ELGAMAL_PROOF),
                     { ...mockInstruction(ZK_ELGAMAL_PROOF), data: new Uint8Array([200]) },
                 ],
-                invocations: [],
+                invocations: [mockInvocation(ZK_ELGAMAL_PROOF), mockInvocation(ZK_ELGAMAL_PROOF)],
             });
 
             expect(result.map(r => r.computeUnits)).toEqual([undefined, undefined]);
