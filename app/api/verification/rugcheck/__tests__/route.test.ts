@@ -113,6 +113,20 @@ describe('Rugcheck API Route', () => {
         });
         expect(Logger.panic).not.toHaveBeenCalled();
     });
+
+    it('should return 502 with short negative cache when the upstream refuses the connection', async () => {
+        const connectError = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:443'), { code: 'ECONNREFUSED' });
+        fetchMock.mockRejectedValueOnce(new TypeError('fetch failed', { cause: connectError }));
+        const response = await callRoute(VALID_MINT);
+        expect(response.status).toBe(502);
+        expect(await response.json()).toEqual({ error: 'Upstream connection failed' });
+        expect(response.headers.get('Cache-Control')).toBe('public, max-age=30, s-maxage=30');
+        expect(Logger.warn).toHaveBeenCalledWith('[api:rugcheck] Upstream connection failed', {
+            mintAddress: VALID_MINT,
+            sentry: true,
+        });
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
 });
 
 function mockFetchResponse(status: number, body: Record<string, unknown> = {}) {
