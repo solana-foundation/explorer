@@ -101,7 +101,7 @@ type TransactionWithInvocations = {
     computeUnits?: number;
     costUnits?: bigint;
     reservedComputeUnits?: number;
-    logTruncated: boolean;
+    computeUnitsFromTruncatedLogs: boolean;
     unavailable: boolean;
     version?: TransactionVersion;
 };
@@ -144,9 +144,9 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
         const transactions: TransactionWithInvocations[] = block.transactions.map(entry => {
             if (!isBlockTransaction(entry)) {
                 return {
+                    computeUnitsFromTruncatedLogs: false,
                     index: entry.index,
                     invocations: new Map(),
-                    logTruncated: false,
                     meta: null,
                     unavailable: true,
                 };
@@ -181,9 +181,10 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
             });
 
             const logs = parseProgramLogs(tx.meta?.logMessages ?? []);
-            // One transaction with no figure hides the column for the whole block, so a failed transaction
-            // that logged nothing counts as 0.
-            const computeUnits = getLoggedComputeUnits(logs) ?? (tx.meta?.err ? 0 : undefined);
+            // An old block has no recorded figure, so the sum of the logs is the only source.
+            const recordedComputeUnits = tx.meta?.computeUnitsConsumed;
+            const computeUnits =
+                recordedComputeUnits === undefined ? getLoggedComputeUnits(logs) : Number(recordedComputeUnits);
 
             const costUnits = tx.meta?.costUnits;
 
@@ -192,10 +193,10 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
 
             return {
                 computeUnits,
+                computeUnitsFromTruncatedLogs: recordedComputeUnits === undefined && logs.truncated,
                 costUnits,
                 index: tx.index,
                 invocations,
-                logTruncated: logs.truncated,
                 meta: tx.meta,
                 reservedComputeUnits,
                 signature,
@@ -490,7 +491,7 @@ function BlockHistoryGridRow({
     const signatureNode = tx.signature ? <Signature signature={tx.signature} link /> : '-';
     const feeNode = tx.meta !== null ? <SolBalance lamports={tx.meta.fee} /> : 'Unknown';
     const reserved = tx.reservedComputeUnits !== undefined ? numberFmt(tx.reservedComputeUnits) : 'Unknown';
-    const compute = `${tx.logTruncated ? '>' : ''}${tx.computeUnits !== undefined ? numberFmt(tx.computeUnits) : 'Unknown'}`;
+    const compute = `${tx.computeUnitsFromTruncatedLogs ? '>' : ''}${tx.computeUnits !== undefined ? numberFmt(tx.computeUnits) : 'Unknown'}`;
     const txnCost = tx.costUnits !== undefined ? numberFmt(tx.costUnits) : 'Unknown';
     const entries = Array.from(tx.invocations.entries());
     entries.sort();

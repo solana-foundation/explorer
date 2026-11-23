@@ -9,6 +9,7 @@ const PROGRAM_B = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ACCOUNT = 'Stake11111111111111111111111111111111111111';
 let search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
 let loggedComputeUnits: number | undefined = 0;
+let logsTruncated = false;
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/block/123',
@@ -38,7 +39,7 @@ vi.mock('@entities/compute-unit', () => ({
 
 vi.mock('@entities/program-logs', () => ({
     getLoggedComputeUnits: () => loggedComputeUnits,
-    parseProgramLogs: () => ({ invocations: [], truncated: false }),
+    parseProgramLogs: () => ({ invocations: [], truncated: logsTruncated }),
 }));
 
 import { BlockHistoryCard } from '../BlockHistoryCard';
@@ -47,6 +48,7 @@ describe('BlockHistoryCard filters', () => {
     beforeEach(() => {
         search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
         loggedComputeUnits = 0;
+        logsTruncated = false;
     });
 
     it('should combine version, program, and account filters while preserving URL parameters', () => {
@@ -113,11 +115,45 @@ describe('BlockHistoryCard filters', () => {
         expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
     });
 
-    it('should keep the CUs Consumed column when a failed transaction logged nothing', () => {
+    it('should show the recorded compute units, not the sum of the logs', () => {
+        search = 'filter=all';
+        loggedComputeUnits = 276;
+        render(
+            <BlockHistoryCard
+                block={makeBlock([makeTransaction(0, 'recorded', 0, PROGRAM_A, null, 576n)])}
+                epoch={500n}
+            />,
+        );
+        expect(screen.getAllByText('576').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('276')).toHaveLength(0);
+    });
+
+    it('should show a recorded figure with no lower-bound mark when the logs are truncated', () => {
+        search = 'filter=all';
+        logsTruncated = true;
+        render(
+            <BlockHistoryCard
+                block={makeBlock([makeTransaction(0, 'recorded', 0, PROGRAM_A, null, 576n)])}
+                epoch={500n}
+            />,
+        );
+        expect(screen.getAllByText('576').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('>576')).toHaveLength(0);
+    });
+
+    it('should mark the sum of truncated logs as a lower bound', () => {
+        search = 'filter=all';
+        loggedComputeUnits = 276;
+        logsTruncated = true;
+        render(<BlockHistoryCard block={makeBlock([makeTransaction(0, 'logged', 0, PROGRAM_A)])} epoch={500n} />);
+        expect(screen.getAllByText('>276').length).toBeGreaterThan(0);
+    });
+
+    it('should hide the CUs Consumed column when a failed transaction has no recorded figure and no logged figure', () => {
         search = 'filter=all&status=failed';
         loggedComputeUnits = undefined;
         render(<BlockHistoryCard block={makeMixedBlock()} epoch={500n} />);
-        expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('CUs Consumed')).toHaveLength(0);
     });
 });
 
@@ -143,6 +179,7 @@ function makeTransaction(
     version: 'legacy' | 0,
     program: string,
     err: BlockTransactionMeta['err'] = null,
+    computeUnitsConsumed?: bigint,
 ) {
     return makeBlockTransaction({
         index,
@@ -151,7 +188,14 @@ function makeTransaction(
             staticAccounts: [address(program), address(ACCOUNT)],
             version,
         },
-        meta: { costUnits: 1n, err, fee: lamports(5_000n), innerInstructions: [], loadedAddresses: undefined },
+        meta: {
+            computeUnitsConsumed,
+            costUnits: 1n,
+            err,
+            fee: lamports(5_000n),
+            innerInstructions: [],
+            loadedAddresses: undefined,
+        },
         signatures: [transactionSignature as Signature],
     });
 }
