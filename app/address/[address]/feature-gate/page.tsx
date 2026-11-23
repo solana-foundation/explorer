@@ -3,6 +3,7 @@ import { FeatureGateMarkdown } from '@components/account/FeatureGateMarkdown';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { getFeatureInfo } from '@/app/entities/feature-gate/server';
 import { fetchFeatureGateInformation, getFeatureGateOpenGraph } from '@/app/features/feature-gate/server';
 
@@ -46,14 +47,9 @@ function ProposalUnavailable({ url }: { url?: string }) {
             {url && (
                 <>
                     {'. '}
-                    <a
-                        href={url}
-                        className="text-dark-accent hover:text-dark-accent-hover"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                    >
+                    <ExternalLink href={url} className="text-dark-accent hover:text-dark-accent-hover">
                         View the proposal on GitHub
-                    </a>
+                    </ExternalLink>
                 </>
             )}
         </p>

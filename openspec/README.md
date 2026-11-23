@@ -1,6 +1,6 @@
 # OpenSpec
 
-This directory is the durable home for the rationale behind non-trivial design and architectural decisions in this repository. The convention itself — _why we picked OpenSpec, what's required, and what's optional_ — is captured as the first proposal under [`changes/pick-adr-methodology/proposal.md`](changes/pick-adr-methodology/proposal.md). Read it once before authoring a new proposal.
+This directory is the durable home for the rationale behind non-trivial design and architectural decisions in this repository. The convention itself — _why we picked OpenSpec, what's required, and what's optional_ — is captured as the first proposal under [`changes/archive/2026-11-18-pick-adr-methodology/proposal.md`](changes/archive/2026-11-18-pick-adr-methodology/proposal.md). Read it once before authoring a new proposal.
 
 ## When to write a proposal
 
