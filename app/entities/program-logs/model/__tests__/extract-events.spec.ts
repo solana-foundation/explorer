@@ -22,6 +22,20 @@ describe('extractEventsFromLogs', () => {
         expect(extractEventsFromLogs({ index: 0, instructionProgramIds: ['P'], logs })).toEqual([]);
     });
 
+    it('should attribute an event past a non-logging precompile to the right instruction via program-id match', () => {
+        const logs = [
+            'Program Comp invoke [1]',
+            'Program Comp success',
+            'Program Prog invoke [1]',
+            'Program data: AAAAAAAAAAAA',
+            'Program Prog success',
+        ];
+        const instructionProgramIds = ['Comp', 'Ed25519', 'Prog'];
+
+        expect(extractEventsFromLogs({ index: 2, instructionProgramIds, logs })).toHaveLength(1);
+        expect(extractEventsFromLogs({ index: 1, instructionProgramIds, logs })).toHaveLength(0);
+    });
+
     it('should attribute each payload to the invocation that logged it', () => {
         const logs = [
             'Program A invoke [1]',
