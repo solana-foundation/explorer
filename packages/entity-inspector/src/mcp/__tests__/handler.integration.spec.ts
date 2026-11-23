@@ -513,7 +513,7 @@ describe('createMcpRequestHandler client rejections', () => {
         },
     );
 
-    it('should not log a POST without application/json in Accept', async () => {
+    it('should log a POST without application/json in Accept at info and return 406', async () => {
         const info = vi.fn();
         const handler = createMcpRequestHandler({
             ...TEST_CONFIG,
@@ -523,7 +523,12 @@ describe('createMcpRequestHandler client rejections', () => {
         const response = await handler(postWithoutJsonAccept(42));
 
         expect(response.status).toBe(406);
-        expect(info).not.toHaveBeenCalled();
+        expect(info).toHaveBeenCalledExactlyOnceWith('[entity-inspector] client request rejected', {
+            error: {
+                message: 'Not Acceptable: Client must accept both application/json and text/event-stream',
+                name: 'Error',
+            },
+        });
     });
 });
 
@@ -533,26 +538,17 @@ describe('createMcpRequestHandler with wrapMcpServerWithSentry', () => {
         getCurrentScope().setClient(undefined);
     });
 
-    it('should send no Sentry event for a GET, a HEAD or an unsupported protocol version', async () => {
+    it('should send no Sentry event for a GET, a HEAD or a POST that the transport rejects', async () => {
         const reported = initSentry();
         const handler = createMcpRequestHandler({ ...TEST_CONFIG, wrapServer: wrapMcpServerWithSentry });
 
         await handler(new Request('http://localhost/mcp', { headers: { accept: 'application/json' }, method: 'GET' }));
         await handler(new Request('http://localhost/mcp', { method: 'HEAD' }));
         await handler(postWithProtocolVersion('2099-01-01', 43));
-        await getClient()?.flush();
-
-        expect(reported).toEqual([]);
-    });
-
-    it('should send a Sentry event for a POST without application/json in Accept', async () => {
-        const reported = initSentry();
-        const handler = createMcpRequestHandler({ ...TEST_CONFIG, wrapServer: wrapMcpServerWithSentry });
-
         await handler(postWithoutJsonAccept(44));
         await getClient()?.flush();
 
-        expect(reported).toEqual(['Not Acceptable: Client must accept both application/json and text/event-stream']);
+        expect(reported).toEqual([]);
     });
 });
 
