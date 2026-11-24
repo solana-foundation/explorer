@@ -1,4 +1,5 @@
 import { metaplexNftHeaderModel } from '@components/account/MetaplexNFTHeader';
+import { Muted } from '@components/account/nft-header/NftHeaderVariants';
 import { nftCreatorsOverviewRow, nftOverviewRows } from '@components/account/nft-header/overview-rows';
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
@@ -215,6 +216,7 @@ function NonFungibleTokenMintAccountCard({
 
     const collectionOpt = nftData.metadata.collection;
     const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
+    const headerModel = metaplexNftHeaderModel(nftData);
 
     const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
@@ -235,7 +237,7 @@ function NonFungibleTokenMintAccountCard({
             label: 'Update Authority',
             value: <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} link />,
         },
-        nftCreatorsOverviewRow(metaplexNftHeaderModel(nftData)),
+        nftCreatorsOverviewRow(headerModel),
         {
             label: 'Website',
             value: nftData.json?.external_url ? (
@@ -244,7 +246,7 @@ function NonFungibleTokenMintAccountCard({
                     <ExternalLinkMark />
                 </ExternalLink>
             ) : (
-                <span className="text-outer-space-300">—</span>
+                <Muted />
             ),
         },
         nftData?.metadata && {
@@ -252,7 +254,7 @@ function NonFungibleTokenMintAccountCard({
             value: `${nftData.metadata.sellerFeeBasisPoints / 100}%`,
         },
         // No collection arg: it only feeds the header, not these Overview rows.
-        ...nftOverviewRows(metaplexNftHeaderModel(nftData)),
+        ...nftOverviewRows(headerModel),
     ];
 
     return (

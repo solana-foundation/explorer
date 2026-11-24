@@ -12,7 +12,7 @@ import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { Address } from '../common/Address';
 import { LoadingArtPlaceholder } from '../common/LoadingArtPlaceholder';
 import { type NftHeaderModel } from './nft-header/model';
-import { NftHeaderLayout } from './nft-header/NftHeaderVariants';
+import { Muted, NftHeaderLayout } from './nft-header/NftHeaderVariants';
 import { nftCreatorsOverviewRow, nftOverviewRows } from './nft-header/overview-rows';
 import { useNftCollection } from './nft-header/use-nft-collection';
 import { UnknownAccountCard } from './UnknownAccountCard';
@@ -48,7 +48,7 @@ export function CompressedNftCard({ account }: { account: Account }) {
                     <ExternalLinkMark />
                 </ExternalLink>
             ) : (
-                <span className="text-outer-space-300">—</span>
+                <Muted />
             ),
         },
         { label: 'Seller Fee', value: `${compressedNft.royalty.basis_points / 100}%` },

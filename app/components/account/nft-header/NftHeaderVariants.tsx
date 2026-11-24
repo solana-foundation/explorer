@@ -237,17 +237,9 @@ function SiteName({ hostname }: { hostname: string }) {
     );
 }
 
-function Pill({
-    tooltip,
-    variant = 'gray',
-    children,
-}: {
-    tooltip?: string;
-    variant?: 'gray' | 'success';
-    children: ReactNode;
-}) {
+function Pill({ tooltip, children }: { tooltip?: string; children: ReactNode }) {
     const badge = (
-        <Badge variant={variant} size="sm" className={tooltip ? 'cursor-help' : undefined}>
+        <Badge variant="success" size="sm" className={tooltip ? 'cursor-help' : undefined}>
             {children}
         </Badge>
     );
@@ -270,9 +262,7 @@ function CollectionLink({ collection }: { collection: NftCollection }) {
             </Link>
             {/* Negative margin cancels the badge's padding so the tag stays one text line tall. */}
             <span className="-my-0.5 inline-flex shrink-0">
-                <Pill tooltip={VERIFIED_COLLECTION_TOOLTIP} variant="success">
-                    Verified
-                </Pill>
+                <Pill tooltip={VERIFIED_COLLECTION_TOOLTIP}>Verified</Pill>
             </span>
         </span>
     );
@@ -328,7 +318,7 @@ function CreatorShare({ creator }: { creator: NftCreator }) {
     );
 }
 
-function Muted() {
+export function Muted() {
     return <span className="text-outer-space-300">—</span>;
 }
 
