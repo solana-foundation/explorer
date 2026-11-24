@@ -1,10 +1,16 @@
+import { isAddress } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
+import { isSignatureValid } from '@utils/tx';
+
+import { parseNaturalNumber } from './parse-natural-number';
+
+type LocalRoute = '/address' | '/block' | '/epoch' | '/tx';
 
 type RouteMapping = {
     /** Path segment used by the external explorer (e.g. "account", "tx"). */
     externalSegment: string;
     /** Corresponding local route prefix (e.g. "/address", "/tx"). */
-    localRoute: string;
+    localRoute: LocalRoute;
     /** User-facing label shown in search results (e.g. "Transaction", "Account"). */
     displayName: string;
 };
@@ -49,6 +55,14 @@ const EXPLORERS: ExternalExplorer[] = [
     },
 ];
 
+// The identifier becomes a navigation path, so only a well-formed identifier of the route's entity may pass
+const IDENTIFIER_VALIDATOR_BY_ROUTE = new Map<LocalRoute, (identifier: string) => boolean>([
+    ['/address', isAddress],
+    ['/block', isNaturalNumber],
+    ['/epoch', isNaturalNumber],
+    ['/tx', isSignatureValid],
+]);
+
 export type ParsedExplorerUrl = {
     /** Canonical hostname of the source explorer (e.g. "solscan.io"). */
     source: string;
@@ -83,8 +97,8 @@ export function parseExplorerUrl(input: string): ParsedExplorerUrl | undefined {
     const route = explorer.routes.find(r => r.externalSegment === pathSegment);
     if (!route) return undefined;
 
-    const identifier = extractIdentifier(segments[2]);
-    if (!identifier) return undefined;
+    const identifier = segments[2] || undefined;
+    if (!isValidIdentifier(route.localRoute, identifier)) return undefined;
 
     return {
         cluster: resolveCluster(explorer, url.searchParams.get('cluster')),
@@ -111,11 +125,14 @@ function findExplorer(hostname: string): ExternalExplorer | undefined {
     return EXPLORERS.find(e => e.hostname === normalised);
 }
 
-function extractIdentifier(rawSegment: string): string | undefined {
-    if (!rawSegment) return undefined;
-    const decoded = decodeURIComponent(rawSegment).trim();
-    if (!decoded || decoded.includes('/')) return undefined;
-    return decoded;
+function isValidIdentifier(localRoute: LocalRoute, identifier: string | undefined): identifier is string {
+    if (!identifier) return false;
+    const validateIdentifier = IDENTIFIER_VALIDATOR_BY_ROUTE.get(localRoute);
+    return validateIdentifier?.(identifier) ?? false;
+}
+
+function isNaturalNumber(value: string): boolean {
+    return parseNaturalNumber(value) !== undefined;
 }
 
 function resolveCluster(explorer: ExternalExplorer, rawCluster: string | null): Cluster {
