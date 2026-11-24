@@ -5,14 +5,12 @@ import type { InstructionComputeUnits, InstructionCUData } from './types';
  * `label` or `legendLabel` and cannot bypass the positional fallback those apply.
  */
 export type InstructionCUDisplay = Omit<InstructionCUData, 'name'> & {
-    // The CU figure the bar is sized by. 0 when `computeUnits` is not a figure, so the row has no segment.
     displayCU: number;
     // Chart tooltip title, before the program qualifier.
     label: string;
     // Legend entry: the instruction's position, then its name — `Unknown Instruction` when nothing
     // resolved one, so every row in the list reads the same shape.
     legendLabel: string;
-    // The CU figure as shown, `Not executed`, or `Unknown`.
     displayValue: string;
 };
 

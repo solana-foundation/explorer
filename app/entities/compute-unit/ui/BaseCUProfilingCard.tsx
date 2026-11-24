@@ -226,7 +226,6 @@ export function BaseCUProfilingCard({ instructions, unitsConsumed, headerless = 
 
     useCUTooltipCleanup();
 
-    // The axis ends at the transaction total, so the CU of rows with no figure stay an empty part of the bar.
     const chartOptions = useCUProfileChartOptions(Math.max(totalDisplayCU, unitsConsumed ?? 0));
 
     const chartData: ChartData<'bar'> = useMemo(

@@ -1,11 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import type { LogRow } from '../../model/to-log-rows';
 import { ProgramLogs } from '../ProgramLogs';
-
-vi.mock('@utils/url', () => ({ useClusterPath: ({ pathname }: { pathname: string }) => pathname }));
-vi.mock('next/navigation', () => ({ usePathname: () => '/tx/sig' }));
 
 const ROW: LogRow = {
     lines: [{ prefix: '> ', style: 'success', text: 'Program returned success' }],
@@ -22,7 +19,7 @@ describe('ProgramLogs', () => {
             />,
         );
 
-        expect(screen.getByRole('link')).toHaveAttribute('href', '/tx/sig#ix-1');
+        expect(screen.getByRole('link')).toHaveAttribute('href', '#ix-1');
         expect(screen.getByText('Token Transfer Checked')).toBeInTheDocument();
         expect(screen.getByText('Program returned success')).toBeInTheDocument();
     });

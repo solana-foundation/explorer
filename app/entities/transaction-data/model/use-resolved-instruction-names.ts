@@ -9,10 +9,6 @@ import { applyNameSources, applyNameSourcesToSummaries } from '../lib/name-sourc
 import type { InstructionNameLookup, InstructionSummary, NamedInstruction } from '../lib/types';
 import type { TransactionWithMeta } from './types';
 
-/**
- * One row for each top-level instruction of an RPC-parsed transaction, Compute Budget included, so the
- * rows stay in the order of the transaction's logs. No rows while the transaction loads.
- */
 export function useTransactionInstructionNames(
     transactionWithMeta: TransactionWithMeta | null | undefined,
 ): NamedInstruction[] {
@@ -24,12 +20,6 @@ export function useTransactionInstructionNames(
     return useResolvedInstructionNames(rows);
 }
 
-/**
- * The second half of instruction naming: fetch the IDLs the unnamed rows need, then run every name
- * source. Row count and order are preserved, so a caller that pairs the rows with the log
- * invocations in order gets the right invocation for each row.
- * @param instructions - Rows in transaction order, each carrying its program
- */
 export function useResolvedInstructionNames(instructions: readonly NamedInstruction[]): NamedInstruction[] {
     const idlNames = useIdlNames(instructions);
 

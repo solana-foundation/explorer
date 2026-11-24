@@ -8,7 +8,6 @@ const PROGRAM = 'AM4L8ZAkTXANjmCK42TUjtXuyV1qwXdqF1YVFbJibTS9';
 const UPGRADEABLE_LOADER = 'BPFLoaderUpgradeab1e11111111111111111111111';
 
 describe('pairLogsWithInstructions', () => {
-    // The first four instructions of devnet transaction 2Y9isGXjmvfUvHLcDqrS485Wy74eexPKC2WNMZFzHzBc8dNA1TXdjH6hhCs1dFGcvdUV1bST8ZgA8sLDdkgbDDhm.
     it('should give a precompile no invocation and keep each later invocation on its own instruction', () => {
         const { invocations } = parseProgramLogs([
             `Program ${PROGRAM} invoke [1]`,
@@ -30,7 +29,6 @@ describe('pairLogsWithInstructions', () => {
         expect(paired).toEqual([invocation(PROGRAM), undefined]);
     });
 
-    // Mainnet transaction ZPWPVpww2joHpgvChSThnwAaqybAqtmbTGqaqz8WgWBQHtyDm8undGsusX7qnRc4atKHEL589VyrYQbLJLfvNpY.
     it('should give lines with no invoke line to a native program that logs none', () => {
         const { invocations } = parseProgramLogs(['Upgraded program BqNztJFVm4BCJUQmbQGBDmPM855gxUXkDByF7GKyCpv8']);
 

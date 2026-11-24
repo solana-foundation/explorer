@@ -1,9 +1,5 @@
 import type { Invocation } from './parse-program-logs';
 
-/**
- * Returns the top-level invocation of each instruction, or `undefined` for an instruction that logged nothing.
- * Matches by program address because a precompile logs nothing, so the invocations can be fewer than the instructions.
- */
 export function pairLogsWithInstructions(
     invocations: readonly Invocation[],
     programAddresses: readonly string[],
@@ -11,7 +7,6 @@ export function pairLogsWithInstructions(
     let next = 0;
 
     return programAddresses.map(programAddress => {
-        // Lines with no `invoke` line that this instruction cannot own belong to no instruction.
         const skipsOrphan =
             invocations[next]?.programAddress === undefined && !isLoggedBy(invocations[next], programAddress);
         const index = skipsOrphan ? next + 1 : next;

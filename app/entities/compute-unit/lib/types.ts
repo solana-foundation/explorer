@@ -1,26 +1,14 @@
-/**
- * One instruction as `toInstructionCUData` takes it: its program, plus display names when the caller
- * resolved them. `programId` is structural rather than a `PublicKey` because only the base58 address is
- * read — that keeps this entity independent of any one key representation.
- *
- * Rows must stay in transaction order and must not be filtered. `toInstructionCUData` pairs the rows
- * with the top-level invocations in order, so a dropped row can give a later row no CU figure or another
- * instruction's.
- */
+// Rows must stay in transaction order and unfiltered to pair each row with its top-level invocation.
 export type InstructionCUInput = {
     programId: { toBase58(): string };
-    // The instruction data. The fixed cost of some programs depends on the instruction.
     data?: Uint8Array;
     name?: string;
     programName?: string;
 };
 
-// A failed transaction stops at the instruction that failed. `failedInstructionIndex` is `undefined`
-// when the transaction error names no instruction.
 export type TransactionOutcome =
     { status: 'succeeded' } | { status: 'failed'; failedInstructionIndex: number | undefined };
 
-// `undefined` when the logs give no figure and no fixed cost applies.
 export type InstructionComputeUnits = number | 'not-executed' | undefined;
 
 export type InstructionCUData = {

@@ -7,8 +7,6 @@ export type ExecutionOptions = {
     simulate: boolean;
 };
 
-// Program logs carried on a result, in both forms: raw RPC lines and the rows of the Logs card.
-// Built at result construction so the render layer only renders, never parses.
 export type ResultLogs = {
     raw: string[];
     rows: LogRow[];

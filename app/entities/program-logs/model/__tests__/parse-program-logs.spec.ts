@@ -54,7 +54,6 @@ describe('parseProgramLogs', () => {
         expect(logs.invocations[1].entries).toEqual([{ kind: 'failed', text: 'custom program error: 0x0' }]);
     });
 
-    // A status word in a program's own text is not a status line.
     it.each(['Program return: B successsuccess', 'Program log: request failed', 'Program data: success'])(
         'should keep the invocation open after "%s"',
         line => {

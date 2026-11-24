@@ -34,7 +34,6 @@ describe('useResolvedInstructionNames', () => {
         expect(result.current[0]).not.toHaveProperty('nameLookup');
     });
 
-    // Callers pair the rows with the log invocations in order, so a dropped row shifts every later one.
     it('should preserve row count and order, named rows included', () => {
         const rows = [unnamed(JUPITER, 1), named('Transfer'), unnamed(WHIRLPOOL, 1)];
 

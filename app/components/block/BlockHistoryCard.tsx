@@ -181,7 +181,6 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
             });
 
             const logs = parseProgramLogs(tx.meta?.logMessages ?? []);
-            // An old block has no recorded figure, so the sum of the logs is the only source.
             const recordedComputeUnits = tx.meta?.computeUnitsConsumed;
             const computeUnits =
                 recordedComputeUnits === undefined ? getLoggedComputeUnits(logs) : Number(recordedComputeUnits);
@@ -236,7 +235,8 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                     (!tx.unavailable && (isFailed(tx) ? 'failed' : 'succeeded') === statusFilter),
             );
 
-        const showComputeUnits = filteredTxs.every(tx => tx.unavailable || tx.computeUnits !== undefined);
+        const showComputeUnits =
+            filteredTxs.every(tx => tx.unavailable) || filteredTxs.some(tx => tx.computeUnits !== undefined);
 
         return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
     }, [

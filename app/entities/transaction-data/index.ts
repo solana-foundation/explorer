@@ -15,7 +15,4 @@ export { isResolvedLookupTable, rowAddresses } from './lib/row-addresses';
 export { trustedInnerInstructions } from './lib/trusted-inner-instructions';
 export { applyNameSourcesToSummaries } from './lib/name-sources';
 export type { InstructionSummary, NamedInstruction } from './lib/types';
-// The second half of instruction naming — after `resolveNamesFromData` above —
-// is on `client.ts`, since the hooks cannot join a server caller of this barrel. README.md has the
-// whole flow and the invariants it holds to.
 export type { RawTransaction, TransactionConfig, TransactionWithMeta } from './model/types';

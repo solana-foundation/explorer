@@ -32,7 +32,6 @@ export type SimulationResult = {
     // from here: `message.staticAccountKeys` is missing any key sourced from a lookup table.
     accountKeys: readonly PublicKey[];
     logs: ParsedProgramLogs | undefined;
-    // The instruction that the transaction error names, for the Logs card.
     instructionError: ProgramError | undefined;
     error: string | undefined;
     outcome: TransactionOutcome;

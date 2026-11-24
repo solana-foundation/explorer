@@ -33,7 +33,6 @@ describe('toInstructionLogRows', () => {
         ]);
     });
 
-    // Truncated logs can end before the failure line of the outer invocation.
     it('should mark a row failed when the logs end after the failure of an inner invocation', () => {
         const [row] = toRows({ lines: errorLogs.slice(0, 5), programAddresses: [VOTING] });
 
@@ -47,7 +46,6 @@ describe('toInstructionLogRows', () => {
         expect(rows[1].status).toBe('success');
     });
 
-    // The entries are fewer than the instructions, so the error index is an instruction index, not an entry index.
     it('should show the transaction error on the instruction it names when the logs have no failure', () => {
         const rows = toRows({
             error: { index: 2, message: 'insufficient funds for instruction' },

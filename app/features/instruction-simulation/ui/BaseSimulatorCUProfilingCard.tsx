@@ -6,7 +6,6 @@ import { useMemo } from 'react';
 type BaseSimulatorCUProfilingCardProps = {
     /** One row per instruction, in `compiledInstructions` order — see useSimulationInstructionNames. */
     instructions: NamedInstruction[];
-    /** The logs of the simulation. */
     logs: ParsedProgramLogs;
     outcome: TransactionOutcome;
     unitsConsumed?: number;

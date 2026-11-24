@@ -62,7 +62,6 @@ describe('CUProfilingSection', () => {
         });
     });
 
-    // ZK ElGamal Proof logs no "consumed" line, and its fixed cost depends on the instruction data.
     it('should show the fixed cost of an instruction that the RPC returned unparsed', () => {
         mockTransaction([verifyZeroCiphertext()], [invocation(ZK_ELGAMAL_PROOF_PROGRAM)]);
 
@@ -71,7 +70,6 @@ describe('CUProfilingSection', () => {
         expect(screen.getByText('#1 Verify Zero Ciphertext: 6,000')).toBeInTheDocument();
     });
 
-    // The logs of a successful transaction can be truncated before a builtin instruction.
     it('should show the fixed cost of a builtin with no log lines in a successful transaction', () => {
         mockTransaction([transferChecked(), setComputeUnitPrice()], [invocation(TOKEN_PROGRAM, 105)]);
 
@@ -170,11 +168,6 @@ function mockTransaction(
     useTransactionDetails.mockReturnValue({ data: { transactionWithMeta } });
 }
 
-/**
- * The raw RPC log lines for one top-level invocation. `parseProgramLogs` reads these; passing the
- * rendered text it produces instead would leave every instruction at zero CU.
- * Compute Budget logs no "consumed" line, so omit the units to reproduce that.
- */
 function invocation(programId: PublicKey, computeUnits?: number): string[] {
     const id = programId.toBase58();
     return [

@@ -85,7 +85,6 @@ describe('toInstructionCUData', () => {
             expect(result[0].computeUnits).toBe(150);
         });
 
-        // An old Address Lookup Table instruction logged lines with no `invoke` line.
         it('should take the fixed cost of a builtin that logged no invoke line', () => {
             const result = toInstructionCUData({
                 instructions: [mockInstruction(ADDRESS_LOOKUP_TABLE)],
@@ -96,7 +95,6 @@ describe('toInstructionCUData', () => {
             expect(result[0].computeUnits).toBe(750);
         });
 
-        // The figures are from devnet transaction 2VdCBG9TRfSftWmRe6c5px61Fu46v2mbZqyVKBoQzJ47hPXRxqS1MhZPHoqpAaRZHT2xSBcFozS5bN2bkxBJZTDJ.
         it('should take the cost of a ZK ElGamal Proof instruction from its instruction data', () => {
             const result = toInstructionCUData({
                 instructions: [
@@ -135,7 +133,6 @@ describe('toInstructionCUData', () => {
     });
 
     describe('complete logs with no invocation for an instruction', () => {
-        // A builtin of the time before the runtime logged an `invoke` line logs nothing.
         it('should take the fixed cost of a builtin, also of one that a feature gate moved on chain', () => {
             const result = toInstructionCUData({
                 instructions: [mockInstruction(SYSTEM), mockInstruction(STAKE)],
@@ -178,7 +175,6 @@ describe('toInstructionCUData', () => {
             expect(result.map(r => r.computeUnits)).toEqual([1200, undefined]);
         });
 
-        // The runtime drops a line that does not fit and keeps a later, shorter line.
         it('should report no figure for a moved builtin whose invocation kept its status line and lost its figure', () => {
             const result = toInstructionCUData({
                 instructions: [mockInstruction(STAKE)],
@@ -291,7 +287,6 @@ describe('toInstructionCUData', () => {
             });
         });
 
-        // The callers run this in a render-phase `useMemo`, so a Sentry capture would repeat on every recompute.
         it('should not send the warning to Sentry', () => {
             toInstructionCUData({
                 instructions: [mockInstruction(TOKEN)],

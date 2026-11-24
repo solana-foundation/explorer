@@ -75,7 +75,6 @@ describe('BaseCUProfilingCard', () => {
     });
 
     describe('chart axis', () => {
-        // The figures are from devnet transaction 2VdCBG9TRfSftWmRe6c5px61Fu46v2mbZqyVKBoQzJ47hPXRxqS1MhZPHoqpAaRZHT2xSBcFozS5bN2bkxBJZTDJ.
         it('should end at the transaction total when a row has no figure', () => {
             render(
                 <BaseCUProfilingCard

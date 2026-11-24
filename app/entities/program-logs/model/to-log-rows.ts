@@ -6,10 +6,8 @@ import { getProgramName } from '@utils/tx';
 import { pairLogsWithInstructions } from './pair-logs-with-instructions';
 import type { Invocation, InvocationEntry, ParsedProgramLogs } from './parse-program-logs';
 
-/** What the Logs card shows for one instruction. */
 export type LogRow = {
     lines: LogLine[];
-    // `none` for an instruction that logged nothing and did not fail.
     status: 'failed' | 'success' | 'none';
 };
 
@@ -19,7 +17,6 @@ type LogLine = {
     style: 'muted' | 'info' | 'success' | 'warning';
 };
 
-/** Returns one row for each instruction, in transaction order. */
 export function toInstructionLogRows({
     cluster,
     error,
@@ -28,7 +25,6 @@ export function toInstructionLogRows({
 }: {
     cluster: Cluster;
     error: ProgramError | undefined;
-    // `undefined` when the caller cannot list the instructions. Each top-level invocation then gets a row.
     instructions: readonly { programId: { toBase58(): string } }[] | undefined;
     logs: ParsedProgramLogs;
 }): LogRow[] {
@@ -39,7 +35,6 @@ export function toInstructionLogRows({
           )
         : logs.invocations;
 
-    // An instruction can fail before any program logs a line.
     if (invocations.length === 0 && error) {
         return [toLogRow({ cluster, invocation: undefined, runtimeError: error.message })];
     }
@@ -56,14 +51,12 @@ function toLogRow({
 }: {
     cluster: Cluster;
     invocation: Invocation | undefined;
-    // The message of the transaction error, for the instruction that the error names.
     runtimeError: string | undefined;
 }): LogRow {
     const lines = invocation ? toLogLines(invocation, cluster) : [];
     if (invocation && hasFailed(invocation)) return { lines, status: 'failed' };
     if (runtimeError === undefined) return { lines, status: invocation ? 'success' : 'none' };
 
-    // A builtin can fail with no line in the logs.
     return {
         lines: [...lines, { prefix: PREFIX, style: 'warning', text: `Runtime error: ${runtimeError}` }],
         status: 'failed',

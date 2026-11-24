@@ -52,7 +52,6 @@ export const WithoutResolvedNames: Story = {
     },
 };
 
-// With no logs, the builtin shows its fixed cost and the Token Program instruction shows `Unknown`.
 export const NoLogs: Story = {
     args: {
         instructions: [

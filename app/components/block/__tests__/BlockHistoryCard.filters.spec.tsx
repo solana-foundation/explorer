@@ -149,7 +149,23 @@ describe('BlockHistoryCard filters', () => {
         expect(screen.getAllByText('>276').length).toBeGreaterThan(0);
     });
 
-    it('should hide the CUs Consumed column when a failed transaction has no recorded figure and no logged figure', () => {
+    it('should show Unknown for a transaction with no figure when another transaction has one', () => {
+        search = 'filter=all';
+        loggedComputeUnits = undefined;
+        render(
+            <BlockHistoryCard
+                block={makeBlock([
+                    makeTransaction(0, 'recorded', 0, PROGRAM_A, null, 576n),
+                    makeTransaction(1, 'no-figure', 0, PROGRAM_A, { InstructionError: [0, { Custom: 1 }] }),
+                ])}
+                epoch={500n}
+            />,
+        );
+        expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Unknown').length).toBeGreaterThan(0);
+    });
+
+    it('should hide the CUs Consumed column when no transaction has a figure', () => {
         search = 'filter=all&status=failed';
         loggedComputeUnits = undefined;
         render(<BlockHistoryCard block={makeMixedBlock()} epoch={500n} />);

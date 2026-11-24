@@ -7,7 +7,6 @@ import { useMemo } from 'react';
 import type { SimulationResult } from '../lib/simulate-transaction';
 import type { SimulationInstructionNames } from './use-simulation-instruction-names';
 
-/** Returns the rows of the Logs card, or `undefined` when the simulation has nothing to show there. */
 export function useSimulationLogRows(
     result: SimulationResult | undefined,
     { instructions, unresolvable }: SimulationInstructionNames,

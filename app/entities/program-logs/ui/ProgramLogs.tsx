@@ -1,9 +1,7 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
-import { useClusterPath } from '@utils/url';
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { ChevronsUp } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
@@ -23,7 +21,6 @@ export function ProgramLogs({
     density = 'even',
 }: {
     rows: readonly LogRow[];
-    /** The instruction of each row. With it, a row shows the instruction's name and links to its card. */
     instructions?: readonly InstructionTitle[];
     density?: TableCardBodyProps['density'];
 }) {
@@ -66,11 +63,8 @@ export function ProgramLogs({
 }
 
 function InstructionLink({ index, children }: React.PropsWithChildren<{ index: number }>) {
-    const pathname = usePathname();
-    const anchorPath = useClusterPath({ pathname: `${pathname}#${getInstructionCardScrollAnchorId([index + 1])}` });
-
     return (
-        <Link className="flex items-baseline" href={anchorPath}>
+        <Link className="flex items-baseline" href={`#${getInstructionCardScrollAnchorId([index + 1])}`}>
             {children}
         </Link>
     );
@@ -82,7 +76,7 @@ function RowHeading({ index, status, title }: { index: number; status: LogRow['s
             <Badge ui="dashkit" variant={BADGE_VARIANT[status]} baseline className="mr-1.5">
                 #{index + 1}
             </Badge>
-            <span className="text-dk-white">{title}</span>
+            <span className="text-dk-white [overflow-wrap:anywhere]">{title}</span>
         </>
     );
 }
@@ -100,7 +94,6 @@ function toTitle({ name, programName, programId }: InstructionTitle): string {
     return `${program} ${name ?? UNNAMED_INSTRUCTION_TITLE}`;
 }
 
-// The dashkit `.text-*` colors of the dark theme.
 const logTextVariants = cva('', {
     variants: {
         variant: {

@@ -23,7 +23,6 @@ export function extractEventsFromLogs({
     return invocation?.entries.flatMap(toPayloads) ?? [];
 }
 
-// Depth-first, in log order: the order that numbers the inner instructions of a transaction.
 function toInnerInvocations(invocation: Invocation): Invocation[] {
     return invocation.entries.flatMap(entry =>
         entry.kind === 'invocation' ? [entry.invocation, ...toInnerInvocations(entry.invocation)] : [],

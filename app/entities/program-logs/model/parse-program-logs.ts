@@ -1,18 +1,14 @@
 export type ParsedProgramLogs = {
-    // The top-level invocations, in log order.
     invocations: Invocation[];
     truncated: boolean;
 };
 
 export type Invocation = {
-    // `undefined` when no `invoke` line precedes the lines.
     programAddress: string | undefined;
-    // The figure of the "consumed" line. A builtin logs no such line.
     computeUnits: number | undefined;
     entries: InvocationEntry[];
 };
 
-// An `invoke` line opens every inner invocation.
 type InnerInvocation = Invocation & { programAddress: string };
 
 export type InvocationEntry =
@@ -20,7 +16,6 @@ export type InvocationEntry =
     | { kind: 'success' }
     | { kind: 'consumed' | 'data' | 'error' | 'failed' | 'log' | 'text'; text: string };
 
-/** Builds the invocation tree of a transaction's log lines. Accepts any lines, in any order, without an error. */
 export function parseProgramLogs(lines: readonly string[]): ParsedProgramLogs {
     const invocations: Invocation[] = [];
     const stack: Invocation[] = [];
@@ -34,7 +29,6 @@ export function parseProgramLogs(lines: readonly string[]): ParsedProgramLogs {
 
         const invoke = line.match(INVOKE);
         if (invoke) {
-            // The depth in the line closes an invocation that logged no status line.
             stack.length = Math.max(0, Math.min(stack.length, Number(invoke[2]) - 1));
             const invocation: InnerInvocation = { computeUnits: undefined, entries: [], programAddress: invoke[1] };
             const parent = stack.at(-1);
@@ -45,7 +39,6 @@ export function parseProgramLogs(lines: readonly string[]): ParsedProgramLogs {
         }
 
         const entry = toEntry(line);
-        // The runtime can write an error after the status line of the invocation that caused it.
         let invocation = stack.at(-1) ?? (entry.kind === 'error' ? invocations.at(-1) : undefined);
         if (!invocation) {
             invocation = { computeUnits: undefined, entries: [], programAddress: undefined };
@@ -61,7 +54,6 @@ export function parseProgramLogs(lines: readonly string[]): ParsedProgramLogs {
     return { invocations, truncated };
 }
 
-/** Returns the compute units that the top-level invocations logged, or `undefined` for logs with no invocation. */
 export function getLoggedComputeUnits({ invocations }: ParsedProgramLogs): number | undefined {
     if (invocations.length === 0) return undefined;
 
@@ -89,6 +81,5 @@ function toEntry(line: string): InvocationEntry {
     const failed = line.match(FAILED);
     if (failed) return { kind: 'failed', text: failed[1] };
 
-    // The runtime writes an error outside the "failed" status line, for example "Program failed to complete".
     return { kind: line.includes('failed') ? 'error' : 'text', text: line };
 }

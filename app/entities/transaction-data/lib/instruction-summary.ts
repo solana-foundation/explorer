@@ -78,11 +78,9 @@ export function resolveInstructionNames(ix: ParsedInstruction | PartiallyDecoded
     return { name: undefined, programName };
 }
 
-/** One instruction of an RPC-parsed transaction as a row for `useResolvedInstructionNames`. */
 export function toNamedInstruction(ix: ParsedInstruction | PartiallyDecodedInstruction): NamedInstruction {
     if ('parsed' in ix) return { ...resolveInstructionNames(ix), data: undefined, programId: ix.programId };
 
-    // A partially decoded instruction carries its data as base58, so encoding it yields the bytes.
     const data = new Uint8Array(BASE58_ENCODER.encode(ix.data));
     return { ...resolveNamesFromData({ data, programId: ix.programId }), data, programId: ix.programId };
 }
