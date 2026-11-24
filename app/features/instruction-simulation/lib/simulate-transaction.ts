@@ -63,8 +63,6 @@ export async function simulateTransaction({
 
     const result = interpretSimulation(raw, cluster, accountBalances);
 
-    // Match the error the RPC returned rather than the interpreted one, which reports any failure
-    // carrying logs as a bare `TransactionError`.
     if (raw.simResult.err === UNSUPPORTED_VERSION) {
         const gate = await inactiveV1GateError(rpc, message);
         if (gate) {
@@ -263,21 +261,11 @@ function interpretSimulation(
 
     const solChanges = computeSolBalanceChanges(accountKeys, parsedAccountsPre, simResult.accounts, accountBalances);
 
-    let logs: InstructionLogs[] | undefined;
+    const logs = simResult.logs.length > 0 ? parseProgramLogs(simResult.logs, simResult.err, cluster) : undefined;
+
     let error: string | undefined;
-
-    if (simResult.logs.length === 0 && typeof simResult.err === 'string') {
-        // No logs to parse — surface the raw RPC error string (e.g. "AccountNotFound")
-        error = simResult.err;
-    } else {
-        logs = parseProgramLogs(simResult.logs, simResult.err, cluster);
-
-        // When logs are present alongside an error, the UI uses `error` to hide
-        // SOL/token balance cards (unreliable after a failed tx) while still
-        // showing the parsed logs so the user can diagnose the failure.
-        if (simResult.err) {
-            error = 'TransactionError';
-        }
+    if (simResult.err) {
+        error = typeof simResult.err === 'string' ? simResult.err : JSON.stringify(simResult.err);
     }
 
     return {
