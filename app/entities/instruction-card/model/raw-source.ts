@@ -2,16 +2,23 @@ import type { TransactionInstruction } from '@solana/web3.js';
 
 import type { InstructionNode } from './node';
 
-/** The top-level instructions of a transaction that the page can fetch in raw form. */
+/** The instructions of a transaction that the page can fetch in raw form. */
 export type RawInstructions =
     | { status: 'fetchable'; fetch: () => void }
-    /** `instructions` is `undefined` for a transaction version that web3.js cannot decompile. */
-    | { status: 'fetched'; instructions: readonly TransactionInstruction[] | undefined };
+    | { status: 'failed'; fetch: () => void }
+    | {
+          status: 'fetched';
+          /** `undefined` when the message cannot be decompiled. */
+          instructions: readonly TransactionInstruction[] | undefined;
+          /** Keyed by the index of the top-level instruction that invoked them. */
+          innerInstructions: ReadonlyMap<number, readonly (TransactionInstruction | undefined)[]> | undefined;
+      };
 
 /** What the Raw view of a parsed instruction shows above its JSON. */
 export type RawSource =
     | { kind: 'instruction'; ix: TransactionInstruction }
     | { kind: 'fetchable'; fetch: () => void }
+    | { kind: 'failed'; fetch: () => void }
     | { kind: 'unavailable' }
     | { kind: 'none' };
 
@@ -19,8 +26,16 @@ export function rawSourceOf(node: InstructionNode, rawInstructions: RawInstructi
     if (node.raw) return { ix: node.raw, kind: 'instruction' };
     if (!rawInstructions) return { kind: 'none' };
     if (rawInstructions.status === 'fetchable') return { fetch: rawInstructions.fetch, kind: 'fetchable' };
-    // Inner instructions never carry raw wire data, so only the top-level list has rows to lose.
-    if (node.childIndex !== undefined) return { kind: 'none' };
-    const ix = rawInstructions.instructions?.[node.index];
-    return ix ? { ix, kind: 'instruction' } : { kind: 'unavailable' };
+    if (rawInstructions.status === 'failed') return { fetch: rawInstructions.fetch, kind: 'failed' };
+    const ix =
+        node.childIndex === undefined
+            ? rawInstructions.instructions?.[node.index]
+            : rawInstructions.innerInstructions?.get(node.index)?.[node.childIndex];
+    // The parsed and the raw responses list instructions separately, so their positions can disagree
+    return ix?.programId.equals(node.programId) ? { ix, kind: 'instruction' } : { kind: 'unavailable' };
+}
+
+export function parsedInstructionOf(node: InstructionNode, rawSource: RawSource): TransactionInstruction | undefined {
+    if (!('parsed' in node.ix)) return node.ix;
+    return rawSource.kind === 'instruction' ? rawSource.ix : undefined;
 }

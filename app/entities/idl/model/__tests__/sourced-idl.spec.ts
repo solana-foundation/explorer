@@ -9,6 +9,7 @@ import {
     getAnchorIdls,
     getAnchorIdlsWithAccounts,
     getOnChainIdls,
+    isProgramMetadataSource,
     type SourcedIdl,
 } from '../sourced-idl';
 
@@ -97,6 +98,16 @@ describe('getAnchorAccountIdls', () => {
 
     it('should return no IDLs when the Anchor IDL account holds a Codama IDL', () => {
         expect(getAnchorAccountIdls(getOnChainIdls(pair({ anchorIdl: CODAMA_IDL })))).toEqual([]);
+    });
+});
+
+describe('isProgramMetadataSource', () => {
+    it('should match an Anchor-standard PMP IDL and skip the Anchor IDL account', () => {
+        expect(getOnChainIdls(BOTH).map(isProgramMetadataSource)).toEqual([true, false]);
+    });
+
+    it('should match a Codama PMP IDL', () => {
+        expect(getOnChainIdls(pair({ programMetadataIdl: CODAMA_IDL })).map(isProgramMetadataSource)).toEqual([true]);
     });
 });
 
