@@ -2,6 +2,8 @@ import { DomainsCard } from '@entities/domain/server';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 type Props = Readonly<{
     params: Promise<{
         address: string;
@@ -19,5 +21,9 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 export default async function OwnedDomainsPage(props: Props) {
     const { address } = await props.params;
 
-    return <DomainsCard address={address} />;
+    return (
+        <AddressTabContent>
+            <DomainsCard address={address} />
+        </AddressTabContent>
+    );
 }

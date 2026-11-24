@@ -2,6 +2,8 @@ import { TokenTransfersCard } from '@components/account/history/TokenTransfersCa
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 type Props = Readonly<{
     params: Promise<{
         address: string;
@@ -19,5 +21,9 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 export default async function TokenTransfersPage(props: Props) {
     const { address } = await props.params;
 
-    return <TokenTransfersCard address={address} />;
+    return (
+        <AddressTabContent>
+            <TokenTransfersCard address={address} />
+        </AddressTabContent>
+    );
 }

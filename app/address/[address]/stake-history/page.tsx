@@ -1,3 +1,5 @@
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 import StakeHistoryPageClient from './page-client';
 
 type Props = Readonly<{
@@ -13,5 +15,9 @@ export const metadata = {
 
 export default async function StakeHistoryPage(props: Props) {
     const params = await props.params;
-    return <StakeHistoryPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <StakeHistoryPageClient params={params} />
+        </AddressTabContent>
+    );
 }

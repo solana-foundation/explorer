@@ -1,6 +1,8 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 import ProgramMultisigPageClient from './page-client';
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
@@ -19,5 +21,9 @@ type Props = Readonly<{
 
 export default async function ProgramMultisigPage(props: Props) {
     const params = await props.params;
-    return <ProgramMultisigPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <ProgramMultisigPageClient params={params} />
+        </AddressTabContent>
+    );
 }

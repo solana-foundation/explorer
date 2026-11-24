@@ -1,5 +1,6 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { getSafeExternalHref } from '@/app/shared/lib/url';
 
@@ -29,4 +30,12 @@ export function ExternalLink({ href, children, ...props }: ExternalLinkProps) {
             {children}
         </a>
     );
+}
+
+/**
+ * The arrow that follows the text of a link to another site, inline so it rides on the text's last line. 14px, as the
+ * address rows' rename icon; 4px after the text and 1px under `align-text-top`, which sits it high against the text.
+ */
+export function ExternalLinkMark() {
+    return <ExternalLinkIcon aria-hidden className="ml-1 inline translate-y-px align-text-top" size={14} />;
 }

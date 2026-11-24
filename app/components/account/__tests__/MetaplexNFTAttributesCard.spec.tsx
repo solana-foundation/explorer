@@ -66,6 +66,19 @@ describe('MetaplexNFTAttributesCard', () => {
         expect(screen.getByText('Legendary')).toBeDefined();
     });
 
+    it('should show an empty row when the metadata has no attributes', async () => {
+        global.fetch = vi.fn().mockResolvedValueOnce({ json: () => Promise.resolve({ attributes: [] }) });
+
+        render(
+            <MetaplexNFTAttributesCard
+                account={makeAccount('https://example.com/metadata.json')}
+                onNotFound={vi.fn<() => never>()}
+            />,
+        );
+
+        expect(await screen.findByText('No attributes')).toBeInTheDocument();
+    });
+
     it('should show error card when fetch fails', async () => {
         global.fetch = vi.fn().mockRejectedValueOnce(new Error('Network error'));
 

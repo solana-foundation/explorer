@@ -1,6 +1,8 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 import VerifiedBuildClient from './page-client';
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
@@ -19,5 +21,9 @@ type Props = Readonly<{
 
 export default async function VerifiedBuildPage(props: Props) {
     const params = await props.params;
-    return <VerifiedBuildClient params={params} />;
+    return (
+        <AddressTabContent>
+            <VerifiedBuildClient params={params} />
+        </AddressTabContent>
+    );
 }

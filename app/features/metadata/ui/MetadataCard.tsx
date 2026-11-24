@@ -1,20 +1,11 @@
 import { useMemo } from 'react';
 
-import { ErrorCard } from '@/app/components/common/ErrorCard';
-import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/shared/ui/tabs';
 import type { Account } from '@/app/providers/accounts';
-import { Card, CardBody } from '@/app/shared/ui/Card';
 
 import { extractMetaplexMetadata } from '../lib/metaplexMetadata';
 import { extractTokenMetadata } from '../lib/tokenMetadata';
 import { useOffChainMetadata } from '../model/useOffChainMetadata';
-
-interface MetadataTab {
-    id: string;
-    title: string;
-    data: object;
-}
+import { BaseMetadataCard, type MetadataSection } from './BaseMetadataCard';
 
 export function MetadataCard({ account }: { account: Account }) {
     const couldHaveOnChainData = Boolean(account.data.parsed);
@@ -26,18 +17,18 @@ export function MetadataCard({ account }: { account: Account }) {
 }
 
 function OnChainMetadataCard({ account }: { account: Account }) {
-    const tabs = useMemo<MetadataTab[]>(() => {
+    const sections = useMemo<MetadataSection[]>(() => {
         const parsedData = account.data.parsed;
 
-        const availableTabs: MetadataTab[] = [];
+        const availableSections: MetadataSection[] = [];
 
-        if (!parsedData) return availableTabs;
+        if (!parsedData) return availableSections;
 
         const tokenMetadata = extractTokenMetadata(parsedData);
         const metaplexMetadata = extractMetaplexMetadata(parsedData);
 
         if (tokenMetadata) {
-            availableTabs.push({
+            availableSections.push({
                 data: tokenMetadata,
                 id: 'token-metadata',
                 title: 'Token extension',
@@ -45,71 +36,35 @@ function OnChainMetadataCard({ account }: { account: Account }) {
         }
 
         if (metaplexMetadata) {
-            availableTabs.push({
+            availableSections.push({
                 data: metaplexMetadata,
                 id: 'metaplex-metadata',
                 title: 'Metaplex',
             });
         }
 
-        return availableTabs;
+        return availableSections;
     }, [account]);
 
-    return <BaseCard tabs={tabs} />;
+    return <BaseMetadataCard sections={sections} />;
 }
 
 function OffChainMetadataCard({ account }: { account: Account }) {
     const { metadata } = useOffChainMetadata(account.pubkey);
 
-    const tabs = (() => {
-        const availableTabs: MetadataTab[] = [];
+    const sections = (() => {
+        const availableSections: MetadataSection[] = [];
 
-        if (!metadata) return availableTabs;
+        if (!metadata) return availableSections;
 
-        availableTabs.push({
+        availableSections.push({
             data: metadata,
             id: 'compressed-nft-metadata',
             title: 'Compressed NFT Metadata',
         });
 
-        return availableTabs;
+        return availableSections;
     })();
 
-    return <BaseCard tabs={tabs} />;
-}
-
-function BaseCard({ tabs }: { tabs: MetadataTab[] }) {
-    if (tabs.length === 0) {
-        return <ErrorCard text="No metadata found" />;
-    }
-
-    return (
-        <Card ui="dashkit">
-            <CardBody ui="dashkit">
-                <Tabs defaultValue={tabs[0]?.id}>
-                    <TabsList>
-                        {tabs.map(tab => (
-                            <TabsTrigger key={tab.id} value={tab.id}>
-                                {tab.title}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                    {tabs.map(tab => (
-                        <TabsContent key={tab.id} value={tab.id}>
-                            <div className="mt-5 [&_.string-value]:break-all">
-                                <ReactJson
-                                    src={tab.data}
-                                    style={{ padding: 25 }}
-                                    name={false}
-                                    enableClipboard={true}
-                                    displayObjectSize={false}
-                                    displayDataTypes={false}
-                                />
-                            </div>
-                        </TabsContent>
-                    ))}
-                </Tabs>
-            </CardBody>
-        </Card>
-    );
+    return <BaseMetadataCard sections={sections} />;
 }

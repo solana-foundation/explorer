@@ -1,6 +1,7 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
 import { withTraceData } from '@/app/shared/lib/sentry';
 
 import AccountDataPageClient from './page-client';
@@ -23,5 +24,9 @@ type Props = Readonly<{
 // Currently is used only for PMP accounts.
 export default async function AccountDataPage(props: Props) {
     const params = await props.params;
-    return <AccountDataPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <AccountDataPageClient params={params} />
+        </AddressTabContent>
+    );
 }

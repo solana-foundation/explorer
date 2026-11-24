@@ -29,6 +29,8 @@ const buttonVariants = cva([], {
         { class: 'h-6 gap-2 rounded px-2 !text-[11px] !font-normal [&_svg]:size-3', size: 'compact', ui: 'tw' },
         { class: 'h-9 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'default', ui: 'tw' },
         { class: 'h-7 w-7 gap-2 rounded [&_svg]:size-3', size: 'icon', ui: 'tw' },
+        // Icon button that fits one line of text (20px leading plus its padding), e.g. per-row copy.
+        { class: 'h-6 w-6 gap-2 rounded [&_svg]:size-3', size: 'icon-sm', ui: 'tw' },
         { class: 'h-10 gap-2 rounded px-8 [&_svg]:size-3', size: 'lg', ui: 'tw' },
         { class: 'h-7 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'sm', ui: 'tw' },
         // Toolbar action row (pairs with variant="quiet"): tighter box than `sm` so a bare
@@ -174,7 +176,7 @@ const buttonVariants = cva([], {
     },
     variants: {
         active: { false: '', true: '' },
-        size: { compact: '', default: '', icon: '', inline: '', lg: '', sm: '', tile: '', toolbar: '' },
+        size: { compact: '', default: '', icon: '', 'icon-sm': '', inline: '', lg: '', sm: '', tile: '', toolbar: '' },
         ui: { dashkit: '', tw: '' },
         variant: {
             accent: '',

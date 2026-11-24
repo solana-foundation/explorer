@@ -1,5 +1,6 @@
 import { AccountHeader } from '@components/account/AccountHeader';
-import { isTokenProgramData } from '@providers/accounts';
+import { isMetaplexNFT } from '@entities/nft';
+import { isTokenProgramData, useMintAccountInfo } from '@providers/accounts';
 import { type ComponentProps, useMemo } from 'react';
 
 import { TokenMarketData, useTokenMarketData } from '@/app/features/token-market-data';
@@ -18,8 +19,11 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
         isTokenProgramData(parsedData) &&
         parsedData?.parsed.type === 'mint' &&
         isTokenMintByOwner(toKitAddress(account.owner), account.data.raw);
+    // An NFT mint is a token mint too, but verification and market data cover fungible tokens only.
+    const isNft = isMetaplexNFT(parsedData, useMintAccountInfo(address));
+    const showTokenPanel = !!isTokenMint && !isNft;
 
-    const marketData = useTokenMarketData(address, !!isTokenMint);
+    const marketData = useTokenMarketData(address, showTokenPanel);
 
     const verificationTarget: VerificationTarget = useMemo(
         () => ({
@@ -37,7 +41,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
                 tokenInfo={tokenInfo}
                 isTokenInfoLoading={isTokenInfoLoading}
             />
-            {isTokenMint && (
+            {showTokenPanel && (
                 <div className="flex w-full flex-col gap-1 sm:items-start sm:gap-2 md:w-auto md:flex-row">
                     <TokenVerificationBadge target={verificationTarget} isTokenInfoLoading={isTokenInfoLoading} />
                     <TokenMarketData marketData={marketData} />

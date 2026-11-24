@@ -4,6 +4,8 @@ import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/ge
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 type Props = Readonly<{
     params: Promise<{
         address: string;
@@ -23,5 +25,9 @@ export default async function NFTokenCollectionPage(props: Props) {
 
     if (!isAddress(address)) notFound();
 
-    return <NftokenCollectionGrid collection={address} />;
+    return (
+        <AddressTabContent>
+            <NftokenCollectionGrid collection={address} />
+        </AddressTabContent>
+    );
 }
