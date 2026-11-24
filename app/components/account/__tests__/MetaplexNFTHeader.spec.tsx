@@ -1,8 +1,10 @@
 import type { EditionInfo } from '@entities/nft';
 import { some } from '@metaplex-foundation/umi';
+import { isTokenProgramData, useAccountInfo } from '@providers/accounts';
+import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MetaplexNFTHeader } from '@/app/components/account/MetaplexNFTHeader';
 import { makeNftData } from '@/app/entities/nft/lib/__tests__/make-nft-data';
@@ -66,5 +68,45 @@ describe('MetaplexNFTHeader', () => {
         expect(screen.queryByText('Market')).not.toBeInTheDocument();
         expect(screen.queryByText('Metadata')).not.toBeInTheDocument();
         expect(screen.queryByText('Creators')).not.toBeInTheDocument();
+    });
+
+    describe('verified collection', () => {
+        const COLLECTION = PublicKey.default.toBase58();
+
+        afterEach(() => {
+            vi.mocked(useAccountInfo).mockReturnValue(undefined);
+            vi.mocked(isTokenProgramData).mockReturnValue(false);
+        });
+
+        function collectionValue() {
+            const labels = screen.getAllByRole('term').map(term => term.textContent);
+            const values = screen.getAllByRole('definition').map(value => value.textContent);
+            return values[labels.indexOf('Collection')];
+        }
+
+        it('should show the collection link and Verified pill once the mint account loads', () => {
+            vi.mocked(useAccountInfo).mockReturnValue({ data: { data: {} } } as never);
+
+            render(<MetaplexNFTHeader nftData={makeNftData({ collection: { key: COLLECTION, verified: true } })} />);
+
+            expect(screen.getByText('Verified')).toBeDefined();
+            expect(collectionValue()).not.toBe('—');
+        });
+
+        it('should hide the collection until the mint account loads', () => {
+            render(<MetaplexNFTHeader nftData={makeNftData({ collection: { key: COLLECTION, verified: true } })} />);
+
+            expect(screen.queryByText('Verified')).not.toBeInTheDocument();
+            expect(collectionValue()).toBe('—');
+        });
+
+        it('should hide an unverified collection even once the mint account loads', () => {
+            vi.mocked(useAccountInfo).mockReturnValue({ data: { data: {} } } as never);
+
+            render(<MetaplexNFTHeader nftData={makeNftData({ collection: { key: COLLECTION, verified: false } })} />);
+
+            expect(screen.queryByText('Verified')).not.toBeInTheDocument();
+            expect(collectionValue()).toBe('—');
+        });
     });
 });

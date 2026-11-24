@@ -24,7 +24,7 @@ describe('nftOverviewRows', () => {
         expect(rows[0].value).toBe(expected);
     });
 
-    it('should add no market row for a compressed NFT, which carries no primary-sale flag', () => {
+    it('should add no market row when the market is unset, as on the DAS path', () => {
         const rows = nftOverviewRows(MODEL).filter(Boolean) as KeyValueRow[];
 
         expect(rows.map(row => row.label)).toEqual(['Metadata']);

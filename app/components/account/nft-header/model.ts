@@ -13,7 +13,7 @@ export type NftHeaderModel = {
     edition?: string;
     collection?: NftCollection;
     compressed: boolean;
-    /** Regular NFTs only: compressed ones carry no primary-sale flag. */
+    /** Only set for Metaplex NFTs; the DAS path also backs fungible and core assets, where a market row is meaningless. */
     primarySaleHappened?: boolean;
     mutable: boolean;
     creators: NftCreator[] | null;
