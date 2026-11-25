@@ -19,6 +19,7 @@ concurrency:
 # observability/. GRAFANA_API_TOKEN is a stack service-account token; SLACK_ALERT_WEBHOOK_URL is the alerts channel's incoming webhook.
 jobs:
   push:
+    if: github.repository == 'solana-foundation/explorer'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
