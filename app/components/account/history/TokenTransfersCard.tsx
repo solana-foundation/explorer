@@ -8,7 +8,12 @@ import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
 import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
-import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
+import {
+    useEnableTransactionFetches,
+    useFetchAccountHistory,
+    useRetryFailedTransactions,
+} from '@features/transaction-history/model/use-fetch-account-history';
+import { RetryButton } from '@features/transaction-history/ui/RetryButton';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { toScaledUiAmountString, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
@@ -31,6 +36,9 @@ import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table'
 
 import { getTransactionRows } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
+
+// A page of transactions must fit in the getTransaction budget of one rate limit window.
+const PAGE_SIZE = 10;
 
 type IndexedTransfer = {
     index: number;
@@ -81,7 +89,9 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const { cluster, url } = useCluster();
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
-    const fetchAccountHistory = useFetchAccountHistory();
+    const fetchAccountHistory = useFetchAccountHistory(PAGE_SIZE);
+    const retryFailedTransactions = useRetryFailedTransactions();
+    useEnableTransactionFetches(toAddress(address));
     const refresh = () => fetchAccountHistory(toAddress(address), true, true);
     const loadMore = () => fetchAccountHistory(toAddress(address), true);
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
@@ -95,8 +105,14 @@ export function TokenTransfersCard({ address }: { address: string }) {
     }, [history]);
 
     React.useEffect(() => {
+        // A fetch that the last unmount skipped left rows without a transaction.
+        const hasSkipped = transactionRows.some(
+            ({ signature }) => history?.data?.missingTransactions?.get(signature) === 'skipped',
+        );
         if (!history || !history.data?.transactionMap?.size) {
             refresh();
+        } else if (hasSkipped) {
+            retryFailedTransactions(toAddress(address));
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -218,6 +234,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
     }
 
     const fetching = history.status === FetchStatus.Fetching;
+    const { missingTransactions } = history.data;
+    const failedCount = transactionRows.filter(({ signature }) => missingTransactions?.has(signature)).length;
     const tokenAddress = pubkey.toBase58();
 
     const columns: GridTableColumn<TransferData>[] = [
@@ -280,9 +298,18 @@ export function TokenTransfersCard({ address }: { address: string }) {
             ariaLabel="Token transfers"
             collapsible={false}
             columns={columns}
-            empty={null}
+            empty={fetching ? 'Loading token transfers' : null}
             footer={
                 <div className="mt-2 w-full">
+                    {failedCount > 0 && !fetching && (
+                        <div className="mb-2 flex items-center justify-center gap-2 text-dk-gray-700">
+                            Failed to load {failedCount} of {transactionRows.length} transactions
+                            <RetryButton
+                                label="Retry the failed transactions"
+                                onRetry={() => retryFailedTransactions(toAddress(address))}
+                            />
+                        </div>
+                    )}
                     <HistoryCardFooterContent
                         fetching={fetching}
                         foundOldest={history.data.foundOldest}

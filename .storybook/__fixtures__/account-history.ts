@@ -24,9 +24,9 @@ type AccountHistoryOverrides = Partial<AccountHistory>;
 export function mockAccountHistory(overrides: AccountHistoryOverrides = {}): CacheEntry<AccountHistory> {
     return {
         data: {
-            failedTransactionSignatures: overrides.failedTransactionSignatures,
             fetched: overrides.fetched ?? [],
             foundOldest: overrides.foundOldest ?? true,
+            missingTransactions: overrides.missingTransactions,
             transactionMap: overrides.transactionMap,
         },
         status: FetchStatus.Fetched,

@@ -1,6 +1,5 @@
 'use client';
 
-import type { TransactionWithMeta } from '@entities/transaction-data';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { getOwn } from '@shared/lib/object';
@@ -13,7 +12,8 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { fetchParsedTransactions } from '../api/fetch-parsed-transactions';
 import { hasActiveFilters, type HistoryFilters } from '../lib/history-filters';
-import type { AccountHistory } from '../lib/types';
+import type { AccountHistory, HistoryRow } from '../lib/types';
+import { isQueueKeyEnabled, useEnabledQueueKey } from './enabled-queue-keys';
 import { fetchHistoryPage } from './fetch-history-page';
 import {
     type Dispatch,
@@ -52,10 +52,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 slot: { gte: slotGte, lte: slotLte },
                 status,
             };
-            // Snapshot the generation at dispatch time; if it advances before the
-            // response lands (a filter change), the result is treated as stale.
-            const generation = generations.get(address) ?? 0;
-            const isCurrent = () => (generations.get(address) ?? 0) === generation;
+            const isCurrent = snapshotGeneration(generations, address);
 
             // Latch entries are keyed by endpoint as well as address. Index coverage is a
             // property of the endpoint, and a request still in flight when the cluster changes
@@ -72,8 +69,11 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
             // addresses are handled inside fetchHistoryPage, which is not filter-dependent.)
             const forceSignatures = signaturesOnly.has(latchKey) && !hasActiveFilters(activeFilters);
 
+            const cached = getOwn(state.entries, address);
+
             const common = {
                 address,
+                cachedHistory: cached?.data,
                 cluster,
                 dispatch,
                 fetchTransactions,
@@ -90,7 +90,6 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 url,
             };
 
-            const cached = getOwn(state.entries, address);
             const isLoadMore = !refresh && Boolean(cached?.data?.fetched?.length);
             if (isLoadMore && cached?.data) {
                 if (cached.data.foundOldest) return;
@@ -101,7 +100,6 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 fetchOnce(address, inFlight, () =>
                     fetchAccountHistory({
                         ...common,
-                        additionalSignatures: fetchTransactions ? getUnfetchedSignatures(cached.data) : [],
                         append: true,
                         before: oldest,
                         paginationToken: cached.data?.paginationToken,
@@ -132,6 +130,56 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
     );
 }
 
+// A retry fetches no page, so a newer page cannot replace the rows whose transactions it fetches.
+export function useRetryFailedTransactions(): (address: Address) => void {
+    const { cluster, url } = useCluster();
+    const state = React.useContext(StateContext);
+    const dispatch = React.useContext(DispatchContext);
+    const inFlight = React.useContext(InFlightContext);
+    const generations = React.useContext(GenerationContext);
+    if (!state || !dispatch || !inFlight || !generations) {
+        throw new Error(`useRetryFailedTransactions must be used within a HistoryProvider`);
+    }
+
+    return React.useCallback(
+        (address: Address) => {
+            const cached = getOwn(state.entries, address);
+            const cachedHistory = cached?.data;
+            if (!cached || !cachedHistory) return;
+            const isCurrent = snapshotGeneration(generations, address);
+            fetchOnce(address, inFlight, () =>
+                retryFailedTransactions({
+                    address,
+                    cachedHistory,
+                    cluster,
+                    dispatch,
+                    isCurrent,
+                    status: cached.status,
+                    url,
+                }),
+            ).catch(e => Logger.error(e));
+        },
+        [cluster, dispatch, generations, inFlight, state, url],
+    );
+}
+
+// A card that fetches transactions calls this, or the queue skips every transaction fetch.
+export function useEnableTransactionFetches(address: Address): void {
+    const { url } = useCluster();
+    useEnabledQueueKey(transactionFetchesKey(url, address));
+}
+
+function transactionFetchesKey(url: string, address: Address): string {
+    return `history-transactions:${url}:${address}`;
+}
+
+// The returned function returns false after the generation advances (a filter change or a reset), so the caller
+// drops the result of a superseded request.
+function snapshotGeneration(generations: Map<string, number>, address: Address): () => boolean {
+    const generation = generations.get(address) ?? 0;
+    return () => (generations.get(address) ?? 0) === generation;
+}
+
 type FetchAccountHistoryOptions = {
     dispatch: Dispatch;
     address: Address;
@@ -144,7 +192,8 @@ type FetchAccountHistoryOptions = {
     append: boolean;
     forceSignatures?: boolean;
     fetchTransactions?: boolean;
-    additionalSignatures?: string[];
+    // The history already in the cache. Some of its rows that have no transaction are fetched with the page.
+    cachedHistory?: AccountHistory;
     // Returns false once this request has been superseded (e.g. by a filter change),
     // in which case its result is dropped rather than written into the cache.
     isCurrent?: () => boolean;
@@ -168,7 +217,7 @@ async function fetchAccountHistory({
     append,
     forceSignatures = false,
     fetchTransactions,
-    additionalSignatures,
+    cachedHistory,
     isCurrent = () => true,
     onMethodNotFound,
     onSignaturesOnly,
@@ -204,47 +253,120 @@ async function fetchAccountHistory({
         status = FetchStatus.FetchFailed;
     }
 
-    let failedTransactionSignatures;
-    let transactionMap;
-    if (fetchTransactions && history?.fetched) {
-        try {
-            const signatures = history.fetched.map(row => row.signature).concat(additionalSignatures ?? []);
-            ({ failedTransactionSignatures, transactionMap } = await fetchParsedTransactions({
-                cluster,
-                signatures,
-                url,
-            }));
-        } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                Logger.error(error, { url });
-            }
-            status = FetchStatus.FetchFailed;
-        }
-    }
-
     // A newer request (e.g. triggered by a filter change) has taken over for this
     // address; discard this stale result so it can't overwrite the fresh cache.
     if (!isCurrent()) return;
 
-    dispatch({
-        data: {
-            append,
-            failedTransactionSignatures,
-            history,
-            transactionMap,
+    if (!fetchTransactions || !history) {
+        dispatch({ data: { append, history }, key: address, status, type: ActionType.Update, url });
+        return;
+    }
+
+    // The page is written before its transactions load, so the rows of each transaction show when it lands.
+    dispatch({ data: { append, history }, key: address, status: FetchStatus.Fetching, type: ActionType.Update, url });
+
+    await fetchTransactionsIntoCache({
+        address,
+        cluster,
+        dispatch,
+        isCurrent,
+        signatures: getSignaturesToFetch({ append, cachedHistory, page: history.fetched }),
+        url,
+    });
+
+    if (!isCurrent()) return;
+
+    dispatch({ key: address, status, type: ActionType.Update, url });
+}
+
+async function retryFailedTransactions({
+    address,
+    cachedHistory,
+    cluster,
+    dispatch,
+    isCurrent,
+    status,
+    url,
+}: {
+    address: Address;
+    cachedHistory: AccountHistory;
+    cluster: Cluster;
+    dispatch: Dispatch;
+    isCurrent: () => boolean;
+    status: FetchStatus;
+    url: string;
+}): Promise<void> {
+    dispatch({ key: address, status: FetchStatus.Fetching, type: ActionType.Update, url });
+
+    await fetchTransactionsIntoCache({
+        address,
+        cluster,
+        dispatch,
+        isCurrent,
+        signatures: getFailedSignatures(cachedHistory),
+        url,
+    });
+
+    if (!isCurrent()) return;
+
+    // The status describes the last page, which the retry did not fetch.
+    dispatch({ key: address, status, type: ActionType.Update, url });
+}
+
+function fetchTransactionsIntoCache({
+    address,
+    cluster,
+    dispatch,
+    isCurrent,
+    signatures,
+    url,
+}: {
+    address: Address;
+    cluster: Cluster;
+    dispatch: Dispatch;
+    isCurrent: () => boolean;
+    signatures: string[];
+    url: string;
+}): Promise<void> {
+    return fetchParsedTransactions({
+        cluster,
+        onSettled: (signature, result) => {
+            if (!isCurrent()) return;
+            dispatch({
+                data: { result, signature },
+                key: address,
+                status: FetchStatus.Fetching,
+                type: ActionType.Update,
+                url,
+            });
         },
-        key: address,
-        status,
-        type: ActionType.Update,
+        shouldRun: () => isCurrent() && isQueueKeyEnabled(transactionFetchesKey(url, address)),
+        signatures,
         url,
     });
 }
 
-// Signatures on the page whose full transaction has not been fetched (and did not
-// previously fail), so a Load More can top up the transaction map in the same request.
-function getUnfetchedSignatures(history: AccountHistory | undefined): string[] {
-    if (!history) return [];
-    const existingMap = history.transactionMap ?? new Map<string, TransactionWithMeta>();
-    const failedSigs = history.failedTransactionSignatures ?? new Set<string>();
-    return history.fetched.map(row => row.signature).filter(sig => !existingMap.has(sig) && !failedSigs.has(sig));
+// The page rows. Load More also fetches the cached rows that no fetch has tried. A refresh does not fetch the
+// cached rows, because a page that does not overlap them replaces the list.
+function getSignaturesToFetch({
+    page,
+    cachedHistory,
+    append,
+}: {
+    page: HistoryRow[];
+    cachedHistory: AccountHistory | undefined;
+    append: boolean;
+}): string[] {
+    const cachedRows = append
+        ? (cachedHistory?.fetched ?? []).filter(({ signature }) => !cachedHistory?.missingTransactions?.has(signature))
+        : [];
+    const signatures = new Set([...page, ...cachedRows].map(row => row.signature));
+    // A transaction never changes, so a row that has one is not fetched again.
+    return [...signatures].filter(signature => !cachedHistory?.transactionMap?.has(signature));
+}
+
+function getFailedSignatures(history: AccountHistory): string[] {
+    return history.fetched
+        .map(({ signature }) => signature)
+        .filter(signature => history.missingTransactions?.has(signature));
 }

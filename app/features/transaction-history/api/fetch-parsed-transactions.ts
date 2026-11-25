@@ -1,48 +1,62 @@
-import { fetchTransactionDetails, type TransactionWithMeta } from '@entities/transaction-data';
+import { fetchTransactionDetails } from '@entities/transaction-data';
 import { Cluster } from '@utils/cluster';
-import { fetchAll } from '@utils/fetch-all';
-import { withBackoff } from '@utils/with-backoff';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
-import type { FailedTransactionSignatures, TransactionMap } from '../lib/types';
+import { getTransactionQueue } from '../lib/get-transaction-queue';
+import { TaskSkippedError } from '../lib/rate-limited-queue';
+import type { ParsedTransactionResult } from '../lib/types';
 
 /**
- * Fetches full parsed transactions for a set of signatures. Individual failures are
- * collected rather than thrown, so one bad signature cannot fail the whole page.
+ * Fetches the parsed transaction of each signature through the rate-limited queue.
+ *
+ * Reports each signature when its fetch settles, so one failure does not fail the page.
  */
 export async function fetchParsedTransactions({
     url,
     cluster,
     signatures,
+    shouldRun,
+    onSettled,
 }: {
     url: string;
     cluster: Cluster;
     signatures: string[];
-}): Promise<{ transactionMap: TransactionMap; failedTransactionSignatures: FailedTransactionSignatures }> {
-    const results = await fetchAll(signatures, async signature => {
-        try {
-            const transaction = await withBackoff(() => fetchTransactionDetails(url, signature));
+    shouldRun: () => boolean;
+    onSettled: (signature: string, result: ParsedTransactionResult) => void;
+}): Promise<void> {
+    await Promise.all(
+        signatures.map(async signature =>
+            onSettled(signature, await fetchParsedTransaction({ cluster, shouldRun, signature, url })),
+        ),
+    );
+}
 
-            return { signature, transaction: transaction ?? undefined };
-        } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                Logger.error(error, { signature, url });
-            }
-            return { signature, transaction: undefined };
+async function fetchParsedTransaction({
+    url,
+    cluster,
+    signature,
+    shouldRun,
+}: {
+    url: string;
+    cluster: Cluster;
+    signature: string;
+    shouldRun: () => boolean;
+}): Promise<ParsedTransactionResult> {
+    try {
+        // The queue runs one task at a time, so a call without a timeout would block every later task.
+        const transaction = await getTransactionQueue(url)(
+            () => fetchTransactionDetails(url, signature, { abortSignal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) }),
+            shouldRun,
+        );
+        // A null transaction is a transient miss, so a retry fetches it again.
+        return transaction ? { status: 'loaded', transaction } : { status: 'failed' };
+    } catch (error) {
+        if (error instanceof TaskSkippedError) return { status: 'skipped' };
+        if (cluster !== Cluster.Custom) {
+            Logger.error(error, { signature, url });
         }
-    });
-
-    const transactionMap = new Map<string, TransactionWithMeta>();
-    const failedTransactionSignatures = new Set<string>();
-
-    results.forEach(({ signature, transaction }) => {
-        if (transaction) {
-            transactionMap.set(signature, transaction);
-        } else {
-            failedTransactionSignatures.add(signature);
-        }
-    });
-
-    return { failedTransactionSignatures, transactionMap };
+        return { status: 'failed' };
+    }
 }
