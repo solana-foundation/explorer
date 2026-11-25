@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import type { AccountInfo } from '@solana/web3.js';
+import { type AccountInfo, VersionedMessage } from '@solana/web3.js';
 import { generated, PROGRAM_ID } from '@sqds/multisig';
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
 import useSWR, { type Key } from 'swr';
@@ -9,8 +10,11 @@ import { describe, expect, type Mock, test, vi } from 'vitest';
 
 import { readCell, renderWithProviders } from '@/app/__tests__/card-harness';
 import * as stubs from '@/app/__tests__/mock-stubs';
-import { createV1TransactionBytes } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
-import { toBase64 } from '@/app/shared/lib/bytes';
+import {
+    createV1TransactionBytes,
+    createWeb3TransactionMessage,
+} from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
+import { fromBase64, toBase64 } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
@@ -127,6 +131,40 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         // Note: Instructions section may show LoadingCard if lookup tables aren't fully resolved,
         // but the main transaction data is correctly displayed
         expect(screen.getByText(/Account List/i)).not.toBeNull();
+    });
+
+    test('should reset the instruction cards when switching between batch transactions', async () => {
+        const { renderWithContext, specificAccountKey } = setup();
+        const mockSWR = await import('swr');
+        (mockSWR.default as unknown as Mock).mockImplementation((key: Key) => {
+            if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
+                return {
+                    data: [
+                        createWeb3TransactionMessage().compileToV0Message(),
+                        VersionedMessage.deserialize(
+                            fromBase64(decodeURIComponent(stubs.systemProgramTransferQueryParam)),
+                        ),
+                    ],
+                    error: null,
+                    isLoading: false,
+                };
+            }
+            return { data: null, error: null, isLoading: true };
+        });
+
+        renderWithContext();
+
+        await waitFor(() => {
+            expect(readCell('Transfer Amount (SOL)')).toMatch('0.000000001');
+        });
+        await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
+        expect(readCell('Transfer Amount (SOL)')).toBe('');
+
+        await userEvent.click(screen.getByRole('button', { name: '2' }));
+
+        await waitFor(() => {
+            expect(readCell('Transfer Amount (SOL)')).toMatch('0.005');
+        });
     });
 });
 
