@@ -2,7 +2,6 @@ import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { generated } from '@sqds/multisig';
 import Link from 'next/link';
 import React from 'react';
 import { Search } from 'react-feather';
@@ -13,15 +12,17 @@ import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { useClusterPath } from '@/app/utils/url';
 
-const { batchDiscriminator, vaultTransactionDiscriminator } = generated;
+// Copies of the Squads SDK discriminators, so the account page detects these accounts without loading heavy SDK.
+const BATCH_DISCRIMINATOR = [156, 194, 70, 44, 22, 88, 137, 44];
+const VAULT_TRANSACTION_DISCRIMINATOR = [168, 250, 162, 100, 81, 14, 162, 207];
 
 export type SquadsAccountType = 'batch' | 'vaultTransaction';
 
 export function detectSquadsAccountType(owner: PublicKey, rawData: Uint8Array): SquadsAccountType | undefined {
     if (owner.toBase58() !== SQUADS_V4_ADDRESS || rawData.length < 8) return undefined;
     const matches = (discriminator: number[]) => discriminator.every((byte, i) => byte === rawData[i]);
-    if (matches(batchDiscriminator)) return 'batch';
-    if (matches(vaultTransactionDiscriminator)) return 'vaultTransaction';
+    if (matches(BATCH_DISCRIMINATOR)) return 'batch';
+    if (matches(VAULT_TRANSACTION_DISCRIMINATOR)) return 'vaultTransaction';
     return undefined;
 }
 
