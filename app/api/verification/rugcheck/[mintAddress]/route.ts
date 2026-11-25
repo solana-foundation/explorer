@@ -2,6 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { is, number, type } from 'superstruct';
 
+import { isRetryableFetchError } from '@/app/shared/lib/errors';
 import { isTransientStatus } from '@/app/shared/lib/http-status';
 import {
     CACHE_HEADERS,
@@ -87,6 +88,13 @@ export async function GET(_request: Request, props: Params) {
             return NextResponse.json(
                 { error: 'Upstream request timed out' },
                 { headers: ERROR_CACHE_HEADERS, status: 504 },
+            );
+        }
+        if (isRetryableFetchError(error)) {
+            Logger.warn('[api:rugcheck] Upstream connection failed', { mintAddress, sentry: true });
+            return NextResponse.json(
+                { error: 'Upstream connection failed' },
+                { headers: ERROR_CACHE_HEADERS, status: 502 },
             );
         }
         Logger.panic(error instanceof Error ? error : new Error('Failed to fetch rugcheck data'));
