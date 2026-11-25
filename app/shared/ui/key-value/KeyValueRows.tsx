@@ -6,6 +6,7 @@ export type KeyValueRow = {
     label: React.ReactNode;
     value: React.ReactNode;
     valueClassName?: string;
+    className?: string;
 };
 
 export type KeyValueRowInput = KeyValueRow | false | 0 | 0n | '' | null | undefined;
@@ -16,11 +17,12 @@ export function KeyValueRows({ rows }: { rows: ReadonlyArray<KeyValueRowInput> }
             {rows
                 .map((row, index) => ({ index, row }))
                 .filter((entry): entry is { index: number; row: KeyValueRow } => Boolean(entry.row))
-                .map(({ index, row: { label, value, valueClassName } }) => (
+                .map(({ index, row: { label, value, valueClassName, className } }) => (
                     <KeyValue
                         key={typeof label === 'string' ? label : index}
                         label={label}
                         valueClassName={valueClassName}
+                        className={className}
                     >
                         {value}
                     </KeyValue>

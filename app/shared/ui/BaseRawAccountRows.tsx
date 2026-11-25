@@ -22,6 +22,7 @@ export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccou
         },
         { label: 'Executable', value: account.executable ? 'Yes' : 'No' },
         {
+            className: 'flex-col items-stretch !gap-1.5 lg:flex-row lg:items-baseline lg:!gap-dk-4',
             label: 'Raw Data',
             value: <RawDataField data={rawData} filename={account.pubkey.toBase58()} loading={isLoading} />,
         },
