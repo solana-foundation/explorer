@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import { Signature } from '@components/common/Signature';
+import { invariant } from '@shared/lib/invariant';
 import {
     getBase58Encoder,
     getPublicKeyFromAddress,
@@ -64,9 +65,10 @@ async function verifySignatures(
 ): Promise<(boolean | undefined)[]> {
     return await Promise.all(
         signatures.map(async (signature, index) => {
-            if (!signature) return undefined;
+            const signer = message.staticAccountKeys.at(index);
+            if (!signature || !signer) return undefined;
             try {
-                const publicKey = await getPublicKeyFromAddress(toKitAddress(message.staticAccountKeys[index]));
+                const publicKey = await getPublicKeyFromAddress(toKitAddress(signer));
                 const rawSignature = signatureBytes(new Uint8Array(BASE58_ENCODER.encode(signature)));
                 return await verifySignature(publicKey, rawSignature, rawMessage);
             } catch (error) {
@@ -110,13 +112,17 @@ export function TransactionSignatures({
             ? verification.results
             : undefined;
 
-    const rows: SignatureRow[] = signatures.map((signature, index) => ({
-        index,
-        pending: verificationResults === undefined,
-        signature,
-        signer: message.staticAccountKeys[index],
-        verified: verificationResults?.[index],
-    }));
+    const rows: SignatureRow[] = signatures.map((signature, index) => {
+        const signer = message.staticAccountKeys.at(index);
+        invariant(signer, `signer index ${index} out of range`);
+        return {
+            index,
+            pending: verificationResults === undefined,
+            signature,
+            signer,
+            verified: verificationResults?.at(index),
+        };
+    });
 
     return (
         <GridTableCard

@@ -36,7 +36,7 @@ export function decodePmpContentInstruction(ix: TransactionInstruction): PmpCont
     }
 
     if (decoded.kind === 'initialize') {
-        const metadataAccount = ix.keys[PMP_METADATA_ACCOUNT_INDEX];
+        const metadataAccount = ix.keys.at(PMP_METADATA_ACCOUNT_INDEX);
         return {
             config: decoded.config,
             kind: 'initialize',
@@ -59,7 +59,7 @@ function bytesSource(bytes: Uint8Array | undefined, account: Address | undefined
 
 /** The optional buffer/sourceBuffer slot. Codama's "programId" strategy fills an omitted optional with the id. */
 function sourceBufferAt(ix: TransactionInstruction): Address | undefined {
-    const pubkey = ix.keys[PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX]?.pubkey;
+    const pubkey = ix.keys.at(PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX)?.pubkey;
     const account = pubkey && toKitAddress(pubkey);
     return account && account !== PMP_ADDRESS ? account : undefined;
 }

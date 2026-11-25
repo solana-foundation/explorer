@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { describe, expect, it } from 'vitest';
 
 import { loadOgFonts } from '../fonts';
@@ -14,6 +16,13 @@ describe('og-fonts', () => {
             'Roboto Mono 500',
             'Roboto Mono 600',
         ]);
+    });
+
+    it('should read a different file for each face', async () => {
+        const fonts = await loadOgFonts();
+        const digests = fonts.map(({ data }) => createHash('sha256').update(new Uint8Array(data)).digest('hex'));
+
+        expect(new Set(digests).size).toBe(fonts.length);
     });
 
     it('should return only the weights a request names', async () => {

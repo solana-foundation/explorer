@@ -1,3 +1,4 @@
+import { invariant } from '@shared/lib/invariant';
 import {
     type AccountMeta,
     addDecoderSizePrefix,
@@ -49,7 +50,9 @@ function namedAccounts<const K extends readonly string[]>(
     }
     const named = {} as Record<K[number], AccountMeta>;
     names.forEach((name, index) => {
-        named[name as K[number]] = ix.accounts[index];
+        const account = ix.accounts.at(index);
+        invariant(account, `missing account at index ${index}`);
+        named[name as K[number]] = account;
     });
     return named;
 }

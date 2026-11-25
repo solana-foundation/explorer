@@ -61,12 +61,12 @@ export function parseBpfUpgradeableLoaderInstruction(ix: KitInstruction): BpfUpg
 
         // Account at position `i`, or undefined when the instruction supplied fewer keys.
         const acc = (i: number): PublicKey | undefined => {
-            const meta = ix.accounts[i];
+            const meta = ix.accounts.at(i);
             return meta ? new PublicKey(meta.address) : undefined;
         };
         // Required account: throws (→ caught → undefined parse) when missing.
         const req = (i: number): PublicKey => {
-            const meta = ix.accounts[i];
+            const meta = ix.accounts.at(i);
             if (!meta) throw new Error(`missing account at index ${i}`);
             return new PublicKey(meta.address);
         };

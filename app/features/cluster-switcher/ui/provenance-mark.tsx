@@ -1,5 +1,6 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
 import { AlertTriangle, CheckCircle } from 'react-feather';
 
 import type { EndpointProvenance } from '../lib/endpoint-provenance';
@@ -38,7 +39,7 @@ export function ProvenanceMark({
     title?: string;
     withLabel?: boolean;
 }) {
-    const mark = provenance ? PROVENANCE_MARK[provenance] : undefined;
+    const mark = provenance ? getOwn(PROVENANCE_MARK, provenance) : undefined;
     if (mark === undefined) return undefined;
     const Glyph = mark.glyph;
     return (

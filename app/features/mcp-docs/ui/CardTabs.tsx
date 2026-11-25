@@ -25,10 +25,13 @@ export function CardTabs({
         [contentRef],
     );
 
-    const { onKeyDown, tabRefs } = useTablistKeyboard<HTMLButtonElement>(
+    const { onKeyDown, setTabRef } = useTablistKeyboard<HTMLButtonElement>(
         items.length,
         items.findIndex(item => item.id === value),
-        index => onChange(items[index].id),
+        index => {
+            const item = items.at(index);
+            if (item) onChange(item.id);
+        },
     );
 
     return (
@@ -45,9 +48,7 @@ export function CardTabs({
                 return (
                     <button
                         key={item.id}
-                        ref={node => {
-                            tabRefs.current[index] = node;
-                        }}
+                        ref={setTabRef(index)}
                         type="button"
                         role="tab"
                         aria-selected={active}

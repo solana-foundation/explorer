@@ -1,4 +1,5 @@
 import { useCluster, useEpochInfo } from '@providers/cluster';
+import { invariant } from '@shared/lib/invariant';
 import useSWR from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -69,7 +70,9 @@ export async function resolveProviders(
     const settled = await Promise.allSettled(providers.map(async p => p.search(query, ctx)));
     return settled.flatMap((result, i) => {
         if (result.status === 'rejected') {
-            Logger.error(new Error(`Failed to run ${providers[i].name} search provider`, { cause: result.reason }), {
+            const provider = providers.at(i);
+            invariant(provider, `missing search provider at index ${i}`);
+            Logger.error(new Error(`Failed to run ${provider.name} search provider`, { cause: result.reason }), {
                 sentry: true,
             });
             return [];

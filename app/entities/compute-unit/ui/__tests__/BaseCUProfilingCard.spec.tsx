@@ -74,11 +74,7 @@ describe('BaseCUProfilingCard', () => {
         });
     });
 
-    /**
-     * The tooltip builds its shell with innerHTML, so the one thing that must never be interpolated is
-     * the instruction name — it can come from program-authored on-chain IDL metadata, which makes it
-     * attacker-controlled by anyone who can publish an IDL.
-     */
+    // The instruction name can come from on-chain IDL metadata, so anyone who publishes an IDL controls it.
     describe('tooltip', () => {
         it('should write a program-authored name as text, not as markup', () => {
             const name = '<img src=x onerror="alert(1)">';
@@ -98,6 +94,16 @@ describe('BaseCUProfilingCard', () => {
             render(<BaseCUProfilingCard instructions={[cuData({ computeUnits: 0, scheduledUnits: 200000 })]} />);
 
             expect(textOf(showTooltip().tooltip, '.cu-tooltip-cu')).toBe('~200,000 CU reserved');
+        });
+
+        it('should set the swatch to the color of its bar', () => {
+            render(<BaseCUProfilingCard instructions={transferAndComputeBudget()} />);
+
+            // eslint-disable-next-line testing-library/no-node-access -- imperative Chart.js DOM, not a render
+            const swatch = showTooltip().tooltip.querySelector<HTMLElement>('.cu-tooltip-swatch');
+
+            // jsdom serializes a hex color as rgb().
+            expect(swatch?.style.backgroundColor).toBe('rgb(32, 215, 155)');
         });
 
         it('should qualify the instruction name with its program', () => {

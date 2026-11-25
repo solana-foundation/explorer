@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { isAddress } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import { isSignatureValid } from '@utils/tx';
@@ -137,5 +138,5 @@ function isNaturalNumber(value: string): boolean {
 
 function resolveCluster(explorer: ExternalExplorer, rawCluster: string | null): Cluster {
     if (!rawCluster) return Cluster.Mainnet;
-    return explorer.clusters[rawCluster] ?? Cluster.Mainnet;
+    return getOwn(explorer.clusters, rawCluster) ?? Cluster.Mainnet;
 }

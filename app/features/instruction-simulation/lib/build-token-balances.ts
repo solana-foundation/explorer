@@ -1,5 +1,6 @@
 import { formatTokenAmount, tokenAmountToNumber } from '@entities/token-amount';
 import { isTokenProgramId } from '@providers/accounts/tokens';
+import { getOwn } from '@shared/lib/object';
 import type {
     AccountInfo,
     ParsedAccountData,
@@ -47,15 +48,15 @@ export function buildTokenBalances(
     const postTokenBalances: TokenBalance[] = [];
     const messageAccounts: ParsedMessageAccount[] = [];
 
-    for (let index = 0; index < accountKeys.length; index++) {
-        const preBalance = extractPreTokenBalance(index, parsedAccountsPre[index]);
+    for (const [index, pubkey] of accountKeys.entries()) {
+        const preBalance = extractPreTokenBalance(index, parsedAccountsPre.at(index));
         if (preBalance) preTokenBalances.push(preBalance);
 
         const postBalance = extractPostTokenBalance(index, simulatedAccounts.at(index), mintToDecimals);
         if (postBalance) postTokenBalances.push(postBalance);
 
         // Every key must be present so generateTokenBalanceRows can join by accountIndex
-        messageAccounts.push({ pubkey: accountKeys[index], signer: false, writable: true });
+        messageAccounts.push({ pubkey, signer: false, writable: true });
     }
 
     return { accountKeys: messageAccounts, postTokenBalances, preTokenBalances };
@@ -89,7 +90,7 @@ function extractPostTokenBalance(
     if (bytes.length < TOKEN_ACCOUNT_SIZE) return undefined;
 
     // Token-2022: accounts > 165 bytes carry a type discriminator — skip mints (1), keep accounts (2)
-    if (bytes.length > TOKEN_ACCOUNT_SIZE && bytes[TOKEN_ACCOUNT_SIZE] !== ACCOUNT_TYPE_TOKEN) return undefined;
+    if (bytes.length > TOKEN_ACCOUNT_SIZE && bytes.at(TOKEN_ACCOUNT_SIZE) !== ACCOUNT_TYPE_TOKEN) return undefined;
 
     // The decoder validates the account-state enum and throws on anything that isn't a
     // real token account — a Token-2022 multisig can reach here by passing the size and
@@ -102,7 +103,7 @@ function extractPostTokenBalance(
     }
     const { amount, mint, owner: tokenOwner } = decoded;
 
-    const decimals = mintToDecimals[mint];
+    const decimals = getOwn(mintToDecimals, mint);
     if (decimals === undefined) return undefined;
 
     const amountStr = amount.toString();

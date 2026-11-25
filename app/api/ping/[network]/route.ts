@@ -47,12 +47,11 @@ export async function GET(_request: Request, props: Params) {
                             Token: process.env.PING_API_KEY || '',
                         },
                     },
-                ),
+                ).then(response => ({ interval, response })),
             ),
         );
-        const data: { [interval: number]: ValidatorsAppPingStats[] } = {};
-        await Promise.all(
-            responses.map(async (response, index) => {
+        const entries = await Promise.all(
+            responses.map(async ({ interval, response }): Promise<[number, ValidatorsAppPingStats[]]> => {
                 if (!response.ok) {
                     await response.text().catch(() => undefined); // drain body to release socket
                     throw new Error(`Upstream API error: ${response.status} ${response.statusText}`);
@@ -63,10 +62,10 @@ export async function GET(_request: Request, props: Params) {
                     throw new Error('Upstream API returned non-array payload');
                 }
 
-                const interval = PING_INTERVALS[index];
-                data[interval] = payload as ValidatorsAppPingStats[];
+                return [interval, payload as ValidatorsAppPingStats[]];
             }),
         );
+        const data: { [interval: number]: ValidatorsAppPingStats[] } = Object.fromEntries(entries);
 
         return NextResponse.json(data, { headers: CACHE_HEADERS });
     } catch (error) {

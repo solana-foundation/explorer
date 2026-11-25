@@ -215,10 +215,7 @@ export function GravityCta({
                 const cy = Math.min(rows - 1, Math.max(0, Math.floor((dot.y / height) * rows)));
                 counts[cy * cols + cx]++;
             }
-            let sparsest = 0;
-            for (let cell = 1; cell < counts.length; cell++) {
-                if (counts[cell] < counts[sparsest]) sparsest = cell;
-            }
+            const sparsest = counts.indexOf(Math.min(...counts));
             return [
                 ((sparsest % cols) + Math.random()) * (width / cols),
                 (Math.floor(sparsest / cols) + Math.random()) * (height / rows),
@@ -307,7 +304,8 @@ export function GravityCta({
             ctx.fillStyle = '#1DD79B';
 
             for (let index = dots.length - 1; index >= 0; index--) {
-                const dot = dots[index];
+                const dot = dots.at(index);
+                if (!dot) continue;
 
                 if (dot.dying > 0) {
                     dot.dying += dt;
@@ -422,26 +420,26 @@ export function GravityCta({
                 let toDrain = Math.ceil(Math.max(0, alive - restingDots) * rate);
                 let toRefill = 0;
                 for (let index = dots.length - 1; index >= 0; index--) {
-                    const dot = dots[index];
-                    if (dot.dying > 0) continue;
+                    const dot = dots.at(index);
+                    if (!dot || dot.dying > 0) continue;
                     const cell = cellOf(dot);
-                    if (counts[cell] <= overfill || Math.random() >= rate) continue;
+                    const count = counts.at(cell);
+                    if (count === undefined || count <= overfill || Math.random() >= rate) continue;
                     dot.dying = dt;
-                    counts[cell]--;
+                    counts.set([count - 1], cell);
                     if (toDrain > 0) toDrain--;
                     else toRefill++;
                 }
                 for (let index = dots.length - 1; index >= 0 && toDrain > 0; index--) {
-                    if (dots[index].dying > 0) continue;
-                    dots[index].dying = dt;
+                    const dot = dots.at(index);
+                    if (!dot || dot.dying > 0) continue;
+                    dot.dying = dt;
                     toDrain--;
                 }
                 while (toRefill-- > 0) {
-                    let sparsest = 0;
-                    for (let cell = 1; cell < counts.length; cell++) {
-                        if (counts[cell] < counts[sparsest]) sparsest = cell;
-                    }
-                    counts[sparsest]++;
+                    const fewest = Math.min(...counts);
+                    const sparsest = counts.indexOf(fewest);
+                    counts.set([fewest + 1], sparsest);
                     makeDot(
                         randomSize(true),
                         ((sparsest % cols) + Math.random()) * (width / cols),

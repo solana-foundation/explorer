@@ -39,7 +39,11 @@ export function logProxyError(error: StatusError) {
         Logger.error(error, context);
         return;
     }
-    Logger[level](`[api:metadata-proxy] ${message}`, context);
+    if (level === 'warn') {
+        Logger.warn(`[api:metadata-proxy] ${message}`, context);
+        return;
+    }
+    Logger.debug(`[api:metadata-proxy] ${message}`, context);
 }
 
 // Records the full fetched-size distribution, not just the over-cap tail, to tune `MAX_SIZE`.

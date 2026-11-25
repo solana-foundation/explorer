@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import type { PublicKey } from '@solana/web3.js';
 
 import { DEFAULT_AUTOCOMPLETE_ITEMS } from './const';
@@ -13,7 +14,7 @@ export function createGetAutocompleteItems(deps: {
 
     const getAutocompleteItems = (accountName: string) => {
         const autocompleteItems = [...defaultItems];
-        const pdaData = pdas[accountName];
+        const pdaData = getOwn(pdas, accountName);
         if (pdaData) {
             autocompleteItems.push({
                 generated: true,

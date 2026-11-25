@@ -120,16 +120,11 @@ export function performanceInfoReducer(state: PerformanceInfo, action: Performan
 }
 
 function downsampleByFactor(series: number[], factor: number) {
-    return series.reduce((result: number[], num: number, i: number) => {
-        const downsampledIndex = Math.floor(i / factor);
-        if (result.length < downsampledIndex + 1) {
-            result.push(0);
-        }
-        const mean = result[downsampledIndex];
-        const differential = (num - mean) / ((i % factor) + 1);
-        result[downsampledIndex] = mean + differential;
-        return result;
-    }, []);
+    return Array.from({ length: Math.ceil(series.length / factor) }, (_, downsampledIndex) =>
+        series
+            .slice(downsampledIndex * factor, (downsampledIndex + 1) * factor)
+            .reduce((mean, num, i) => mean + (num - mean) / (i + 1), 0),
+    );
 }
 
 function round(series: number[]) {

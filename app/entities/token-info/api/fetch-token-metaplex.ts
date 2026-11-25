@@ -7,6 +7,7 @@ import {
     TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
+import { invariant } from '@shared/lib/invariant';
 import { address } from '@solana/kit';
 import { fetchAll } from '@utils/fetch-all';
 
@@ -91,11 +92,12 @@ async function fetchDecimals(
                     )
                     .send();
                 value.forEach((account, index) => {
+                    const mint = batch.at(index);
                     const data = account?.data;
-                    if (!data || !('parsed' in data)) return;
+                    if (mint === undefined || !data || !('parsed' in data)) return;
                     const parsedDecimals = (data.parsed as { info?: { decimals?: unknown } }).info?.decimals;
                     if (typeof parsedDecimals === 'number') {
-                        decimals.set(batch[index], parsedDecimals);
+                        decimals.set(mint, parsedDecimals);
                     }
                 });
             } catch (error) {
@@ -227,16 +229,20 @@ export async function getTokenInfosFromMetaplex(
             options.onError,
         ),
         // `fetchAll` runs at most `LOGO_CONCURRENCY` reads at a time and keeps the results in the
-        // order the mints were given, so `logoUris[index]` below still belongs to `fungible[index]`.
+        // order the mints were given, so `logoUris.at(index)` below still belongs to `fungible[index]`.
         fetchAll(fungible, metadata => fetchLogoUri(metadata, deadline, options), LOGO_CONCURRENCY),
     ]);
 
-    return fungible.map((metadata, index) => ({
-        address: metadata.mint.toString(),
-        decimals: decimals.get(metadata.mint.toString()) ?? DEFAULT_DECIMALS,
-        logoURI: logoUris[index],
-        name: removeEmptyChars(metadata.name),
-        symbol: removeEmptyChars(metadata.symbol),
-        verified: false,
-    }));
+    return fungible.map((metadata, index) => {
+        const logoURI = logoUris.at(index);
+        invariant(logoURI !== undefined, `logo URI index ${index} out of range`);
+        return {
+            address: metadata.mint.toString(),
+            decimals: decimals.get(metadata.mint.toString()) ?? DEFAULT_DECIMALS,
+            logoURI,
+            name: removeEmptyChars(metadata.name),
+            symbol: removeEmptyChars(metadata.symbol),
+            verified: false,
+        };
+    });
 }

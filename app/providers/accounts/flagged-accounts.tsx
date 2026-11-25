@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import Link from 'next/link';
 import React from 'react';
 
@@ -68,8 +69,7 @@ const INCIDENTS: Record<IncidentId, IncidentDescription> = {
     ),
 } as const;
 
-const FLAGGED_ACCOUNTS_WARNING: FlaggedMap = {};
-for (const [account, incidentId] of Object.entries(FLAGGED_ACCOUNTS)) {
-    FLAGGED_ACCOUNTS_WARNING[account] = INCIDENTS[incidentId];
-}
+const FLAGGED_ACCOUNTS_WARNING: FlaggedMap = Object.fromEntries(
+    Object.entries(FLAGGED_ACCOUNTS).map(([account, incidentId]) => [account, getOwn(INCIDENTS, incidentId)]),
+);
 export default FLAGGED_ACCOUNTS_WARNING;

@@ -20,6 +20,7 @@ import {
     STATUS_VALUES,
 } from '@features/transaction-history/lib/history-filters';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import {
     type Address as KitAddress,
     address,
@@ -88,7 +89,7 @@ const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; directi
     const sort = query.get('sort');
     const mode: SortMode = isSortMode(sort) ? sort : 'index';
     const dir = query.get('dir');
-    const direction: SortDirection = isSortDirection(dir) ? dir : DEFAULT_DIRECTION[mode];
+    const direction: SortDirection = isSortDirection(dir) ? dir : getOwn(DEFAULT_DIRECTION, mode);
     return { direction, mode };
 };
 
@@ -171,7 +172,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
             const invocations = new Map<string, number>();
             const accountKeys = getBlockTransactionAccounts(tx);
             indexMap.forEach((count, i) => {
-                const accountKey = accountKeys[i];
+                const accountKey = accountKeys.at(i);
                 invariant(accountKey, `account key index ${i} out of range`);
                 const programId = accountKey;
                 invocations.set(programId, count);
@@ -228,7 +229,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                     return true;
                 }
 
-                const tx = block.transactions[index];
+                const tx = block.transactions.at(index);
                 if (!tx || !isBlockTransaction(tx)) return false;
                 return getBlockTransactionAccounts(tx).includes(accountFilter);
             })
@@ -314,7 +315,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                                 {statusFilter !== null && (
                                     <FilterChip
                                         field="Status"
-                                        label={STATUS_LABELS[statusFilter]}
+                                        label={getOwn(STATUS_LABELS, statusFilter)}
                                         applyReset={params => params.delete(STATUS_PARAM)}
                                     />
                                 )}
@@ -704,7 +705,7 @@ const FilterDropdown = ({
                         <ParamFilterLink
                             active={currentStatus === status}
                             key={status}
-                            label={STATUS_LABELS[status]}
+                            label={getOwn(STATUS_LABELS, status)}
                             param={STATUS_PARAM}
                             value={status}
                         />
@@ -794,8 +795,8 @@ const SortDropdown = ({
     onSort: (sortKey: SortMode, direction: SortDirection) => void;
 }) => {
     const options = sortModes(showComputeUnits).flatMap(mode => [
-        { direction: 'asc' as SortDirection, label: `Lowest ${SORT_NOUNS[mode]}`, mode },
-        { direction: 'desc' as SortDirection, label: `Highest ${SORT_NOUNS[mode]}`, mode },
+        { direction: 'asc' as SortDirection, label: `Lowest ${getOwn(SORT_NOUNS, mode)}`, mode },
+        { direction: 'desc' as SortDirection, label: `Highest ${getOwn(SORT_NOUNS, mode)}`, mode },
     ]);
 
     return (

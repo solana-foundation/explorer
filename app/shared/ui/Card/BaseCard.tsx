@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
@@ -158,7 +159,7 @@ const BaseCardTitle = React.forwardRef<HTMLElement, BaseCardTitleProps>(
         // TODO: fold `sizeClass` into `titleVariants` as an `as` variant (a compound variant keyed on
         // `ui: 'dashkit'` + `as`) so the dashkit size token is part of the CVA config instead of a
         // separate class passed alongside it.
-        const sizeClass = ui === 'dashkit' ? dashkitTitleSizeByAs[as] : '';
+        const sizeClass = ui === 'dashkit' ? getOwn(dashkitTitleSizeByAs, as) : '';
         return <Element ref={ref} className={cnPrefixed(titleVariants({ ui }), sizeClass, className)} {...props} />;
     },
 );

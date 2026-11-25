@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { is, number, type } from 'superstruct';
@@ -119,7 +120,7 @@ async function getNoDataStatus(response: Response): Promise<NoDataStatusCode | u
     if (response.status === 404) return 404;
     if (response.status !== 400) return undefined;
     const error = await getErrorMessage(response);
-    if (error) return RUGCHECK_NO_DATA_ERRORS[error];
+    if (error) return getOwn(RUGCHECK_NO_DATA_ERRORS, error);
     return undefined;
 }
 

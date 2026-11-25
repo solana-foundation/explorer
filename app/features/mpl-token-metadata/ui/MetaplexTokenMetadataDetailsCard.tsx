@@ -8,6 +8,7 @@ import {
     text,
 } from '@entities/instruction-card';
 import type { ParsedInstructionInfo } from '@entities/instruction-parser';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 
 import type { MetaplexTokenMetadataParsed } from '../lib/metaplex-token-metadata-client';
@@ -72,7 +73,7 @@ export function MetaplexTokenMetadataDetailsCard({ node, parsed }: MetaplexToken
     const { info, type } = parsed as MetaplexTokenMetadataParsed;
 
     return (
-        <InstructionCardView node={node} title={`${TITLE_PREFIX}: ${IX_TITLES[type]}`}>
+        <InstructionCardView node={node} title={`${TITLE_PREFIX}: ${getOwn(IX_TITLES, type)}`}>
             <InstructionFields programId={node.programId} fields={instructionFields(type, info)} />
         </InstructionCardView>
     );

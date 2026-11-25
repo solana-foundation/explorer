@@ -11,6 +11,7 @@ import { ProxiedImage } from '@features/metadata';
 import { useSecurityTxt } from '@features/security-txt';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
+import { getOwn } from '@shared/lib/object';
 import { PROGRAM_INFO_BY_ID } from '@utils/programs';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
@@ -37,7 +38,7 @@ export function ProgramHeader({
         version?: string;
         selfReported?: boolean;
     } => {
-        const programInfo = PROGRAM_INFO_BY_ID[address];
+        const programInfo = getOwn(PROGRAM_INFO_BY_ID, address);
         const isTrustedProgram = programInfo && programInfo.deployments.includes(cluster);
         const trustedProgramName = isTrustedProgram ? programInfo.name : undefined;
         const namePlaceholder = 'Program Account';

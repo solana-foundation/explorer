@@ -101,15 +101,15 @@ export function encodeTokenAccountBase64(
     buf.set(encoded);
 
     // The encoder only accepts in-range AccountState values, so corrupt vectors patch the byte directly
-    if (state !== undefined) buf[STATE_OFFSET] = state;
-    if (totalSize > TOKEN_ACCOUNT_SIZE) buf[TOKEN_ACCOUNT_SIZE] = ACCOUNT_TYPE_TOKEN;
+    if (state !== undefined) buf.set([state], STATE_OFFSET);
+    if (totalSize > TOKEN_ACCOUNT_SIZE) buf.set([ACCOUNT_TYPE_TOKEN], TOKEN_ACCOUNT_SIZE);
 
     return toBase64(buf);
 }
 
 export function encodeMintAccountBase64(decimals: number, size = MINT_SIZE): string {
     const bytes = new Uint8Array(size);
-    bytes[MINT_DECIMALS_OFFSET] = decimals;
+    bytes.set([decimals], MINT_DECIMALS_OFFSET);
     bytes[MINT_DECIMALS_OFFSET + 1] = 1; // isInitialized
     return toBase64(bytes);
 }

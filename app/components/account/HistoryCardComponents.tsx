@@ -12,35 +12,25 @@ export type TransactionRow = {
 
 export function getTransactionRows(transactions: ConfirmedSignatureInfo[]): TransactionRow[] {
     const transactionRows: TransactionRow[] = [];
-    for (let i = 0; i < transactions.length; i++) {
-        const slot = transactions[i].slot;
-        const slotTransactions = [transactions[i]];
-        while (i + 1 < transactions.length) {
-            const nextSlot = transactions[i + 1].slot;
-            if (nextSlot !== slot) break;
-            slotTransactions.push(transactions[++i]);
+    for (const transaction of transactions) {
+        let statusText;
+        let statusClass;
+        if (transaction.err) {
+            statusClass = 'warning';
+            statusText = 'Failed';
+        } else {
+            statusClass = 'success';
+            statusText = 'Success';
         }
-
-        for (const slotTransaction of slotTransactions) {
-            let statusText;
-            let statusClass;
-            if (slotTransaction.err) {
-                statusClass = 'warning';
-                statusText = 'Failed';
-            } else {
-                statusClass = 'success';
-                statusText = 'Success';
-            }
-            transactionRows.push({
-                blockTime: slotTransaction.blockTime,
-                err: slotTransaction.err,
-                signature: slotTransaction.signature,
-                signatureInfo: slotTransaction,
-                slot,
-                statusClass,
-                statusText,
-            });
-        }
+        transactionRows.push({
+            blockTime: transaction.blockTime,
+            err: transaction.err,
+            signature: transaction.signature,
+            signatureInfo: transaction,
+            slot: transaction.slot,
+            statusClass,
+            statusText,
+        });
     }
 
     return transactionRows;

@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import React from 'react';
 
 export enum FetchStatus {
@@ -95,7 +96,7 @@ export function reducer<T, U>(state: State<T>, action: Action<U>, reconciler: Re
     switch (action.type) {
         case ActionType.Update: {
             const key = action.key;
-            const entry = state.entries[key];
+            const entry = getOwn(state.entries, key);
             const entries = {
                 ...state.entries,
                 [key]: {

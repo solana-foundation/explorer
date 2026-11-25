@@ -6,11 +6,11 @@ export function rowAddresses(message: VersionedMessage, lookupTables: readonly R
     const addresses = new Set(message.staticAccountKeys.map(pubkey => pubkey.toBase58()));
 
     message.addressTableLookups.forEach((lookup, tableIndex) => {
-        const entry = lookupTables[tableIndex];
+        const entry = lookupTables.at(tableIndex);
         if (!isResolvedLookupTable(entry)) return;
 
         for (const index of [...lookup.writableIndexes, ...lookup.readonlyIndexes]) {
-            const address = entry[0].state.addresses[index];
+            const address = entry[0].state.addresses.at(index);
             if (address) addresses.add(address.toBase58());
         }
     });

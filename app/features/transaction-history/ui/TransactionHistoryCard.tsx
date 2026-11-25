@@ -14,6 +14,7 @@ import { Slot } from '@components/common/Slot';
 import { Badge } from '@components/shared/ui/badge';
 import { cn } from '@components/shared/utils';
 import { FetchStatus } from '@providers/cache';
+import { getOwn } from '@shared/lib/object';
 import { address as toAddress } from '@solana/kit';
 import { displayTimestampUtc } from '@utils/date';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -135,7 +136,7 @@ function TransactionRow({
     // Mount the mobile drawer only once the row is first tapped, so the page does not mount a closed
     // drawer for every row up front.
     const [drawerMounted, setDrawerMounted] = useState(false);
-    const badge = STATUS_BADGE[status];
+    const badge = getOwn(STATUS_BADGE, status);
 
     // If the viewport crosses to desktop while the drawer is open, close it gracefully
     useEffect(() => {

@@ -1,5 +1,6 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
 import * as React from 'react';
 import { CheckCircle, ChevronDown, Copy, Star, XCircle } from 'react-feather';
 
@@ -183,7 +184,7 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                     )}
                 >
                     <time dateTime={dateTime} className={cn('min-w-0', !children && 'tabular-nums')}>
-                        {children ?? labels[effective]}
+                        {children ?? getOwn(labels, effective)}
                     </time>
                     <ChevronDown size={14} className="mt-0.5 shrink-0 text-neutral-500" />
                 </button>

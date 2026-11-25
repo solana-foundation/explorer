@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { is, number, object, optional, record, refine, string, type, unknown } from 'superstruct';
@@ -63,7 +64,7 @@ export async function GET(_request: Request, props: Params) {
             return NextResponse.json({ price: null }, { headers: CACHE_HEADERS });
         }
 
-        const token = is(data, JupiterPriceResponseSchema) ? data[mintAddress] : undefined;
+        const token = is(data, JupiterPriceResponseSchema) ? getOwn(data, mintAddress) : undefined;
 
         if (!is(token, JupiterPriceTokenSchema)) {
             const err = new Error(`Jupiter price API returned unexpected schema for ${mintAddress}`);

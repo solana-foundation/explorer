@@ -117,21 +117,21 @@ const BaseFeatureCard = ({
             label: 'SIMDs',
             value: (
                 <StackedList mono={false}>
-                    {featureInfo.simds.map((simd, index) => (
-                        <li key={index}>
-                            {simd && featureInfo.simd_link[index] ? (
-                                <ExternalLink
-                                    href={featureInfo.simd_link[index]}
-                                    className="inline-flex items-center gap-1"
-                                >
-                                    SIMD {simd}
-                                    <ExternalLinkIcon size={12} />
-                                </ExternalLink>
-                            ) : (
-                                <code>No link</code>
-                            )}
-                        </li>
-                    ))}
+                    {featureInfo.simds.map((simd, index) => {
+                        const link = featureInfo.simd_link.at(index);
+                        return (
+                            <li key={index}>
+                                {simd && link ? (
+                                    <ExternalLink href={link} className="inline-flex items-center gap-1">
+                                        SIMD {simd}
+                                        <ExternalLinkIcon size={12} />
+                                    </ExternalLink>
+                                ) : (
+                                    <code>No link</code>
+                                )}
+                            </li>
+                        );
+                    })}
                 </StackedList>
             ),
         },

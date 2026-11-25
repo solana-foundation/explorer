@@ -133,7 +133,7 @@ function convertTuple({ value, str, root }: ConvertCtx, typeNode: TypeNode) {
     if (!Array.isArray(parsed)) return parsed;
     const items = (typeNode as { items: TypeNode[] }).items;
     return parsed.map((item, i) => {
-        const itemType = items[i];
+        const itemType = items.at(i);
         return itemType ? convertValue(item, itemType, root) : item;
     });
 }

@@ -89,6 +89,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Root project only. Test-Packages typechecks each package after idl-decode generates the
+      # gitignored clients its specs import.
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
       - name: Generate build info
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         run: pnpm build:info --skip-build .next/BUILD.fresh.md

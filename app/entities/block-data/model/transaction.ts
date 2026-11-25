@@ -1,3 +1,4 @@
+import { invariant } from '@shared/lib/invariant';
 import { type Address, type CompiledTransactionMessage, decompileTransactionMessage } from '@solana/kit';
 
 import type { BlockTransaction } from './types';
@@ -13,7 +14,8 @@ export function getBlockTransactionAccounts({ message, meta }: BlockTransaction)
 export function getBlockTransactionInstructions(message: CompiledTransactionMessage) {
     if (message.version === 1) {
         return message.instructionHeaders.map((header, index) => {
-            const payload = message.instructionPayloads[index];
+            const payload = message.instructionPayloads.at(index);
+            invariant(payload, `instruction payload index ${index} out of range`);
             return {
                 accountIndices: payload.instructionAccountIndices,
                 data: new Uint8Array(payload.instructionData),

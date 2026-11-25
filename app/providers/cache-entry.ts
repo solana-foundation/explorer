@@ -1,6 +1,7 @@
 'use client';
 
 import { useClusterConnectionFailed } from '@entities/cluster';
+import { getOwn } from '@shared/lib/object';
 
 import { type CacheEntry, FetchStatus, type State } from './cache';
 
@@ -21,7 +22,7 @@ export function useCacheEntry<T>(
 
     if (key === undefined) return undefined;
 
-    return entryOrConnectionFailure(entries[key], connectionFailed);
+    return entryOrConnectionFailure(getOwn(entries, key), connectionFailed);
 }
 
 /** `useCacheEntry` for a set of keys. One hook call, so the key list may vary between renders. */
@@ -31,7 +32,7 @@ export function useCacheEntries<T>(
 ): (CacheEntry<T> | undefined)[] {
     const connectionFailed = useClusterConnectionFailed();
 
-    return keys.map(key => entryOrConnectionFailure(entries[key], connectionFailed));
+    return keys.map(key => entryOrConnectionFailure(getOwn(entries, key), connectionFailed));
 }
 
 /**

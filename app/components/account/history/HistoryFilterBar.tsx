@@ -16,6 +16,7 @@ import {
     STATUS_VALUES,
 } from '@features/transaction-history/lib/history-filters';
 import { useHistoryFiltersSupported } from '@features/transaction-history/model/use-account-history';
+import { getOwn } from '@shared/lib/object';
 import { format } from 'date-fns/format';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -164,7 +165,7 @@ export function HistoryFilterChips(filters: HistoryFilters) {
             {status !== undefined && (
                 <FilterChip
                     label="Status"
-                    value={STATUS_LABELS[status]}
+                    value={getOwn(STATUS_LABELS, status)}
                     onClear={() => updateFilters({ [STATUS_PARAM]: undefined })}
                 />
             )}

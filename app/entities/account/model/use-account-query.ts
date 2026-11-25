@@ -3,6 +3,7 @@
 import type { Account, FetchAccountDataMode } from '@providers/accounts';
 import { FetchersContext, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
+import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { useContext, useEffect, useMemo } from 'react';
 
@@ -34,12 +35,12 @@ export function useAccountQuery<TData>(
     const dataMode = options.dataMode ?? 'parsed';
     const { select } = options;
 
-    const cacheEntry = address ? state.entries[address] : undefined;
+    const cacheEntry = address ? getOwn(state.entries, address) : undefined;
 
     useEffect(() => {
         if (!address) return;
         if (cacheEntry) return;
-        fetchers[dataMode].fetch(new PublicKey(address));
+        getOwn(fetchers, dataMode).fetch(new PublicKey(address));
     }, [address, cacheEntry, dataMode, fetchers]);
 
     const data = useMemo(() => {

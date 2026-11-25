@@ -8,6 +8,7 @@ import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
 import { useAccountSizes } from '@entities/account';
 import { useTransactionDetails } from '@providers/transactions';
+import { invariant } from '@shared/lib/invariant';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
@@ -188,6 +189,9 @@ export function AccountsCard({ signature }: SignatureProps) {
     }
 
     const accountRows = accounts.map(({ account, address }, index) => {
+        const post = meta.postBalances.at(index);
+        const pre = meta.preBalances.at(index);
+        invariant(post !== undefined && pre !== undefined, `balance index ${index} out of range`);
         return (
             <TransactionAccountRow
                 key={address}
@@ -196,8 +200,8 @@ export function AccountsCard({ signature }: SignatureProps) {
                 index={index}
                 isDesktop={isDesktop}
                 message={message}
-                post={meta.postBalances[index]}
-                pre={meta.preBalances[index]}
+                post={post}
+                pre={pre}
             />
         );
     });

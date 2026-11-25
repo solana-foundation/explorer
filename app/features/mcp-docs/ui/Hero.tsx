@@ -1,5 +1,7 @@
 'use client';
 
+import { getOwn } from '@shared/lib/object';
+import { stripWebScheme } from '@shared/lib/url';
 import { useRef } from 'react';
 import { Check, Copy, ExternalLink, XCircle } from 'react-feather';
 
@@ -14,7 +16,7 @@ const MCP_README = 'https://github.com/solana-foundation/explorer/blob/master/ap
 export function Hero({ origin, status }: { origin: string; status: EndpointStatus }) {
     const fieldRef = useRef<HTMLDivElement>(null);
 
-    const host = origin.replace('https://', '').replace('http://', '');
+    const host = stripWebScheme(origin);
     const facts = [
         { key: 'Transport', value: 'Streamable HTTP, stateless' },
         {
@@ -174,7 +176,7 @@ function EndpointAddress({ display, value }: { display: string; value: string })
                     state === 'errored' && 'text-red-500 hover:text-red-500',
                 )}
             >
-                {COPY_ICON[state]}
+                {getOwn(COPY_ICON, state)}
             </button>
         </span>
     );

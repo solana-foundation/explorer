@@ -29,6 +29,21 @@ describe('useTablistKeyboard', () => {
         expect(event.preventDefault).toHaveBeenCalled();
     });
 
+    it('should move to the tab after the focused one, not after the selected one', () => {
+        const onSelect = vi.fn();
+        const { result } = renderHook(() => useTablistKeyboard<HTMLButtonElement>(3, 0, onSelect));
+        const tabs = [0, 1, 2].map(() => document.createElement('button'));
+        document.body.append(...tabs);
+        tabs.forEach((tab, index) => result.current.setTabRef(index)(tab));
+        tabs[1].focus();
+
+        result.current.onKeyDown(keyEvent('ArrowRight'));
+
+        expect(onSelect).toHaveBeenCalledWith(2);
+        expect(tabs[2]).toHaveFocus();
+        tabs.forEach(tab => tab.remove());
+    });
+
     it.each(['altKey', 'ctrlKey', 'metaKey'] as const)('should leave ArrowLeft with %s to the browser', modifier => {
         const onSelect = vi.fn();
         const { result } = renderHook(() => useTablistKeyboard(3, 1, onSelect));

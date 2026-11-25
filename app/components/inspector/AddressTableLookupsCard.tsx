@@ -98,11 +98,13 @@ function LookupRow({
             resolvedKeyComponent = <span className="text-outer-space-300">Failed to fetch Lookup Table</span>;
         } else if (typeof lookupTable === 'string') {
             resolvedKeyComponent = <span className="text-outer-space-300">Invalid Lookup Table</span>;
-        } else if (lookupTableIndex >= lookupTable.state.addresses.length) {
-            resolvedKeyComponent = <span className="text-outer-space-300">Invalid Lookup Table Index</span>;
         } else {
-            const resolvedKey = lookupTable.state.addresses[lookupTableIndex];
-            resolvedKeyComponent = <Address pubkey={resolvedKey} link />;
+            const resolvedKey = lookupTable.state.addresses.at(lookupTableIndex);
+            resolvedKeyComponent = resolvedKey ? (
+                <Address pubkey={resolvedKey} link />
+            ) : (
+                <span className="text-outer-space-300">Invalid Lookup Table Index</span>
+            );
         }
     }
 

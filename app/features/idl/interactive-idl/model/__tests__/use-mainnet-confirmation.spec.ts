@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
 import { toConnectableUrl } from '@entities/cluster';
-import { getCookie, setCookie } from '@features/cookie';
+import { getStoredValue, setStoredValue } from '@features/cookie';
 import { act, renderHook } from '@testing-library/react';
 import { Cluster, clusterName, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCluster } from '@/app/providers/cluster';
 
@@ -16,7 +16,7 @@ vi.mock('@features/cookie');
 describe('useMainnetConfirmation', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getCookie).mockReturnValue(null);
+        vi.mocked(getStoredValue).mockReturnValue(undefined);
     });
 
     describe('when cluster is Mainnet Beta', () => {
@@ -68,7 +68,7 @@ describe('useMainnetConfirmation', () => {
             });
 
             expect(mockAction).not.toHaveBeenCalled();
-            expect(setCookie).not.toHaveBeenCalled();
+            expect(setStoredValue).not.toHaveBeenCalled();
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
         });
@@ -168,8 +168,8 @@ describe('useMainnetConfirmation', () => {
         });
     });
 
-    describe('cookie persistence', () => {
-        it('should set disclaimer cookie when user confirms', async () => {
+    describe('disclaimer persistence', () => {
+        it('should store the disclaimer acceptance when user confirms', async () => {
             setup();
 
             const mockAction = vi.fn();
@@ -183,12 +183,16 @@ describe('useMainnetConfirmation', () => {
                 await result.current.confirm();
             });
 
-            expect(setCookie).toHaveBeenCalledWith('idl_mainnet_accepted', 'true', 182 * 24 * 60 * 60);
+            expect(setStoredValue).toHaveBeenCalledWith({
+                maxAgeSeconds: 182 * 24 * 60 * 60,
+                name: 'idl_mainnet_accepted',
+                value: 'true',
+            });
         });
 
-        it('should skip dialog on mainnet when disclaimer cookie exists', async () => {
+        it('should skip dialog on mainnet when the disclaimer acceptance is stored', async () => {
             setup();
-            vi.mocked(getCookie).mockReturnValue('true');
+            vi.mocked(getStoredValue).mockReturnValue('true');
 
             const mockAction = vi.fn();
             const { result } = renderHook(() => useMainnetConfirmation());
@@ -200,6 +204,38 @@ describe('useMainnetConfirmation', () => {
             expect(mockAction).toHaveBeenCalledTimes(1);
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
+        });
+
+        describe('with real storage', () => {
+            beforeEach(async () => {
+                const storage = await vi.importActual<typeof import('@features/cookie')>('@features/cookie');
+                vi.mocked(getStoredValue).mockImplementation(storage.getStoredValue);
+                vi.mocked(setStoredValue).mockImplementation(storage.setStoredValue);
+            });
+
+            afterEach(() => {
+                localStorage.clear();
+                vi.mocked(setStoredValue).mockReset();
+            });
+
+            it('should run the next mainnet action without the dialog after the user confirms', async () => {
+                setup();
+                const nextAction = vi.fn();
+                const { result } = renderHook(() => useMainnetConfirmation());
+
+                await act(async () => {
+                    await result.current.requireConfirmation(vi.fn());
+                });
+                await act(async () => {
+                    await result.current.confirm();
+                });
+                await act(async () => {
+                    await result.current.requireConfirmation(nextAction);
+                });
+
+                expect(nextAction).toHaveBeenCalledOnce();
+                expect(result.current.isOpen).toBe(false);
+            });
         });
     });
 });

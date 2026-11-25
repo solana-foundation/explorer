@@ -1,3 +1,4 @@
+import { getOwn } from '@shared/lib/object';
 import type { DataSource } from '@solana-program/program-metadata';
 
 import { pmpAnalytics, type PmpPayloadSource, type PmpTab } from './analytics';
@@ -15,7 +16,7 @@ export function createPayloadTabTracker({
 }): (tab: PmpTab) => void {
     return (tab: PmpTab) => {
         pmpAnalytics.trackTabOpened({
-            dataSource: PMP_DATA_SOURCE_ANALYTICS_NAMES[dataSource],
+            dataSource: getOwn(PMP_DATA_SOURCE_ANALYTICS_NAMES, dataSource),
             format: PMP_FORMAT_ANALYTICS_NAMES[pmpIx.config.format],
             instruction: PMP_ANALYTICS_IX_NAMES[pmpIx.kind],
             source,

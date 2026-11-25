@@ -19,10 +19,9 @@ export type OgGlows = {
     success: string;
 };
 
-const FILES = {
-    failed: 'pink_gradient',
-    success: 'green_gradient',
-} as const;
+const GLOW_DIR = join(process.cwd(), 'public', 'img', 'og');
+const PINK_GLOW_PATH = join(GLOW_DIR, 'pink_gradient.png');
+const GREEN_GLOW_PATH = join(GLOW_DIR, 'green_gradient.png');
 
 let cached: Promise<OgGlows> | undefined;
 
@@ -43,13 +42,11 @@ export function loadOgGlows(): Promise<OgGlows> {
  * Both files, read off disk in one parallel pass.
  */
 async function readGlowFiles(): Promise<OgGlows> {
-    const [failed, success] = await Promise.all([readGlowFile(FILES.failed), readGlowFile(FILES.success)]);
+    const [failed, success] = await Promise.all([readFile(PINK_GLOW_PATH), readFile(GREEN_GLOW_PATH)]);
 
-    return { failed, success };
+    return { failed: toPngDataUri(failed), success: toPngDataUri(success) };
 }
 
-async function readGlowFile(file: string): Promise<string> {
-    const bytes = await readFile(join(process.cwd(), 'public', 'img', 'og', `${file}.png`));
-
-    return `data:image/png;base64,${toBase64(new Uint8Array(bytes))}`;
+function toPngDataUri(bytes: Uint8Array): string {
+    return `data:image/png;base64,${toBase64(bytes)}`;
 }

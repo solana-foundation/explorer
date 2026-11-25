@@ -1,3 +1,5 @@
+import { invariant } from '@shared/lib/invariant';
+import { getOwn } from '@shared/lib/object';
 import { getBase58Decoder, getBase58Encoder, isSignature, type Signature } from '@solana/kit';
 import {
     ParsedInstruction,
@@ -39,12 +41,12 @@ export function getProgramName(address: string, cluster: Cluster): string {
 }
 
 export function programLabel(address: string, cluster: Cluster): string | undefined {
-    const programInfo = PROGRAM_INFO_BY_ID[address];
+    const programInfo = getOwn(PROGRAM_INFO_BY_ID, address);
     if (programInfo && programInfo.deployments.includes(cluster)) {
         return programInfo.name;
     }
 
-    return LOADER_IDS[address] as string;
+    return getOwn(LOADER_IDS, address);
 }
 
 function tokenLabel_(tokenInfo?: TokenLabelInfo): string | undefined {
@@ -58,8 +60,8 @@ function tokenLabel_(tokenInfo?: TokenLabelInfo): string | undefined {
 export function addressLabel(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string | undefined {
     return (
         programLabel(address, cluster) ||
-        SYSVAR_IDS[address] ||
-        SPECIAL_IDS[address] ||
+        getOwn(SYSVAR_IDS, address) ||
+        getOwn(SPECIAL_IDS, address) ||
         tokenLabel_(tokenInfo) ||
         SerumMarketRegistry.get(address, cluster)
     );
@@ -104,7 +106,11 @@ export function intoParsedTransaction(tx: Transaction): ParsedTransaction {
                 writable: message.isAccountWritable(index),
             })),
             instructions: message.instructions.map(ix => ({
-                accounts: ix.accounts.map(index => message.accountKeys[index]),
+                accounts: ix.accounts.map(index => {
+                    const key = message.accountKeys.at(index);
+                    invariant(key, `compiled instruction references missing account key ${index}`);
+                    return key;
+                }),
                 data: ix.data,
                 programId: message.accountKeys[ix.programIdIndex],
             })),
