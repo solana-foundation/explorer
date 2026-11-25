@@ -93,7 +93,7 @@ function CardHeading({ label, name }: Pick<SplitLayoutProps, 'label' | 'name'>) 
 
 const CARD_SURFACE = 'rounded-lg border border-solid border-outer-space-800 bg-outer-space-900';
 
-const CARD_NAME_CLASSES = 'm-0 break-words text-[30px] font-normal leading-tight text-white sm:text-[42px]';
+const CARD_NAME_CLASSES = 'm-0 break-words text-[30px] font-normal leading-tight text-white lg:text-[42px]';
 
 function FactStrip({ facts }: { facts: NftFact[] }) {
     return (
