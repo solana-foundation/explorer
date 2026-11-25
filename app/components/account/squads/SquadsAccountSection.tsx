@@ -12,6 +12,8 @@ import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { useClusterPath } from '@/app/utils/url';
 
+import { useSquadsMultisigAddresses } from './use-squads-multisig-addresses';
+
 // Copies of the Squads SDK discriminators, so the account page detects these accounts without loading heavy SDK.
 const BATCH_DISCRIMINATOR = [156, 194, 70, 44, 22, 88, 137, 44];
 const VAULT_TRANSACTION_DISCRIMINATOR = [168, 250, 162, 100, 81, 14, 162, 207];
@@ -32,11 +34,18 @@ export function SquadsAccountSection({ account, accountType }: { account: Accoun
         pathname: '/tx/inspector',
     });
     const label = accountType === 'batch' ? 'Squads Batch' : 'Squads Vault Transaction';
+    const multisigAddresses = useSquadsMultisigAddresses(account, accountType);
 
     const rows: KeyValueRow[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
         { label: 'Balance (SOL)', value: <SolBalance lamports={account.lamports} />, valueClassName: 'uppercase' },
         { label: 'Owner', value: <Address pubkey={account.owner} link /> },
+        ...(multisigAddresses
+            ? [
+                  { label: 'Multisig Account', value: <Address pubkey={multisigAddresses.multisig} link /> },
+                  { label: 'Multisig Vault', value: <Address pubkey={multisigAddresses.vault} link /> },
+              ]
+            : []),
     ];
 
     return (
