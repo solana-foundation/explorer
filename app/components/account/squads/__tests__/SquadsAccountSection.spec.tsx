@@ -11,7 +11,7 @@ import { BATCH_DATA, makeSquadsAccount, VAULT_TRANSACTION_DATA } from './__fixtu
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 vi.mock('@providers/cluster', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/cluster')>()),
-    useCluster: () => ({ cluster: Cluster.MainnetBeta, url: 'http://localhost' }),
+    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'http://localhost' }),
 }));
 
 describe('SquadsAccountSection', () => {
