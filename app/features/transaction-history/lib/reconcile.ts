@@ -59,7 +59,7 @@ function withTransactionResult({
     return { ...history, missingTransactions, transactionMap };
 }
 
-function combineFetched(
+export function combineFetched(
     fetched: HistoryRow[],
     current: HistoryRow[] | undefined,
     append: boolean,

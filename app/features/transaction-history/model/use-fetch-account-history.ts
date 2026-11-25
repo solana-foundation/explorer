@@ -12,6 +12,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { fetchParsedTransactions } from '../api/fetch-parsed-transactions';
 import { hasActiveFilters, type HistoryFilters } from '../lib/history-filters';
+import { combineFetched } from '../lib/reconcile';
 import type { AccountHistory, HistoryRow } from '../lib/types';
 import { isQueueKeyEnabled, useEnabledQueueKey } from './enabled-queue-keys';
 import { fetchHistoryPage } from './fetch-history-page';
@@ -346,8 +347,8 @@ function fetchTransactionsIntoCache({
     });
 }
 
-// The page rows. Load More also fetches the cached rows that no fetch has tried. A refresh does not fetch the
-// cached rows, because a page that does not overlap them replaces the list.
+// The page rows, and the rows of the merged list that no fetch has tried. A refresh whose page does not overlap the
+// cached rows drops them from the list, so it does not fetch them.
 function getSignaturesToFetch({
     page,
     cachedHistory,
@@ -357,10 +358,9 @@ function getSignaturesToFetch({
     cachedHistory: AccountHistory | undefined;
     append: boolean;
 }): string[] {
-    const cachedRows = append
-        ? (cachedHistory?.fetched ?? []).filter(({ signature }) => !cachedHistory?.missingTransactions?.has(signature))
-        : [];
-    const signatures = new Set([...page, ...cachedRows].map(row => row.signature));
+    const { combined } = combineFetched(page, cachedHistory?.fetched, append);
+    const rowsWithoutReason = combined.filter(({ signature }) => !cachedHistory?.missingTransactions?.has(signature));
+    const signatures = new Set([...page, ...rowsWithoutReason].map(row => row.signature));
     // A transaction never changes, so a row that has one is not fetched again.
     return [...signatures].filter(signature => !cachedHistory?.transactionMap?.has(signature));
 }

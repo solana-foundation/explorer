@@ -309,16 +309,22 @@ describe('useFetchAccountHistory with transactions', () => {
         expect(result.current.history?.status).toBe(FetchStatus.Fetched);
     });
 
-    it('should fetch on a refresh only the page rows that have no transaction', async () => {
-        const { result } = await renderSettledHistory();
+    it.each<[string, ReturnType<typeof sig>[], string[]]>([
+        ['keeps', [sig('new', 6), sig('loaded', 5), sig('failed', 4)], ['new', 'failed', 'untried', 'untried-tail']],
+        ['drops', [sig('replacement', 9)], ['replacement']],
+    ])(
+        'should fetch the page rows and the listed rows that no fetch has tried, on a refresh that %s the cached rows',
+        async (_, page, expected) => {
+            const { result } = await renderSettledHistory();
 
-        mockResult([sig('new', 6), sig('loaded', 5), sig('failed', 4)], 'token');
-        fetchParsedTransactions.mockResolvedValueOnce(undefined);
-        act(() => result.current.fetch(toAddress(ADDRESS), true, true));
-        await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
+            mockResult(page, 'token');
+            fetchParsedTransactions.mockResolvedValueOnce(undefined);
+            act(() => result.current.fetch(toAddress(ADDRESS), true, true));
+            await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
 
-        expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual(['new', 'failed']);
-    });
+            expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual(expected);
+        },
+    );
 
     it('should fetch on Load More, once each, the page rows and the cached rows that no fetch has tried', async () => {
         const { result } = await renderSettledHistory();
