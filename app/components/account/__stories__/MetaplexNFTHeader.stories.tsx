@@ -1,3 +1,4 @@
+import { none, type Option, some } from '@metaplex-foundation/umi';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -14,7 +15,7 @@ function buildNftData(
         isMutable: boolean;
         primarySaleHappened: boolean;
         collection: { key: string; verified: boolean } | null;
-        edition: { masterEdition?: { supply: bigint }; edition?: { edition: bigint } };
+        edition: { masterEdition?: { supply: bigint; maxSupply: Option<bigint> }; edition?: { edition: bigint } };
         image: string;
     }> = {},
 ): NFTData {
@@ -61,7 +62,7 @@ export const Default: Story = {
 export const MasterEdition: Story = {
     args: {
         nftData: buildNftData({
-            edition: { masterEdition: { supply: 1000n } as never },
+            edition: { masterEdition: { maxSupply: none(), supply: 1000n } as never },
         }),
     },
 };
@@ -71,7 +72,7 @@ export const NumberedEdition: Story = {
         nftData: buildNftData({
             edition: {
                 edition: { edition: 42n } as never,
-                masterEdition: { supply: 1000n } as never,
+                masterEdition: { maxSupply: some(1000n), supply: 1000n } as never,
             },
         }),
     },
