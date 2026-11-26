@@ -1,10 +1,7 @@
 'use client';
 
-import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
-import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
 import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
@@ -13,7 +10,6 @@ import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { toScaledUiAmountString, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
 import { address as toAddress } from '@solana/kit';
 import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -23,13 +19,10 @@ import React, { useMemo } from 'react';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { Badge } from '@/app/components/shared/ui/badge';
-import { RefreshButton } from '@/app/components/shared/ui/refresh-button';
 import { Logger } from '@/app/shared/lib/logger';
-import { RelativeTime } from '@/app/shared/RelativeTime';
-import { GridTableCard, type GridTableColumn } from '@/app/shared/ui/grid-table';
 
 import { getTransactionRows } from '../HistoryCardComponents';
+import { BaseTokenTransfersCard, type TokenTransferRowView } from './BaseTokenTransfersCard';
 import { extractMintDetails, MintDetails } from './common';
 
 type IndexedTransfer = {
@@ -38,43 +31,8 @@ type IndexedTransfer = {
     transfer: Transfer | TransferChecked;
 };
 
-type TransferData = {
-    amountString: string;
-    blockTime: number | undefined;
-    childIndex?: number;
-    index: number;
-    signature: string;
-    statusClass: string;
-    statusText: string;
-    transfer: Transfer | TransferChecked;
-    units: string;
-};
-
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
     return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
-}
-
-function AmountCell({
-    amountString,
-    tokenAddress,
-    units,
-}: {
-    amountString: string;
-    tokenAddress: string;
-    units: string;
-}) {
-    const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(tokenAddress);
-    const scaledAmount = toScaledUiAmountString(amountString, scaledUiAmountMultiplier);
-
-    return (
-        <>
-            {scaledAmount} {units}
-            <ScaledUiAmountMultiplierTooltip
-                rawAmount={amountString}
-                scaledUiAmountMultiplier={scaledUiAmountMultiplier}
-            />
-        </>
-    );
 }
 
 export function TokenTransfersCard({ address }: { address: string }) {
@@ -86,6 +44,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const loadMore = () => fetchAccountHistory(toAddress(address), true);
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
     const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
+    const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(address);
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {
@@ -100,13 +59,12 @@ export function TokenTransfersCard({ address }: { address: string }) {
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { allTransfers, hasTimestamps } = React.useMemo(() => {
+    const rows = React.useMemo(() => {
         const detailedHistoryMap = history?.data?.transactionMap || new Map<string, TransactionWithMeta>();
-        const hasTimestamps = transactionRows.some(element => element.blockTime);
         const mintMap = new Map<string, MintDetails>();
-        const allTransfers: TransferData[] = [];
+        const allTransfers: TokenTransferRowView[] = [];
 
-        transactionRows.forEach(({ signature, blockTime, statusText, statusClass }) => {
+        transactionRows.forEach(({ signature, blockTime, err }) => {
             const transactionWithMeta = detailedHistoryMap.get(signature);
             if (!transactionWithMeta) return;
 
@@ -153,18 +111,9 @@ export function TokenTransfersCard({ address }: { address: string }) {
             });
 
             transfers.forEach(({ transfer, index, childIndex }) => {
-                let units = 'Tokens';
+                // `undefined` while the token info loads: the card holds the symbol's place until it arrives.
+                const units = tokenInfo?.symbol || (tokenInfoLoading ? undefined : 'Tokens');
                 let amountString = '';
-
-                // Loading token info, just don't show units
-                if (tokenInfoLoading) {
-                    units = '';
-                }
-
-                // Loaded symbol, use it
-                if (tokenInfo?.symbol) {
-                    units = tokenInfo.symbol;
-                }
 
                 if ('tokenAmount' in transfer) {
                     amountString = transfer.tokenAmount.uiAmountString;
@@ -186,24 +135,22 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 }
 
                 allTransfers.push({
-                    amountString,
+                    amount: toScaledUiAmountString(amountString, scaledUiAmountMultiplier),
                     blockTime: blockTime || undefined,
-                    childIndex,
-                    index,
+                    destination: transfer.destination,
+                    key: `${signature}:${index}:${childIndex ?? '-'}`,
+                    rawAmount: amountString,
+                    scaledUiAmountMultiplier,
                     signature,
-                    statusClass,
-                    statusText,
-                    transfer,
+                    source: transfer.source,
+                    status: err ? 'failed' : 'success',
                     units,
                 });
             });
         });
 
-        return {
-            allTransfers,
-            hasTimestamps,
-        };
-    }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading]);
+        return allTransfers;
+    }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading, scaledUiAmountMultiplier]);
 
     if (!history) {
         return null;
@@ -218,83 +165,19 @@ export function TokenTransfersCard({ address }: { address: string }) {
     }
 
     const fetching = history.status === FetchStatus.Fetching;
-    const tokenAddress = pubkey.toBase58();
 
-    const columns: GridTableColumn<TransferData>[] = [
-        {
-            cell: { wrap: 'nowrap' },
-            header: 'Transaction Signature',
-            render: ({ signature }) => <Signature signature={signature} link />,
-        },
-        {
-            cell: { wrap: 'nowrap' },
-            header: 'Source',
-            render: ({ transfer }) => <Address pubkey={transfer.source} link />,
-        },
-        {
-            cell: { wrap: 'nowrap' },
-            header: 'Destination',
-            render: ({ transfer }) => <Address pubkey={transfer.destination} link />,
-        },
-        {
-            cell: { wrap: 'nowrap' },
-            header: 'Amount',
-            render: ({ amountString, units }) => (
-                <AmountCell amountString={amountString} tokenAddress={tokenAddress} units={units} />
-            ),
-        },
-        {
-            cell: { wrap: 'nowrap' },
-            header: 'Result',
-            render: ({ statusClass, statusText }) => (
-                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
-                    {statusText}
-                </Badge>
-            ),
-        },
-    ];
-
-    if (hasTimestamps) {
-        columns.splice(1, 0, {
-            cell: { wrap: 'nowrap' },
-            cellClassName: 'text-dk-gray-700',
-            header: 'Age',
-            render: ({ blockTime }) => (blockTime ? <RelativeTime date={blockTime * 1000} /> : null),
-        });
+    if (fetching && rows.length === 0) {
+        return <LoadingCard message="Loading token transfers" />;
     }
 
-    const gridTemplate = hasTimestamps
-        ? 'grid-cols-[auto_auto_auto_auto_auto_auto]'
-        : 'grid-cols-[auto_auto_auto_auto_auto]';
-
     return (
-        <GridTableCard
-            actions={
-                <RefreshButton
-                    analyticsSection="token_transfers_header"
-                    failed={history.status === FetchStatus.FetchFailed}
-                    fetching={fetching}
-                    onClick={() => refresh()}
-                />
-            }
-            ariaLabel="Token transfers"
-            collapsible={false}
-            columns={columns}
-            empty={null}
-            footer={
-                <div className="mt-2 w-full">
-                    <HistoryCardFooterContent
-                        fetching={fetching}
-                        foundOldest={history.data.foundOldest}
-                        loadMore={() => loadMore()}
-                    />
-                </div>
-            }
-            getRowKey={transferData => transferData.signature + transferData.index + (transferData.childIndex || '')}
-            gridTemplate={gridTemplate}
-            mobile="stack"
-            rows={allTransfers}
-            title="Token Transfers"
+        <BaseTokenTransfersCard
+            rows={rows}
+            fetching={fetching}
+            failed={history.status === FetchStatus.FetchFailed}
+            foundOldest={history.data.foundOldest}
+            onRefresh={refresh}
+            onLoadMore={loadMore}
         />
     );
 }
