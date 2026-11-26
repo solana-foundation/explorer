@@ -25,6 +25,13 @@ describe('BaseTokenTransfersCard', () => {
         expect(screen.queryByText('Load More')).not.toBeInTheDocument();
     });
 
+    it('should keep Load More when a fetched page holds no transfers but older history remains', () => {
+        renderCard({ foundOldest: false, rows: [] });
+
+        expect(within(desktopTable()).getByText('No transfers found')).toBeInTheDocument();
+        expect(screen.getByText('Load More')).toBeInTheDocument();
+    });
+
     it('should show a dash in the Time cell of a row without a block time', () => {
         renderCard({
             rows: [row({ blockTime: BLOCK_TIME, key: 'timed' }), row({ blockTime: undefined, key: 'untimed' })],

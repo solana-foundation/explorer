@@ -132,7 +132,9 @@ export function BaseTokenTransfersCard({
             mobile="stack"
             empty="No transfers found"
             footer={
-                isEmpty ? undefined : (
+                // Keep "Load More" while older pages remain, even with no rows: a fetched page can hold mint
+                // transactions that carry no matching transfers, so an empty list isn't the end of history.
+                isEmpty && foundOldest ? undefined : (
                     <div className="mt-2 w-full">
                         <HistoryCardFooterContent fetching={fetching} foundOldest={foundOldest} loadMore={onLoadMore} />
                     </div>
