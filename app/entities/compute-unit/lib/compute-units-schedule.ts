@@ -21,12 +21,10 @@ const BASE58_ENCODER = getBase58Encoder();
  * Built-in programs that have minimal reserved compute units (3k)
  * This list is based on the feature gate C9oAhLxDBm3ssWtJx1yBGzPY55r2rArHmN1pbQn6HogH
  * Source: https://solana.com/docs/references/feature-gates/reserve-minimal-cus-for-builtins
+ * Stake, Config and Address Lookup Table run as Core BPF programs now, so the runtime reserves the default for them.
  */
 const BUILTIN_PROGRAMS_3K: readonly string[] = [
     '11111111111111111111111111111111', // System Program
-    'Stake11111111111111111111111111111111111111', // Stake Program
-    'Config1111111111111111111111111111111111111', // Config Program
-    'AddressLookupTab1e1111111111111111111111111', // Address Lookup Table Program
     'BPFLoaderUpgradeab1e11111111111111111111111', // BPF Loader Upgradeable
     'BPFLoader1111111111111111111111111111111111', // BPF Loader
     'BPFLoader2111111111111111111111111111111111', // BPF Loader 2

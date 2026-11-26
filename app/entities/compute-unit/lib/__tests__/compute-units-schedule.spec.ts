@@ -1,11 +1,15 @@
 import { makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
 import { address } from '@solana/kit';
-import { ComputeBudgetProgram } from '@solana/web3.js';
+import { ComputeBudgetProgram, type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
 
-import { estimateRequestedComputeUnits, getReservedComputeUnits } from '../compute-units-schedule';
+import {
+    estimateRequestedComputeUnits,
+    estimateRequestedComputeUnitsForParsedTransaction,
+    getReservedComputeUnits,
+} from '../compute-units-schedule';
 
 describe('getReservedComputeUnits', () => {
     describe('mainnet', () => {
@@ -63,6 +67,14 @@ describe('getReservedComputeUnits', () => {
                     programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
                 }),
             ).toEqual(200_000);
+        });
+
+        it.each([
+            'Stake11111111111111111111111111111111111111',
+            'Config1111111111111111111111111111111111111',
+            'AddressLookupTab1e1111111111111111111111111',
+        ])('should return default compute units for %s, which runs as a Core BPF program', programId => {
+            expect(getReservedComputeUnits({ cluster: Cluster.Mainnet, epoch: 1097n, programId })).toEqual(200_000);
         });
 
         it('should handle feature gate program migration correctly', () => {
@@ -304,6 +316,17 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 759n, Cluster.Mainnet)).toEqual(203_000);
         });
 
+        // Mainnet 5aKTtG79yJycua2vNZQbWWsvaEv6qzsxmrVGsoSYQPVRhy9LpvnixFwm8ntFuapeV5ice5V9xLoUzta3oZg8ybfM logs
+        // `Stake11111111111111111111111111111111111111 consumed 12186 of 202850` after the System instruction used 150.
+        it('should reserve the default for a Stake instruction', () => {
+            const tx = createMockTransaction([
+                { data: new Uint8Array([4, 0, 0, 0]), programId: '11111111111111111111111111111111' },
+                { data: new Uint8Array([1, 0, 0, 0]), programId: 'Stake11111111111111111111111111111111111111' },
+            ]);
+
+            expect(estimateRequestedComputeUnits(tx, 1097n, Cluster.Mainnet)).toEqual(203_000);
+        });
+
         it('should handle feature gate program correctly across epochs', () => {
             const tx = createMockTransaction([
                 {
@@ -437,5 +460,35 @@ describe('estimateRequestedComputeUnits', () => {
             const tx = createV1Transaction({ computeUnitLimit: 5_000_000 });
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(1_400_000);
         });
+    });
+});
+
+describe('estimateRequestedComputeUnitsForParsedTransaction', () => {
+    // Mainnet 5PjwEDEdNSLv7uYTe3cjoyRcqDA7PGVnGXq1LoH1LDEy17ymV4ePvPfZy3Gz8CLnS3LiPdyu9LhAUQUqkY45NRgf logs
+    // `Stake11111111111111111111111111111111111111 consumed 16053 of 200000 compute units`.
+    it('should reserve the default for an RPC-parsed Stake instruction', () => {
+        const delegate: ParsedInstruction = {
+            parsed: {
+                info: {
+                    clockSysvar: 'SysvarC1ock11111111111111111111111111111111',
+                    stakeAccount: '4otjzF3rD3ExDJw3UL4zhdUsiNXJKKT5Gnp1sadRYmvN',
+                    stakeAuthority: '59L2oxymiQQ9Hvhh92nt8Y7nDYjsauFkdb3SybdnsG6h',
+                    stakeConfigAccount: 'StakeConfig11111111111111111111111111111111',
+                    stakeHistorySysvar: 'SysvarStakeHistory1111111111111111111111111',
+                    voteAccount: 'H74qox1GASBWd94FWMyy6GVAbRVLf9SAMgbJ1tzSUAst',
+                },
+                type: 'delegate',
+            },
+            program: 'stake',
+            programId: new PublicKey('Stake11111111111111111111111111111111111111'),
+        };
+
+        expect(
+            estimateRequestedComputeUnitsForParsedTransaction(
+                { message: { instructions: [delegate] } },
+                1097n,
+                Cluster.Mainnet,
+            ),
+        ).toEqual(200_000);
     });
 });
