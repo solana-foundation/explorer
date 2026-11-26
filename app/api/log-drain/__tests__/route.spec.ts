@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { GET, POST } from '../route';
 
 const fetchMock = vi.fn();
@@ -102,6 +104,18 @@ describe('log-drain route', () => {
 
         expect(response.status).toBe(502);
         expect(response.headers.get('x-vercel-verify')).toBe(VERIFY);
+    });
+
+    it('should report the response body of a rejected push to Sentry', async () => {
+        const logError = vi.spyOn(Logger, 'error').mockImplementation(() => {});
+        fetchMock.mockResolvedValue({ ok: false, status: 500, text: async () => 'ingester unavailable' });
+
+        await post(event({}));
+
+        expect(logError).toHaveBeenCalledWith(
+            expect.any(Error),
+            expect.objectContaining({ sentry: true, sentryExtras: { detail: 'ingester unavailable' } }),
+        );
     });
 
     it('should answer 502 when Loki is unreachable', async () => {
