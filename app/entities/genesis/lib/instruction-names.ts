@@ -145,7 +145,7 @@ const EMIT_EVENT_DISCRIMINATOR = 255;
 
 /** The IDL name for a Genesis instruction discriminator, or `undefined` for a byte the vendored IDL does not know. */
 export function getGenesisInstructionName(discriminator: number): string | undefined {
-    return discriminator === EMIT_EVENT_DISCRIMINATOR ? 'EmitEvent' : NAMES_BY_DISCRIMINATOR[discriminator];
+    return discriminator === EMIT_EVENT_DISCRIMINATOR ? 'EmitEvent' : NAMES_BY_DISCRIMINATOR.at(discriminator);
 }
 
 /**

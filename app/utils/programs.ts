@@ -224,7 +224,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     GNS1S5J5AspKXgpjz6SvKL66kPaKWAhaGRhCqPRxii2B: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
         name: PROGRAM_NAMES.GENESIS_PROGRAM,
     },
     Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c: {
