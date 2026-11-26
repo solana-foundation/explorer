@@ -1,5 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
 import { TokenExtensionRow } from '@entities/token-extension';
+import { useEpochInfo } from '@providers/cluster';
 import { useCallback, useMemo, useState } from 'react';
 import { Code, ExternalLink as ExternalLinkIcon } from 'react-feather';
 
@@ -34,6 +35,7 @@ export function TokenExtensionsSection({
     const { activeExtension: selectedExtension, navigateToExtension } = useTokenExtensionNavigation({
         uriComponent: `/address/${address}`,
     });
+    const epochInfo = useEpochInfo();
 
     const onSelect = useCallback(
         (id: string) => {
@@ -65,6 +67,7 @@ export function TokenExtensionsSection({
                         {extension && (
                             <TokenExtensionAccordionItem
                                 decimals={decimals}
+                                epoch={epochInfo?.epoch}
                                 extension={extension}
                                 onSelect={onSelect}
                                 parsedExtension={ext}
@@ -80,12 +83,14 @@ export function TokenExtensionsSection({
 
 function TokenExtensionAccordionItem({
     decimals,
+    epoch,
     extension,
     onSelect,
     parsedExtension,
     symbol,
 }: {
     decimals: number;
+    epoch: bigint | undefined;
     extension: TokenExtension;
     onSelect: (id: string) => void;
     parsedExtension: ParsedTokenExtension;
@@ -140,7 +145,12 @@ function TokenExtensionAccordionItem({
                 {!showRaw ? (
                     <Card ui="dashkit" className="m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
-                            <TokenExtensionRow decimals={decimals} symbol={symbol} tokenExtension={extension} />
+                            <TokenExtensionRow
+                                decimals={decimals}
+                                epoch={epoch}
+                                symbol={symbol}
+                                tokenExtension={extension}
+                            />
                         </TableCardBodyHeaded>
                     </Card>
                 ) : (
