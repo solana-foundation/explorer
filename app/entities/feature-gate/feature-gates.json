@@ -1766,7 +1766,7 @@
     "testnet_activation_epoch": 958,
     "devnet_activation_epoch": 1074,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1097,
     "description": ""
   },
   {
@@ -2334,7 +2334,7 @@
   {
     "comms_required": null,
     "description": "The partitioned epoch rewards process currently requires all stake accounts, including inactive stakes, to be considered when computing the lattice hash and rewards partition count. But inactive stakes do not contribute to stake weight or rewards, so they shouldn't be required.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1218,
     "key": "RMsTKfD6hZnBhhNvgGBeKNrqCNkeoP3DYYxNtcuWtRg",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
