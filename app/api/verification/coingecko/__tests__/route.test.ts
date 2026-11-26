@@ -101,8 +101,8 @@ describe('CoinGecko verification route (gt_verified)', () => {
         const r = await callRoute(VALID_ADDRESS);
         expect(r.status).toBe(status);
         expect(Logger.warn).toHaveBeenCalledWith(`[api:coingecko] Upstream returned ${status}`, {
-            address: VALID_ADDRESS,
             sentry: true,
+            sentryExtras: { address: VALID_ADDRESS },
         });
         expect(Logger.panic).not.toHaveBeenCalled();
     });
@@ -130,8 +130,8 @@ describe('CoinGecko verification route (gt_verified)', () => {
         const r = await callRoute(VALID_ADDRESS);
         expect(r.status).toBe(502);
         expect(Logger.warn).toHaveBeenCalledWith('[api:coingecko] Failed to parse upstream JSON', {
-            address: VALID_ADDRESS,
             sentry: true,
+            sentryExtras: { address: VALID_ADDRESS },
         });
     });
 

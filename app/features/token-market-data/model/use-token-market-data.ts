@@ -43,8 +43,8 @@ export async function fetchTokenMarketData([, address]: SwrKey): Promise<TokenMa
         const data = await response.json();
         if (!is(data, TokenMarketDataSchema)) {
             Logger.error(new Error('[token-market-data] Market data schema validation failed'), {
-                address,
                 sentry: true,
+                sentryExtras: { address },
             });
             return { status: TokenMarketDataStatus.FetchFailed };
         }

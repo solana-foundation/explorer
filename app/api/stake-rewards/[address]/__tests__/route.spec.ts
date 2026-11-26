@@ -161,7 +161,9 @@ describe('GET /api/stake-rewards/[address]', () => {
 
         expect(logged).toHaveBeenCalledWith(
             expect.any(Error),
-            expect.objectContaining({ reason: 'solscan-key-rejected', status: 401 }),
+            expect.objectContaining({
+                sentryExtras: expect.objectContaining({ reason: 'solscan-key-rejected', status: 401 }),
+            }),
         );
         logged.mockRestore();
     });
@@ -174,7 +176,9 @@ describe('GET /api/stake-rewards/[address]', () => {
 
         expect(logged).toHaveBeenCalledWith(
             expect.any(Error),
-            expect.objectContaining({ reason: 'solscan-request-failed', status: 503 }),
+            expect.objectContaining({
+                sentryExtras: expect.objectContaining({ reason: 'solscan-request-failed', status: 503 }),
+            }),
         );
         logged.mockRestore();
     });

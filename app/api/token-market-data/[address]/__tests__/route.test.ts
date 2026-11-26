@@ -124,8 +124,8 @@ describe('Token Market Data API Route', () => {
         const r = await callRoute(VALID_ADDRESS);
         expect(r.status).toBe(502);
         expect(Logger.warn).toHaveBeenCalledWith('[api:token-market-data] Failed to parse upstream JSON', {
-            address: VALID_ADDRESS,
             sentry: true,
+            sentryExtras: { address: VALID_ADDRESS },
         });
     });
 

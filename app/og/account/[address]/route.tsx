@@ -57,7 +57,10 @@ export async function GET(request: NextRequest, props: Props) {
             },
         });
     } catch (e) {
-        Logger.error(new Error('[og:account] Failed to generate image', { cause: e }), { address, sentry: true });
+        Logger.error(new Error('[og:account] Failed to generate image', { cause: e }), {
+            sentry: true,
+            sentryExtras: { address },
+        });
         return new NextResponse('Failed to process request', { status: 500 });
     }
 }

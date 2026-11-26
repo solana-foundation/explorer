@@ -62,7 +62,10 @@ export async function GET(_request: Request, props: Params) {
             if (response.status === 429) {
                 Logger.warn('[api:rugcheck] Rate limit exceeded', { sentry: true });
             } else if (isTransientStatus(response.status)) {
-                Logger.warn(`[api:rugcheck] Upstream returned ${response.status}`, { mintAddress, sentry: true });
+                Logger.warn(`[api:rugcheck] Upstream returned ${response.status}`, {
+                    sentry: true,
+                    sentryExtras: { mintAddress },
+                });
             } else {
                 Logger.panic(new Error(`Rugcheck API error: ${response.status}`));
             }
@@ -75,7 +78,7 @@ export async function GET(_request: Request, props: Params) {
         const data = await response.json();
 
         if (!is(data, RugCheckResponseSchema)) {
-            Logger.warn('[api:rugcheck] Invalid response schema', { mintAddress, sentry: true });
+            Logger.warn('[api:rugcheck] Invalid response schema', { sentry: true, sentryExtras: { mintAddress } });
             return NextResponse.json(
                 { error: 'Invalid response from rugcheck API' },
                 { headers: NO_STORE_HEADERS, status: 502 },
@@ -85,14 +88,14 @@ export async function GET(_request: Request, props: Params) {
         return NextResponse.json({ score: data.score_normalised }, { headers: CACHE_HEADERS });
     } catch (error) {
         if (isTimeoutError(error)) {
-            Logger.warn('[api:rugcheck] Upstream request timed out', { mintAddress, sentry: true });
+            Logger.warn('[api:rugcheck] Upstream request timed out', { sentry: true, sentryExtras: { mintAddress } });
             return NextResponse.json(
                 { error: 'Upstream request timed out' },
                 { headers: ERROR_CACHE_HEADERS, status: 504 },
             );
         }
         if (isRetryableFetchError(error)) {
-            Logger.warn('[api:rugcheck] Upstream connection failed', { mintAddress, sentry: true });
+            Logger.warn('[api:rugcheck] Upstream connection failed', { sentry: true, sentryExtras: { mintAddress } });
             return NextResponse.json(
                 { error: 'Upstream connection failed' },
                 { headers: ERROR_CACHE_HEADERS, status: 502 },

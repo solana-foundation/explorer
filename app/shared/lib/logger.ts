@@ -17,17 +17,17 @@ type SentryExtras = Record<string, unknown>;
 
 type SentryReport = boolean | 'always';
 
-type SentryContext = LogContext & {
+// Sentry receives only `sentryExtras`, so a context that reports to Sentry accepts no other field.
+type ReportedContext = {
     /** `true` reports from the server only. `'always'` reports from the server and the browser. */
-    sentry?: SentryReport;
+    sentry: true | 'always';
     /** Extra data sent exclusively to Sentry (not included in console output). */
     sentryExtras?: SentryExtras;
 };
 
-type PanicContext = LogContext & {
-    /** Extra data sent exclusively to Sentry (not included in console output). */
-    sentryExtras?: SentryExtras;
-};
+type SentryContext = (LogContext & { sentry?: false; sentryExtras?: never }) | ReportedContext;
+
+type PanicContext = Pick<ReportedContext, 'sentryExtras'>;
 
 /**
  * A log message won't be shown if its level is greater than the NEXT_LOG_LEVEL environment variable.
@@ -49,7 +49,7 @@ type PanicContext = LogContext & {
  * error sample rate in `sentry/lib/config.mjs`, so a browser `panic` reaches Sentry only when sampled.
  *
  * Use `sentryExtras` to attach data exclusively to the Sentry event.
- * Context fields outside `sentryExtras` are only sent to the console.
+ * A context without `sentry` is only sent to the console.
  * Internal keys (`sentry`, `sentryExtras`) are always stripped from console output.
  */
 class StraightforwardLogger {

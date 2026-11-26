@@ -35,7 +35,10 @@ export async function GET(_request: NextRequest, props: Props) {
             headers: { ...CACHE_HEADERS, 'Content-Type': 'image/png' },
         });
     } catch (e) {
-        Logger.error(new Error('[og:feature-gate] Failed to generate image', { cause: e }), { address, sentry: true });
+        Logger.error(new Error('[og:feature-gate] Failed to generate image', { cause: e }), {
+            sentry: true,
+            sentryExtras: { address },
+        });
         return new NextResponse('Failed to process request', { status: 500 });
     }
 }

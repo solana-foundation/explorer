@@ -53,7 +53,10 @@ export async function fetchTokenResults(query: string, ctx: SearchContext): Prom
 
         const data = await response.json();
         if (!is(data, SearchApiResponseSchema)) {
-            Logger.error(new Error('[token-search] invalid search response'), { query: trimmed, sentry: true });
+            Logger.error(new Error('[token-search] invalid search response'), {
+                sentry: true,
+                sentryExtras: { query: trimmed },
+            });
             return [];
         }
 
@@ -70,8 +73,8 @@ export async function fetchTokenResults(query: string, ctx: SearchContext): Prom
         return options.length > 0 ? [{ label: SearchGroup.Tokens, options }] : [];
     } catch (error) {
         Logger.error(error instanceof Error ? error : new Error('[token-search] request failed'), {
-            query: trimmed,
             sentry: true,
+            sentryExtras: { query: trimmed },
         });
         return [];
     } finally {

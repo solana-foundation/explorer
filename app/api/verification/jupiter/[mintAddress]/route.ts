@@ -52,7 +52,10 @@ export async function GET(_request: Request, props: Params) {
             if (response.status === 429) {
                 Logger.warn('[api:jupiter] Rate limit exceeded', { sentry: true });
             } else if (isTransientStatus(response.status)) {
-                Logger.warn(`[api:jupiter] Upstream returned ${response.status}`, { mintAddress, sentry: true });
+                Logger.warn(`[api:jupiter] Upstream returned ${response.status}`, {
+                    sentry: true,
+                    sentryExtras: { mintAddress },
+                });
             } else if (response.status !== 404) {
                 Logger.panic(new Error(`Jupiter API error: ${response.status}`));
             }
@@ -65,7 +68,7 @@ export async function GET(_request: Request, props: Params) {
         const data = await response.json();
 
         if (!is(data, JupiterResponseSchema)) {
-            Logger.error(new Error('[api:jupiter] schema mismatch'), { mintAddress, sentry: true });
+            Logger.error(new Error('[api:jupiter] schema mismatch'), { sentry: true, sentryExtras: { mintAddress } });
             return NextResponse.json(
                 { error: 'Upstream schema mismatch' },
                 { headers: ERROR_CACHE_HEADERS, status: 502 },
@@ -76,7 +79,7 @@ export async function GET(_request: Request, props: Params) {
         return NextResponse.json({ verified: token?.isVerified === true }, { headers: CACHE_HEADERS });
     } catch (error) {
         if (isTimeoutError(error)) {
-            Logger.warn('[api:jupiter] Upstream request timed out', { mintAddress, sentry: true });
+            Logger.warn('[api:jupiter] Upstream request timed out', { sentry: true, sentryExtras: { mintAddress } });
             return NextResponse.json(
                 { error: 'Upstream request timed out' },
                 { headers: ERROR_CACHE_HEADERS, status: 504 },
