@@ -185,6 +185,24 @@ jobs:
       - name: Audit dependencies
         run: pnpm audit:ci
 
+  # A frozen install does not compare catalog versions with the lockfile, so a catalog bump without a lockfile update passes CI on the old version.
+  Lockfile-Check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install package manager
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Re-resolve lockfile from manifests
+        run: pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
+
+      - name: Fail when the committed lockfile differs
+        run: git diff --exit-code pnpm-lock.yaml
+
   Sitemap-Check:
     needs: read-nvmrc
     runs-on: ubuntu-latest
@@ -269,7 +287,7 @@ jobs:
     # Without `always()`, GitHub skips this job when any job in `needs` fails.
     # A skipped required check does not block a merge, so the broken PR would merge.
     if: always()
-    needs: [read-nvmrc, Format-And-Lint, Build, Test-Packages, Specs-Shards, Security-Audit, Sitemap-Check]
+    needs: [read-nvmrc, Format-And-Lint, Build, Test-Packages, Specs-Shards, Security-Audit, Lockfile-Check, Sitemap-Check]
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
