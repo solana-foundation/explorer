@@ -32,6 +32,15 @@ describe('BaseMetadataCard', () => {
         expect(screen.queryByText('PayPal USD')).not.toBeInTheDocument();
     });
 
+    it('should link each tab to its panel for screen readers', () => {
+        render(<BaseMetadataCard sections={[tokenExtension, metaplex]} />);
+
+        const tab = screen.getByRole('tab', { name: 'Token extension' });
+        const panel = screen.getByRole('tabpanel');
+        expect(tab.getAttribute('aria-controls')).toBe(panel.getAttribute('id'));
+        expect(panel.getAttribute('aria-labelledby')).toBe(tab.getAttribute('id'));
+    });
+
     it('should report a missing source', () => {
         render(<BaseMetadataCard sections={[]} />);
 

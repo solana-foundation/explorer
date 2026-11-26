@@ -6,18 +6,24 @@ import { useCallback, useRef } from 'react';
 import { useEdgeFades } from '@/app/shared/lib/use-edge-fades';
 import { useTablistKeyboard } from '@/app/shared/lib/use-tablist-keyboard';
 
+// Stable element ids so a tab and its panel can reference each other via aria-controls / aria-labelledby.
+export const cardTabId = (idBase: string, id: string) => `${idBase}-tab-${id}`;
+export const cardTabPanelId = (idBase: string, id: string) => `${idBase}-panel-${id}`;
+
 // Tabs for a card's header row. `mono` is the MCP docs look (mono capitals, accent active tab); `plain` keeps the
-// same height but takes the app's regular tabs' font and colors.
+// same height but takes the app's regular tabs' font and colors. Pass `idBase` to wire the tabs to a `role="tabpanel"`.
 export function CardTabs({
     items,
     onChange,
     value,
     look = 'mono',
+    idBase,
 }: {
     items: { id: string; label: string }[];
     onChange: (id: string) => void;
     value: string;
     look?: 'mono' | 'plain';
+    idBase?: string;
 }) {
     const rowRef = useRef<HTMLDivElement>(null);
     const { contentRef, maskImage, onScroll } = useEdgeFades(rowRef, true, 'horizontal');
@@ -55,6 +61,8 @@ export function CardTabs({
                         ref={setTabRef(index)}
                         type="button"
                         role="tab"
+                        id={idBase ? cardTabId(idBase, item.id) : undefined}
+                        aria-controls={idBase ? cardTabPanelId(idBase, item.id) : undefined}
                         aria-selected={active}
                         tabIndex={active ? 0 : -1}
                         onClick={() => onChange(item.id)}

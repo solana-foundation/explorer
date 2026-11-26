@@ -1,1 +1,1 @@
-export { CardTabs } from './CardTabs';
+export { CardTabs, cardTabId, cardTabPanelId } from './CardTabs';

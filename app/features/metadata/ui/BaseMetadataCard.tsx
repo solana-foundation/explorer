@@ -2,11 +2,11 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { JsonViewer } from '@components/common/JsonViewer';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cva } from 'class-variance-authority';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import { withStringsInsteadOfBigInts } from '@/app/shared/lib/bigint-to-string';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
-import { CardTabs } from '@/app/shared/ui/card-tabs';
+import { cardTabId, cardTabPanelId, CardTabs } from '@/app/shared/ui/card-tabs';
 import { InlineCopyButton } from '@/app/shared/ui/json-view';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
@@ -34,15 +34,18 @@ function TabsMetadataCard({ sections }: { sections: MetadataSection[] }) {
     const [activeId, setActiveId] = useState(sections[0].id);
     const active = sections.find(section => section.id === activeId) ?? sections[0];
     const [copyState, copy] = useCopyToClipboard(1000);
+    const idBase = useId();
+    const hasTabs = sections.length > 1;
     return (
         <div className="w-full overflow-hidden rounded-lg border border-solid border-outer-space-800 bg-outer-space-900">
-            <div className={tabsHeaderVariants({ content: sections.length > 1 ? 'tabs' : 'label' })}>
-                {sections.length > 1 ? (
+            <div className={tabsHeaderVariants({ content: hasTabs ? 'tabs' : 'label' })}>
+                {hasTabs ? (
                     <CardTabs
                         items={sections.map(section => ({ id: section.id, label: section.title }))}
                         onChange={setActiveId}
                         value={active.id}
                         look="plain"
+                        idBase={idBase}
                     />
                 ) : (
                     <span className="flex-1 text-sm font-normal text-white">{active.title}</span>
@@ -55,7 +58,13 @@ function TabsMetadataCard({ sections }: { sections: MetadataSection[] }) {
                     />
                 </span>
             </div>
-            <div className={ROW_PADDING}>
+            <div
+                className={ROW_PADDING}
+                id={hasTabs ? cardTabPanelId(idBase, active.id) : undefined}
+                role={hasTabs ? 'tabpanel' : undefined}
+                aria-labelledby={hasTabs ? cardTabId(idBase, active.id) : undefined}
+                tabIndex={hasTabs ? 0 : undefined}
+            >
                 <JsonViewer version="v2" src={active.data} blockCopy={false} />
             </div>
         </div>
