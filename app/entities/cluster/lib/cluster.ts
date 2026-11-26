@@ -47,18 +47,19 @@ export const DEVNET_URL = 'https://api.devnet.solana.com';
 // Same public mainnet RPC as `MAINNET_BETA_URL`, under the name wallets and dApps still link with.
 export const MAINNET_BETA_ALIAS_URL = 'https://api.mainnet-beta.solana.com';
 
-const PUBLIC_ENDPOINT_CLUSTERS: [string, ServerCluster][] = [
+// Keyed by origin: each URL constant is a bare origin, so it matches `RpcEndpoint.origin` as is.
+const PUBLIC_ENDPOINT_CLUSTERS = new Map<string, ServerCluster>([
     [MAINNET_BETA_URL, Cluster.Mainnet],
     [MAINNET_BETA_ALIAS_URL, Cluster.Mainnet],
     [TESTNET_URL, Cluster.Testnet],
     [DEVNET_URL, Cluster.Devnet],
-];
+]);
 
 /** The known cluster whose public RPC `url` points at, by origin; `undefined` for any other endpoint. */
 export function clusterForPublicEndpoint(url: string): ServerCluster | undefined {
     const endpoint = parseRpcEndpoint(url);
     if (!endpoint) return undefined;
-    return PUBLIC_ENDPOINT_CLUSTERS.find(([publicUrl]) => new URL(publicUrl).origin === endpoint.origin)?.[1];
+    return PUBLIC_ENDPOINT_CLUSTERS.get(endpoint.origin);
 }
 
 // On localhost we use the default public Solana RPCs (e.g. api.mainnet.solana.com)
