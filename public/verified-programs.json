@@ -270,6 +270,12 @@
     "verifiedAt": "2025-03-09T16:34:58"
   },
   {
+    "address": "3whhSuib2w3oDRzgh9meGe2kZnDgURukc1vvAYeNyTPc",
+    "name": "aqevu/aqevu-program",
+    "repoUrl": "https://github.com/aqevu/aqevu-program/tree/1bfa7a98356dcfd00302afef18bc6d47bf28e766",
+    "verifiedAt": "2026-11-25T20:40:41"
+  },
+  {
     "address": "41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB",
     "name": "burnmint_token_pool",
     "repoUrl": "https://github.com/smartcontractkit/chainlink-ccip-solana/tree/eb216bf476c25845cd2dda0033822b1fa238e496",
@@ -370,6 +376,12 @@
     "name": "voidify",
     "repoUrl": "https://github.com/VoidifyCommunity/voidify-smart-contract-audit/tree/5194babd258fc795d2014456567becc40739d04a",
     "verifiedAt": "2026-07-20T11:53:07"
+  },
+  {
+    "address": "4WMGnz33sRKHynF2an3kWmfZtd8eudTVCExtSmMWuaCc",
+    "name": "sipLinchik/darkpool-wrap",
+    "repoUrl": "https://github.com/sipLinchik/darkpool-wrap/tree/f5462b58ac4ed69007b4c5835bae9d779a5e543b",
+    "verifiedAt": "2026-11-25T11:32:02"
   },
   {
     "address": "4wRDs4r5tvs7YSrgKvMsTuLdibr4C4YK7yNA2Syg2iyz",
@@ -1510,6 +1522,12 @@
     "name": "soldust",
     "repoUrl": "https://github.com/corium-solana/corium-core/tree/78e4b5b39361f09de95352c0aa174e234a53e000",
     "verifiedAt": "2026-09-18T06:06:27"
+  },
+  {
+    "address": "Cr4RMFXbbnRU85PUQtLuUJebD4cVUh5nPmN5YBq9PYsH",
+    "name": "mudwater_digital_swaps",
+    "repoUrl": "https://github.com/mudwater-cards/escrow-program-source/tree/e044d9e94fd2458f752d00906be32bbf46239701",
+    "verifiedAt": "2026-11-25T08:31:39"
   },
   {
     "address": "Crab3VG41zLxPMy4WkVvJTip8TrjSY6zjfi8Dv69a5A3",
@@ -2780,8 +2798,8 @@
   {
     "address": "LiQnowFbFQdYyZhF4pUbpsrZCjxRTQ1upKJxZ2VXjde",
     "name": "liquidation",
-    "repoUrl": "https://github.com/metaDAOproject/programs/tree/fcb7e10d058e590e9b770cc925a3de24b9fb1440",
-    "verifiedAt": "2026-03-10T21:54:23"
+    "repoUrl": "https://github.com/metaDAOproject/programs/tree/cde70a44a72413c1a31e0dd51be5c644fc8f9d7d",
+    "verifiedAt": "2026-11-25T18:52:20"
   },
   {
     "address": "Liquidbdbaw2nFfqbjGGggc4vr4m48sfLzkAoQ7sw4n",
@@ -2800,12 +2818,6 @@
     "name": "lombard-finance/sol-svm-contracts",
     "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/e90556261faf9004f74bab72cc540f03e3cd7341",
     "verifiedAt": "2026-07-27T11:35:17"
-  },
-  {
-    "address": "Lomb8TTCwJKEhZrJ1J8UbsCRjNSf7NNQUEr4qo3dkSk",
-    "name": "lombard-finance/sol-svm-contracts",
-    "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/e90556261faf9004f74bab72cc540f03e3cd7341",
-    "verifiedAt": "2026-07-27T11:43:06"
   },
   {
     "address": "LomeavGUocL4Rn5TboDYFQEwUp3wBKodUTRKE8KqbE6",
@@ -2830,12 +2842,6 @@
     "name": "lombard-finance/sol-svm-contracts",
     "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/21d81cff91da2632c83f91ce7a21c87facdceb7f",
     "verifiedAt": "2026-05-26T10:22:04"
-  },
-  {
-    "address": "Lomva5kTftuXE8992qRufkaeq3XrXV47qv3C1W9xW6Z",
-    "name": "lombard-finance/sol-svm-contracts",
-    "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/e90556261faf9004f74bab72cc540f03e3cd7341",
-    "verifiedAt": "2026-07-27T11:38:27"
   },
   {
     "address": "LomyRmBeQiuqiwcPmr23RRA1SMLAuDEgj5tHHe7rsDn",
