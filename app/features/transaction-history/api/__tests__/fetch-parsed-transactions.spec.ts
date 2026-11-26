@@ -106,7 +106,6 @@ describe('fetchParsedTransactions', () => {
     });
 });
 
-// Each test uses its own url, because the queue of a url keeps its window across tests.
 function options(url: string, signatures: string[]) {
     return { cluster: Cluster.Mainnet, onSettled: () => {}, shouldRun: () => true, signatures, url };
 }

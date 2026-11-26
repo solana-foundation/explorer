@@ -131,7 +131,6 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
     );
 }
 
-// A retry fetches no page, so a newer page cannot replace the rows whose transactions it fetches.
 export function useRetryFailedTransactions(): (address: Address) => void {
     const { cluster, url } = useCluster();
     const state = React.useContext(StateContext);
@@ -164,7 +163,6 @@ export function useRetryFailedTransactions(): (address: Address) => void {
     );
 }
 
-// A card that fetches transactions calls this, or the queue skips every transaction fetch.
 export function useEnableTransactionFetches(address: Address): void {
     const { url } = useCluster();
     useEnabledQueueKey(transactionFetchesKey(url, address));
@@ -174,8 +172,6 @@ function transactionFetchesKey(url: string, address: Address): string {
     return `history-transactions:${url}:${address}`;
 }
 
-// The returned function returns false after the generation advances (a filter change or a reset), so the caller
-// drops the result of a superseded request.
 function snapshotGeneration(generations: Map<string, number>, address: Address): () => boolean {
     const generation = generations.get(address) ?? 0;
     return () => (generations.get(address) ?? 0) === generation;
@@ -193,7 +189,6 @@ type FetchAccountHistoryOptions = {
     append: boolean;
     forceSignatures?: boolean;
     fetchTransactions?: boolean;
-    // The history already in the cache. Some of its rows that have no transaction are fetched with the page.
     cachedHistory?: AccountHistory;
     // Returns false once this request has been superseded (e.g. by a filter change),
     // in which case its result is dropped rather than written into the cache.
@@ -263,7 +258,6 @@ async function fetchAccountHistory({
         return;
     }
 
-    // The page is written before its transactions load, so the rows of each transaction show when it lands.
     dispatch({ data: { append, history }, key: address, status: FetchStatus.Fetching, type: ActionType.Update, url });
 
     await fetchTransactionsIntoCache({
@@ -310,7 +304,6 @@ async function retryFailedTransactions({
 
     if (!isCurrent()) return;
 
-    // The status describes the last page, which the retry did not fetch.
     dispatch({ key: address, status, type: ActionType.Update, url });
 }
 
@@ -347,8 +340,6 @@ function fetchTransactionsIntoCache({
     });
 }
 
-// The page rows, and the rows of the merged list that no fetch has tried. A refresh whose page does not overlap the
-// cached rows drops them from the list, so it does not fetch them.
 function getSignaturesToFetch({
     page,
     cachedHistory,
@@ -359,9 +350,10 @@ function getSignaturesToFetch({
     append: boolean;
 }): string[] {
     const { combined } = combineFetched(page, cachedHistory?.fetched, append);
-    const rowsWithoutReason = combined.filter(({ signature }) => !cachedHistory?.missingTransactions?.has(signature));
-    const signatures = new Set([...page, ...rowsWithoutReason].map(row => row.signature));
-    // A transaction never changes, so a row that has one is not fetched again.
+    const rowsNotFailed = combined.filter(
+        ({ signature }) => cachedHistory?.missingTransactions?.get(signature) !== 'failed',
+    );
+    const signatures = new Set([...page, ...rowsNotFailed].map(row => row.signature));
     return [...signatures].filter(signature => !cachedHistory?.transactionMap?.has(signature));
 }
 

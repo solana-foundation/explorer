@@ -2,7 +2,6 @@ import type { TransactionWithMeta } from '@entities/transaction-data';
 import type { ConfirmedSignatureInfo } from '@solana/web3.js';
 
 export type TransactionMap = Map<string, TransactionWithMeta>;
-// The reason a row has no transaction. A row that no fetch has tried has no reason.
 export type MissingTransactionReason = 'failed' | 'skipped';
 export type MissingTransactions = Map<string, MissingTransactionReason>;
 
@@ -24,5 +23,4 @@ export type AccountHistory = {
 };
 
 export type HistoryUpdate =
-    // `append` is true when the page extends the tail (Load More), and false on a refresh.
     { history: AccountHistory | undefined; append: boolean } | { signature: string; result: ParsedTransactionResult };

@@ -94,7 +94,6 @@ function wrapper({ children }: { children: React.ReactNode }) {
     return <HistoryProvider>{children}</HistoryProvider>;
 }
 
-// A history of five rows: one loaded, one failed, one skipped, and two that no fetch has tried.
 async function renderSettledHistory() {
     mockResult(
         [sig('loaded', 5), sig('failed', 4), sig('skipped', 3), sig('untried', 2), sig('untried-tail', 1)],
@@ -310,10 +309,15 @@ describe('useFetchAccountHistory with transactions', () => {
     });
 
     it.each<[string, ReturnType<typeof sig>[], string[]]>([
-        ['keeps', [sig('new', 6), sig('loaded', 5), sig('failed', 4)], ['new', 'failed', 'untried', 'untried-tail']],
+        [
+            'keeps',
+            [sig('new', 6), sig('loaded', 5), sig('failed', 4)],
+            ['new', 'failed', 'skipped', 'untried', 'untried-tail'],
+        ],
+        ['returns an empty page and keeps', [], ['skipped', 'untried', 'untried-tail']],
         ['drops', [sig('replacement', 9)], ['replacement']],
     ])(
-        'should fetch the page rows and the listed rows that no fetch has tried, on a refresh that %s the cached rows',
+        'should fetch the page rows and the listed rows whose fetch has not failed, on a refresh that %s the cached rows',
         async (_, page, expected) => {
             const { result } = await renderSettledHistory();
 
@@ -326,7 +330,7 @@ describe('useFetchAccountHistory with transactions', () => {
         },
     );
 
-    it('should fetch on Load More, once each, the page rows and the cached rows that no fetch has tried', async () => {
+    it('should fetch on Load More, once each, the page rows and the cached rows whose fetch has not failed', async () => {
         const { result } = await renderSettledHistory();
 
         mockResult([sig('untried-tail', 1), sig('older', 0)], null);
@@ -334,7 +338,12 @@ describe('useFetchAccountHistory with transactions', () => {
         act(() => result.current.fetch(toAddress(ADDRESS), true));
         await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
 
-        expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual(['untried-tail', 'older', 'untried']);
+        expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual([
+            'untried-tail',
+            'older',
+            'skipped',
+            'untried',
+        ]);
     });
 
     it('should fetch on Retry only the listed rows after a refresh replaced the list', async () => {

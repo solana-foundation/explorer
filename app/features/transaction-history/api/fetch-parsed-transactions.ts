@@ -8,11 +8,6 @@ import { getTransactionQueue } from '../lib/get-transaction-queue';
 import { TaskSkippedError } from '../lib/rate-limited-queue';
 import type { ParsedTransactionResult } from '../lib/types';
 
-/**
- * Fetches the parsed transaction of each signature through the rate-limited queue.
- *
- * Reports each signature when its fetch settles, so one failure does not fail the page.
- */
 export async function fetchParsedTransactions({
     url,
     cluster,
@@ -45,12 +40,10 @@ async function fetchParsedTransaction({
     shouldRun: () => boolean;
 }): Promise<ParsedTransactionResult> {
     try {
-        // The queue runs one task at a time, so a call without a timeout would block every later task.
         const transaction = await getTransactionQueue(url)(
             () => fetchTransactionDetails(url, signature, { abortSignal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) }),
             shouldRun,
         );
-        // A null transaction is a transient miss, so a retry fetches it again.
         return transaction ? { status: 'loaded', transaction } : { status: 'failed' };
     } catch (error) {
         if (error instanceof TaskSkippedError) return { status: 'skipped' };

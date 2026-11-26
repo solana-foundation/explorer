@@ -105,7 +105,6 @@ export function TokenTransfersCard({ address }: { address: string }) {
     }, [history]);
 
     React.useEffect(() => {
-        // A fetch that the last unmount skipped left rows without a transaction.
         const hasSkipped = transactionRows.some(
             ({ signature }) => history?.data?.missingTransactions?.get(signature) === 'skipped',
         );

@@ -33,7 +33,6 @@ export function reconcile(
     return {
         fetched: combined,
         foundOldest: tailFromUpdate ? update.history.foundOldest : (history?.foundOldest ?? false),
-        // A page has no transactions, so a refresh from a card that fetches none keeps the missing reasons.
         missingTransactions: history?.missingTransactions,
         paginationToken: tailFromUpdate ? update.history.paginationToken : history?.paginationToken,
         transactionMap: history?.transactionMap,
@@ -73,6 +72,8 @@ export function combineFetched(
         const seen = new Set(current.map(c => c.signature));
         return { combined: current.concat(fetched.filter(f => !seen.has(f.signature))), replaced: false };
     }
+
+    if (fetched.length === 0) return { combined: current, replaced: false };
 
     // History was refreshed: prepend the newly-seen prefix if the page overlaps
     // what we already have, otherwise treat it as a full replacement.

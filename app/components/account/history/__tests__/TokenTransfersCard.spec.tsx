@@ -1,5 +1,6 @@
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import type { MissingTransactions } from '@features/transaction-history/lib/types';
+import { FetchStatus } from '@providers/cache';
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
@@ -62,32 +63,55 @@ describe('TokenTransfersCard', () => {
         expect(fetchAccountHistory).not.toHaveBeenCalled();
     });
 
-    it('should not retry or refresh on mount for a skipped signature that the history does not list', () => {
+    it('should not retry or refresh on mount for a failed row, or for a skipped signature that the history does not list', () => {
+        const rows = [mockConfirmedSignatureInfo()];
+
         renderCard({
-            fetched: [mockConfirmedSignatureInfo()],
-            missingTransactions: new Map([['unlisted', 'skipped']]),
+            fetched: rows,
+            missingTransactions: new Map([
+                [rows[0].signature, 'failed'],
+                ['unlisted', 'skipped'],
+            ]),
             transactionMap: new Map([['other', {} as TransactionWithMeta]]),
         });
 
         expect(retryFailedTransactions).not.toHaveBeenCalled();
         expect(fetchAccountHistory).not.toHaveBeenCalled();
     });
+
+    it('should show the loading text, and no failed count, while the transactions load', () => {
+        const rows = [mockConfirmedSignatureInfo()];
+
+        renderCard({
+            fetched: rows,
+            missingTransactions: new Map([[rows[0].signature, 'failed']]),
+            status: FetchStatus.Fetching,
+            transactionMap: new Map([['other', {} as TransactionWithMeta]]),
+        });
+
+        expect(screen.getAllByText('Loading token transfers')).not.toHaveLength(0);
+        expect(screen.queryByText('Failed to load', { exact: false })).not.toBeInTheDocument();
+    });
 });
 
 function renderCard({
     fetched,
     missingTransactions,
+    status = FetchStatus.Fetched,
     transactionMap,
 }: {
     fetched: ReturnType<typeof mockConfirmedSignatureInfo>[];
     missingTransactions: MissingTransactions;
+    status?: FetchStatus;
     transactionMap?: Map<string, TransactionWithMeta>;
 }): void {
     render(
         <MockClusterProvider>
             <MockAccountsProvider>
                 <MockHistoryProvider
-                    history={{ [ADDRESS]: mockAccountHistory({ fetched, missingTransactions, transactionMap }) }}
+                    history={{
+                        [ADDRESS]: { ...mockAccountHistory({ fetched, missingTransactions, transactionMap }), status },
+                    }}
                 >
                     <TokenTransfersCard address={ADDRESS} />
                 </MockHistoryProvider>
