@@ -21,7 +21,6 @@ const MINT_C = gen.address(3);
 
 const dataCache = vi.hoisted(() => new Map<string, unknown>());
 
-// Like the Next data cache, the fake keeps what the function returns, and nothing when it throws.
 vi.mock('next/cache', () => ({
     unstable_cache: (fn: () => Promise<unknown>, keyParts: string[]) => async () => {
         const key = keyParts.join(',');

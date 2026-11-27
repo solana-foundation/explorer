@@ -40,7 +40,6 @@ export function fetchJupiterVerifiedTokens({
     apiKey: string;
     signal: AbortSignal;
 }): Promise<JupiterTokensResult> {
-    // The list exceeds the item size limit of the Next data cache.
     return fetchJupiterTokens(JUPITER_VERIFIED_TOKENS_URL, { apiKey, cache: 'no-store', signal });
 }
 

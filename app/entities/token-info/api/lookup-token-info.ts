@@ -142,7 +142,6 @@ function toFetchArgs({ addresses, cluster, genesisHash, includeOnChainFallback }
 } {
     if (addresses.length === 1 && !includeOnChainFallback) {
         const query = new URLSearchParams({ cluster: String(cluster) });
-        // A named cluster needs no hash, and sending one gives the same mint a second CDN cache key.
         if (cluster === Cluster.Custom && genesisHash) query.set('genesisHash', genesisHash);
         return {
             init: { method: 'GET' },

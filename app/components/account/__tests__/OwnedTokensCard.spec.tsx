@@ -240,7 +240,6 @@ describe('should page the ordered holdings', () => {
         expect(firstPage.slice(0, 5)).toEqual(verifiedMints);
     });
 
-    // A lookup of every holding sends one Jupiter request per `TOKEN_INFO_REQUEST_LIMIT` mints and gets rate limited.
     it('should look up token info only for the unverified mints on screen', async () => {
         render(<OwnedTokensCard address={OWNER} />);
 

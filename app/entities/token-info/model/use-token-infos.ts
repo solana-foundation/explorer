@@ -117,8 +117,6 @@ export function useVerifiedTokenInfos({
     );
     const tokenInfos = useMemo(() => toTokenInfoMap(data), [data]);
 
-    // Before a render with this key commits, SWR returns a cached `error` with `isLoading` false.
-    // `committedKey` is state, not a ref, to re-render when SWR skips the revalidation on mount.
     const serializedKey = unstable_serialize(key);
     const [committedKey, setCommittedKey] = useState<string>();
     useEffect(() => setCommittedKey(serializedKey), [serializedKey]);

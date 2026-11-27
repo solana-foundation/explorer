@@ -333,7 +333,6 @@ async function renderSettledThenUnmount(props: Partial<Props>, config: SWRConfig
     unmount();
 }
 
-// One cache across mounts, so a second mount reads what the first one stored.
 function sharedCache(): SWRConfiguration {
     const cache = new Map();
     return { dedupingInterval: 0, provider: () => cache };

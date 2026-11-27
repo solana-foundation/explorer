@@ -12,11 +12,9 @@ import type { TokenInfoLookup } from '../../lib/token-info-lookup';
 import type { TokenInfo } from '../../lib/types';
 import { JUPITER_ROUTE_TIMEOUT_MS, lookupTokenInfo, lookupVerifiedTokenInfos } from '../lookup-token-info';
 
-// MINT_A sorts before MINT_B.
 const MINT_A = gen.address(1);
 const MINT_B = gen.address(2);
 
-// One more than the request limit, sorted, so the last mint goes alone in the second chunk.
 const MINTS_OVER_LIMIT = Array.from({ length: TOKEN_INFO_REQUEST_LIMIT + 1 }, (_, index) =>
     gen.address(index + 10),
 ).sort();

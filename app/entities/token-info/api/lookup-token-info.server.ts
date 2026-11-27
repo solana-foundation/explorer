@@ -176,7 +176,6 @@ function toTokenInfo(token: JupiterToken): TokenInfo {
         name: token.name || undefined,
         symbol: token.symbol || undefined,
         verified,
-        // The mint creator sets the website, so only a verified mint shows one.
         website: verified ? (token.website ?? undefined) : undefined,
     };
 }
