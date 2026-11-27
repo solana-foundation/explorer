@@ -151,6 +151,30 @@ describe('getReservedComputeUnits', () => {
         });
     });
 
+    describe('Core BPF migrations', () => {
+        it.each([
+            ['mainnet', Cluster.Mainnet, 'AddressLookupTab1e1111111111111111111111111', 762n],
+            ['mainnet', Cluster.Mainnet, 'Stake11111111111111111111111111111111111111', 823n],
+            ['devnet', Cluster.Devnet, 'AddressLookupTab1e1111111111111111111111111', 849n],
+            ['devnet', Cluster.Devnet, 'Stake11111111111111111111111111111111111111', 917n],
+            ['testnet', Cluster.Testnet, 'AddressLookupTab1e1111111111111111111111111', 756n],
+            ['testnet', Cluster.Testnet, 'Stake11111111111111111111111111111111111111', 813n],
+        ])('should keep the minimal reserve on %s for %s until its migration', (_name, cluster, programId, epoch) => {
+            expect(getReservedComputeUnits({ cluster, epoch: epoch - 1n, programId })).toEqual(3_000);
+            expect(getReservedComputeUnits({ cluster, epoch, programId })).toEqual(200_000);
+        });
+
+        it('should return default compute units for Config, which was already Core BPF at epoch 759', () => {
+            expect(
+                getReservedComputeUnits({
+                    cluster: Cluster.Mainnet,
+                    epoch: 759n,
+                    programId: 'Config1111111111111111111111111111111111111',
+                }),
+            ).toEqual(200_000);
+        });
+    });
+
     describe('custom cluster', () => {
         it('should always use most recent configuration', () => {
             expect(

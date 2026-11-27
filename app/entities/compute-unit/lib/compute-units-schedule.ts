@@ -21,10 +21,15 @@ const BASE58_ENCODER = getBase58Encoder();
  * Built-in programs that have minimal reserved compute units (3k)
  * This list is based on the feature gate C9oAhLxDBm3ssWtJx1yBGzPY55r2rArHmN1pbQn6HogH
  * Source: https://solana.com/docs/references/feature-gates/reserve-minimal-cus-for-builtins
- * Stake, Config and Address Lookup Table run as Core BPF programs now, so the runtime reserves the default for them.
+ * Config is not in the list: it was already a Core BPF program on every cluster when this feature activated.
+ * Stake and Address Lookup Table leave it when their own Core BPF migrations activate (see below).
  */
+const STAKE_PROGRAM = 'Stake11111111111111111111111111111111111111';
+const ADDRESS_LOOKUP_TABLE_PROGRAM = 'AddressLookupTab1e1111111111111111111111111';
 const BUILTIN_PROGRAMS_3K: readonly string[] = [
     '11111111111111111111111111111111', // System Program
+    STAKE_PROGRAM, // Stake Program
+    ADDRESS_LOOKUP_TABLE_PROGRAM, // Address Lookup Table Program
     'BPFLoaderUpgradeab1e11111111111111111111111', // BPF Loader Upgradeable
     'BPFLoader1111111111111111111111111111111111', // BPF Loader
     'BPFLoader2111111111111111111111111111111111', // BPF Loader 2
@@ -63,6 +68,11 @@ const DEFAULT_COMPUTE_UNITS = 200_000;
 const MINIMAL_BUILTIN_COMPUTE_UNITS = 3_000;
 const MAX_COMPUTE_UNITS = 1_400_000;
 
+function reserveMinimalUnitsFor(builtins: readonly string[]) {
+    return (programId: string) =>
+        builtins.includes(programId) ? MINIMAL_BUILTIN_COMPUTE_UNITS : DEFAULT_COMPUTE_UNITS;
+}
+
 /**
  * Compute unit reserve configurations by epoch
  * Add new configurations here as features are activated
@@ -85,13 +95,34 @@ const COMPUTE_UNIT_RESERVE_CONFIGS: readonly ComputeUnitReserveConfig[] = [
         },
         description: 'Built-in programs use minimal compute units',
         featureAccount: 'C9oAhLxDBm3ssWtJx1yBGzPY55r2rArHmN1pbQn6HogH',
-        getReservedUnits: (programId: string) => {
-            if (BUILTIN_PROGRAMS_3K.includes(programId)) {
-                return MINIMAL_BUILTIN_COMPUTE_UNITS;
-            }
-            // Feature gate program is already BPF at this point, uses default
-            return DEFAULT_COMPUTE_UNITS;
+        // Feature gate program is already BPF at this point, uses default
+        getReservedUnits: reserveMinimalUnitsFor(BUILTIN_PROGRAMS_3K),
+    },
+    {
+        activations: {
+            [Cluster.Mainnet]: 762,
+            [Cluster.Devnet]: 849,
+            [Cluster.Testnet]: 756,
         },
+        description: 'Address Lookup Table program migrated to Core BPF',
+        featureAccount: 'C97eKZygrkU4JxJsZdjgbUY7iQR7rKTr4NyDWo2E5pRm',
+        getReservedUnits: reserveMinimalUnitsFor(
+            BUILTIN_PROGRAMS_3K.filter(programId => programId !== ADDRESS_LOOKUP_TABLE_PROGRAM),
+        ),
+    },
+    {
+        activations: {
+            [Cluster.Mainnet]: 823,
+            [Cluster.Devnet]: 917,
+            [Cluster.Testnet]: 813,
+        },
+        description: 'Stake program migrated to Core BPF',
+        featureAccount: '6M4oQ6eXneVhtLoiAr4yRYQY43eVLjrKbiDZDJc892yk',
+        getReservedUnits: reserveMinimalUnitsFor(
+            BUILTIN_PROGRAMS_3K.filter(
+                programId => programId !== ADDRESS_LOOKUP_TABLE_PROGRAM && programId !== STAKE_PROGRAM,
+            ),
+        ),
     },
 ];
 
