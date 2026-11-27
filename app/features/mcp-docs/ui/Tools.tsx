@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
+import { CardTabs } from '@/app/shared/ui/card-tabs';
 
 import { INSPECT_ENTITY_RESPONSE } from '../lib/tool-reference';
-import { CardTabs } from './CardTabs';
 import { BandIntro } from './NumberedBand';
 
 const TOOL_VIEWS = [

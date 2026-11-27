@@ -3,6 +3,7 @@ import { TokenHistoryCard } from '@components/account/TokenHistoryCard';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
 type Props = Readonly<{
@@ -23,9 +24,11 @@ export default async function OwnedTokensPage(props: Props) {
     const { address } = await props.params;
 
     return (
-        <TransactionsProvider>
-            <OwnedTokensCard address={address} />
-            <TokenHistoryCard address={address} />
-        </TransactionsProvider>
+        <AddressTabContent>
+            <TransactionsProvider>
+                <OwnedTokensCard address={address} />
+                <TokenHistoryCard address={address} />
+            </TransactionsProvider>
+        </AddressTabContent>
     );
 }

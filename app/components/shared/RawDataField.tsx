@@ -15,7 +15,9 @@ import { CopyButton } from '@/app/shared/ui/CopyButton';
 
 import { cn } from './utils';
 
-// Must match HexData's default spanSize (4 bytes). 6 spans × 4 bytes = 24 bytes per row.
+// Collapsed-view threshold for the hex tab: show roughly this many bytes (VISIBLE_ROWS worth)
+// before the "Show more" spoiler. The hex itself reflows responsively, so this is a byte budget,
+// not a fixed grid.
 const HEX_ROW_BYTES = 24;
 const VISIBLE_ROWS = 3;
 
@@ -187,7 +189,7 @@ export function RawDataField({
                 value: 'hex',
             },
             {
-                content: <span className="text-wrap break-all font-mono text-sm text-white">{base64String}</span>,
+                content: <span className="break-all font-mono text-xs text-white">{base64String}</span>,
                 value: 'base64',
             },
         ];
@@ -215,11 +217,18 @@ export function RawDataField({
                     {tabsList}
                 </div>
 
-                {/* Collapsed: show at most 4 rows; the rest is revealed inline via the
-                    bottom "Show more" toggle. max-h-[5rem] = pane (0.25rem) + <pre>
-                    padding (0.75rem) + 4×1rem line-height. Expanded drops the clamp. */}
-                <div ref={dataRef} className={cn('relative overflow-hidden', clampData && 'max-h-[5rem]')}>
-                    {renderPanes('py-0.5')}
+                {/* Shared box owns the background + padding so both tabs sit in identical chrome and
+                    only the decoded content changes on switch. Collapsed: show at most ~4 rows; the rest
+                    is revealed inline via the bottom "Show more" toggle. max-h-[5rem] = container padding
+                    (0.75rem) + 4×1rem line-height. Expanded drops the clamp. */}
+                <div
+                    ref={dataRef}
+                    className={cn(
+                        'relative overflow-hidden rounded bg-heavy-metal-900 px-3 py-1.5',
+                        clampData && 'max-h-[5rem]',
+                    )}
+                >
+                    {renderPanes('')}
                     {clamped && clampData && (
                         <div
                             className="pointer-events-none absolute inset-x-0 bottom-0 h-7"
@@ -255,6 +264,10 @@ export function RawDataField({
     }
 
     // ---- Popover variant (default) ----------------------------------------
+    // Both tabs share one padding class so only the decoded content changes on switch; the pane box
+    // (position, padding, font) stays put. `loading` bumps to p-3 to center the spinner.
+    const popoverPaneClass = cn('max-h-80 overflow-y-auto px-3 py-2 text-start', view.kind === 'loading' && 'p-3');
+
     return (
         <Tabs
             value={tab}
@@ -308,14 +321,7 @@ export function RawDataField({
                 </div>
             </div>
 
-            <TabsContent
-                value="hex"
-                className={cn(
-                    'max-h-80 overflow-y-auto p-1.5 text-start',
-                    view.kind === 'loading' && 'p-3',
-                    view.kind === 'tooLarge' && 'px-3 py-2',
-                )}
-            >
+            <TabsContent value="hex" className={popoverPaneClass}>
                 {view.kind === 'loading' ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : view.kind === 'failed' ? (
@@ -327,14 +333,12 @@ export function RawDataField({
                         className="w-full"
                         raw={visibleData ?? new Uint8Array(0)}
                         isCopyable={false}
-                        layout="fixed"
-                        rowSize={HEX_ROW_BYTES}
-                        align="start"
+                        layout="fit"
                     />
                 )}
             </TabsContent>
 
-            <TabsContent value="base64" className={cn('max-h-80 overflow-y-auto p-3 text-start', hasData && 'py-2')}>
+            <TabsContent value="base64" className={popoverPaneClass}>
                 {view.kind === 'loading' ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : view.kind === 'failed' ? (

@@ -1,3 +1,4 @@
+import { none } from '@metaplex-foundation/umi';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -9,7 +10,7 @@ import { MetaplexNFTHeader } from '../MetaplexNFTHeader';
 const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
 const nftData = {
-    editionInfo: { masterEdition: { supply: 1000n } as never },
+    editionInfo: { masterEdition: { maxSupply: none(), supply: 1000n } as never },
     json: undefined,
     metadata: {
         collection: { __option: 'None' },

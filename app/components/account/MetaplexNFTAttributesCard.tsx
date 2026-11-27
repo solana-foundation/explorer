@@ -13,12 +13,17 @@ interface Attribute {
     value: string;
 }
 
+// `shrink` + `break-words`: long free-text values wrap instead of overflowing and scrolling the phone page sideways.
 const COLUMNS: ReadonlyArray<GridTableColumn<Attribute>> = [
     {
+        cell: { shrink: true },
+        cellClassName: 'break-words',
         header: 'Trait type',
         render: ({ trait_type }) => trait_type,
     },
     {
+        cell: { shrink: true },
+        cellClassName: 'break-words',
         header: 'Value',
         render: ({ value }) => value,
     },
@@ -50,9 +55,7 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
             const metadata = await response.json();
             if (isCancelled()) return;
 
-            // Verify if the attributes value is an array
             if (Array.isArray(metadata.attributes)) {
-                // Filter attributes to keep objects matching schema
                 const filteredAttributes = metadata.attributes.filter((attribute: any) => {
                     return (
                         typeof attribute === 'object' &&
@@ -97,10 +100,11 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
         <GridTableCard
             title="Attributes"
             ariaLabel="Attributes"
-            gridTemplate="grid-cols-[auto_1fr]"
+            gridTemplate="grid-cols-[clamp(132px,25%,200px)_1fr]"
             columns={COLUMNS}
             rows={attributes}
             getRowKey={({ trait_type, value }) => `${trait_type}:${value}`}
+            empty="No attributes"
         />
     );
 }

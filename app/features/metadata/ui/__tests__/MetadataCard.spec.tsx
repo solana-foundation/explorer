@@ -13,7 +13,7 @@ import {
 import { MetadataCard } from '../MetadataCard';
 
 vi.mock('@/app/components/common/JsonViewer', () => ({
-    SolarizedJsonViewer: ({ src }: { src: any }) => <div data-testid="json-viewer">{JSON.stringify(src, null, 2)}</div>,
+    JsonViewer: ({ src }: { src: any }) => <div data-testid="json-viewer">{JSON.stringify(src, null, 2)}</div>,
 }));
 
 vi.mock('../../model/useOffChainMetadata', () => ({
@@ -25,7 +25,7 @@ vi.mock('../../model/useOffChainMetadata', () => ({
 }));
 
 describe('MetadataCard', () => {
-    it('should render Metaplex tab when account has metaplex metadata', () => {
+    it('should render a Metaplex section when account has metaplex metadata', () => {
         const { account, getJsonViewer } = setup('metaplexMetadata');
         render(<MetadataCard account={account} />);
 
@@ -33,21 +33,21 @@ describe('MetadataCard', () => {
         expect(getJsonViewer()).toHaveTextContent('USD Coin');
     });
 
-    it('should render token metadata tab when account has token metadata', () => {
+    it('should render a token metadata section when account has token metadata', () => {
         const { account, getJsonViewer } = setup('tokenMetadata');
         render(<MetadataCard account={account} />);
         expect(screen.getByText('Token extension')).toBeInTheDocument();
         expect(getJsonViewer()).toHaveTextContent('PayPal USD');
     });
 
-    it('should render two tabs when account has token metadata and metaplex metadata', () => {
+    it('should render two sections when account has token metadata and metaplex metadata', () => {
         const { account } = setup('tokenMetadataAndMetaplexMetadata');
         render(<MetadataCard account={account} />);
         expect(screen.getByText('Metaplex')).toBeInTheDocument();
         expect(screen.getByText('Token extension')).toBeInTheDocument();
     });
 
-    it('should render compressed NFT tab when account has compressed NFT', () => {
+    it('should render a compressed NFT section when account has compressed NFT', () => {
         const { account, getJsonViewer } = setup('compressedNft');
         render(<MetadataCard account={account} />);
         expect(screen.getByText('Compressed NFT Metadata')).toBeInTheDocument();

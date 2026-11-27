@@ -17,9 +17,11 @@ function AttestationCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     return (
-        <Suspense fallback={<LoadingCard />}>
-            {<AttestationDataCard account={account} onNotFound={onNotFound} />}
-        </Suspense>
+        <div className="pb-14">
+            <Suspense fallback={<LoadingCard />}>
+                {<AttestationDataCard account={account} onNotFound={onNotFound} />}
+            </Suspense>
+        </div>
     );
 }
 

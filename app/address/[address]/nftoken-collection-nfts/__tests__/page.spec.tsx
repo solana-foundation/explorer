@@ -19,7 +19,8 @@ describe('NFTokenCollectionPage', () => {
 
         const element = await NFTokenCollectionPage({ params: Promise.resolve({ address }) });
 
-        expect(element.props).toEqual({ collection: address });
+        // The grid sits in the tab's box-less wrapper (`AddressTabContent`).
+        expect(element.props.children.props).toEqual({ collection: address });
     });
 
     it.each(['not-an-address', '0OIl', ''])('should call notFound for the address %j', async address => {

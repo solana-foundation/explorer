@@ -3,6 +3,7 @@ import { FeatureGateMarkdown } from '@components/account/FeatureGateMarkdown';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { getFeatureInfo } from '@/app/entities/feature-gate/server';
 import { fetchFeatureGateInformation, getFeatureGateOpenGraph } from '@/app/features/feature-gate/server';
@@ -30,13 +31,15 @@ export default async function FeatureGatePage(props: Props) {
     const [proposal] = await fetchFeatureGateInformation(feature);
 
     return (
-        <FeatureGateCard>
-            {proposal?.status === 'ok' ? (
-                <FeatureGateMarkdown baseUrl={feature?.simd_link?.[0]}>{proposal.markdown}</FeatureGateMarkdown>
-            ) : (
-                <ProposalUnavailable url={proposal?.url ?? feature?.simd_link?.[0]} />
-            )}
-        </FeatureGateCard>
+        <AddressTabContent>
+            <FeatureGateCard>
+                {proposal?.status === 'ok' ? (
+                    <FeatureGateMarkdown baseUrl={feature?.simd_link?.[0]}>{proposal.markdown}</FeatureGateMarkdown>
+                ) : (
+                    <ProposalUnavailable url={proposal?.url ?? feature?.simd_link?.[0]} />
+                )}
+            </FeatureGateCard>
+        </AddressTabContent>
     );
 }
 

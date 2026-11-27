@@ -440,7 +440,8 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
         tabs.push({ path: 'compression', title: 'Compression' });
     }
 
-    if (hasTokenMetadata(parsedData)) {
+    // A Token-2022 mint with a Metaplex account already got its Metadata tab above; one tab shows both.
+    if (hasTokenMetadata(parsedData) && !tabs.some(tab => tab.path === 'metadata')) {
         tabs.push({ path: 'metadata', title: 'Metadata' });
     }
 

@@ -1,6 +1,7 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
 import { withTraceData } from '@/app/shared/lib/sentry';
 
 import IdlPageClient from './page-client';
@@ -21,5 +22,9 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 
 export default async function ProgramIDLPage(props: Props) {
     const params = await props.params;
-    return <IdlPageClient address={params.address} />;
+    return (
+        <AddressTabContent>
+            <IdlPageClient address={params.address} />
+        </AddressTabContent>
+    );
 }

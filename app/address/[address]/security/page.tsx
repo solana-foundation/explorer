@@ -1,6 +1,7 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
 import { withTraceData } from '@/app/shared/lib/sentry';
 
 import SecurityPageClient from './page-client';
@@ -21,5 +22,9 @@ type Props = Readonly<{
 
 export default async function SecurityPage(props: Props) {
     const params = await props.params;
-    return <SecurityPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <SecurityPageClient params={params} />
+        </AddressTabContent>
+    );
 }

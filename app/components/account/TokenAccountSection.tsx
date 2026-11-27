@@ -1,3 +1,6 @@
+import { metaplexNftHeaderModel } from '@components/account/MetaplexNFTHeader';
+import { Muted } from '@components/account/nft-header/NftHeaderVariants';
+import { nftCreatorsOverviewRow, nftOverviewRows } from '@components/account/nft-header/overview-rows';
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
@@ -19,12 +22,11 @@ import { TokenExtension } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
 import { useEffect, useMemo, useState } from 'react';
-import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { ExternalLink } from '@/app/components/shared/ui/external-link';
+import { ExternalLink, ExternalLinkMark } from '@/app/components/shared/ui/external-link';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
@@ -146,7 +148,7 @@ function FungibleTokenMintAccountCard({
             value: (
                 <ExternalLink href={tokenInfo.extensions.website}>
                     {tokenInfo.extensions.website}
-                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                    <ExternalLinkMark />
                 </ExternalLink>
             ),
         },
@@ -214,23 +216,11 @@ function NonFungibleTokenMintAccountCard({
 
     const collectionOpt = nftData.metadata.collection;
     const collection = collectionOpt && isSome(collectionOpt) ? collectionOpt.value : null;
-    const maxSupplyOpt =
-        nftData.editionInfo.masterEdition && 'maxSupply' in nftData.editionInfo.masterEdition
-            ? nftData.editionInfo.masterEdition.maxSupply
-            : undefined;
-    const maxSupply = maxSupplyOpt && isSome(maxSupplyOpt) ? Number(maxSupplyOpt.value) : null;
+    const headerModel = metaplexNftHeaderModel(nftData);
 
     const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
         { label: 'Owner', value: <Address pubkey={account.owner} link /> },
-        maxSupply != null && { label: 'Max Total Supply', value: maxSupply === 0 ? 1 : maxSupply },
-        nftData?.editionInfo.masterEdition != null && {
-            label: 'Current Supply',
-            value:
-                Number(nftData.editionInfo.masterEdition.supply) === 0
-                    ? 1
-                    : Number(nftData.editionInfo.masterEdition.supply),
-        },
         collection?.verified && {
             label: 'Verified Collection Address',
             value: <Address pubkey={new PublicKey(collection.key.toString())} link />,
@@ -247,20 +237,24 @@ function NonFungibleTokenMintAccountCard({
             label: 'Update Authority',
             value: <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} link />,
         },
-        nftData?.json &&
-            nftData.json.external_url && {
-                label: 'Website',
-                value: (
-                    <ExternalLink href={nftData.json.external_url}>
-                        {nftData.json.external_url}
-                        <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                    </ExternalLink>
-                ),
-            },
+        nftCreatorsOverviewRow(headerModel),
+        {
+            label: 'Website',
+            value: nftData.json?.external_url ? (
+                <ExternalLink href={nftData.json.external_url}>
+                    {nftData.json.external_url}
+                    <ExternalLinkMark />
+                </ExternalLink>
+            ) : (
+                <Muted />
+            ),
+        },
         nftData?.metadata && {
             label: 'Seller Fee',
             value: `${nftData.metadata.sellerFeeBasisPoints / 100}%`,
         },
+        // No collection arg: it only feeds the header, not these Overview rows.
+        ...nftOverviewRows(headerModel),
     ];
 
     return (

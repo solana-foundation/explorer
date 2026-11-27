@@ -193,11 +193,9 @@ function WrapContent({
     const second: HexSpan['variant'] = inverted ? 'primary' : 'secondary-old';
 
     const content = (
-        // px-0 overrides the global `pre { padding: .33rem }` so the hex sits flush left.
-        <pre
-            ref={preRef}
-            className="mb-0 block whitespace-normal bg-heavy-metal-900 px-0 py-1.5 text-left font-mono text-xs"
-        >
+        // p-0 overrides the global `pre { padding: .33rem }`; the host container owns the background
+        // and padding so the Hex/Base64 tabs share identical chrome.
+        <pre ref={preRef} className="mb-0 block whitespace-normal p-0 text-left font-mono text-xs">
             {spans.map((span, i) => (
                 <React.Fragment key={i}>
                     <span

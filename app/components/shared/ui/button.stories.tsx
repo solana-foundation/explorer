@@ -31,10 +31,10 @@ const sizeOptions = [
     'sm',
     'lg',
     'icon',
+    'icon-sm',
     'compact',
     'tile',
     'toolbar',
-    'inline',
 ] as const satisfies readonly ButtonSize[];
 
 // Dashkit migration shim — emits raw Bootstrap `.btn` + `.btn-<variant>` classes via `ui="dashkit"`.
@@ -110,6 +110,13 @@ export const AllSizes: Story = {
             {sizeOptions.map(size => {
                 if (size === 'icon') {
                     return <IconButton key={size} aria-label="Confirm" icon={<Check />} />;
+                }
+                if (size === 'icon-sm') {
+                    return (
+                        <Button key={size} size={size} aria-label="Confirm">
+                            <Check />
+                        </Button>
+                    );
                 }
                 if (size === 'tile') {
                     return (
@@ -195,6 +202,7 @@ export const VariantsBySize: Story = {
             compact: 'Compact',
             default: 'Default',
             icon: 'Icon',
+            'icon-sm': 'Icon small',
             inline: 'Inline',
             lg: 'Large',
             sm: 'Small',
@@ -218,6 +226,13 @@ export const VariantsBySize: Story = {
                                             variant={variant}
                                             icon={<Icon />}
                                         />
+                                    );
+                                }
+                                if (size === 'icon-sm') {
+                                    return (
+                                        <Button key={variant} size={size} variant={variant} aria-label={variant}>
+                                            <Icon />
+                                        </Button>
                                     );
                                 }
                                 if (size === 'tile') {

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Check, ExternalLink } from 'react-feather';
 
+import { CardTabs } from '@/app/shared/ui/card-tabs';
+
 import { SETUP_CLIENTS } from '../lib/setup-clients';
-import { CardTabs } from './CardTabs';
 import { CodeCard } from './CodeCard';
 import { BandIntro } from './NumberedBand';
 

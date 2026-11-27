@@ -1,6 +1,8 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 import NFTAttributesPageClient from './page-client';
 
 type Props = Readonly<{
@@ -19,5 +21,9 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 
 export default async function MetaplexNFTAttributesPage(props: Props) {
     const params = await props.params;
-    return <NFTAttributesPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <NFTAttributesPageClient params={params} />
+        </AddressTabContent>
+    );
 }

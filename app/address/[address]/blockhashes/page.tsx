@@ -1,3 +1,5 @@
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 import RecentBlockhashesPageClient from './page-client';
 
 type Props = Readonly<{
@@ -13,5 +15,9 @@ export const metadata = {
 
 export default async function RecentBlockhashesPage(props: Props) {
     const params = await props.params;
-    return <RecentBlockhashesPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <RecentBlockhashesPageClient params={params} />
+        </AddressTabContent>
+    );
 }

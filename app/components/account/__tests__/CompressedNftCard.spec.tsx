@@ -16,6 +16,7 @@ vi.mock('@/app/providers/cluster', () => ({
 vi.mock('@/app/providers/accounts', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/providers/accounts')>()),
     useAccountInfo: vi.fn(() => undefined),
+    useFetchAccountInfo: vi.fn(() => vi.fn()),
 }));
 
 vi.mock('@/app/providers/compressed-nft', () => ({
@@ -127,6 +128,39 @@ describe('CompressedNftCard', () => {
         expect(screen.getByText('Owner')).toBeDefined();
         expect(screen.getByText('Update Authority')).toBeDefined();
     });
+
+    it('should show a dash for an asset without a website', () => {
+        useCompressedNft.mockReturnValue(
+            makeCoreAsset({ creators: [{ address: PublicKey.default.toBase58(), share: 100, verified: true }] }),
+        );
+
+        render(<CompressedNftCard account={makeAccount()} />);
+
+        expect(screen.getByText('Website')).toBeDefined();
+        expect(screen.getByText('—')).toBeDefined();
+    });
+
+    it('should link the website of an asset that has one', () => {
+        const asset = makeCoreAsset();
+        asset.content.links.external_url = 'https://example.com';
+        useCompressedNft.mockReturnValue(asset);
+
+        render(<CompressedNftCard account={makeAccount()} />);
+
+        expect(screen.getByRole('link', { name: 'https://example.com' })).toHaveAttribute(
+            'href',
+            'https://example.com',
+        );
+    });
+
+    it('should list the creators before the website in the Overview card', () => {
+        useCompressedNft.mockReturnValue(makeCoreAsset());
+
+        render(<CompressedNftCard account={makeAccount()} />);
+
+        const labels = screen.getAllByText(text => text === 'Creators' || text === 'Website');
+        expect(labels.map(label => label.textContent)).toEqual(['Creators', 'Website']);
+    });
 });
 
 describe('getAssetTypeLabel', () => {
@@ -153,7 +187,7 @@ describe('CompressedNFTHeader', () => {
         expect(screen.getByText('dogwifhat')).toBeDefined();
         expect(screen.queryByText('Metaplex Compressed NFT')).toBeNull();
         expect(screen.queryByText('Compressed')).toBeNull();
-        expect(screen.queryByText('Verified Collection')).toBeNull();
+        expect(screen.queryByText('Verified')).toBeNull();
     });
 
     it('should keep compressed labels for a real compressed NFT', () => {
@@ -161,6 +195,6 @@ describe('CompressedNFTHeader', () => {
 
         expect(screen.getByText('Metaplex Compressed NFT')).toBeDefined();
         expect(screen.getByText('Compressed')).toBeDefined();
-        expect(screen.getByText('Verified Collection')).toBeDefined();
+        expect(screen.getByText('Verified')).toBeDefined();
     });
 });

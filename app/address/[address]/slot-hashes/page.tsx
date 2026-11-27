@@ -1,3 +1,5 @@
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
+
 import SlotHashesPageClient from './page-client';
 
 type Props = Readonly<{
@@ -13,5 +15,9 @@ export const metadata = {
 
 export default async function SlotHashesPage(props: Props) {
     const params = await props.params;
-    return <SlotHashesPageClient params={params} />;
+    return (
+        <AddressTabContent>
+            <SlotHashesPageClient params={params} />
+        </AddressTabContent>
+    );
 }

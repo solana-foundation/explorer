@@ -4,6 +4,7 @@ import { Cluster, clusterFromSlug } from '@utils/cluster';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
+import { AddressTabContent } from '@/app/address/[address]/AddressTabContent';
 import { getFeatureGateOpenGraph } from '@/app/features/feature-gate/server';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
@@ -52,8 +53,10 @@ export default async function TransactionHistoryPage(props: Props) {
     const { address } = await props.params;
 
     return (
-        <TransactionsProvider>
-            <TransactionHistoryCard address={address} />
-        </TransactionsProvider>
+        <AddressTabContent>
+            <TransactionsProvider>
+                <TransactionHistoryCard address={address} />
+            </TransactionsProvider>
+        </AddressTabContent>
     );
 }
