@@ -1,6 +1,6 @@
 import { DEFAULT_SLOT } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { createNextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -12,7 +12,7 @@ import { ProgramMultisigCard } from '../ProgramMultisigCard';
 // Devnet short-circuits useSquadsMultisigLookup so Suspense resolves without RPC calls.
 const meta = {
     component: ProgramMultisigCard,
-    decorators: [withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withViewportFromGlobal, withClusterAndAccounts],
     parameters: {
         ...createNextjsParameters({ query: { cluster: 'devnet' } }),
         viewport: { options: INITIAL_VIEWPORTS },

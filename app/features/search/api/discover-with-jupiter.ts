@@ -1,71 +1,41 @@
-import { array, boolean, is, nullable, number, optional, string, type } from 'superstruct';
+import { JupiterHttpError, reportJupiterError, searchJupiterTokens } from '@entities/token-info/server';
 
 import { matchAbortError } from '@/app/shared/lib/errors';
-import { fetchUpstream } from '@/app/shared/lib/http-utils';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getJupiterApiKey } from '../config';
 import type { DiscoveredToken } from './types';
 
-const JupiterTokenSchema = type({
-    decimals: optional(number()),
-    icon: optional(nullable(string())),
-    id: string(),
-    isVerified: optional(boolean()),
-    logoURI: optional(nullable(string())),
-    name: string(),
-    symbol: string(),
-});
-
-const JupiterSearchResponseSchema = array(JupiterTokenSchema);
-
 export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
-    const jupiterApiKey = getJupiterApiKey();
+    const jupiterApiKey = process.env.JUPITER_API_KEY;
     if (!jupiterApiKey) {
         Logger.warn('[api:search] JUPITER_API_KEY is not configured — skipping Jupiter discovery');
         return [];
     }
 
-    try {
-        const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(query)}`;
-        const response = await fetchUpstream(url, {
-            headers: {
-                Accept: 'application/json',
-                'x-api-key': jupiterApiKey,
-            },
-            signal,
-        });
-
-        if (!response.ok) {
-            if (response.status === 429) {
-                Logger.warn('[api:search] Jupiter rate limit exceeded', { sentry: true });
-            } else {
-                Logger.warn(`[api:search] Jupiter returned ${response.status}`, { sentry: true });
-            }
-            return [];
-        }
-
-        const data = await response.json();
-        if (!is(data, JupiterSearchResponseSchema)) {
-            Logger.warn('[api:search] Jupiter schema mismatch', { sentry: true });
-            return [];
-        }
-
-        return data.map(item => ({
-            address: item.id,
-            decimals: item.decimals,
-            isVerified: item.isVerified === true,
-            logoUri: item.icon ?? item.logoURI ?? undefined,
-            name: item.name,
-            symbol: item.symbol,
-        }));
-    } catch (error) {
-        if (matchAbortError(error)) {
-            return [];
-        }
-        Logger.error(error instanceof Error ? error : new Error('[api:search] Jupiter discovery failed'), {
-            sentry: true,
-        });
+    const result = await searchJupiterTokens({ apiKey: jupiterApiKey, query, signal });
+    if (result.kind === 'rate-limited') {
+        Logger.warn('[api:search] Jupiter rate limit exceeded', { sentry: true });
         return [];
     }
+    if (result.kind === 'unavailable') {
+        reportUnavailable(result.error);
+        return [];
+    }
+    return result.tokens.map(item => ({
+        address: item.id,
+        decimals: item.decimals,
+        isVerified: item.isVerified === true,
+        logoUri: item.icon ?? undefined,
+        name: item.name,
+        symbol: item.symbol,
+    }));
+}
+
+function reportUnavailable(error: unknown): void {
+    if (matchAbortError(error)) return;
+    if (error instanceof JupiterHttpError && error.status === 403) {
+        Logger.warn('[api:search] Jupiter returned 403', { sentry: true });
+        return;
+    }
+    reportJupiterError({ error, message: '[api:search] Jupiter discovery failed' });
 }

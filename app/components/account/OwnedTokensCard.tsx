@@ -4,8 +4,13 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { cn } from '@components/shared/utils';
-import { deriveScaledUiAmountMultiplier, orderMintsByVerification, type TokenInfo } from '@entities/token-info';
-import { useTokenInfos } from '@entities/token-info/client';
+import {
+    deriveScaledUiAmountMultiplier,
+    orderMintsByVerification,
+    type TokenInfo,
+    useTokenInfo,
+    useVerifiedTokenInfos,
+} from '@entities/token-info';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -78,11 +83,13 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
     const holdings = useMemo(() => aggregateByMint(tokens), [tokens]);
     const mints = useMemo(() => Array.from(holdings.keys()), [holdings]);
 
-    // Every mint, not just the visible ones: ordering needs each mint's verified status.
-    const { isLoading, tokenInfos } = useTokenInfos(mints, cluster, genesisHash);
+    const { isLoading, tokenInfos: verifiedTokenInfos } = useVerifiedTokenInfos({ cluster, genesisHash, mints });
 
     // A permutation of `mints`, so its length is the distinct mint count the footer reports.
-    const orderedMints = useMemo(() => orderMintsByVerification(mints, tokenInfos), [mints, tokenInfos]);
+    const orderedMints = useMemo(
+        () => orderMintsByVerification(mints, verifiedTokenInfos),
+        [mints, verifiedTokenInfos],
+    );
 
     // Hold the spinner rather than paint an arbitrary order that reshuffles a moment later.
     if (isLoading) {
@@ -95,7 +102,7 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
         .slice(0, visibleCount)
         .map(mintAddress => {
             const token = holdings.get(mintAddress);
-            return token ? { mintAddress, token, tokenInfo: tokenInfos.get(mintAddress) } : null;
+            return token ? { mintAddress, token, verifiedTokenInfo: verifiedTokenInfos.get(mintAddress) } : null;
         })
         .filter((row): row is TokenRowData => row !== null);
 
@@ -105,32 +112,22 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
             cellClassName: 'p-0',
             header: 'Logo',
             hideOnMobile: true,
-            render: ({ tokenInfo }) => <TokenLogo tokenInfo={tokenInfo} />,
+            render: row => <TokenLogo row={row} />,
         },
         {
             header: 'Mint Address',
             mobileLabel: 'Mint',
-            mobileRender: ({ mintAddress, tokenInfo }) => (
+            mobileRender: row => (
                 <div className="flex min-w-0 items-center gap-2">
-                    <TokenLogo tokenInfo={tokenInfo} />
-                    <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
+                    <TokenLogo row={row} />
+                    <MintAddress row={row} />
                 </div>
             ),
-            render: ({ mintAddress, tokenInfo }) => (
-                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
-            ),
+            render: row => <MintAddress row={row} />,
         },
         {
             header: isDetail ? 'Total Balance' : 'Balance',
-            render: ({ token, tokenInfo }) => (
-                <>
-                    {token.amount} {tokenInfo?.symbol}
-                    <ScaledUiAmountMultiplierTooltip
-                        rawAmount={new BigNumber(token.rawAmount).shiftedBy(-(token.decimals || 0)).toString()}
-                        scaledUiAmountMultiplier={{ multiplier: token.scaledUiAmountMultiplier, status: 'known' }}
-                    />
-                </>
-            ),
+            render: row => <TokenBalance row={row} />,
         },
     ];
 
@@ -167,7 +164,7 @@ function HoldingsCard({ display, tokens }: { display: Display; tokens: TokenInfo
 type TokenRowData = {
     mintAddress: string;
     token: MappedToken;
-    tokenInfo: TokenInfo | undefined;
+    verifiedTokenInfo: TokenInfo | undefined;
 };
 
 type MappedToken = {
@@ -178,16 +175,42 @@ type MappedToken = {
     scaledUiAmountMultiplier: string;
 };
 
-function TokenLogo({ tokenInfo }: { tokenInfo: TokenInfo | undefined }) {
+function TokenLogo({ row }: { row: TokenRowData }) {
+    const tokenInfo = useRowTokenInfo(row);
     return (
         <ProxiedImage
             alt="Token icon"
             className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
             height={16}
-            uri={tokenInfo?.logoURI ?? undefined}
+            uri={tokenInfo?.logoURI}
             width={16}
         />
     );
+}
+
+function MintAddress({ row }: { row: TokenRowData }) {
+    const tokenInfo = useRowTokenInfo(row);
+    return <Address pubkey={new PublicKey(row.mintAddress)} link tokenLabelInfo={tokenInfo} />;
+}
+
+function TokenBalance({ row }: { row: TokenRowData }) {
+    const { token } = row;
+    const tokenInfo = useRowTokenInfo(row);
+    return (
+        <>
+            {token.amount} {tokenInfo?.symbol}
+            <ScaledUiAmountMultiplierTooltip
+                rawAmount={new BigNumber(token.rawAmount).shiftedBy(-(token.decimals || 0)).toString()}
+                scaledUiAmountMultiplier={{ multiplier: token.scaledUiAmountMultiplier, status: 'known' }}
+            />
+        </>
+    );
+}
+
+function useRowTokenInfo({ mintAddress, verifiedTokenInfo }: TokenRowData): TokenInfo | undefined {
+    const { cluster, genesisHash } = useCluster();
+    const { tokenInfo } = useTokenInfo({ cluster, genesisHash, mint: verifiedTokenInfo ? undefined : mintAddress });
+    return verifiedTokenInfo ?? tokenInfo;
 }
 
 /** Insertion order is RPC order, which the verification tiering preserves within a tier. */

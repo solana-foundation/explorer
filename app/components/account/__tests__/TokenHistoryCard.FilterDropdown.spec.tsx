@@ -1,3 +1,4 @@
+import type { useTokenInfo } from '@entities/token-info';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
@@ -23,7 +24,7 @@ vi.mock('@providers/cluster', async importOriginal => {
 });
 
 // Mock the shared per-mint hook so the dropdown resolves labels through the same path the holdings rows use.
-const { useTokenInfoMock } = vi.hoisted(() => ({ useTokenInfoMock: vi.fn() }));
+const { useTokenInfoMock } = vi.hoisted(() => ({ useTokenInfoMock: vi.fn<typeof useTokenInfo>() }));
 vi.mock('@entities/token-info', async importOriginal => {
     const actual = await importOriginal<typeof import('@entities/token-info')>();
     return { ...actual, useTokenInfo: useTokenInfoMock };
@@ -47,12 +48,16 @@ describe('should label the Token History filter with fetched token metadata', ()
     it('should show the fetched symbol and name on the selected-filter toggle button', async () => {
         useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis' });
         useTokenInfoMock.mockReturnValue({
-            address: FILTER_MINT,
-            decimals: 6,
-            logoURI: '',
-            name: 'USD Coin',
-            symbol: 'USDC',
-            verified: true,
+            isLoading: false,
+            kind: 'listed',
+            tokenInfo: {
+                address: FILTER_MINT,
+                decimals: 6,
+                logoURI: '',
+                name: 'USD Coin',
+                symbol: 'USDC',
+                verified: true,
+            },
         });
 
         render(<FilterDropdown filter={FILTER_MINT} tokens={[tokenFor(FILTER_MINT)] as any} />);
@@ -60,9 +65,9 @@ describe('should label the Token History filter with fetched token metadata', ()
         await waitFor(() => expect(screen.getByRole('button').textContent).toContain('USDC - USD Coin'));
     });
 
-    it('should fall back to a truncated pubkey when metadata is unavailable', async () => {
+    it('should fall back to a truncated pubkey when the mint is not listed', async () => {
         useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis' });
-        useTokenInfoMock.mockReturnValue(undefined);
+        useTokenInfoMock.mockReturnValue({ isLoading: false, kind: 'not-listed', tokenInfo: undefined });
 
         render(<FilterDropdown filter={FILTER_MINT} tokens={[tokenFor(FILTER_MINT)] as any} />);
 

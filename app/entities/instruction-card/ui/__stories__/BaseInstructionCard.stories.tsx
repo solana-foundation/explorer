@@ -1,11 +1,5 @@
 import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    nextjsParameters,
-    withCluster,
-    withClusterAndAccounts,
-    withScrollAnchor,
-    withTokenInfoBatch,
-} from '@storybook-config/decorators';
+import { nextjsParameters, withCluster, withClusterAndAccounts, withScrollAnchor } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -19,7 +13,7 @@ import { InstructionFieldRows } from '../InstructionFields';
 const meta = {
     args: { collapsible: false, rawSource: { kind: 'none' }, result: { err: null }, validateProgram: false },
     component: BaseInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch],
+    decorators: [withCluster, withScrollAnchor],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Entities/Instruction Card/BaseInstructionCard',

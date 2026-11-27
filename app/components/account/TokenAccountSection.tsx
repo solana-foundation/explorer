@@ -1,9 +1,8 @@
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
-import { Copyable } from '@components/common/Copyable';
 import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { type TokenInfo, useTokenInfo } from '@entities/token-info';
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData } from '@providers/accounts';
@@ -12,40 +11,23 @@ import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
-import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
+import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-extension';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { TokenExtension } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
-import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { create } from 'superstruct';
-import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
-import { FullTokenInfo } from '@/app/utils/token-info';
 
 import { TokenExtensionsStatusRow } from './token-extensions/TokenExtensionsStatusRow';
 import { UnknownAccountCard } from './UnknownAccountCard';
-
-const getEthAddress = (link?: string) => {
-    let address = '';
-    if (link) {
-        // eslint-disable-next-line no-restricted-syntax -- extract Ethereum address from URL
-        const extractEth = link.match(/0x[a-fA-F0-9]{40,64}/);
-
-        if (extractEth) {
-            address = extractEth[0];
-        }
-    }
-
-    return address;
-};
 
 export const StatusBadge = ({ status }: { status: string }) => (
     <Badge ui="dashkit" variant={status === 'initialized' ? 'success' : 'warning'}>
@@ -60,7 +42,7 @@ export function TokenAccountSection({
 }: {
     account: Account;
     tokenAccount: TokenAccount;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
 }) {
     const { cluster } = useCluster();
 
@@ -109,12 +91,9 @@ function FungibleTokenMintAccountCard({
 }: {
     account: Account;
     mintInfo: MintAccountInfo;
-    tokenInfo?: FullTokenInfo;
+    tokenInfo?: TokenInfo;
 }) {
     const fetchInfo = useRefreshAccount();
-
-    const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
-    const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
 
     const mintExtensions = mintInfo.extensions?.slice();
     mintExtensions?.sort(cmpExtension);
@@ -141,11 +120,11 @@ function FungibleTokenMintAccountCard({
                 </>
             ),
         },
-        tokenInfo?.extensions?.website && {
+        tokenInfo?.website && {
             label: 'Website',
             value: (
-                <ExternalLink href={tokenInfo.extensions.website}>
-                    {tokenInfo.extensions.website}
+                <ExternalLink href={tokenInfo.website}>
+                    {tokenInfo.website}
                     <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
                 </ExternalLink>
             ),
@@ -160,30 +139,12 @@ function FungibleTokenMintAccountCard({
         },
         { label: 'Decimals', value: mintInfo.decimals },
         !mintInfo.isInitialized && { label: 'Status', value: 'Uninitialized' },
-        tokenInfo?.extensions?.bridgeContract &&
-            bridgeContractAddress && {
-                label: 'Bridge Contract',
-                value: (
-                    <Copyable text={bridgeContractAddress}>
-                        <ExternalLink href={tokenInfo.extensions.bridgeContract}>{bridgeContractAddress}</ExternalLink>
-                    </Copyable>
-                ),
-            },
-        tokenInfo?.extensions?.assetContract &&
-            assetContractAddress && {
-                label: 'Bridged Asset Contract',
-                value: (
-                    <Copyable text={assetContractAddress}>
-                        <ExternalLink href={tokenInfo.extensions.assetContract}>{assetContractAddress}</ExternalLink>
-                    </Copyable>
-                ),
-            },
     ];
 
     return (
         <AccountCard
             title={
-                tokenInfo
+                tokenInfo?.name
                     ? 'Overview'
                     : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
                       ? 'Token-2022 Mint'
@@ -275,19 +236,13 @@ function NonFungibleTokenMintAccountCard({
     );
 }
 
-async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await fetchTokenInfoFromApi(new PublicKey(address), cluster, url);
-}
-
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useRefreshAccount();
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(info.mint.toBase58());
-    const { cluster, url } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, info.mint, url]);
-
-    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
-    const [symbol, setSymbol] = useState<string | undefined>(undefined);
+    const { tokenInfo } = useTokenInfo({ cluster, genesisHash, mint: info.mint.toBase58() });
+    const symbol = info.isNative ? 'SOL' : tokenInfo?.symbol;
     const accountExtensions = info.extensions?.slice();
     accountExtensions?.sort(cmpExtension);
 
@@ -299,14 +254,6 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     ) : (
         <>{info.tokenAmount.uiAmountString}</>
     );
-
-    useEffect(() => {
-        if (info.isNative) {
-            setSymbol('SOL');
-        } else {
-            setSymbol(tokenInfo?.symbol);
-        }
-    }, [tokenInfo, info]);
 
     const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },

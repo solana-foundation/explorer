@@ -311,12 +311,9 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     );
 }
 
-// Resolves one mint's label through the batch provider, which coalesces the dropdown's mints into one
-// POST and skips a mint it has already resolved. The holdings card resolves its own list separately, so
-// a mint on both pays for two lookups.
 function TokenFilterLabel({ mint }: { mint: string }) {
     const { cluster, genesisHash } = useCluster();
-    const info = useTokenInfo(true, mint, cluster, genesisHash);
+    const { tokenInfo: info } = useTokenInfo({ cluster, genesisHash, mint });
     return <>{formatTokenName(mint, cluster, info)}</>;
 }
 

@@ -1,6 +1,6 @@
 import { decodePmpPayload } from '@entities/pmp-account';
 import { Compression } from '@solana-program/program-metadata';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { gzip } from 'pako';
 
@@ -29,7 +29,7 @@ function argsFor(raw: Uint8Array) {
 
 const meta = {
     component: BaseMetadataAccountCard,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeAccountPmp/BaseMetadataAccountCard',

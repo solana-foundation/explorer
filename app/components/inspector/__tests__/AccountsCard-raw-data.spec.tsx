@@ -5,9 +5,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('next/navigation');
 
-vi.mock('@/app/entities/cluster/api/fetch-genesis-hash', () => ({
-    fetchGenesisHash: vi.fn(async () => 'genesis'),
-}));
+vi.mock('@/app/entities/cluster/api/fetch-genesis-hash', async () => {
+    const { GENESIS_HASHES } = await import('@entities/chain-id');
+    return { fetchGenesisHash: vi.fn(async () => GENESIS_HASHES.MAINNET) };
+});
 
 const mockGetMultipleAccounts = vi.fn();
 const mockGetAccountInfo = vi.fn();

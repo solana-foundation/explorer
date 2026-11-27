@@ -1,4 +1,7 @@
 import { gen } from '@__fixtures__/gen';
+import { GENESIS_HASHES } from '@entities/chain-id';
+import { useTokenInfo } from '@entities/token-info';
+import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
@@ -14,7 +17,7 @@ vi.mock('@providers/accounts', () => ({
     useAccountInfo: (address: string) => (address === MINT ? mock.entry : undefined),
 }));
 vi.mock('@providers/cluster', () => ({
-    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'https://api.mainnet-beta.solana.com' }),
+    useCluster: () => ({ cluster: Cluster.Custom, genesisHash: GENESIS_HASHES.MAINNET, url: 'http://localhost:8899' }),
 }));
 vi.mock('@entities/account', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/account')>()),
@@ -22,13 +25,18 @@ vi.mock('@entities/account', async importOriginal => ({
 }));
 vi.mock('@entities/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-info')>()),
-    fetchTokenInfoFromApi: vi.fn(async () => undefined),
+    useTokenInfo: vi.fn((): ReturnType<typeof useTokenInfo> => ({
+        isLoading: false,
+        kind: 'not-listed',
+        tokenInfo: undefined,
+    })),
 }));
 vi.mock('../TokenExtensionsSection', () => ({ TokenExtensionsSection: () => null }));
 
 describe('TokenExtensionsCard', () => {
     beforeEach(() => {
         mock.entry = undefined;
+        vi.mocked(useTokenInfo).mockReset();
     });
 
     it('should disable the refresh button while the mint is fetching', async () => {
@@ -44,6 +52,29 @@ describe('TokenExtensionsCard', () => {
         renderCard();
 
         expect(await screen.findByRole('button', { name: 'Refresh' })).toBeEnabled();
+    });
+
+    it('should look up the mint with the genesis hash of a Custom cluster', () => {
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        renderCard();
+
+        expect(useTokenInfo).toHaveBeenCalledWith({
+            cluster: Cluster.Custom,
+            genesisHash: GENESIS_HASHES.MAINNET,
+            mint: MINT,
+        });
+    });
+
+    it('should render a listed mint whose token info has no decimals', async () => {
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        vi.mocked(useTokenInfo).mockReturnValue({
+            isLoading: false,
+            kind: 'listed',
+            tokenInfo: { ...tokenInfo(MINT), decimals: undefined },
+        });
+        renderCard();
+
+        expect(await screen.findByRole('button', { name: 'Refresh' })).toBeInTheDocument();
     });
 });
 

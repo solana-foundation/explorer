@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { createNextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { SWRConfig, unstable_serialize } from 'swr';
 
@@ -26,7 +26,7 @@ const withSquadsFallback: Decorator = Story => (
 
 const meta = {
     component: ProgramMultisigCard,
-    decorators: [withSquadsFallback, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withSquadsFallback, withClusterAndAccounts],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
     tags: ['autodocs', 'test'],
     title: 'Components/Account/ProgramMultisigCard',

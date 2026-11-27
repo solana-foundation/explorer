@@ -2,7 +2,7 @@ import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -25,7 +25,7 @@ const rawMessage = new Uint8Array(64);
 
 const meta = {
     component: TransactionSignatures,
-    decorators: [withViewportFromGlobal, withCluster, withTokenInfoBatch],
+    decorators: [withViewportFromGlobal, withCluster],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

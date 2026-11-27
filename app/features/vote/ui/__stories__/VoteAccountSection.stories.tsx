@@ -1,4 +1,4 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { withMockRpc } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
@@ -8,7 +8,7 @@ import { accountFixture, BASE_SLOT, voteAccountFixture, voteAccountV4Fixture } f
 
 const meta = {
     component: VoteAccountSection,
-    decorators: [withMockRpc, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withMockRpc, withClusterAndAccounts],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteAccountSection',

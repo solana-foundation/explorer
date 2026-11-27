@@ -8,7 +8,7 @@ import {
     type RecurringDelegation,
     type SubscriptionDelegation,
 } from '@solana/subscriptions';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { withMockRpc } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
@@ -91,7 +91,7 @@ const ALL_DATA = {
 
 const meta = {
     component: WalletSubscriptionsView,
-    decorators: [withMockRpc, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withMockRpc, withClusterAndAccounts],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Subscriptions/WalletSubscriptionsCard',

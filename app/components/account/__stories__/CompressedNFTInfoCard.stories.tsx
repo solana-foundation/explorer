@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { CompressedNft, CompressedNftProof } from '@/app/providers/compressed-nft';
@@ -41,7 +41,7 @@ const sampleCompressedNft = {
 // proofSize === proof.length. The stories pick the proof length to reach each Proof Size badge.
 const meta = {
     component: DasCompressionInfoCard,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withClusterAndAccounts],
     parameters: {
         ...nextjsParameters,
         docs: {

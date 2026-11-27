@@ -8,7 +8,7 @@ const ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 describe('isAccountRefreshKey', () => {
     it.each([
         ['a key without extra parts', accountRefreshKey(URL, ADDRESS, 'raw-account-data')],
-        ['a key with extra parts', accountRefreshKey(URL, ADDRESS, 'full-token-info', 'mainnet-beta', undefined)],
+        ['a key with extra parts', accountRefreshKey(URL, ADDRESS, 'mint-token-info', 'mainnet-beta', undefined)],
     ])('should match %s of the account', (_, key) => {
         expect(isAccountRefreshKey(key, URL, ADDRESS)).toBe(true);
     });

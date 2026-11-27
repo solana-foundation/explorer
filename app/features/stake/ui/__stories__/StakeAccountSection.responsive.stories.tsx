@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '../../../../../.storybook/decorators';
 import {
     INITIAL_VIEWPORTS,
     withMockRpc,
@@ -61,7 +61,7 @@ const args = {
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: StakeAccountSection,
-    decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

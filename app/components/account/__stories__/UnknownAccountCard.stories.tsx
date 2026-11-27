@@ -1,13 +1,13 @@
 import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
 
 const meta = {
     component: UnknownAccountCard,
-    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/UnknownAccountCard',

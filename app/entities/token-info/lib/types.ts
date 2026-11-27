@@ -1,18 +1,13 @@
-import { boolean, type Infer, nullable, number, string, type } from 'superstruct';
+import { boolean, type Infer, number, optional, string, type } from 'superstruct';
 
 export const TokenInfoStruct = type({
     address: string(),
-    decimals: nullable(number()),
-    logoURI: nullable(string()),
-    name: string(),
-    symbol: string(),
+    decimals: optional(number()),
+    logoURI: optional(string()),
+    name: optional(string()),
+    symbol: optional(string()),
     verified: boolean(),
+    website: optional(string()),
 });
 
 export type TokenInfo = Infer<typeof TokenInfoStruct>;
-
-export type FetchConfig = {
-    signal?: AbortSignal;
-    next?: NextFetchRequestConfig;
-    onError?: (error: unknown) => void;
-};

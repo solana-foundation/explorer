@@ -1,8 +1,6 @@
 import type * as SolanaKit from '@solana/kit';
 import { beforeEach, vi } from 'vitest';
 
-import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/token-info-batch-provider';
-
 import { mockSolanaRpc } from './app/__tests__/mock-rpc';
 
 // jsdom storage outlives a test and storage-backed state reads it on first use; node-environment specs have none.
@@ -25,19 +23,6 @@ vi.mock('@/app/shared/lib/sentry', () => ({
 vi.mock('@/app/shared/lib/sentry/server', () => ({
     wrapMcpServerWithSentry: vi.fn(server => server),
 }));
-
-// Global no-op mock for TokenInfoBatchProvider to prevent network requests in all tests.
-// Tests that need to assert on batch behavior should override with a local vi.mock().
-vi.mock('@/app/entities/token-info/model/token-info-batch-provider', async () => {
-    const actual = await vi.importActual<typeof TokenInfoBatchProvider>(
-        '@/app/entities/token-info/model/token-info-batch-provider',
-    );
-
-    return {
-        ...actual,
-        useTokenInfoBatch: () => () => {},
-    };
-});
 
 // Global mock for @solana/kit to prevent real RPC calls (429s) in tests.
 // Tests that need custom RPC behavior should override with a local vi.mock().
