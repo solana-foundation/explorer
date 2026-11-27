@@ -91,7 +91,7 @@ vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
         programId === IDL_PROGRAM_ID.toBase58() ? { kind: 'anchor' } : undefined,
 }));
 
-vi.mock('@components/instruction/system/SystemDetailsCard', () => ({
+vi.mock('@features/decode-instruction-system', () => ({
     SystemDetailsCard: () => {
         throw new Error('system card failed');
     },

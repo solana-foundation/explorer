@@ -1,5 +1,4 @@
 import { address, createNoopSigner } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
 import {
     getAdvanceNonceAccountInstruction,
     getAllocateInstruction,
@@ -7,6 +6,7 @@ import {
     getAssignInstruction,
     getAssignWithSeedInstruction,
     getAuthorizeNonceAccountInstruction,
+    getCreateAccountAllowPrefundInstruction,
     getCreateAccountInstruction,
     getCreateAccountWithSeedInstruction,
     getInitializeNonceAccountInstruction,
@@ -36,9 +36,9 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
         expected: {
             info: {
                 lamports: 100,
-                newAccount: new PublicKey(B),
-                owner: new PublicKey(OWNER),
-                source: new PublicKey(A),
+                newAccount: B,
+                owner: OWNER,
+                source: A,
                 space: 10,
             },
             type: 'createAccount',
@@ -55,12 +55,12 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     {
         expected: {
             info: {
-                base: new PublicKey(C),
+                base: C,
                 lamports: 100,
-                newAccount: new PublicKey(B),
-                owner: new PublicKey(OWNER),
+                newAccount: B,
+                owner: OWNER,
                 seed: 'seed',
-                source: new PublicKey(A),
+                source: A,
                 space: 10,
             },
             type: 'createAccountWithSeed',
@@ -79,7 +79,53 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     },
     {
         expected: {
-            info: { account: new PublicKey(A), space: 10 },
+            info: {
+                lamports: 100,
+                newAccount: B,
+                owner: OWNER,
+                source: A,
+                space: 10,
+            },
+            type: 'createAccountAllowPrefund',
+        },
+        instruction: getCreateAccountAllowPrefundInstruction({
+            lamports: 100n,
+            newAccount: createNoopSigner(address(B)),
+            payer: createNoopSigner(address(A)),
+            programAddress: address(OWNER),
+            space: 10n,
+        }),
+        name: 'createAccountAllowPrefund with lamports',
+    },
+    {
+        expected: {
+            info: { newAccount: B, owner: OWNER, space: 10 },
+            type: 'createAccountAllowPrefund',
+        },
+        instruction: getCreateAccountAllowPrefundInstruction({
+            newAccount: createNoopSigner(address(B)),
+            programAddress: address(OWNER),
+            space: 10n,
+        }),
+        name: 'createAccountAllowPrefund without lamports',
+    },
+    {
+        expected: {
+            info: { newAccount: B, owner: OWNER, space: 10 },
+            type: 'createAccountAllowPrefund',
+        },
+        instruction: getCreateAccountAllowPrefundInstruction({
+            lamports: 0n,
+            newAccount: createNoopSigner(address(B)),
+            payer: createNoopSigner(address(A)),
+            programAddress: address(OWNER),
+            space: 10n,
+        }),
+        name: 'createAccountAllowPrefund with zero lamports and a payer',
+    },
+    {
+        expected: {
+            info: { account: A, space: 10 },
             type: 'allocate',
         },
         instruction: getAllocateInstruction({ newAccount: createNoopSigner(address(A)), space: 10n }),
@@ -88,9 +134,9 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     {
         expected: {
             info: {
-                account: new PublicKey(A),
-                base: new PublicKey(B),
-                owner: new PublicKey(OWNER),
+                account: A,
+                base: B,
+                owner: OWNER,
                 seed: 'seed',
                 space: 10,
             },
@@ -108,7 +154,7 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     },
     {
         expected: {
-            info: { account: new PublicKey(A), owner: new PublicKey(OWNER) },
+            info: { account: A, owner: OWNER },
             type: 'assign',
         },
         instruction: getAssignInstruction({
@@ -120,9 +166,9 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     {
         expected: {
             info: {
-                account: new PublicKey(A),
-                base: new PublicKey(B),
-                owner: new PublicKey(OWNER),
+                account: A,
+                base: B,
+                owner: OWNER,
                 seed: 'seed',
             },
             type: 'assignWithSeed',
@@ -138,7 +184,7 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     },
     {
         expected: {
-            info: { destination: new PublicKey(B), lamports: 42, source: new PublicKey(A) },
+            info: { destination: B, lamports: 42, source: A },
             type: 'transfer',
         },
         instruction: getTransferSolInstruction({
@@ -151,11 +197,11 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     {
         expected: {
             info: {
-                destination: new PublicKey(B),
+                destination: B,
                 lamports: 42,
-                source: new PublicKey(A),
-                sourceBase: new PublicKey(C),
-                sourceOwner: new PublicKey(OWNER),
+                source: A,
+                sourceBase: C,
+                sourceOwner: OWNER,
                 sourceSeed: 'seed',
             },
             type: 'transferWithSeed',
@@ -172,7 +218,7 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     },
     {
         expected: {
-            info: { nonceAccount: new PublicKey(A), nonceAuthority: new PublicKey(B) },
+            info: { nonceAccount: A, nonceAuthority: B },
             type: 'advanceNonce',
         },
         instruction: getAdvanceNonceAccountInstruction({
@@ -184,12 +230,12 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     {
         expected: {
             info: {
-                destination: new PublicKey(C),
+                destination: C,
                 lamports: 42,
-                nonceAccount: new PublicKey(A),
-                nonceAuthority: new PublicKey(B),
+                nonceAccount: A,
+                nonceAuthority: B,
             },
-            type: 'withdrawNonce',
+            type: 'withdrawFromNonce',
         },
         instruction: getWithdrawNonceAccountInstruction({
             nonceAccount: address(A),
@@ -197,14 +243,14 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
             recipientAccount: address(C),
             withdrawAmount: 42n,
         }),
-        name: 'withdrawNonce',
+        name: 'withdrawFromNonce',
     },
     {
         expected: {
             info: {
-                newAuthorized: new PublicKey(C),
-                nonceAccount: new PublicKey(A),
-                nonceAuthority: new PublicKey(B),
+                newAuthorized: C,
+                nonceAccount: A,
+                nonceAuthority: B,
             },
             type: 'authorizeNonce',
         },
@@ -217,7 +263,7 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     },
     {
         expected: {
-            info: { nonceAccount: new PublicKey(A), nonceAuthority: new PublicKey(B) },
+            info: { nonceAccount: A, nonceAuthority: B },
             type: 'initializeNonce',
         },
         instruction: getInitializeNonceAccountInstruction({
@@ -228,7 +274,7 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
     },
     {
         expected: {
-            info: { nonceAccount: new PublicKey(A) },
+            info: { nonceAccount: A },
             type: 'upgradeNonce',
         },
         instruction: getUpgradeNonceAccountInstruction({ nonceAccount: address(A) }),
@@ -239,6 +285,17 @@ const byteCases: { name: string; instruction: unknown; expected: SystemParsed }[
 describe('parseSystemInstruction (byte path)', () => {
     it.each(byteCases)('should decode $name from instruction bytes', ({ instruction, expected }) => {
         expect(parseSystemInstruction(toKitIx(instruction))).toEqual(expected);
+    });
+
+    it('should return undefined for createAccountAllowPrefund that moves lamports without a payer', () => {
+        const instruction = getCreateAccountAllowPrefundInstruction({
+            lamports: 100n,
+            newAccount: createNoopSigner(address(B)),
+            programAddress: address(OWNER),
+            space: 10n,
+        });
+
+        expect(parseSystemInstruction(toKitIx(instruction))).toBeUndefined();
     });
 
     it('should return undefined for an unrecognized discriminator', () => {
@@ -256,125 +313,32 @@ describe('parseSystemInstruction (byte path)', () => {
     });
 });
 
-const rpcCases: { type: string; info: Record<string, unknown>; expectedInfo: Record<string, unknown> }[] = [
+const RECENT_BLOCKHASHES_SYSVAR = 'SysvarRecentB1ockHashes11111111111111111111';
+const RENT_SYSVAR = 'SysvarRent111111111111111111111111111111111';
+
+const rpcCases: { type: string; info: Record<string, unknown> }[] = [
+    { info: { destination: B, lamports: 42, source: A }, type: 'transfer' },
     {
-        expectedInfo: {
-            lamports: 100,
-            newAccount: new PublicKey(B),
-            owner: new PublicKey(OWNER),
-            source: new PublicKey(A),
-            space: 10,
-        },
-        info: { lamports: 100, newAccount: B, owner: OWNER, source: A, space: 10 },
-        type: 'createAccount',
-    },
-    {
-        expectedInfo: {
-            base: new PublicKey(C),
-            lamports: 100,
-            newAccount: new PublicKey(B),
-            owner: new PublicKey(OWNER),
-            seed: 'seed',
-            source: new PublicKey(A),
-            space: 10,
-        },
-        info: { base: C, lamports: 100, newAccount: B, owner: OWNER, seed: 'seed', source: A, space: 10 },
-        type: 'createAccountWithSeed',
-    },
-    {
-        expectedInfo: { account: new PublicKey(A), space: 10 },
-        info: { account: A, space: 10 },
-        type: 'allocate',
-    },
-    {
-        expectedInfo: {
-            account: new PublicKey(A),
-            base: new PublicKey(B),
-            owner: new PublicKey(OWNER),
-            seed: 'seed',
-            space: 10,
-        },
-        info: { account: A, base: B, owner: OWNER, seed: 'seed', space: 10 },
-        type: 'allocateWithSeed',
-    },
-    {
-        expectedInfo: { account: new PublicKey(A), owner: new PublicKey(OWNER) },
-        info: { account: A, owner: OWNER },
-        type: 'assign',
-    },
-    {
-        expectedInfo: {
-            account: new PublicKey(A),
-            base: new PublicKey(B),
-            owner: new PublicKey(OWNER),
-            seed: 'seed',
-        },
-        info: { account: A, base: B, owner: OWNER, seed: 'seed' },
-        type: 'assignWithSeed',
-    },
-    {
-        expectedInfo: { destination: new PublicKey(B), lamports: 42, source: new PublicKey(A) },
-        info: { destination: B, lamports: 42, source: A },
-        type: 'transfer',
-    },
-    {
-        expectedInfo: {
-            destination: new PublicKey(B),
+        info: {
+            destination: C,
             lamports: 42,
-            source: new PublicKey(A),
-            sourceBase: new PublicKey(C),
-            sourceOwner: new PublicKey(OWNER),
-            sourceSeed: 'seed',
+            nonceAccount: A,
+            nonceAuthority: B,
+            recentBlockhashesSysvar: RECENT_BLOCKHASHES_SYSVAR,
+            rentSysvar: RENT_SYSVAR,
         },
-        info: { destination: B, lamports: 42, source: A, sourceBase: C, sourceOwner: OWNER, sourceSeed: 'seed' },
-        type: 'transferWithSeed',
+        type: 'withdrawFromNonce',
     },
-    {
-        expectedInfo: { nonceAccount: new PublicKey(A), nonceAuthority: new PublicKey(B) },
-        info: { nonceAccount: A, nonceAuthority: B },
-        type: 'advanceNonce',
-    },
-    {
-        expectedInfo: {
-            destination: new PublicKey(C),
-            lamports: 42,
-            nonceAccount: new PublicKey(A),
-            nonceAuthority: new PublicKey(B),
-        },
-        info: { destination: C, lamports: 42, nonceAccount: A, nonceAuthority: B },
-        type: 'withdrawNonce',
-    },
-    {
-        expectedInfo: {
-            newAuthorized: new PublicKey(C),
-            nonceAccount: new PublicKey(A),
-            nonceAuthority: new PublicKey(B),
-        },
-        info: { newAuthorized: C, nonceAccount: A, nonceAuthority: B },
-        type: 'authorizeNonce',
-    },
-    {
-        expectedInfo: { nonceAccount: new PublicKey(A), nonceAuthority: new PublicKey(B) },
-        info: { nonceAccount: A, nonceAuthority: B },
-        type: 'initializeNonce',
-    },
-    {
-        expectedInfo: { nonceAccount: new PublicKey(A) },
-        info: { nonceAccount: A },
-        type: 'upgradeNonce',
-    },
+    { info: { newAccount: B, owner: OWNER, space: 10 }, type: 'createAccountAllowPrefund' },
 ];
 
 function rpcInstruction(program: string, type: string, info: unknown) {
-    return { parsed: { info, type }, program, programId: new PublicKey(SYSTEM) } as never;
+    return { parsed: { info, type }, program, programId: SYSTEM } as never;
 }
 
 describe('parseSystemRpcInstruction (RPC-parsed path)', () => {
-    it.each(rpcCases)('should normalize $type from RPC-parsed info', ({ type, info, expectedInfo }) => {
-        expect(parseSystemRpcInstruction(rpcInstruction('system', type, info))).toEqual({
-            info: expectedInfo,
-            type,
-        });
+    it.each(rpcCases)('should accept $type from RPC-parsed info', ({ type, info }) => {
+        expect(parseSystemRpcInstruction(rpcInstruction('system', type, info))).toEqual({ info, type });
     });
 
     it('should reject instructions from other programs', () => {
@@ -386,7 +350,13 @@ describe('parseSystemRpcInstruction (RPC-parsed path)', () => {
     });
 
     it('should return undefined for unrecognized instruction types', () => {
-        expect(parseSystemRpcInstruction(rpcInstruction('system', 'somethingNew', {}))).toBeUndefined();
+        // `toString` is a key of Object.prototype.
+        const types = ['somethingNew', 'toString'];
+
+        expect(types.map(type => parseSystemRpcInstruction(rpcInstruction('system', type, {})))).toEqual([
+            undefined,
+            undefined,
+        ]);
     });
 
     it('should return undefined when the info fails validation', () => {
@@ -395,5 +365,29 @@ describe('parseSystemRpcInstruction (RPC-parsed path)', () => {
                 rpcInstruction('system', 'transfer', { destination: B, lamports: 'x', source: A }),
             ),
         ).toBeUndefined();
+    });
+
+    it('should return undefined for createAccountAllowPrefund with lamports and no source', () => {
+        expect(
+            parseSystemRpcInstruction(
+                rpcInstruction('system', 'createAccountAllowPrefund', {
+                    lamports: 100,
+                    newAccount: B,
+                    owner: OWNER,
+                    space: 10,
+                }),
+            ),
+        ).toBeUndefined();
+    });
+
+    it('should return undefined when parsed is not a type and info pair', () => {
+        const notPairs = ['transfer', null, { type: 'transfer' }, { info: {} }];
+
+        expect(notPairs.map(parsed => parseSystemRpcInstruction({ parsed, program: 'system' }))).toEqual([
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+        ]);
     });
 });

@@ -237,8 +237,22 @@ describe('InstructionNodeCard', () => {
         loggerError.mockRestore();
     });
 
+    it('should show the unknown card and report a System payload that its slice rejects', () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const loggerError = vi.spyOn(Logger, 'error').mockImplementation(() => undefined);
+
+        renderCard(toInstructionNode({ index: 0, ix: rpcParsed(SystemProgram.programId, 'system', 'transfer', {}) }));
+
+        expect(screen.getByText('System Program: Unknown Instruction')).toBeInTheDocument();
+        expect(loggerError).toHaveBeenCalledWith(
+            new Error('Unexpected system instruction payload: transfer'),
+            expect.objectContaining({ sentry: 'always' }),
+        );
+        consoleError.mockRestore();
+        loggerError.mockRestore();
+    });
+
     it.each([
-        ['System Program', SystemProgram.programId, 'system', 'transfer'],
         ['Stake Program', StakeProgram.programId, 'stake', 'deactivate'],
         ['Vote Program', VoteProgram.programId, 'vote', 'withdraw'],
         ['BPF Upgradeable Loader', BPF_UPGRADEABLE_LOADER_PROGRAM_ID, 'bpf-upgradeable-loader', 'upgrade'],

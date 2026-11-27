@@ -1,9 +1,5 @@
 import { instructionDataOf, toInstructionNode, toRawInstructionNode } from '@entities/instruction-card';
-import {
-    createInstructionParserDispatcher,
-    isParsedInstruction,
-    toParsedInstruction,
-} from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -167,7 +163,7 @@ function dispatched(ix: TransactionInstruction) {
     if (viaDispatcher) return viaDispatcher;
     const parsed = parseEd25519Instruction(toKitInstruction(ix));
     invariant(parsed, 'fixture data is at least the count and padding');
-    return toParsedInstruction(parsed, ED25519_PROGRAM_LABEL, ix.programId);
+    return { parsed, program: ED25519_PROGRAM_LABEL, programId: ix.programId };
 }
 
 function renderCard(ix: TransactionInstruction, siblingData: (index: number) => Uint8Array | undefined) {

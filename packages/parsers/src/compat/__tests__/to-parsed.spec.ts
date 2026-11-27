@@ -2,21 +2,11 @@ import { PublicKey, TransactionInstruction, type VersionedMessage } from '@solan
 import { describe, expect, it } from 'vitest';
 
 import { gen } from '../../__tests__/gen.js';
-import { toParsedInstruction, toParsedTransaction } from '../index.js';
+import { toParsedTransaction } from '../index.js';
 
 const PROGRAM_ID = new PublicKey(gen.tokenProgram);
 const SIGNER = new PublicKey(gen.systemProgram);
 const READONLY = new PublicKey(gen.sysvarRent);
-
-describe('toParsedInstruction', () => {
-    it('should wrap slice output into the canonical ParsedInstruction shape', () => {
-        expect(toParsedInstruction({ info: { amount: 5 }, type: 'transfer' }, 'spl-token', PROGRAM_ID)).toEqual({
-            parsed: { info: { amount: 5 }, type: 'transfer' },
-            program: 'spl-token',
-            programId: PROGRAM_ID,
-        });
-    });
-});
 
 describe('toParsedTransaction', () => {
     const instruction = new TransactionInstruction({

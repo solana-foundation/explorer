@@ -1,6 +1,5 @@
 import { address, defineInstructionCard, sol } from '@entities/instruction-card';
-
-import { WithdrawNonceInfo } from './types';
+import { WithdrawNonceInfo } from '@explorer/parsers/programs/system';
 
 export const NonceWithdrawDetailsCard = defineInstructionCard<WithdrawNonceInfo>({
     fields: info => [

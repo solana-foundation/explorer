@@ -1,10 +1,10 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
-import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
 import { LIGHTHOUSE_ADDRESS, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { SystemDetailsCard } from '@features/decode-instruction-system';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { getBase58Decoder } from '@solana/kit';
@@ -59,8 +59,8 @@ vi.mock('@features/decode-instruction-lighthouse', async importOriginal => {
     return { ...actual, LighthouseDetailsCard: vi.fn(actual.LighthouseDetailsCard) };
 });
 
-vi.mock('@components/instruction/system/SystemDetailsCard', async importOriginal => {
-    const actual = await importOriginal<typeof import('@components/instruction/system/SystemDetailsCard')>();
+vi.mock('@features/decode-instruction-system', async importOriginal => {
+    const actual = await importOriginal<typeof import('@features/decode-instruction-system')>();
     return { ...actual, SystemDetailsCard: vi.fn(actual.SystemDetailsCard) };
 });
 

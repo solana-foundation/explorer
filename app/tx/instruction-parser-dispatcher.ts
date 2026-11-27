@@ -2,6 +2,7 @@
 // consumers of this dispatcher (the /mcp route) must not pull in. The contract itself is React-free
 // in @explorer/parsers.
 import { createInstructionParserDispatcher } from '@explorer/parsers';
+import { systemInstructionParser } from '@explorer/parsers/programs/system';
 import { addressLookupTableInstructionParser } from '@features/decode-instruction-address-lookup-table/lib/address-lookup-table-client';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token/lib/associated-token-client';
 import { bpfLoaderInstructionParser } from '@features/decode-instruction-bpf-loader/lib/bpf-loader-client';
@@ -11,7 +12,6 @@ import { ed25519InstructionParser } from '@features/decode-instruction-ed25519/l
 import { lighthouseInstructionParser } from '@features/decode-instruction-lighthouse/lib/lighthouse-client';
 import { memoInstructionParsers } from '@features/decode-instruction-memo/lib/memo-client';
 import { solanaAttestationInstructionParser } from '@features/decode-instruction-sas/lib/sas-client';
-import { systemInstructionParser } from '@features/decode-instruction-system/lib/system-client';
 import { tokenInstructionParser } from '@features/decode-instruction-token/lib/token-client';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022/lib/token-2022-client';
 import { zkElGamalProofInstructionParser } from '@features/decode-instruction-zk-elgamal-proof/lib/zk-elgamal-proof-client';
