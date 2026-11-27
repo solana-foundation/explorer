@@ -219,13 +219,14 @@ describe('lookupVerifiedTokenInfos', () => {
     });
 
     it.each([
-        ['rate-limited', 429],
-        ['unavailable', 401],
-    ])('should return %s, report it, and ask Jupiter again on the next lookup', async (kind, status) => {
+        ['rate-limited', 429, Logger.warn],
+        ['unavailable', 401, Logger.error],
+    ])('should return %s, report it, and ask Jupiter again on the next lookup', async (kind, status, report) => {
         fetchMock.mockResolvedValueOnce(new Response(null, { status }));
         jupiterAnswers([jupiterToken(MINT_A, { isVerified: true })]);
 
         expect(await lookupVerified([MINT_A])).toEqual({ kind });
+        expect(report).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ sentry: true }));
         expect(await lookupVerified([MINT_A])).toEqual(resolved(tokenInfo(MINT_A, true)));
     });
 });
