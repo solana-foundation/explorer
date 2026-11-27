@@ -15,6 +15,7 @@ import { systemInstructionParser } from '@features/decode-instruction-system/lib
 import { tokenInstructionParser } from '@features/decode-instruction-token/lib/token-client';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022/lib/token-2022-client';
 import { zkElGamalProofInstructionParser } from '@features/decode-instruction-zk-elgamal-proof/lib/zk-elgamal-proof-client';
+import { genesisInstructionParser } from '@features/genesis-vesting/lib/genesis-client';
 import { mangoInstructionParsers } from '@features/instruction-program-mango/lib/mango-client';
 import { pythInstructionParsers } from '@features/instruction-program-pyth/lib/pyth-client';
 import { serumInstructionParsers } from '@features/instruction-program-serum/lib/serum-client';
@@ -36,6 +37,7 @@ export const instructionParserDispatcher = createInstructionParserDispatcher([
     computeBudgetInstructionParser,
     zkElGamalProofInstructionParser,
     solanaAttestationInstructionParser,
+    genesisInstructionParser,
     ...pythInstructionParsers,
     ...memoInstructionParsers,
     ...serumInstructionParsers,

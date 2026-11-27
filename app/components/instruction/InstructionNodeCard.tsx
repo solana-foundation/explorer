@@ -131,6 +131,7 @@ const PROGRAM_CARDS: Readonly<Record<string, ProgramRoute | undefined>> = {
         rawNode && <ComputeBudgetDetailsCard node={node} parsed={parsedOf(dispatched)} />,
     ed25519: ({ dispatched, rawNode, instructionData }) =>
         rawNode && <Ed25519DetailsCard node={rawNode} parsed={parsedOf(dispatched)} siblingData={instructionData} />,
+    genesis: nameOnly(),
     lighthouse: ({ dispatched, rawNode }) =>
         rawNode && isParsedInstruction(dispatched) ? (
             <LighthouseDetailsCard node={rawNode} parsed={dispatched.parsed} />

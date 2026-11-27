@@ -84,6 +84,9 @@ export enum PROGRAM_NAMES {
 
     // Subscriptions
     SUBSCRIPTIONS_PROGRAM = 'Subscriptions Program',
+
+    // Metaplex Genesis
+    GENESIS_PROGRAM = 'Metaplex Genesis Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.Mainnet];
@@ -219,6 +222,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     [PYTH_ORACLE_PROGRAM_IDS.mainnet]: {
         deployments: [Cluster.Mainnet],
         name: PYTH_ORACLE_PROGRAM_LABEL,
+    },
+    GNS1S5J5AspKXgpjz6SvKL66kPaKWAhaGRhCqPRxii2B: {
+        deployments: [Cluster.Mainnet, Cluster.Devnet],
+        name: PROGRAM_NAMES.GENESIS_PROGRAM,
     },
     Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c: {
         deployments: [Cluster.Devnet, Cluster.Mainnet],
