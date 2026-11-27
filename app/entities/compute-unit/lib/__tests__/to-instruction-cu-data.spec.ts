@@ -14,7 +14,7 @@ const ED25519 = 'Ed25519SigVerify111111111111111111111111111';
 const ZK_ELGAMAL_PROOF = 'ZkE1Gama1Proof11111111111111111111111111111';
 const STAKE = 'Stake11111111111111111111111111111111111111';
 const ADDRESS_LOOKUP_TABLE = 'AddressLookupTab1e1111111111111111111111111';
-const UNKNOWN_BUILTIN = 'Config1111111111111111111111111111111111111';
+const CONFIG = 'Config1111111111111111111111111111111111111';
 const SUCCEEDED: TransactionOutcome = { status: 'succeeded' };
 
 describe('toInstructionCUData', () => {
@@ -51,14 +51,17 @@ describe('toInstructionCUData', () => {
             expect(result[0].computeUnits).toBe(150);
         });
 
-        it('should take the fixed cost of a builtin from before a feature gate moved it on chain', () => {
+        it.each([
+            [STAKE, 750],
+            [CONFIG, 450],
+        ])('should take the fixed cost of %s from before a feature gate moved it on chain', (builtin, cost) => {
             const result = toInstructionCUData({
-                instructions: [mockInstruction(STAKE)],
-                logs: completeLogs(endedInvocation(STAKE)),
+                instructions: [mockInstruction(builtin)],
+                logs: completeLogs(endedInvocation(builtin)),
                 outcome: SUCCEEDED,
             });
 
-            expect(result[0].computeUnits).toBe(750);
+            expect(result[0].computeUnits).toBe(cost);
         });
 
         it.each([
@@ -123,8 +126,8 @@ describe('toInstructionCUData', () => {
 
         it('should report no figure for a program with no fixed cost', () => {
             const result = toInstructionCUData({
-                instructions: [mockInstruction(UNKNOWN_BUILTIN)],
-                logs: completeLogs(endedInvocation(UNKNOWN_BUILTIN)),
+                instructions: [mockInstruction(TOKEN)],
+                logs: completeLogs(endedInvocation(TOKEN)),
                 outcome: SUCCEEDED,
             });
 

@@ -28,6 +28,9 @@ const LOADER_V4_COMPUTE_UNITS = 2000;
 // https://github.com/anza-xyz/agave/blob/v2.1.13/programs/compute-budget/src/lib.rs#L3
 const COMPUTE_BUDGET_PROGRAM_COMPUTE_UNITS = 150;
 
+// https://github.com/anza-xyz/agave/blob/v2.1.13/programs/config/src/config_processor.rs#L15
+const CONFIG_PROGRAM_COMPUTE_UNITS = 450;
+
 export function getDefaultComputeUnits(programId: string, data?: Uint8Array): number | undefined {
     if (programId === ZK_ELGAMAL_PROOF_PROGRAM_ID) return data && ZK_ELGAMAL_PROOF_COMPUTE_UNITS[data[0]];
 
@@ -51,6 +54,7 @@ const NON_MIGRATING_BUILTIN_COMPUTE_UNITS: Record<string, number> = {
 
 const MIGRATED_BUILTIN_COMPUTE_UNITS: Record<string, number> = {
     AddressLookupTab1e1111111111111111111111111: ADDRESS_LOOKUP_TABLE_INSTRUCTION_COMPUTE_UNITS,
+    Config1111111111111111111111111111111111111: CONFIG_PROGRAM_COMPUTE_UNITS,
     Stake11111111111111111111111111111111111111: STAKE_PROGRAM_COMPUTE_UNITS,
 };
 
