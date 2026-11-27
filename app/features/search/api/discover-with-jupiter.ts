@@ -3,11 +3,10 @@ import { JupiterHttpError, reportJupiterError, searchJupiterTokens } from '@enti
 import { matchAbortError } from '@/app/shared/lib/errors';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getJupiterApiKey } from '../config';
 import type { DiscoveredToken } from './types';
 
 export async function discoverWithJupiter(query: string, signal: AbortSignal): Promise<DiscoveredToken[]> {
-    const jupiterApiKey = getJupiterApiKey();
+    const jupiterApiKey = process.env.JUPITER_API_KEY;
     if (!jupiterApiKey) {
         Logger.warn('[api:search] JUPITER_API_KEY is not configured — skipping Jupiter discovery');
         return [];

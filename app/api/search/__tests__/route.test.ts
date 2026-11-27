@@ -140,7 +140,6 @@ describe('GET /api/search', () => {
 
         it('should return no tokens and send no request when no Jupiter API key is set', async () => {
             delete process.env.JUPITER_API_KEY;
-            delete process.env.SEARCH_JUPITER_API_KEY;
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
