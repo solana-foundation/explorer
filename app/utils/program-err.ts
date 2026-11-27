@@ -1,3 +1,6 @@
+// `BorshIoError` carries a message string in older ledger entries and none since solana-instruction-error 2.0
+const BORSH_IO_ERROR_MESSAGE = 'Failed to serialize or deserialize account data';
+
 const instructionErrorMessage: Map<string, string> = new Map([
     ['GenericError', 'generic instruction error'],
     ['InvalidArgument', 'invalid program argument'],
@@ -43,12 +46,16 @@ const instructionErrorMessage: Map<string, string> = new Map([
     ['ProgramFailedToCompile', 'Program failed to compile'],
     ['Immutable', 'Account is immutable'],
     ['IncorrectAuthority', 'Incorrect authority provided'],
-    ['BorshIoError', 'Failed to serialize or deserialize account data: {0}'],
+    ['BorshIoError', BORSH_IO_ERROR_MESSAGE],
     ['AccountNotRentExempt', 'An account does not have enough lamports to be rent-exempt'],
     ['InvalidAccountOwner', 'Invalid account owner'],
     ['ArithmeticOverflow', 'Program arithmetic overflowed'],
     ['UnsupportedSysvar', 'Unsupported sysvar'],
     ['IllegalOwner', 'Provided owner is not allowed'],
+    ['MaxAccountsDataAllocationsExceeded', 'Accounts data allocations exceeded the maximum allowed per transaction'],
+    ['MaxAccountsExceeded', 'Max accounts exceeded'],
+    ['MaxInstructionTraceLengthExceeded', 'Max instruction trace length exceeded'],
+    ['BuiltinProgramsMustConsumeComputeUnits', 'Builtin programs must consume compute units'],
 ]);
 
 export type ProgramError = {
@@ -92,7 +99,7 @@ function getInstructionError(error: unknown): string {
         out = instructionErrorMessage.get('Custom');
         value = error['Custom'];
     } else if (error !== null && typeof error === 'object' && 'BorshIoError' in error) {
-        out = instructionErrorMessage.get('BorshIoError');
+        out = `${BORSH_IO_ERROR_MESSAGE}: {0}`;
         value = error['BorshIoError'];
     }
 
