@@ -173,15 +173,18 @@ describe('instruction-name-table', () => {
         });
 
         it('should keep the discriminators and the name of an IDL that has no metadata.spec', () => {
-            const idlWithoutSpec = { ...anchorIdl, metadata: { name: 'voting' } } as unknown as SupportedIdl;
+            // The converter does not compute these bytes, so a converted IDL fails the lookup.
+            const listedDiscriminator = [1, 2, 3, 4, 5, 6, 7, 8];
+            const idlWithoutSpec = {
+                instructions: [{ accounts: [], args: [], discriminator: listedDiscriminator, name: 'vote' }],
+                metadata: { name: 'voting' },
+            } as unknown as SupportedIdl;
             const names = buildProgramIdlNames([idlWithoutSpec], VOTING_ADDRESS);
             expect(names?.programName).toBe('Voting');
-            expect(names?.resolveInstructionName?.(Uint8Array.from([227, 110, 155, 23, 136, 126, 172, 25]))).toBe(
-                'Vote',
-            );
+            expect(names?.resolveInstructionName?.(Uint8Array.from(listedDiscriminator))).toBe('Vote');
         });
 
-        it('should not throw on a legacy Anchor IDL that the converter rejects', () => {
+        it('should keep the legacy form of an Anchor IDL that the converter rejects', () => {
             const rejectedIdl = {
                 ...ammV3Legacy,
                 types: [
@@ -191,7 +194,10 @@ describe('instruction-name-table', () => {
                     },
                 ],
             } as unknown as SupportedIdl;
-            expect(() => buildProgramIdlNames([rejectedIdl], ammV3Modern.address)).not.toThrow();
+            expect(buildProgramIdlNames([rejectedIdl], ammV3Modern.address)).toEqual({
+                programName: 'Amm V3',
+                resolveInstructionName: undefined,
+            });
         });
     });
 });
