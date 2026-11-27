@@ -17,7 +17,6 @@ import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
 import { address as toAddress } from '@solana/kit';
 import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
 import { create } from 'superstruct';
@@ -38,18 +37,16 @@ type IndexedTransfer = {
     transfer: Transfer | TransferChecked;
 };
 
-type TransferData = {
-    amountString: string;
+type RawAmount = { decimals: number; rawAmount: string | number };
+
+type TransferData = RawAmount & {
     blockTime: number | undefined;
     childIndex?: number;
-    decimals: number;
     index: number;
-    rawAmount: string | number;
     signature: string;
     statusClass: string;
     statusText: string;
     transfer: Transfer | TransferChecked;
-    units: string;
 };
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
@@ -57,29 +54,22 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 }
 
 function AmountCell({
-    amountString,
     decimals,
     rawAmount,
     tokenAddress,
     units,
-}: {
-    amountString: string;
-    decimals: number;
-    rawAmount: string | number;
+}: RawAmount & {
     tokenAddress: string;
     units: string;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(tokenAddress);
     const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
-    // The formatted amount can hold a thousands separator, so an amount with no multiplier keeps it.
-    const scaledAmount =
-        multiplier === '1' ? amountString : toScaledUiAmount({ decimals, multiplier, rawAmount }).toFixed();
 
     return (
         <>
-            {scaledAmount} {units}
+            {toScaledUiAmount({ decimals, multiplier, rawAmount }).toFixed()} {units}
             <ScaledUiAmountMultiplierTooltip
-                rawAmount={amountString}
+                rawAmount={toScaledUiAmount({ decimals, multiplier: '1', rawAmount }).toFixed()}
                 scaledUiAmountMultiplier={scaledUiAmountMultiplier}
             />
         </>
@@ -162,50 +152,15 @@ export function TokenTransfersCard({ address }: { address: string }) {
             });
 
             transfers.forEach(({ transfer, index, childIndex }) => {
-                let units = 'Tokens';
-                let amountString = '';
-                let decimals = 0;
-
-                // Loading token info, just don't show units
-                if (tokenInfoLoading) {
-                    units = '';
-                }
-
-                // Loaded symbol, use it
-                if (tokenInfo?.symbol) {
-                    units = tokenInfo.symbol;
-                }
-
-                if ('tokenAmount' in transfer) {
-                    amountString = transfer.tokenAmount.uiAmountString;
-                    decimals = transfer.tokenAmount.decimals;
-                } else {
-                    if (tokenInfo?.decimals) {
-                        decimals = tokenInfo.decimals;
-                    } else if (mintMap.has(transfer.source.toBase58())) {
-                        decimals = mintMap.get(transfer.source.toBase58())?.decimals || 0;
-                    } else if (mintMap.has(transfer.destination.toBase58())) {
-                        decimals = mintMap.get(transfer.destination.toBase58())?.decimals || 0;
-                    }
-
-                    amountString = new Intl.NumberFormat('en-US', {
-                        maximumFractionDigits: decimals,
-                        minimumFractionDigits: decimals,
-                    }).format(normalizeTokenAmount(transfer.amount, decimals));
-                }
-
                 allTransfers.push({
-                    amountString,
+                    ...getRawAmount({ mintMap, tokenInfoDecimals: tokenInfo?.decimals, transfer }),
                     blockTime: blockTime || undefined,
                     childIndex,
-                    decimals,
                     index,
-                    rawAmount: 'tokenAmount' in transfer ? transfer.tokenAmount.amount : transfer.amount,
                     signature,
                     statusClass,
                     statusText,
                     transfer,
-                    units,
                 });
             });
         });
@@ -214,7 +169,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
             allTransfers,
             hasTimestamps,
         };
-    }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading]);
+    }, [history, transactionRows, tokenInfo, pubkey, address, cluster]);
 
     if (!history) {
         return null;
@@ -230,6 +185,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     const tokenAddress = pubkey.toBase58();
+    const units = tokenInfo?.symbol || (tokenInfoLoading ? '' : 'Tokens');
 
     const columns: GridTableColumn<TransferData>[] = [
         {
@@ -250,14 +206,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
         {
             cell: { wrap: 'nowrap' },
             header: 'Amount',
-            render: ({ amountString, decimals, rawAmount, units }) => (
-                <AmountCell
-                    amountString={amountString}
-                    decimals={decimals}
-                    rawAmount={rawAmount}
-                    tokenAddress={tokenAddress}
-                    units={units}
-                />
+            render: ({ decimals, rawAmount }) => (
+                <AmountCell decimals={decimals} rawAmount={rawAmount} tokenAddress={tokenAddress} units={units} />
             ),
         },
         {
@@ -314,6 +264,27 @@ export function TokenTransfersCard({ address }: { address: string }) {
             title="Token Transfers"
         />
     );
+}
+
+// A `transfer` instruction holds no decimals, so they come from the token info or from a token balance.
+function getRawAmount({
+    transfer,
+    tokenInfoDecimals,
+    mintMap,
+}: {
+    transfer: Transfer | TransferChecked;
+    tokenInfoDecimals: number | null | undefined;
+    mintMap: Map<string, MintDetails>;
+}): RawAmount {
+    if ('tokenAmount' in transfer) {
+        return { decimals: transfer.tokenAmount.decimals, rawAmount: transfer.tokenAmount.amount };
+    }
+    const decimals =
+        tokenInfoDecimals ||
+        mintMap.get(transfer.source.toBase58())?.decimals ||
+        mintMap.get(transfer.destination.toBase58())?.decimals ||
+        0;
+    return { decimals, rawAmount: transfer.amount };
 }
 
 function getTransfer(

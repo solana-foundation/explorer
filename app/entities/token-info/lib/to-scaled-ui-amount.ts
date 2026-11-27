@@ -11,7 +11,6 @@ export function toScaledUiAmount({
     decimals: number;
     multiplier: string;
 }): BigNumber {
-    // An f64 product rounds a raw amount above 2^53, so an amount with no multiplier stays exact.
     const scaledRawAmount =
         multiplier === '1'
             ? new BigNumber(rawAmount)

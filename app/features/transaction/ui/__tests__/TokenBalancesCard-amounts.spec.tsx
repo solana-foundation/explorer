@@ -19,7 +19,6 @@ vi.mock('@components/common/Address', () => ({ Address: () => <span>address</spa
 vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', () => ({ default: () => null }));
 
 describe('generateTokenBalanceRows', () => {
-    // A simulation reads the pre balance from an account, where the RPC scales `uiAmountString`.
     it('should read the raw amounts, not the UI amounts', () => {
         const rows = generateTokenBalanceRows(
             [tokenBalance(MINT, '100', '1.01')],
@@ -33,25 +32,24 @@ describe('generateTokenBalanceRows', () => {
     it('should zero the post amount of an account that has no post balance', () => {
         const rows = generateTokenBalanceRows([tokenBalance(MINT, '100', '1')], [], ACCOUNTS);
 
-        expect(rows).toMatchObject([{ mint: MINT, postAmount: '0', preAmount: '100' }]);
+        expect(rows).toMatchObject([{ decimals: 2, mint: MINT, postAmount: '0', preAmount: '100' }]);
     });
 
     it('should return one row for each mint when the mint of an account changes', () => {
         const rows = generateTokenBalanceRows(
             [tokenBalance(MINT, '100', '1')],
-            [tokenBalance(OTHER_MINT, '7', '0.07')],
+            [tokenBalance(OTHER_MINT, '7', '0.000000007', 9)],
             ACCOUNTS,
         );
 
         expect(rows).toMatchObject([
-            { mint: MINT, postAmount: '0', preAmount: '100' },
-            { mint: OTHER_MINT, postAmount: '7', preAmount: '0' },
+            { decimals: 2, mint: MINT, postAmount: '0', preAmount: '100' },
+            { decimals: 9, mint: OTHER_MINT, postAmount: '7', preAmount: '0' },
         ]);
     });
 });
 
 describe('TokenBalancesCard amounts', () => {
-    // Balances of a mainnet token account. Scaling the raw change gives -0.06047959.
     it('should show the change as the difference of the scaled balances', () => {
         mocks.multiplier = '1.007474126658766';
 
@@ -70,8 +68,8 @@ describe('TokenBalancesCard amounts', () => {
     });
 });
 
-function tokenBalance(mint: string, amount: string, uiAmountString: string): TokenBalance {
-    return { accountIndex: 0, mint, uiTokenAmount: { amount, decimals: 2, uiAmount: null, uiAmountString } };
+function tokenBalance(mint: string, amount: string, uiAmountString: string, decimals = 2): TokenBalance {
+    return { accountIndex: 0, mint, uiTokenAmount: { amount, decimals, uiAmount: null, uiAmountString } };
 }
 
 function renderRow(amounts: { decimals: number; postAmount: string; preAmount: string }) {
