@@ -31,11 +31,11 @@ const COMPUTE_BUDGET_PROGRAM_COMPUTE_UNITS = 150;
 export function getDefaultComputeUnits(programId: string, data?: Uint8Array): number | undefined {
     if (programId === ZK_ELGAMAL_PROOF_PROGRAM_ID) return data && ZK_ELGAMAL_PROOF_COMPUTE_UNITS[data[0]];
 
-    return NON_MIGRATING_BUILTIN_COMPUTE_UNITS[programId] ?? MIGRATED_BUILTIN_COMPUTE_UNITS[programId];
+    return getOwn(NON_MIGRATING_BUILTIN_COMPUTE_UNITS, programId) ?? getOwn(MIGRATED_BUILTIN_COMPUTE_UNITS, programId);
 }
 
 export function getNonMigratingBuiltinComputeUnits(programId: string): number | undefined {
-    return NON_MIGRATING_BUILTIN_COMPUTE_UNITS[programId];
+    return getOwn(NON_MIGRATING_BUILTIN_COMPUTE_UNITS, programId);
 }
 
 // https://github.com/anza-xyz/agave/blob/v3.0.0/builtins-default-costs/src/lib.rs

@@ -31,18 +31,22 @@ export function toInstructionCUData({
     const programIds = instructions.map(instruction => instruction.programId.toBase58());
     const pairedInvocations = pairLogsWithInstructions(invocations, programIds);
 
-    return instructions.map((instruction, index) => ({
-        computeUnits: toComputeUnits({
-            data: instruction.data,
-            execution: toExecution(index, outcome),
-            invocation: pairedInvocations[index],
-            logsTruncated: logs.truncated,
-            programId: programIds[index],
-        }),
-        name: instruction.name,
-        programId: programIds[index],
-        programName: instruction.programName,
-    }));
+    return instructions.map((instruction, index) => {
+        const programId = instruction.programId.toBase58();
+
+        return {
+            computeUnits: toComputeUnits({
+                data: instruction.data,
+                execution: toExecution(index, outcome),
+                invocation: pairedInvocations.at(index),
+                logsTruncated: logs.truncated,
+                programId,
+            }),
+            name: instruction.name,
+            programId,
+            programName: instruction.programName,
+        };
+    });
 }
 
 function toComputeUnits({

@@ -8,12 +8,12 @@ export function pairLogsWithInstructions(
 
     return programAddresses.map(programAddress => {
         const skipsOrphan =
-            invocations[next]?.programAddress === undefined && !isLoggedBy(invocations[next], programAddress);
+            invocations.at(next)?.programAddress === undefined && !isLoggedBy(invocations.at(next), programAddress);
         const index = skipsOrphan ? next + 1 : next;
-        if (!isLoggedBy(invocations[index], programAddress)) return undefined;
+        if (!isLoggedBy(invocations.at(index), programAddress)) return undefined;
 
         next = index + 1;
-        return invocations[index];
+        return invocations.at(index);
     });
 }
 

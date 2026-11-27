@@ -16,10 +16,10 @@ export function extractEventsFromLogs({
     instructionProgramIds: string[];
     logs: string[];
 }): ProgramEventPayload[] {
-    const topLevel = pairLogsWithInstructions(parseProgramLogs(logs).invocations, instructionProgramIds)[index];
+    const topLevel = pairLogsWithInstructions(parseProgramLogs(logs).invocations, instructionProgramIds).at(index);
     if (!topLevel) return [];
 
-    const invocation = childIndex === undefined ? topLevel : toInnerInvocations(topLevel)[childIndex];
+    const invocation = childIndex === undefined ? topLevel : toInnerInvocations(topLevel).at(childIndex);
     return invocation?.entries.flatMap(toPayloads) ?? [];
 }
 

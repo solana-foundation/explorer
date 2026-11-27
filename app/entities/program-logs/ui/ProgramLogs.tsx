@@ -1,4 +1,5 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
+import { getOwn } from '@shared/lib/object';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
@@ -27,7 +28,7 @@ export function ProgramLogs({
     return (
         <TableCardBody density={density} layout="expanded">
             {rows.map((row, index) => {
-                const instruction = instructions?.[index];
+                const instruction = instructions?.at(index);
 
                 return (
                     <BaseTable.Row key={index} data-ix-index={index}>
@@ -73,7 +74,7 @@ function InstructionLink({ index, children }: React.PropsWithChildren<{ index: n
 function RowHeading({ index, status, title }: { index: number; status: LogRow['status']; title: string }) {
     return (
         <>
-            <Badge ui="dashkit" variant={BADGE_VARIANT[status]} baseline className="mr-1.5">
+            <Badge ui="dashkit" variant={getOwn(BADGE_VARIANT, status)} baseline className="mr-1.5">
                 #{index + 1}
             </Badge>
             <span className="text-dk-white [overflow-wrap:anywhere]">{title}</span>
