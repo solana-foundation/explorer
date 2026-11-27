@@ -7,10 +7,11 @@ export function pairLogsWithInstructions(
     let next = 0;
 
     return programAddresses.map(programAddress => {
-        const skipsOrphan =
-            invocations.at(next)?.programAddress === undefined && !isLoggedBy(invocations.at(next), programAddress);
-        const index = skipsOrphan ? next + 1 : next;
-        if (!isLoggedBy(invocations.at(index), programAddress)) return undefined;
+        const index = invocations.findIndex(
+            (invocation, i) =>
+                i >= next && (invocation.programAddress !== undefined || isLoggedBy(invocation, programAddress)),
+        );
+        if (index < 0 || !isLoggedBy(invocations.at(index), programAddress)) return undefined;
 
         next = index + 1;
         return invocations.at(index);

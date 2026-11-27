@@ -36,14 +36,15 @@ describe('pairLogsWithInstructions', () => {
         expect(pairLogsWithInstructions(invocations, [PROGRAM])).toEqual([undefined]);
     });
 
-    it('should skip lines with no invoke line that precede the invocation of the instruction', () => {
+    it('should skip every block of lines with no invoke line that precedes the invocation of the instruction', () => {
         const { invocations } = parseProgramLogs([
-            'Program log: before any invocation',
+            `Program ${PROGRAM} success`,
+            `Program ${PROGRAM} success`,
             `Program ${PROGRAM} invoke [1]`,
             `Program ${PROGRAM} success`,
         ]);
 
-        expect(pairLogsWithInstructions(invocations, [PROGRAM])).toEqual([invocations[1]]);
+        expect(pairLogsWithInstructions(invocations, [PROGRAM])).toEqual([invocations[2]]);
     });
 });
 
