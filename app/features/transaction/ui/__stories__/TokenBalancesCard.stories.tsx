@@ -4,7 +4,6 @@ import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsPr
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import { BigNumber } from 'bignumber.js';
 import React from 'react';
 
 import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS, RECIPIENT, TOKEN_MINT } from '../__fixtures__/transaction';
@@ -59,18 +58,20 @@ const SAMPLE_ROWS = [
     {
         account: RECIPIENT,
         accountIndex: 0,
-        balance: '1.5',
-        delta: new BigNumber('1.0'),
+        decimals: 6,
         mint: TOKEN_MINT.toBase58(),
         owner: RECIPIENT.toBase58(),
+        postAmount: '1500000',
+        preAmount: '500000',
     },
     {
         account: new PublicKey('GsbwXfJraMomNxBcpR3DBr9yoWR2PmN93PEaYJz7MSTN'),
         accountIndex: 1,
-        balance: '50.25',
-        delta: new BigNumber('-2.5'),
+        decimals: 9,
         mint: new PublicKey('So11111111111111111111111111111111111111112').toBase58(),
         owner: new PublicKey('9noXzpXnkyEcKF3AeXqUHTdR59V5uvrRBUZ9bwfQwxNq').toBase58(),
+        postAmount: '50250000000',
+        preAmount: '52750000000',
     },
 ];
 

@@ -9,7 +9,6 @@ import { getOwn } from '@shared/lib/object';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenAccountInfo } from '@validators/accounts/token';
-import { BigNumber } from 'bignumber.js';
 import React from 'react';
 import { create } from 'superstruct';
 
@@ -148,12 +147,6 @@ export function useScaledUiAmountMultiplier(address: string | undefined): Scaled
         return { status: 'loading' };
     }
     return { status: 'unknown' };
-}
-
-// A formatted amount can hold a thousands separator, so it stays a string when no multiplier applies.
-export function toScaledUiAmountString(amount: string, scaledUiAmountMultiplier: ScaledUiAmountMultiplier): string {
-    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
-    return multiplier === '1' ? amount : new BigNumber(amount).multipliedBy(multiplier).toString();
 }
 
 // An amount stays raw when the multiplier is not known.

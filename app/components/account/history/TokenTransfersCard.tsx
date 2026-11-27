@@ -6,11 +6,11 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { fetchTokenInfoFromApi, getTokenInfoSwrKey, toScaledUiAmount } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
-import { toScaledUiAmountString, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
+import { getAmountMultiplier, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
@@ -42,7 +42,9 @@ type TransferData = {
     amountString: string;
     blockTime: number | undefined;
     childIndex?: number;
+    decimals: number;
     index: number;
+    rawAmount: string | number;
     signature: string;
     statusClass: string;
     statusText: string;
@@ -56,15 +58,22 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function AmountCell({
     amountString,
+    decimals,
+    rawAmount,
     tokenAddress,
     units,
 }: {
     amountString: string;
+    decimals: number;
+    rawAmount: string | number;
     tokenAddress: string;
     units: string;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(tokenAddress);
-    const scaledAmount = toScaledUiAmountString(amountString, scaledUiAmountMultiplier);
+    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
+    // The formatted amount can hold a thousands separator, so an amount with no multiplier keeps it.
+    const scaledAmount =
+        multiplier === '1' ? amountString : toScaledUiAmount({ decimals, multiplier, rawAmount }).toFixed();
 
     return (
         <>
@@ -155,6 +164,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
             transfers.forEach(({ transfer, index, childIndex }) => {
                 let units = 'Tokens';
                 let amountString = '';
+                let decimals = 0;
 
                 // Loading token info, just don't show units
                 if (tokenInfoLoading) {
@@ -168,9 +178,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
                 if ('tokenAmount' in transfer) {
                     amountString = transfer.tokenAmount.uiAmountString;
+                    decimals = transfer.tokenAmount.decimals;
                 } else {
-                    let decimals = 0;
-
                     if (tokenInfo?.decimals) {
                         decimals = tokenInfo.decimals;
                     } else if (mintMap.has(transfer.source.toBase58())) {
@@ -189,7 +198,9 @@ export function TokenTransfersCard({ address }: { address: string }) {
                     amountString,
                     blockTime: blockTime || undefined,
                     childIndex,
+                    decimals,
                     index,
+                    rawAmount: 'tokenAmount' in transfer ? transfer.tokenAmount.amount : transfer.amount,
                     signature,
                     statusClass,
                     statusText,
@@ -239,8 +250,14 @@ export function TokenTransfersCard({ address }: { address: string }) {
         {
             cell: { wrap: 'nowrap' },
             header: 'Amount',
-            render: ({ amountString, units }) => (
-                <AmountCell amountString={amountString} tokenAddress={tokenAddress} units={units} />
+            render: ({ amountString, decimals, rawAmount, units }) => (
+                <AmountCell
+                    amountString={amountString}
+                    decimals={decimals}
+                    rawAmount={rawAmount}
+                    tokenAddress={tokenAddress}
+                    units={units}
+                />
             ),
         },
         {

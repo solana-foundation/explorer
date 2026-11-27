@@ -4,13 +4,12 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { cn } from '@components/shared/utils';
-import { fetchTokenInfosFromApi, getChainId } from '@entities/token-info';
+import { fetchTokenInfosFromApi, getChainId, toScaledUiAmount } from '@entities/token-info';
 import { useTransactionDetails } from '@providers/transactions';
 import { invariant } from '@shared/lib/invariant';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
-import { BigNumber } from 'bignumber.js';
 import useSWRImmutable from 'swr/immutable';
 
 import { getAmountMultiplier, useScaledUiAmountMultiplier } from '@/app/providers/accounts/tokens';
@@ -22,8 +21,9 @@ type TokenBalanceRow = {
     account: PublicKey;
     owner?: string;
     mint: string;
-    balance: string;
-    delta: BigNumber;
+    preAmount: string;
+    postAmount: string;
+    decimals: number;
     accountIndex: number;
 };
 
@@ -75,8 +75,9 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                     key={row.account.toBase58() + row.mint}
                     account={row.account}
                     owner={row.owner}
-                    delta={row.delta}
-                    balance={row.balance}
+                    preAmount={row.preAmount}
+                    postAmount={row.postAmount}
+                    decimals={row.decimals}
                     mint={row.mint}
                     units={tokenSymbols?.get(row.mint) || 'tokens'}
                 />
@@ -104,24 +105,26 @@ async function fetchTokenSymbols([, mintKey, cluster, genesisHash]: TokenSymbols
 function TokenBalanceRow({
     account,
     owner,
-    delta,
-    balance,
+    preAmount,
+    postAmount,
+    decimals,
     mint,
     units,
     index,
 }: {
     account: PublicKey;
     owner?: string;
-    delta: BigNumber;
-    balance: string;
+    preAmount: string;
+    postAmount: string;
+    decimals: number;
     mint: string;
     units: string;
     index: number;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(mint);
     const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
-    const scaledBalance = new BigNumber(balance).multipliedBy(multiplier).toString();
-    const scaledDelta = delta.multipliedBy(multiplier);
+    const scaledBalance = toScaledUiAmount({ decimals, multiplier, rawAmount: postAmount });
+    const scaledDelta = scaledBalance.minus(toScaledUiAmount({ decimals, multiplier, rawAmount: preAmount }));
     const mintPubkey = new PublicKey(mint);
     const ownerPubkey = owner ? new PublicKey(owner) : undefined;
 
@@ -148,9 +151,9 @@ function TokenBalanceRow({
                 <div className="flex shrink-0 flex-col items-end gap-0.5 whitespace-nowrap text-right">
                     <BalanceDelta delta={scaledDelta} />
                     <span>
-                        {scaledBalance} {units}
+                        {scaledBalance.toFixed()} {units}
                         <ScaledUiAmountMultiplierTooltip
-                            rawAmount={balance}
+                            rawAmount={toScaledUiAmount({ decimals, multiplier: '1', rawAmount: postAmount }).toFixed()}
                             scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                         />
                     </span>
@@ -196,61 +199,32 @@ export function generateTokenBalanceRows(
         const account = accounts.at(accountIndex)?.pubkey;
         invariant(account, `account index ${accountIndex} out of range`);
 
-        if (!uiTokenAmount.uiAmountString) {
-            // uiAmount deprecation
-            continue;
-        }
-
-        const postBalanceUiAmountString = uiTokenAmount.uiAmountString;
-        const preBalanceUiAmountString = preBalance?.uiTokenAmount.uiAmountString;
+        const { amount: postAmount, decimals } = uiTokenAmount;
 
         // case where mint changes
         if (preBalance && preBalance.mint !== mint) {
-            if (!preBalanceUiAmountString) {
-                // uiAmount deprecation
-                continue;
-            }
-
             rows.push({
                 account,
                 accountIndex,
-                balance: '0',
-                delta: new BigNumber(-preBalanceUiAmountString),
+                decimals: preBalance.uiTokenAmount.decimals,
                 mint: preBalance.mint,
                 owner,
+                postAmount: '0',
+                preAmount: preBalance.uiTokenAmount.amount,
             });
 
-            rows.push({
-                account,
-                accountIndex,
-                balance: postBalanceUiAmountString,
-                delta: new BigNumber(postBalanceUiAmountString),
-                mint: mint,
-                owner,
-            });
+            rows.push({ account, accountIndex, decimals, mint, owner, postAmount, preAmount: '0' });
             continue;
-        }
-
-        let delta;
-
-        if (preBalance) {
-            if (!preBalanceUiAmountString) {
-                // uiAmount deprecation
-                continue;
-            }
-
-            delta = new BigNumber(postBalanceUiAmountString).minus(new BigNumber(preBalanceUiAmountString || 0));
-        } else {
-            delta = new BigNumber(postBalanceUiAmountString);
         }
 
         rows.push({
             account,
             accountIndex,
-            balance: postBalanceUiAmountString,
-            delta,
+            decimals,
             mint,
             owner,
+            postAmount,
+            preAmount: preBalance?.uiTokenAmount.amount ?? '0',
         });
     }
 
