@@ -4,6 +4,7 @@ export { fetchTokenInfoFromApi, fetchTokenInfosFromApi, getTokenInfoSwrKey } fro
 export { deriveScaledUiAmountMultiplier } from './lib/derive-scaled-ui-multiplier';
 export { TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors';
 export { orderMintsByVerification } from './lib/order-mints-by-verification';
+export { toScaledUiAmount } from './lib/to-scaled-ui-amount';
 export { getChainId } from '@entities/chain-id/@x/token-info';
 export type { FetchConfig, TokenInfo } from './lib/types';
 export { TokenInfoBatchProvider, useTokenInfoBatch } from './model/token-info-batch-provider';

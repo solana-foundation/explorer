@@ -3,7 +3,7 @@ import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { useRefreshAccount } from '@entities/account';
 import { isMetaplexNFT } from '@entities/nft';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { fetchTokenInfoFromApi, getTokenInfoSwrKey, toScaledUiAmount } from '@entities/token-info';
 import { AccountCard } from '@features/account';
 import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData } from '@providers/accounts';
@@ -127,12 +127,11 @@ function FungibleTokenMintAccountCard({
             value: (
                 <>
                     <span>
-                        {normalizeTokenAmount(
-                            Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
-                            mintInfo.decimals,
-                        ).toLocaleString('en-US', {
-                            maximumFractionDigits: 20,
-                        })}
+                        {toScaledUiAmount({
+                            decimals: mintInfo.decimals,
+                            multiplier: scaledUiAmountMultiplier,
+                            rawAmount: mintInfo.supply,
+                        }).toFormat()}
                     </span>
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}

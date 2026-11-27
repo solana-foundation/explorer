@@ -1,4 +1,4 @@
-import { formatTokenAmount, tokenAmountToNumber } from '@entities/token-amount';
+import type { RawTokenBalance } from '@entities/token-amount';
 import { isTokenProgramId } from '@providers/accounts/tokens';
 import { getOwn } from '@shared/lib/object';
 import type {
@@ -7,7 +7,6 @@ import type {
     ParsedMessageAccount,
     PublicKey,
     SimulatedTransactionAccountInfo,
-    TokenBalance,
 } from '@solana/web3.js';
 import { getTokenDecoder, getTokenSize } from '@solana-program/token';
 
@@ -22,8 +21,8 @@ import { toParsedData } from './token-program';
 import type { MintDecimalsMap } from './types';
 
 export type TokenBalanceData = {
-    preTokenBalances: TokenBalance[];
-    postTokenBalances: TokenBalance[];
+    preTokenBalances: RawTokenBalance[];
+    postTokenBalances: RawTokenBalance[];
     /**
      * Parallel array of every account key in the transaction.
      * `generateTokenBalanceRows` joins token balances to addresses via `accountIndex`.
@@ -36,7 +35,7 @@ export type TokenBalanceData = {
  *
  * Pre-simulation balances come from the RPC's parsed account format (already decoded).
  * Post-simulation balances are decoded from raw base64 buffers returned by
- * `simulateTransaction`, using `mintToDecimals` to format human-readable amounts.
+ * `simulateTransaction`, with the decimals of each mint from `mintToDecimals`.
  */
 export function buildTokenBalances(
     accountKeys: PublicKey[],
@@ -44,8 +43,8 @@ export function buildTokenBalances(
     simulatedAccounts: (SimulatedTransactionAccountInfo | undefined)[],
     mintToDecimals: MintDecimalsMap,
 ): TokenBalanceData {
-    const preTokenBalances: TokenBalance[] = [];
-    const postTokenBalances: TokenBalance[] = [];
+    const preTokenBalances: RawTokenBalance[] = [];
+    const postTokenBalances: RawTokenBalance[] = [];
     const messageAccounts: ParsedMessageAccount[] = [];
 
     for (const [index, pubkey] of accountKeys.entries()) {
@@ -65,21 +64,26 @@ export function buildTokenBalances(
 function extractPreTokenBalance(
     accountIndex: number,
     account: AccountInfo<ParsedAccountData | Buffer> | undefined,
-): TokenBalance | undefined {
+): RawTokenBalance | undefined {
     if (!account || !isTokenProgramId(account.owner)) return undefined;
 
     const parsed = toParsedData(account.data);
     if (!parsed || parsed.parsed.type !== 'account') return undefined;
 
     const { mint, owner, tokenAmount } = parsed.parsed.info;
-    return { accountIndex, mint, owner, uiTokenAmount: tokenAmount };
+    return {
+        accountIndex,
+        mint,
+        owner,
+        uiTokenAmount: { amount: tokenAmount.amount, decimals: tokenAmount.decimals },
+    };
 }
 
 function extractPostTokenBalance(
     accountIndex: number,
     accountInfo: SimulatedTransactionAccountInfo | undefined,
     mintToDecimals: MintDecimalsMap,
-): TokenBalance | undefined {
+): RawTokenBalance | undefined {
     if (!accountInfo) return undefined;
 
     const dataBase64 = accountInfo.data[0];
@@ -106,22 +110,10 @@ function extractPostTokenBalance(
     const decimals = getOwn(mintToDecimals, mint);
     if (decimals === undefined) return undefined;
 
-    const amountStr = amount.toString();
-    const tokenAmount = { amount, decimals };
-    const uiAmountString = formatTokenAmount(tokenAmount);
-    // uiAmount is a legacy numeric field — precision loss beyond Number.MAX_SAFE_INTEGER
-    // is acceptable here because downstream code uses uiAmountString
-    const uiAmount = tokenAmountToNumber(tokenAmount);
-
     return {
         accountIndex,
         mint,
         owner: tokenOwner,
-        uiTokenAmount: {
-            amount: amountStr,
-            decimals,
-            uiAmount,
-            uiAmountString,
-        },
+        uiTokenAmount: { amount: amount.toString(), decimals },
     };
 }

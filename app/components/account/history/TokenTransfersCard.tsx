@@ -6,18 +6,17 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
-import { fetchTokenInfoFromApi, getTokenInfoSwrKey } from '@entities/token-info';
+import { fetchTokenInfoFromApi, getTokenInfoSwrKey, toScaledUiAmount } from '@entities/token-info';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
-import { toScaledUiAmountString, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
+import { getAmountMultiplier, useScaledUiAmountMultiplier } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { HistoryCardFooterContent } from '@shared/ui/HistoryCard';
 import { address as toAddress } from '@solana/kit';
 import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
 import { create } from 'superstruct';
@@ -38,8 +37,9 @@ type IndexedTransfer = {
     transfer: Transfer | TransferChecked;
 };
 
-type TransferData = {
-    amountString: string;
+type RawAmount = { decimals: number; rawAmount: string | number };
+
+type TransferData = RawAmount & {
     blockTime: number | undefined;
     childIndex?: number;
     index: number;
@@ -47,7 +47,6 @@ type TransferData = {
     statusClass: string;
     statusText: string;
     transfer: Transfer | TransferChecked;
-    units: string;
 };
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
@@ -55,22 +54,22 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 }
 
 function AmountCell({
-    amountString,
+    decimals,
+    rawAmount,
     tokenAddress,
     units,
-}: {
-    amountString: string;
+}: RawAmount & {
     tokenAddress: string;
     units: string;
 }) {
     const scaledUiAmountMultiplier = useScaledUiAmountMultiplier(tokenAddress);
-    const scaledAmount = toScaledUiAmountString(amountString, scaledUiAmountMultiplier);
+    const multiplier = getAmountMultiplier(scaledUiAmountMultiplier);
 
     return (
         <>
-            {scaledAmount} {units}
+            {toScaledUiAmount({ decimals, multiplier, rawAmount }).toFixed()} {units}
             <ScaledUiAmountMultiplierTooltip
-                rawAmount={amountString}
+                rawAmount={toScaledUiAmount({ decimals, multiplier: '1', rawAmount }).toFixed()}
                 scaledUiAmountMultiplier={scaledUiAmountMultiplier}
             />
         </>
@@ -153,40 +152,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
             });
 
             transfers.forEach(({ transfer, index, childIndex }) => {
-                let units = 'Tokens';
-                let amountString = '';
-
-                // Loading token info, just don't show units
-                if (tokenInfoLoading) {
-                    units = '';
-                }
-
-                // Loaded symbol, use it
-                if (tokenInfo?.symbol) {
-                    units = tokenInfo.symbol;
-                }
-
-                if ('tokenAmount' in transfer) {
-                    amountString = transfer.tokenAmount.uiAmountString;
-                } else {
-                    let decimals = 0;
-
-                    if (tokenInfo?.decimals) {
-                        decimals = tokenInfo.decimals;
-                    } else if (mintMap.has(transfer.source.toBase58())) {
-                        decimals = mintMap.get(transfer.source.toBase58())?.decimals || 0;
-                    } else if (mintMap.has(transfer.destination.toBase58())) {
-                        decimals = mintMap.get(transfer.destination.toBase58())?.decimals || 0;
-                    }
-
-                    amountString = new Intl.NumberFormat('en-US', {
-                        maximumFractionDigits: decimals,
-                        minimumFractionDigits: decimals,
-                    }).format(normalizeTokenAmount(transfer.amount, decimals));
-                }
-
                 allTransfers.push({
-                    amountString,
+                    ...getRawAmount({ mintMap, tokenInfoDecimals: tokenInfo?.decimals, transfer }),
                     blockTime: blockTime || undefined,
                     childIndex,
                     index,
@@ -194,7 +161,6 @@ export function TokenTransfersCard({ address }: { address: string }) {
                     statusClass,
                     statusText,
                     transfer,
-                    units,
                 });
             });
         });
@@ -203,7 +169,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
             allTransfers,
             hasTimestamps,
         };
-    }, [history, transactionRows, tokenInfo, pubkey, address, cluster, tokenInfoLoading]);
+    }, [history, transactionRows, tokenInfo, pubkey, address, cluster]);
 
     if (!history) {
         return null;
@@ -219,6 +185,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     const tokenAddress = pubkey.toBase58();
+    const units = tokenInfo?.symbol || (tokenInfoLoading ? '' : 'Tokens');
 
     const columns: GridTableColumn<TransferData>[] = [
         {
@@ -239,8 +206,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
         {
             cell: { wrap: 'nowrap' },
             header: 'Amount',
-            render: ({ amountString, units }) => (
-                <AmountCell amountString={amountString} tokenAddress={tokenAddress} units={units} />
+            render: ({ decimals, rawAmount }) => (
+                <AmountCell decimals={decimals} rawAmount={rawAmount} tokenAddress={tokenAddress} units={units} />
             ),
         },
         {
@@ -297,6 +264,27 @@ export function TokenTransfersCard({ address }: { address: string }) {
             title="Token Transfers"
         />
     );
+}
+
+// A `transfer` instruction holds no decimals, so they come from the token info or from a token balance.
+function getRawAmount({
+    transfer,
+    tokenInfoDecimals,
+    mintMap,
+}: {
+    transfer: Transfer | TransferChecked;
+    tokenInfoDecimals: number | null | undefined;
+    mintMap: Map<string, MintDetails>;
+}): RawAmount {
+    if ('tokenAmount' in transfer) {
+        return { decimals: transfer.tokenAmount.decimals, rawAmount: transfer.tokenAmount.amount };
+    }
+    const decimals =
+        tokenInfoDecimals ||
+        mintMap.get(transfer.source.toBase58())?.decimals ||
+        mintMap.get(transfer.destination.toBase58())?.decimals ||
+        0;
+    return { decimals, rawAmount: transfer.amount };
 }
 
 function getTransfer(

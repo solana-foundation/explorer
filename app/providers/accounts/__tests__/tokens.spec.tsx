@@ -32,7 +32,6 @@ import {
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     TokensProvider,
-    toScaledUiAmountString,
     useAccountOwnedTokens,
     useFetchAccountOwnedTokens,
     useScaledUiAmountMultiplier,
@@ -189,20 +188,6 @@ describe('useScaledUiAmountMultiplier', () => {
         const { result } = renderScaledUiAmountMultiplier({});
 
         expect(result.current).toEqual({ status: 'loading' });
-    });
-});
-
-describe('toScaledUiAmountString', () => {
-    it('should scale the amount as an exact decimal', () => {
-        expect(toScaledUiAmountString('0.1', { multiplier: '3', status: 'known' })).toBe('0.3');
-    });
-
-    it.each<ScaledUiAmountMultiplier>([
-        { multiplier: '1', status: 'known' },
-        { status: 'loading' },
-        { status: 'unknown' },
-    ])('should keep the formatted amount when the multiplier is %o', scaledUiAmountMultiplier => {
-        expect(toScaledUiAmountString('1,000.50', scaledUiAmountMultiplier)).toBe('1,000.50');
     });
 });
 

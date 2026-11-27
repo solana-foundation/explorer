@@ -2,7 +2,6 @@ import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { PublicKey } from '@solana/web3.js';
 import { render, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import { BigNumber } from 'bignumber.js';
 import { type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
 
@@ -122,7 +121,14 @@ describe('TokenBalancesCard token symbols', () => {
 });
 
 function row(mint: string, balance: string) {
-    return { account: new PublicKey(mint), accountIndex: 0, balance, delta: new BigNumber(0), mint };
+    return {
+        account: new PublicKey(mint),
+        accountIndex: 0,
+        decimals: 0,
+        mint,
+        postAmount: balance,
+        preAmount: balance,
+    };
 }
 
 function renderCard(rows: ReturnType<typeof row>[], cache = new Map()) {
