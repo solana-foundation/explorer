@@ -1,24 +1,20 @@
 import { mergeTransactionMap } from '@/app/entities/transaction-data';
 
-import type { AccountHistory, FailedTransactionSignatures, HistoryRow, HistoryUpdate } from './types';
+import type { AccountHistory, HistoryRow, HistoryUpdate, ParsedTransactionResult } from './types';
 
-// Merges one fetched page into the cached history for an address. Pure: the cache
+// Merges one update into the cached history for an address. Pure: the cache
 // reducer in `@providers/cache` owns storage, this owns the merge rules.
-export function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
-    if (update?.history === undefined) {
-        // Support transactionMap-only updates from background lazy fetches
-        if ((update?.transactionMap || update?.failedTransactionSignatures) && history) {
-            const transactionMap = mergeTransactionMap(history.transactionMap, update.transactionMap);
-            const failedTransactionSignatures = mergeFailedTransactionSignatures(
-                history.failedTransactionSignatures,
-                update.failedTransactionSignatures,
-            );
-            return { ...history, failedTransactionSignatures, transactionMap };
-        }
-        return history;
+export function reconcile(
+    history: AccountHistory | undefined,
+    update: HistoryUpdate | undefined,
+): AccountHistory | undefined {
+    if (update === undefined) return history;
+    if ('signature' in update) {
+        return history && withTransactionResult({ history, result: update.result, signature: update.signature });
     }
+    if (update.history === undefined) return history;
 
-    const append = update.append ?? false;
+    const { append } = update;
 
     // A refresh that came back empty is almost always a transient RPC blip, not a real transition to
     // "zero history" (signatures are immutable). Drop it so a flaky empty can't wipe already-loaded rows
@@ -34,22 +30,35 @@ export function reconcile(history: AccountHistory | undefined, update: HistoryUp
     // the whole list; a refresh that merely prepends new items keeps the old tail.
     const tailFromUpdate = append || replaced;
 
-    const transactionMap = mergeTransactionMap(history?.transactionMap, update.transactionMap);
-    const failedTransactionSignatures = mergeFailedTransactionSignatures(
-        append ? history?.failedTransactionSignatures : undefined,
-        update.failedTransactionSignatures,
-    );
-
     return {
-        failedTransactionSignatures,
         fetched: combined,
         foundOldest: tailFromUpdate ? update.history.foundOldest : (history?.foundOldest ?? false),
+        missingTransactions: history?.missingTransactions,
         paginationToken: tailFromUpdate ? update.history.paginationToken : history?.paginationToken,
-        transactionMap,
+        transactionMap: history?.transactionMap,
     };
 }
 
-function combineFetched(
+function withTransactionResult({
+    history,
+    signature,
+    result,
+}: {
+    history: AccountHistory;
+    signature: string;
+    result: ParsedTransactionResult;
+}): AccountHistory {
+    const missingTransactions = new Map(history.missingTransactions);
+    if (result.status !== 'loaded') {
+        missingTransactions.set(signature, result.status);
+        return { ...history, missingTransactions };
+    }
+    missingTransactions.delete(signature);
+    const transactionMap = mergeTransactionMap(history.transactionMap, new Map([[signature, result.transaction]]));
+    return { ...history, missingTransactions, transactionMap };
+}
+
+export function combineFetched(
     fetched: HistoryRow[],
     current: HistoryRow[] | undefined,
     append: boolean,
@@ -64,20 +73,11 @@ function combineFetched(
         return { combined: current.concat(fetched.filter(f => !seen.has(f.signature))), replaced: false };
     }
 
+    if (fetched.length === 0) return { combined: current, replaced: false };
+
     // History was refreshed: prepend the newly-seen prefix if the page overlaps
     // what we already have, otherwise treat it as a full replacement.
     const end = fetched.findIndex(f => f.signature === current[0].signature);
     if (end < 0) return { combined: fetched, replaced: true };
     return { combined: fetched.slice(0, end).concat(current), replaced: false };
-}
-
-function mergeFailedTransactionSignatures(
-    current: FailedTransactionSignatures | undefined,
-    update: FailedTransactionSignatures | undefined,
-) {
-    if (!update) {
-        return current ?? new Set<string>();
-    }
-
-    return new Set([...(current ?? []), ...update]);
 }

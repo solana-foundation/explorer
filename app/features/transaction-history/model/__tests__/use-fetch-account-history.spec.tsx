@@ -28,6 +28,9 @@ vi.mock('@entities/cluster', async () => {
     };
 });
 
+const fetchParsedTransactions = vi.hoisted(() => vi.fn());
+vi.mock('../../api/fetch-parsed-transactions', () => ({ fetchParsedTransactions }));
+
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -35,9 +38,15 @@ import { useCluster } from '@providers/cluster';
 import type { HistoryFilters } from '../../lib/history-filters';
 import { HistoryProvider } from '../history-provider';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../use-account-history';
-import { useFetchAccountHistory } from '../use-fetch-account-history';
+import {
+    useEnableTransactionFetches,
+    useFetchAccountHistory,
+    useRetryFailedTransactions,
+} from '../use-fetch-account-history';
 
 const ADDRESS = 'rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h';
+const TRANSACTION = { slot: 1 };
+const LOADED = { status: 'loaded', transaction: TRANSACTION };
 const ADDRESS_B = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 
 function sig(signature: string, slot: number) {
@@ -85,10 +94,35 @@ function wrapper({ children }: { children: React.ReactNode }) {
     return <HistoryProvider>{children}</HistoryProvider>;
 }
 
-function renderHistory(filters: HistoryFilters = {}) {
-    return renderHook(() => ({ fetch: useFetchAccountHistory(25, filters), history: useAccountHistory(ADDRESS) }), {
-        wrapper,
+async function renderSettledHistory() {
+    mockResult(
+        [sig('loaded', 5), sig('failed', 4), sig('skipped', 3), sig('untried', 2), sig('untried-tail', 1)],
+        'token',
+    );
+    fetchParsedTransactions.mockImplementationOnce(async options => {
+        options.onSettled('loaded', LOADED);
+        options.onSettled('failed', { status: 'failed' });
+        options.onSettled('skipped', { status: 'skipped' });
     });
+    const view = renderHistory();
+    act(() => view.result.current.fetch(toAddress(ADDRESS), true));
+    await waitForHook(() => expect(view.result.current.history?.status).toBe(FetchStatus.Fetched));
+    return view;
+}
+
+function renderHistory(filters: HistoryFilters = {}) {
+    return renderHook(
+        () => {
+            useEnableTransactionFetches(toAddress(ADDRESS));
+            return {
+                fetch: useFetchAccountHistory(25, filters),
+                history: useAccountHistory(ADDRESS),
+                reset: useResetAccountHistory(),
+                retry: useRetryFailedTransactions(),
+            };
+        },
+        { wrapper },
+    );
 }
 
 beforeEach(() => {
@@ -244,6 +278,166 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
 
         // foundOldest short-circuits the load-more, so no further request is made.
         expect(fetchMock).not.toHaveBeenCalled();
+    });
+});
+
+describe('useFetchAccountHistory with transactions', () => {
+    it('should show the page before its transactions load, then each transaction when it settles', async () => {
+        mockResult([sig('a', 2), sig('b', 1)], null);
+        const settled = deferred<void>();
+        let onSettled!: (signature: string, result: unknown) => void;
+        fetchParsedTransactions.mockImplementationOnce(options => {
+            onSettled = options.onSettled;
+            return settled.promise;
+        });
+        const { result } = renderHistory();
+
+        act(() => result.current.fetch(toAddress(ADDRESS), true));
+        await waitForHook(() => expect(result.current.history?.data?.fetched).toHaveLength(2));
+        expect(result.current.history?.status).toBe(FetchStatus.Fetching);
+        expect(fetchParsedTransactions.mock.calls[0][0].signatures).toEqual(['a', 'b']);
+
+        act(() => {
+            onSettled('a', LOADED);
+            onSettled('b', { status: 'failed' });
+        });
+        expect(result.current.history?.data?.transactionMap?.get('a')).toBe(TRANSACTION);
+        expect([...(result.current.history?.data?.missingTransactions ?? [])]).toEqual([['b', 'failed']]);
+
+        await act(async () => settled.resolve());
+        expect(result.current.history?.status).toBe(FetchStatus.Fetched);
+    });
+
+    it.each<[string, ReturnType<typeof sig>[], string[]]>([
+        [
+            'keeps',
+            [sig('new', 6), sig('loaded', 5), sig('failed', 4)],
+            ['new', 'failed', 'skipped', 'untried', 'untried-tail'],
+        ],
+        ['returns an empty page and keeps', [], ['skipped', 'untried', 'untried-tail']],
+        ['drops', [sig('replacement', 9)], ['replacement']],
+    ])(
+        'should fetch the page rows and the listed rows whose fetch has not failed, on a refresh that %s the cached rows',
+        async (_, page, expected) => {
+            const { result } = await renderSettledHistory();
+
+            mockResult(page, 'token');
+            fetchParsedTransactions.mockResolvedValueOnce(undefined);
+            act(() => result.current.fetch(toAddress(ADDRESS), true, true));
+            await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
+
+            expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual(expected);
+        },
+    );
+
+    it('should fetch on Load More, once each, the page rows and the cached rows whose fetch has not failed', async () => {
+        const { result } = await renderSettledHistory();
+
+        mockResult([sig('untried-tail', 1), sig('older', 0)], null);
+        fetchParsedTransactions.mockResolvedValueOnce(undefined);
+        act(() => result.current.fetch(toAddress(ADDRESS), true));
+        await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
+
+        expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual([
+            'untried-tail',
+            'older',
+            'skipped',
+            'untried',
+        ]);
+    });
+
+    it('should fetch on Retry only the listed rows after a refresh replaced the list', async () => {
+        const { result } = await renderSettledHistory();
+        mockResult([sig('replacement', 9)], 'token');
+        fetchParsedTransactions.mockImplementationOnce(async options => {
+            options.onSettled('replacement', { status: 'failed' });
+        });
+        act(() => result.current.fetch(toAddress(ADDRESS), true, true));
+        await waitForHook(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+
+        fetchParsedTransactions.mockResolvedValueOnce(undefined);
+        act(() => result.current.retry(toAddress(ADDRESS)));
+        await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(3));
+
+        expect(fetchParsedTransactions.mock.calls[2][0].signatures).toEqual(['replacement']);
+    });
+
+    it('should fetch on Retry the cached rows whose fetch failed or was skipped, without a page and with the page status kept', async () => {
+        const { result } = await renderSettledHistory();
+        mockRpcError(-32000, 'boom');
+        act(() => result.current.fetch(toAddress(ADDRESS), true, true));
+        await waitForHook(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        fetchMock.mockClear();
+
+        fetchParsedTransactions.mockResolvedValueOnce(undefined);
+        act(() => result.current.retry(toAddress(ADDRESS)));
+        await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
+        await waitForHook(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+
+        expect(fetchParsedTransactions.mock.calls[1][0].signatures).toEqual(['failed', 'skipped']);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('should run the queued transaction fetches only while a card that shows the address is mounted', async () => {
+        mockResult([sig('a', 2)], null);
+        let shouldRun!: () => boolean;
+        fetchParsedTransactions.mockImplementationOnce(options => {
+            shouldRun = options.shouldRun;
+            return new Promise(() => {});
+        });
+        const { result, unmount } = renderHistory();
+        act(() => result.current.fetch(toAddress(ADDRESS), true));
+        await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledOnce());
+        expect(shouldRun()).toBe(true);
+
+        unmount();
+        expect(shouldRun()).toBe(false);
+
+        renderHistory();
+        expect(shouldRun()).toBe(true);
+    });
+
+    it.each<[string, (transactions: Promise<void>) => Promise<ReturnType<typeof renderHistory>>]>([
+        [
+            'page fetch',
+            async transactions => {
+                mockResult([sig('a', 2)], null);
+                fetchParsedTransactions.mockReturnValueOnce(transactions);
+                const view = renderHistory();
+                act(() => view.result.current.fetch(toAddress(ADDRESS), true));
+                await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledOnce());
+                return view;
+            },
+        ],
+        [
+            'retry',
+            async transactions => {
+                const view = await renderSettledHistory();
+                fetchParsedTransactions.mockReturnValueOnce(transactions);
+                act(() => view.result.current.retry(toAddress(ADDRESS)));
+                await waitForHook(() => expect(fetchParsedTransactions).toHaveBeenCalledTimes(2));
+                return view;
+            },
+        ],
+    ])('should drop the transactions and the status of a %s that a reset superseded', async (_, start) => {
+        const pendingTransactions = deferred<void>();
+        const { result } = await start(pendingTransactions.promise);
+        const superseded = fetchParsedTransactions.mock.lastCall?.[0];
+
+        mockResult([sig('b', 3)], null);
+        fetchParsedTransactions.mockReturnValueOnce(new Promise(() => {}));
+        act(() => {
+            result.current.reset(ADDRESS);
+            result.current.fetch(toAddress(ADDRESS), true, true);
+        });
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('b'));
+
+        expect(superseded.shouldRun()).toBe(false);
+        const [signature] = superseded.signatures;
+        act(() => superseded.onSettled(signature, LOADED));
+        expect(result.current.history?.data?.transactionMap?.get(signature)).toBeUndefined();
+        await act(async () => pendingTransactions.resolve());
+        expect(result.current.history?.status).toBe(FetchStatus.Fetching);
     });
 });
 
