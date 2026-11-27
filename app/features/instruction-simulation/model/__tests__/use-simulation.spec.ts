@@ -34,7 +34,7 @@ describe('useSimulation', () => {
     });
 
     it('should transition to done with result on success', async () => {
-        const successResult = createSuccessResult({ epoch: 42n, unitsConsumed: 200 });
+        const successResult = createSuccessResult({ unitsConsumed: 200 });
         mockSimulateTransaction.mockResolvedValue(successResult);
 
         const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper() });
@@ -44,7 +44,7 @@ describe('useSimulation', () => {
         });
 
         expect(result.current).toMatchObject({
-            result: { epoch: 42n, unitsConsumed: 200 },
+            result: { unitsConsumed: 200 },
             status: 'done',
         });
     });
@@ -102,9 +102,10 @@ function createMockMessage(): VersionedMessage {
 function createSuccessResult(overrides?: Partial<SimulationResult>): SimulationResult {
     return {
         accountKeys: [],
-        epoch: 100n,
         error: undefined,
-        logs: [],
+        instructionError: undefined,
+        logs: { invocations: [], truncated: false },
+        outcome: { status: 'succeeded' },
         solBalanceChanges: undefined,
         tokenBalanceData: undefined,
         unitsConsumed: 150,

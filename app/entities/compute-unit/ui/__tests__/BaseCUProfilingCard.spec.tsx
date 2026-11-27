@@ -74,6 +74,25 @@ describe('BaseCUProfilingCard', () => {
         });
     });
 
+    describe('chart axis', () => {
+        it('should end at the transaction total when a row has no figure', () => {
+            render(
+                <BaseCUProfilingCard
+                    instructions={[cuData({ computeUnits: 14702 }), cuData({ computeUnits: undefined })]}
+                    unitsConsumed={247852}
+                />,
+            );
+
+            expect(xAxisMax()).toBe(247852);
+        });
+
+        it('should end at the sum of the rows when no total is given', () => {
+            render(<BaseCUProfilingCard instructions={transferAndComputeBudget()} />);
+
+            expect(xAxisMax()).toBe(255);
+        });
+    });
+
     // The instruction name can come from on-chain IDL metadata, so anyone who publishes an IDL controls it.
     describe('tooltip', () => {
         it('should write a program-authored name as text, not as markup', () => {
@@ -91,9 +110,9 @@ describe('BaseCUProfilingCard', () => {
         });
 
         it('should show the same CU figure the legend shows', () => {
-            render(<BaseCUProfilingCard instructions={[cuData({ computeUnits: 0, scheduledUnits: 200000 })]} />);
+            render(<BaseCUProfilingCard instructions={[cuData({ computeUnits: 159483 })]} />);
 
-            expect(textOf(showTooltip().tooltip, '.cu-tooltip-cu')).toBe('~200,000 CU reserved');
+            expect(textOf(showTooltip().tooltip, '.cu-tooltip-cu')).toBe('159,483 CU consumed');
         });
 
         it('should set the swatch to the color of its bar', () => {
@@ -135,6 +154,12 @@ function datasets(): ChartData<'bar'>['datasets'] {
     const props = Bar.mock.calls.at(-1)?.[0] as { data: ChartData<'bar'> } | undefined;
     if (!props) throw new Error('BaseCUProfilingCard rendered no chart');
     return props.data.datasets;
+}
+
+function xAxisMax(): unknown {
+    const props = Bar.mock.calls.at(-1)?.[0] as { options: ChartOptions<'bar'> } | undefined;
+    if (!props) throw new Error('BaseCUProfilingCard rendered no chart');
+    return props.options.scales?.x?.max;
 }
 
 /**

@@ -7,7 +7,6 @@ export { getProgramName, UNKNOWN_PROGRAM_NAME } from './lib/get-program-name';
 export {
     getCompiledInstructionSummaries,
     getInstructionSummaries,
-    resolveInstructionNames,
     resolveNamesFromData,
 } from './lib/instruction-summary';
 export { mergeTransactionMap } from './lib/merge-transaction-map';
@@ -16,7 +15,4 @@ export { isResolvedLookupTable, rowAddresses } from './lib/row-addresses';
 export { trustedInnerInstructions } from './lib/trusted-inner-instructions';
 export { applyNameSourcesToSummaries } from './lib/name-sources';
 export type { InstructionSummary, NamedInstruction } from './lib/types';
-// The second half of instruction naming — `resolveInstructionNames` / `resolveNamesFromData` above —
-// is on `client.ts`, since the hooks cannot join a server caller of this barrel. README.md has the
-// whole flow and the invariants it holds to.
 export type { RawTransaction, TransactionConfig, TransactionWithMeta } from './model/types';

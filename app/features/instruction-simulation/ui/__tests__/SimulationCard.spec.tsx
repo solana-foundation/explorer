@@ -3,8 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { useSimulation, useSimulationInstructionNames, CUProfilingCard } = vi.hoisted(() => ({
+const { useSimulation, useSimulationInstructionNames, CUProfilingCard, ProgramLogs } = vi.hoisted(() => ({
     CUProfilingCard: vi.fn(() => null),
+    ProgramLogs: vi.fn((_props: { rows: readonly { status: string }[] }) => null),
     useSimulation: vi.fn(),
     useSimulationInstructionNames: vi.fn(),
 }));
@@ -13,7 +14,10 @@ vi.mock('../../model/use-simulation', () => ({ useSimulation }));
 vi.mock('../../model/use-simulation-instruction-names', () => ({ useSimulationInstructionNames }));
 vi.mock('../BaseSimulatorCUProfilingCard', () => ({ BaseSimulatorCUProfilingCard: CUProfilingCard }));
 vi.mock('../SolBalanceChangesCard', () => ({ SolBalanceChangesCard: () => null }));
-vi.mock('@components/ProgramLogsCardBody', () => ({ ProgramLogsCardBody: () => null }));
+vi.mock('@entities/program-logs', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/program-logs')>()),
+    ProgramLogs,
+}));
 vi.mock('@features/transaction', () => ({
     TokenBalancesCardInner: () => null,
     generateTokenBalanceRows: () => [],
@@ -31,9 +35,11 @@ beforeEach(() => {
     useSimulation.mockReturnValue({
         result: {
             accountKeys: [],
-            epoch: 0n,
             error: undefined,
-            logs: [{ computeUnits: 105, failed: false, invokedProgram: 'TokenProgram', logs: [] }],
+            logs: {
+                invocations: [{ computeUnits: 105, entries: [], programAddress: 'TokenProgram' }],
+                truncated: false,
+            },
             solBalanceChanges: [],
             unitsConsumed: 105,
         },
@@ -74,7 +80,7 @@ describe('SimulatorCard CU profiling', () => {
     // No logs means nothing to profile, so neither the chart nor an excuse belongs on the page.
     it('should render neither the chart nor a reason when the simulation produced no logs', () => {
         useSimulation.mockReturnValue({
-            result: { accountKeys: [], epoch: 0n, error: 'blockhash not found', logs: undefined },
+            result: { accountKeys: [], error: 'blockhash not found', logs: undefined },
             simulate: vi.fn(),
             status: 'done',
         });
@@ -86,11 +92,9 @@ describe('SimulatorCard CU profiling', () => {
         expect(CUProfilingCard).not.toHaveBeenCalled();
     });
 
-    // `parseProgramLogs` returns [] for a simulation that logged nothing, and an empty array is truthy —
-    // so guarding on the array itself put the "unavailable" excuse on a page with nothing to profile.
     it('should render neither the chart nor a reason when the log list is empty', () => {
         useSimulation.mockReturnValue({
-            result: { accountKeys: [], epoch: 0n, error: undefined, logs: [] },
+            result: { accountKeys: [], error: undefined, logs: { invocations: [], truncated: false } },
             simulate: vi.fn(),
             status: 'done',
         });
@@ -100,5 +104,32 @@ describe('SimulatorCard CU profiling', () => {
 
         expect(screen.queryByText(UNAVAILABLE)).not.toBeInTheDocument();
         expect(CUProfilingCard).not.toHaveBeenCalled();
+    });
+});
+
+describe('SimulatorCard logs', () => {
+    it('should show a row for each top-level invocation when the message cannot be named', () => {
+        useSimulationInstructionNames.mockReturnValue({ instructions: [], unresolvable: true });
+
+        render(<SimulatorCard message={MESSAGE} showTokenBalanceChanges={false} />);
+
+        expect(ProgramLogs.mock.lastCall?.[0].rows).toHaveLength(1);
+    });
+
+    it('should show the instruction error of a simulation that logged no invocation', () => {
+        useSimulation.mockReturnValue({
+            result: {
+                accountKeys: [],
+                error: 'TransactionError',
+                instructionError: { index: 0, message: 'invalid account data for instruction' },
+                logs: { invocations: [], truncated: false },
+            },
+            simulate: vi.fn(),
+            status: 'done',
+        });
+
+        render(<SimulatorCard message={MESSAGE} showTokenBalanceChanges={false} />);
+
+        expect(ProgramLogs.mock.lastCall?.[0].rows.map(row => row.status)).toEqual(['failed']);
     });
 });

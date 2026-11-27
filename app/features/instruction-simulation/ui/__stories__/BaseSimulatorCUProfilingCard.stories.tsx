@@ -1,7 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import { Cluster } from '@utils/cluster';
 
 import { BaseSimulatorCUProfilingCard } from '../BaseSimulatorCUProfilingCard';
 
@@ -23,28 +22,18 @@ type Story = StoryObj<typeof meta>;
 // Rows arrive resolved from useSimulationInstructionNames, so the card never fetches.
 export const TwoInstructions: Story = {
     args: {
-        cluster: Cluster.Mainnet,
-        epoch: 800n,
         instructions: [
-            { name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
-            { name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
+            { data: undefined, name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
+            { data: undefined, name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        logs: [
-            {
-                computeUnits: 45000,
-                failed: false,
-                invokedProgram: SYSTEM_PROGRAM.toBase58(),
-                logs: [],
-                truncated: false,
-            },
-            {
-                computeUnits: 30000,
-                failed: false,
-                invokedProgram: TOKEN_PROGRAM.toBase58(),
-                logs: [],
-                truncated: false,
-            },
-        ],
+        logs: {
+            invocations: [
+                { computeUnits: 45000, entries: [], programAddress: SYSTEM_PROGRAM.toBase58() },
+                { computeUnits: 30000, entries: [], programAddress: TOKEN_PROGRAM.toBase58() },
+            ],
+            truncated: false,
+        },
+        outcome: { status: 'succeeded' },
         unitsConsumed: 75000,
     },
 };
@@ -53,26 +42,23 @@ export const TwoInstructions: Story = {
 // are still named, which is what the tooltip qualifies the position with.
 export const WithoutResolvedNames: Story = {
     args: {
-        cluster: Cluster.Mainnet,
-        epoch: 800n,
         instructions: [
-            { name: undefined, programId: SYSTEM_PROGRAM, programName: 'System Program' },
-            { name: undefined, programId: TOKEN_PROGRAM, programName: 'Token Program' },
+            { data: undefined, name: undefined, programId: SYSTEM_PROGRAM, programName: 'System Program' },
+            { data: undefined, name: undefined, programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        logs: TwoInstructions.args?.logs ?? [],
+        logs: TwoInstructions.args?.logs ?? { invocations: [], truncated: false },
+        outcome: { status: 'succeeded' },
         unitsConsumed: 75000,
     },
 };
 
-// The logs said nothing about either instruction, so both fall back to their scheduled CU reserve.
 export const NoLogs: Story = {
     args: {
-        cluster: Cluster.Mainnet,
-        epoch: 800n,
         instructions: [
-            { name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
-            { name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
+            { data: undefined, name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
+            { data: undefined, name: 'Transfer Checked', programId: TOKEN_PROGRAM, programName: 'Token Program' },
         ],
-        logs: [],
+        logs: { invocations: [], truncated: false },
+        outcome: { status: 'succeeded' },
     },
 };

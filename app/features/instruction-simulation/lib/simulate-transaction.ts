@@ -1,4 +1,6 @@
 import type { SolanaRpc } from '@entities/cluster';
+import type { TransactionOutcome } from '@entities/compute-unit';
+import { type ParsedProgramLogs, parseProgramLogs } from '@entities/program-logs';
 import type { Address, Base64EncodedWireTransaction } from '@solana/kit';
 import type {
     AccountInfo,
@@ -9,7 +11,7 @@ import type {
 } from '@solana/web3.js';
 import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
-import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
+import { getTransactionInstructionError, type ProgramError } from '@utils/program-err';
 
 import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -29,9 +31,10 @@ export type SimulationResult = {
     // `compiledInstructions` indexes into. Callers that need an instruction's program id must read it
     // from here: `message.staticAccountKeys` is missing any key sourced from a lookup table.
     accountKeys: readonly PublicKey[];
-    epoch: bigint;
-    logs: InstructionLogs[] | undefined;
+    logs: ParsedProgramLogs | undefined;
+    instructionError: ProgramError | undefined;
     error: string | undefined;
+    outcome: TransactionOutcome;
     solBalanceChanges: SolBalanceChange[] | undefined;
     tokenBalanceData: TokenBalanceData | undefined;
     unitsConsumed: number | undefined;
@@ -120,7 +123,6 @@ async function inactiveV1GateError(
 
 type RawSimulation = {
     accountKeys: PublicKey[];
-    epoch: bigint;
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | undefined)[];
     simResult: {
         accounts: (SimulatedTransactionAccountInfo | undefined)[];
@@ -139,10 +141,7 @@ async function runSimulation(rpc: SolanaRpc, message: VersionedMessage): Promise
     const accountKeys = message.getAccountKeys({ addressLookupTableAccounts: lookupTables }).keySegments().flat();
     const addresses = accountKeys.map(key => toKitAddress(key));
 
-    const [parsedAccountsPre, epochInfo] = await Promise.all([
-        getMultipleParsedAccounts(rpc, addresses),
-        rpc.getEpochInfo({ commitment: 'confirmed' }).send(),
-    ]);
+    const parsedAccountsPre = await getMultipleParsedAccounts(rpc, addresses);
 
     // A v1 message must be sent in the v1 wire envelope (message first); the stock
     // VersionedTransaction envelope is signatures-first and nodes reject it for v1.
@@ -172,7 +171,6 @@ async function runSimulation(rpc: SolanaRpc, message: VersionedMessage): Promise
 
     return {
         accountKeys,
-        epoch: epochInfo.epoch,
         parsedAccountsPre,
         simResult: {
             accounts: simResult.accounts.map(account => (account ? toLegacySimulatedAccountInfo(account) : undefined)),
@@ -251,7 +249,7 @@ function toLegacySimulatedAccountInfo(account: KitSimulatedAccount): SimulatedTr
  * SOL balance changes, and parsed program logs.
  */
 function interpretSimulation(
-    { accountKeys, epoch, parsedAccountsPre, simResult }: RawSimulation,
+    { accountKeys, parsedAccountsPre, simResult }: RawSimulation,
     cluster: Cluster,
     accountBalances?: { preBalances: number[]; postBalances: number[] },
 ): SimulationResult {
@@ -261,18 +259,23 @@ function interpretSimulation(
 
     const solChanges = computeSolBalanceChanges(accountKeys, parsedAccountsPre, simResult.accounts, accountBalances);
 
-    const logs = simResult.logs.length > 0 ? parseProgramLogs(simResult.logs, simResult.err, cluster) : undefined;
+    const logs = simResult.logs.length > 0 ? parseProgramLogs(simResult.logs) : undefined;
 
     let error: string | undefined;
     if (simResult.err) {
         error = typeof simResult.err === 'string' ? simResult.err : JSON.stringify(simResult.err);
     }
 
+    const instructionError = getTransactionInstructionError(simResult.err);
+
     return {
         accountKeys,
-        epoch,
         error,
+        instructionError,
         logs,
+        outcome: simResult.err
+            ? { failedInstructionIndex: instructionError?.index, status: 'failed' }
+            : { status: 'succeeded' },
         solBalanceChanges: solChanges.length > 0 ? solChanges : undefined,
         tokenBalanceData: tokenData,
         unitsConsumed: simResult.unitsConsumed,

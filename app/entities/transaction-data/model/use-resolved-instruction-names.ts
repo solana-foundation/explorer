@@ -4,20 +4,32 @@ import { useProgramIdlNames } from '@entities/idl/@x/transaction-data';
 import { useCluster } from '@providers/cluster';
 import { useMemo } from 'react';
 
+import { toNamedInstruction } from '../lib/instruction-summary';
 import { applyNameSources, applyNameSourcesToSummaries } from '../lib/name-sources';
 import type { InstructionNameLookup, InstructionSummary, NamedInstruction } from '../lib/types';
+import type { TransactionWithMeta } from './types';
 
-/**
- * The second half of instruction naming: fetch the IDLs the unnamed rows need, then run every name
- * source. Row count and order are preserved, so a caller pairing row `i` with `instructionLogs[i]`
- * stays aligned.
- * @param instructions - Rows in transaction order, each carrying its program
- */
+export function useTransactionInstructionNames(
+    transactionWithMeta: TransactionWithMeta | null | undefined,
+): NamedInstruction[] {
+    const rows = useMemo(
+        () => transactionWithMeta?.transaction.message.instructions.map(toNamedInstruction) ?? [],
+        [transactionWithMeta],
+    );
+
+    return useResolvedInstructionNames(rows);
+}
+
 export function useResolvedInstructionNames(instructions: readonly NamedInstruction[]): NamedInstruction[] {
     const idlNames = useIdlNames(instructions);
 
     return useMemo(
-        () => instructions.map(row => ({ ...applyNameSources(row, idlNames), programId: row.programId })),
+        () =>
+            instructions.map(row => ({
+                ...applyNameSources(row, idlNames),
+                data: row.data,
+                programId: row.programId,
+            })),
         [instructions, idlNames],
     );
 }

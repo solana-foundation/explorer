@@ -32,8 +32,6 @@ export type SortableTransaction = {
 };
 
 // Returns a new array sorted by `mode`. Missing numeric values stay after known values in either direction.
-// `compute` falls back to no-op when compute data isn't available for every readable row, matching the
-// hidden Compute column.
 export function sortTransactions<T extends SortableTransaction>(
     txs: readonly T[],
     mode: SortMode,

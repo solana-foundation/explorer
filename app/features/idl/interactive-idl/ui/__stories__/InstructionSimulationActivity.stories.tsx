@@ -1,8 +1,9 @@
 import { baseLogs, errorLogs } from '@entities/program-logs/model/mocks/logs';
-import { parsedBaseLogs, parsedErrorLogs } from '@entities/program-logs/model/mocks/parsedLogs';
 import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
+import { Cluster } from '@utils/cluster';
 
+import { toResultLogs } from '../../model/transaction/parse-result-logs';
 import { InstructionSimulationActivity } from '../InstructionActivity';
 
 const FINISHED_AT = new Date('2026-01-01T00:00:00Z');
@@ -12,8 +13,8 @@ const LONG_ERROR =
     'Program log: AnchorError occurred. Error Code: ConstraintHasOne. Error Number: 2001. ' +
     'Error Message: A has one constraint was violated. The provided account does not match the expected owner.';
 
-const BASE_LOGS = { parsed: parsedBaseLogs, raw: baseLogs };
-const ERROR_LOGS = { parsed: parsedErrorLogs, raw: errorLogs };
+const BASE_LOGS = toResultLogs(baseLogs, undefined, Cluster.Devnet);
+const ERROR_LOGS = toResultLogs(errorLogs, undefined, Cluster.Devnet);
 
 const meta = {
     component: InstructionSimulationActivity,

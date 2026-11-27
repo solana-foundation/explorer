@@ -1,6 +1,5 @@
-import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
+import { type ParsedProgramLogs, ProgramLogs } from '@entities/program-logs';
 import { generateTokenBalanceRows, TokenBalancesCardInner } from '@features/transaction';
-import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
@@ -10,6 +9,7 @@ import { baseCardVariants, Card, CardBody, CardHeader, CardTitle } from '@/app/s
 
 import { useSimulation } from '../model/use-simulation';
 import { useSimulationInstructionNames } from '../model/use-simulation-instruction-names';
+import { useSimulationLogRows } from '../model/use-simulation-log-rows';
 import { BaseSimulatorCUProfilingCard } from './BaseSimulatorCUProfilingCard';
 import { SolBalanceChangesCard } from './SolBalanceChangesCard';
 
@@ -23,13 +23,13 @@ type SimulatorCardProps = {
 };
 
 export function SimulatorCard({ message, showTokenBalanceChanges, accountBalances }: SimulatorCardProps) {
-    const { cluster, url } = useCluster();
     const simulation = useSimulation(message, accountBalances);
     // Lookup-table-resolved keys only exist once the simulation has run, so naming waits for them.
-    const { instructions: namedInstructions, unresolvable } = useSimulationInstructionNames({
+    const instructionNames = useSimulationInstructionNames({
         accountKeys: simulation.status === 'done' ? simulation.result.accountKeys : undefined,
         message,
     });
+    const { instructions: namedInstructions, unresolvable } = instructionNames;
 
     const tokenBalanceData = simulation.status === 'done' ? simulation.result.tokenBalanceData : undefined;
     const tokenBalanceRows = useMemo(
@@ -42,6 +42,11 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                   )
                 : undefined,
         [tokenBalanceData],
+    );
+
+    const logRows = useSimulationLogRows(
+        simulation.status === 'done' ? simulation.result : undefined,
+        instructionNames,
     );
 
     if (simulation.status === 'simulating') {
@@ -83,15 +88,15 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         );
     }
 
-    const { logs, solBalanceChanges, epoch, unitsConsumed, error } = simulation.result;
+    const { logs, outcome, solBalanceChanges, unitsConsumed, error } = simulation.result;
     const succeeded = !error;
-    const hasLogs = !!logs?.length;
+    const hasLogs = !!logRows;
     const hasErrorWithoutLogs = !hasLogs && !!error;
 
     return (
         <>
             <SimulationCardShell action={<SimulateButton label="Retry" onClick={simulation.simulate} />}>
-                {hasLogs && <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />}
+                {logRows && <ProgramLogs rows={logRows} instructions={namedInstructions} />}
                 {hasErrorWithoutLogs && (
                     <CardBody ui="dashkit">
                         <div>
@@ -115,10 +120,9 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                 ) : (
                     <BaseSimulatorCUProfilingCard
                         instructions={namedInstructions}
-                        logs={logs}
+                        logs={logs ?? NO_LOGS}
+                        outcome={outcome}
                         unitsConsumed={unitsConsumed}
-                        cluster={cluster}
-                        epoch={epoch}
                     />
                 ))}
             {succeeded && !!solBalanceChanges?.length && <SolBalanceChangesCard balanceChanges={solBalanceChanges} />}
@@ -128,6 +132,8 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         </>
     );
 }
+
+const NO_LOGS: ParsedProgramLogs = { invocations: [], truncated: false };
 
 function SimulateButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (

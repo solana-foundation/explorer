@@ -1,25 +1,17 @@
-import type { InstructionCUData } from './types';
+import type { InstructionComputeUnits, InstructionCUData } from './types';
 
 /**
  * One chart row, with every string it renders already derived. `name` is dropped so a consumer reads
  * `label` or `legendLabel` and cannot bypass the positional fallback those apply.
  */
 export type InstructionCUDisplay = Omit<InstructionCUData, 'name'> & {
-    // The CU figure the bar is sized by. Falls back `computeUnits` → `defaultUnits` → `scheduledUnits`,
-    // the last of which is never 0, so an instruction the logs said nothing about still occupies a
-    // visible segment.
     displayCU: number;
     // Chart tooltip title, before the program qualifier.
     label: string;
     // Legend entry: the instruction's position, then its name — `Unknown Instruction` when nothing
     // resolved one, so every row in the list reads the same shape.
     legendLabel: string;
-    // The CU figure as shown, with a ~ prefix when it is the schedule's estimate.
     displayValue: string;
-    // True only for the schedule's reserve (`scheduledUnits`) — the one figure that is a guess. A
-    // measured `computeUnits` and a builtin's fixed `defaultUnits` are both real costs, so the tooltip
-    // presents neither as an estimate.
-    isEstimate: boolean;
 };
 
 /**
@@ -28,15 +20,10 @@ export type InstructionCUDisplay = Omit<InstructionCUData, 'name'> & {
  */
 export function toInstructionCUDisplay(instructions: InstructionCUData[]): InstructionCUDisplay[] {
     return instructions.map((item, i) => {
-        // `scheduledUnits` is never 0, so this resolves to a real figure on every row — see types.ts.
-        const value = item.computeUnits || item.defaultUnits || item.scheduledUnits;
-        const isEstimate = !item.computeUnits && !item.defaultUnits;
-
         return {
             ...item,
-            displayCU: value,
-            displayValue: `${isEstimate ? '~' : ''}${value.toLocaleString()}`,
-            isEstimate,
+            displayCU: typeof item.computeUnits === 'number' ? item.computeUnits : 0,
+            displayValue: toDisplayValue(item.computeUnits),
             // The tooltip shows one row at a time, so an unnamed instruction is identified by its
             // position alone — `Unknown Instruction` there would read the same on every unnamed row.
             label: item.name ?? positionLabel(i),
@@ -59,6 +46,13 @@ export function formatTooltipTitle({ label, programName }: { label: string; prog
 // instruction reads the same wherever it appears. Declared here rather than imported: this entity owns
 // its own fallback by design — see "Two row shapes" in the transaction-data README.
 const UNKNOWN_INSTRUCTION_LABEL = 'Unknown Instruction';
+
+function toDisplayValue(computeUnits: InstructionComputeUnits): string {
+    if (computeUnits === undefined) return 'Unknown';
+    if (computeUnits === 'not-executed') return 'Not executed';
+
+    return computeUnits.toLocaleString();
+}
 
 function positionLabel(index: number): string {
     return `Instruction #${index + 1}`;

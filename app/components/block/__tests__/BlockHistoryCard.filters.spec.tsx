@@ -8,6 +8,8 @@ const PROGRAM_A = '11111111111111111111111111111111';
 const PROGRAM_B = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ACCOUNT = 'Stake11111111111111111111111111111111111111';
 let search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
+let loggedComputeUnits: number | undefined = 0;
+let logsTruncated = false;
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/block/123',
@@ -35,8 +37,9 @@ vi.mock('@entities/compute-unit', () => ({
     estimateRequestedComputeUnits: () => 0,
 }));
 
-vi.mock('@utils/program-logs', () => ({
-    parseProgramLogs: () => [{ computeUnits: 0, truncated: false }],
+vi.mock('@entities/program-logs', () => ({
+    getLoggedComputeUnits: () => loggedComputeUnits,
+    parseProgramLogs: () => ({ invocations: [], truncated: logsTruncated }),
 }));
 
 import { BlockHistoryCard } from '../BlockHistoryCard';
@@ -44,6 +47,8 @@ import { BlockHistoryCard } from '../BlockHistoryCard';
 describe('BlockHistoryCard filters', () => {
     beforeEach(() => {
         search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
+        loggedComputeUnits = 0;
+        logsTruncated = false;
     });
 
     it('should combine version, program, and account filters while preserving URL parameters', () => {
@@ -109,6 +114,63 @@ describe('BlockHistoryCard filters', () => {
         render(<BlockHistoryCard block={makeBlockWithUnavailable()} epoch={500n} />);
         expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
     });
+
+    it('should show the recorded compute units, not the sum of the logs', () => {
+        search = 'filter=all';
+        loggedComputeUnits = 276;
+        render(
+            <BlockHistoryCard
+                block={makeBlock([makeTransaction(0, 'recorded', 0, PROGRAM_A, null, 576n)])}
+                epoch={500n}
+            />,
+        );
+        expect(screen.getAllByText('576').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('276')).toHaveLength(0);
+    });
+
+    it('should show a recorded figure with no lower-bound mark when the logs are truncated', () => {
+        search = 'filter=all';
+        logsTruncated = true;
+        render(
+            <BlockHistoryCard
+                block={makeBlock([makeTransaction(0, 'recorded', 0, PROGRAM_A, null, 576n)])}
+                epoch={500n}
+            />,
+        );
+        expect(screen.getAllByText('576').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('>576')).toHaveLength(0);
+    });
+
+    it('should mark the sum of truncated logs as a lower bound', () => {
+        search = 'filter=all';
+        loggedComputeUnits = 276;
+        logsTruncated = true;
+        render(<BlockHistoryCard block={makeBlock([makeTransaction(0, 'logged', 0, PROGRAM_A)])} epoch={500n} />);
+        expect(screen.getAllByText('>276').length).toBeGreaterThan(0);
+    });
+
+    it('should show Unknown for a transaction with no figure when another transaction has one', () => {
+        search = 'filter=all';
+        loggedComputeUnits = undefined;
+        render(
+            <BlockHistoryCard
+                block={makeBlock([
+                    makeTransaction(0, 'recorded', 0, PROGRAM_A, null, 576n),
+                    makeTransaction(1, 'no-figure', 0, PROGRAM_A, { InstructionError: [0, { Custom: 1 }] }),
+                ])}
+                epoch={500n}
+            />,
+        );
+        expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Unknown').length).toBeGreaterThan(0);
+    });
+
+    it('should hide the CUs Consumed column when no transaction has a figure', () => {
+        search = 'filter=all&status=failed';
+        loggedComputeUnits = undefined;
+        render(<BlockHistoryCard block={makeMixedBlock()} epoch={500n} />);
+        expect(screen.queryAllByText('CUs Consumed')).toHaveLength(0);
+    });
 });
 
 function makeBlockWithUnavailable(): BlockData {
@@ -133,6 +195,7 @@ function makeTransaction(
     version: 'legacy' | 0,
     program: string,
     err: BlockTransactionMeta['err'] = null,
+    computeUnitsConsumed?: bigint,
 ) {
     return makeBlockTransaction({
         index,
@@ -141,7 +204,14 @@ function makeTransaction(
             staticAccounts: [address(program), address(ACCOUNT)],
             version,
         },
-        meta: { costUnits: 1n, err, fee: lamports(5_000n), innerInstructions: [], loadedAddresses: undefined },
+        meta: {
+            computeUnitsConsumed,
+            costUnits: 1n,
+            err,
+            fee: lamports(5_000n),
+            innerInstructions: [],
+            loadedAddresses: undefined,
+        },
         signatures: [transactionSignature as Signature],
     });
 }

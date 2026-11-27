@@ -93,12 +93,6 @@ describe('useSimulationInstructionNames', () => {
             expect(result.current.unresolvable).toBe(false);
         });
 
-        /**
-         * The whole list goes, not just the offending row. `formatInstructionLogs` pairs row `i` with
-         * `instructionLogs[i]`, so dropping one row shifts every later instruction onto another
-         * instruction's CU figure — a chart of confidently wrong numbers. The mixed case below is what
-         * distinguishes bailing from dropping; a single-instruction case passes either way.
-         */
         it('should discard every row when one program index is out of range', () => {
             const { result } = renderNames({
                 accountKeys: [TOKEN_PROGRAM, ComputeBudgetProgram.programId],
@@ -187,11 +181,6 @@ describe('useSimulationInstructionNames', () => {
             );
         });
 
-        /**
-         * One mount, two renders — the transition a pair of separate renderHook calls cannot cover. Row
-         * order and count must survive the IDL landing, and only the names may change: the CU chart pairs
-         * these rows with log entries by index.
-         */
         it('should fill in names across a rerender without disturbing row order', () => {
             const { result, rerender } = renderNames({
                 accountKeys: [TOKEN_PROGRAM, JUPITER_PROGRAM],

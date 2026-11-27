@@ -12,6 +12,7 @@ import {
     isBlockTransaction,
 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
+import { getLoggedComputeUnits, parseProgramLogs } from '@entities/program-logs';
 import {
     type HistoryStatus,
     isHistoryStatus,
@@ -27,7 +28,6 @@ import {
     type Signature as KitSignature,
     type TransactionVersion,
 } from '@solana/kit';
-import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
 import Link from 'next/link';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -101,7 +101,7 @@ type TransactionWithInvocations = {
     computeUnits?: number;
     costUnits?: bigint;
     reservedComputeUnits?: number;
-    logTruncated: boolean;
+    computeUnitsFromTruncatedLogs: boolean;
     unavailable: boolean;
     version?: TransactionVersion;
 };
@@ -144,9 +144,9 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
         const transactions: TransactionWithInvocations[] = block.transactions.map(entry => {
             if (!isBlockTransaction(entry)) {
                 return {
+                    computeUnitsFromTruncatedLogs: false,
                     index: entry.index,
                     invocations: new Map(),
-                    logTruncated: false,
                     meta: null,
                     unavailable: true,
                 };
@@ -180,16 +180,10 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                 invokedPrograms.set(programId, programTransactionCount + 1);
             });
 
-            let logTruncated = false;
-            let computeUnits: number | undefined = undefined;
-            try {
-                const parsedLogs = parseProgramLogs(tx.meta?.logMessages ?? [], tx.meta?.err ?? null, cluster);
-
-                logTruncated = parsedLogs[parsedLogs.length - 1].truncated;
-                computeUnits = parsedLogs.map(({ computeUnits }) => computeUnits).reduce((sum, next) => sum + next);
-            } catch (_err) {
-                // ignore parsing errors because some old logs aren't parsable
-            }
+            const logs = parseProgramLogs(tx.meta?.logMessages ?? []);
+            const recordedComputeUnits = tx.meta?.computeUnitsConsumed;
+            const computeUnits =
+                recordedComputeUnits === undefined ? getLoggedComputeUnits(logs) : Number(recordedComputeUnits);
 
             const costUnits = tx.meta?.costUnits;
 
@@ -198,10 +192,10 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
 
             return {
                 computeUnits,
+                computeUnitsFromTruncatedLogs: recordedComputeUnits === undefined && logs.truncated,
                 costUnits,
                 index: tx.index,
                 invocations,
-                logTruncated,
                 meta: tx.meta,
                 reservedComputeUnits,
                 signature,
@@ -241,7 +235,8 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                     (!tx.unavailable && (isFailed(tx) ? 'failed' : 'succeeded') === statusFilter),
             );
 
-        const showComputeUnits = filteredTxs.every(tx => tx.unavailable || tx.computeUnits !== undefined);
+        const showComputeUnits =
+            filteredTxs.every(tx => tx.unavailable) || filteredTxs.some(tx => tx.computeUnits !== undefined);
 
         return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
     }, [
@@ -496,7 +491,7 @@ function BlockHistoryGridRow({
     const signatureNode = tx.signature ? <Signature signature={tx.signature} link /> : '-';
     const feeNode = tx.meta !== null ? <SolBalance lamports={tx.meta.fee} /> : 'Unknown';
     const reserved = tx.reservedComputeUnits !== undefined ? numberFmt(tx.reservedComputeUnits) : 'Unknown';
-    const compute = `${tx.logTruncated ? '>' : ''}${tx.computeUnits !== undefined ? numberFmt(tx.computeUnits) : 'Unknown'}`;
+    const compute = `${tx.computeUnitsFromTruncatedLogs ? '>' : ''}${tx.computeUnits !== undefined ? numberFmt(tx.computeUnits) : 'Unknown'}`;
     const txnCost = tx.costUnits !== undefined ? numberFmt(tx.costUnits) : 'Unknown';
     const entries = Array.from(tx.invocations.entries());
     entries.sort();

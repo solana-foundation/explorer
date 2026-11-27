@@ -839,7 +839,6 @@ export default tseslint.config(
             'app/utils/cluster.ts',
             'app/utils/get-readable-title-from-address.ts',
             'app/utils/parseFeatureAccount.ts',
-            'app/utils/program-logs.ts',
             'app/utils/program-verification.tsx',
             'app/utils/verified-builds.tsx',
 
@@ -965,7 +964,6 @@ export default tseslint.config(
     {
         files: [
             // app/components (pre-FSD legacy)
-            'app/components/ProgramLogsCardBody.tsx',
             'app/components/account/AccountHeader.tsx',
             'app/components/account/AnchorAccountCard.tsx',
             'app/components/account/MetaplexNFTAttributesCard.tsx',

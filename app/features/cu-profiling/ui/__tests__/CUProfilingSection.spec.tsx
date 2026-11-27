@@ -5,15 +5,15 @@ import {
     type ParsedTransactionWithMeta,
     type PartiallyDecodedInstruction,
     PublicKey,
+    type TransactionError,
 } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Chart.js needs a canvas that jsdom does not have; the legend is plain DOM, which is where names show.
-const { Bar, useTransactionDetails, useProgramIdlNames, useEpochScheduleResult } = vi.hoisted(() => ({
+const { Bar, useTransactionDetails, useProgramIdlNames } = vi.hoisted(() => ({
     Bar: vi.fn(() => null),
-    useEpochScheduleResult: vi.fn(),
     useProgramIdlNames: vi.fn(),
     useTransactionDetails: vi.fn(),
 }));
@@ -23,29 +23,16 @@ vi.mock('@providers/transactions', () => ({ useTransactionDetails }));
 vi.mock('@entities/idl/@x/transaction-data', () => ({ useProgramIdlNames }));
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: Cluster.Mainnet, url: MAINNET_URL }),
-    useEpochScheduleResult,
 }));
-
-const EPOCH_SCHEDULE = { firstNormalEpoch: 0n, firstNormalSlot: 0n, slotsPerEpoch: 432000n };
-
-// The schedule has landed unless a test says otherwise.
-beforeEach(() =>
-    useEpochScheduleResult.mockReturnValue({
-        data: EPOCH_SCHEDULE,
-        error: undefined,
-        isLoading: false,
-    }),
-);
 
 import { CUProfilingSection } from '../CUProfilingSection';
 
 const BASE58_DECODER = getBase58Decoder();
 
 const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
-// A real mainnet slot. Slot 0 would be falsy and short-circuit the component's own guard.
-const SLOT = 438628608;
 const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const JUPITER_PROGRAM = new PublicKey('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4');
+const ZK_ELGAMAL_PROOF_PROGRAM = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
 
 afterEach(() => vi.clearAllMocks());
 
@@ -73,6 +60,35 @@ describe('CUProfilingSection', () => {
             expect(screen.getByText('#1 Set Compute Unit Price: 150')).toBeInTheDocument();
             expect(screen.getByText('#2 Transfer Checked: 105')).toBeInTheDocument();
         });
+    });
+
+    it('should show the fixed cost of an instruction that the RPC returned unparsed', () => {
+        mockTransaction([verifyZeroCiphertext()], [invocation(ZK_ELGAMAL_PROOF_PROGRAM)]);
+
+        renderSection();
+
+        expect(screen.getByText('#1 Verify Zero Ciphertext: 6,000')).toBeInTheDocument();
+    });
+
+    it('should show the fixed cost of a builtin with no log lines in a successful transaction', () => {
+        mockTransaction([transferChecked(), setComputeUnitPrice()], [invocation(TOKEN_PROGRAM, 105)]);
+
+        renderSection();
+
+        expect(screen.getByText('#2 Set Compute Unit Price: 150')).toBeInTheDocument();
+    });
+
+    it('should show an instruction after the one that failed as not executed', () => {
+        const token = TOKEN_PROGRAM.toBase58();
+        mockTransaction(
+            [transferChecked(), setComputeUnitPrice()],
+            [[`Program ${token} invoke [1]`, `Program ${token} failed: custom program error: 0x1`]],
+            { InstructionError: [0, { Custom: 1 }] },
+        );
+
+        renderSection();
+
+        expect(screen.getByText('#2 Set Compute Unit Price: Not executed')).toBeInTheDocument();
     });
 
     describe('names resolvable only from an IDL', () => {
@@ -133,63 +149,6 @@ describe('CUProfilingSection', () => {
             expect(container).toBeEmptyDOMElement();
         });
     });
-
-    /**
-     * The epoch schedule sets the CU reserve, so no schedule means no card. An empty card body is what
-     * the user would otherwise get with no explanation, and only the error tells "failed" apart from
-     * "still loading". `useEpochSchedule` returns undefined for both.
-     */
-    describe('when the epoch schedule cannot be loaded', () => {
-        beforeEach(() => {
-            useEpochScheduleResult.mockReturnValue({
-                data: undefined,
-                error: new Error('rpc unavailable'),
-                isLoading: false,
-            });
-        });
-
-        it('should say why CU profiling is unavailable instead of vanishing', () => {
-            mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
-
-            renderSection();
-
-            expect(screen.getByText('Unavailable: the epoch schedule could not be loaded.')).toBeInTheDocument();
-        });
-
-        // SWR keeps a cached value beside a later error.
-        it('should still render the chart when a cached schedule is available', () => {
-            useEpochScheduleResult.mockReturnValue({
-                data: EPOCH_SCHEDULE,
-                error: new Error('rpc unavailable'),
-                isLoading: false,
-            });
-            mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
-
-            renderSection();
-
-            expect(screen.getByText('#1 Transfer Checked: 105')).toBeInTheDocument();
-            expect(screen.queryByText('Unavailable: the epoch schedule could not be loaded.')).not.toBeInTheDocument();
-        });
-
-        // Still nothing to show when the transaction logged nothing: the section is not this user's
-        // concern at all, so the degraded card would be noise.
-        it('should still render nothing when the transaction has no logs', () => {
-            mockTransaction([transferChecked()], []);
-
-            const { container } = renderSection();
-
-            expect(container).toBeEmptyDOMElement();
-        });
-    });
-
-    it('should render nothing while the schedule is still loading', () => {
-        useEpochScheduleResult.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
-        mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
-
-        const { container } = renderSection();
-
-        expect(container).toBeEmptyDOMElement();
-    });
 });
 
 function renderSection() {
@@ -199,21 +158,16 @@ function renderSection() {
 function mockTransaction(
     instructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
     logLines: string[][],
+    err: TransactionError | null = null,
 ): void {
     useProgramIdlNames.mockReturnValue(new Map());
     const transactionWithMeta = {
-        meta: { computeUnitsConsumed: 405, err: null, logMessages: logLines.flat() },
-        slot: SLOT,
+        meta: { computeUnitsConsumed: 405, err, logMessages: logLines.flat() },
         transaction: { message: { accountKeys: [], instructions } },
     } as unknown as ParsedTransactionWithMeta;
     useTransactionDetails.mockReturnValue({ data: { transactionWithMeta } });
 }
 
-/**
- * The raw RPC log lines for one top-level invocation. `parseProgramLogs` reads these; passing the
- * rendered text it produces instead would leave every instruction at zero CU.
- * Compute Budget logs no "consumed" line, so omit the units to reproduce that.
- */
 function invocation(programId: PublicKey, computeUnits?: number): string[] {
     const id = programId.toBase58();
     return [
@@ -237,6 +191,10 @@ function setComputeUnitPrice(): PartiallyDecodedInstruction {
         data: BASE58_DECODER.decode(new Uint8Array([3, 0x90, 0x06, 0, 0, 0, 0, 0, 0])),
         programId: ComputeBudgetProgram.programId,
     };
+}
+
+function verifyZeroCiphertext(): PartiallyDecodedInstruction {
+    return { accounts: [], data: BASE58_DECODER.decode(new Uint8Array([1])), programId: ZK_ELGAMAL_PROOF_PROGRAM };
 }
 
 function jupiterRoute(): PartiallyDecodedInstruction {

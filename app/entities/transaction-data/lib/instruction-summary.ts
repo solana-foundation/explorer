@@ -9,7 +9,7 @@ import { is } from 'superstruct';
 import type { TransactionWithMeta } from '../model/types';
 import { findProgramName, UNKNOWN_PROGRAM_NAME } from './get-program-name';
 import { resolveMemoInstructionName } from './memo-name';
-import type { InstructionNames, InstructionSummary } from './types';
+import type { InstructionNames, InstructionSummary, NamedInstruction } from './types';
 
 const BASE58_ENCODER = getBase58Encoder();
 const COMPILED_MESSAGE_DECODER = getCompiledTransactionMessageDecoder();
@@ -76,6 +76,13 @@ export function resolveInstructionNames(ix: ParsedInstruction | PartiallyDecoded
     // Parsed but neither a typed instruction nor a memo — no raw data for a discriminator lookup, so
     // nothing can name it and there is no lookup to hand on either.
     return { name: undefined, programName };
+}
+
+export function toNamedInstruction(ix: ParsedInstruction | PartiallyDecodedInstruction): NamedInstruction {
+    if ('parsed' in ix) return { ...resolveInstructionNames(ix), data: undefined, programId: ix.programId };
+
+    const data = new Uint8Array(BASE58_ENCODER.encode(ix.data));
+    return { ...resolveNamesFromData({ data, programId: ix.programId }), data, programId: ix.programId };
 }
 
 /**
