@@ -37,6 +37,33 @@ describe('Next.js proxy', () => {
         expect(response.status).toBe(401);
     });
 
+    describe('public cluster custom URL', () => {
+        const DEVNET = encodeURIComponent('https://api.devnet.solana.com');
+        const MAINNET_BETA = encodeURIComponent('https://api.mainnet-beta.solana.com');
+
+        it.each([
+            [`/tx/abc?cluster=custom&customUrl=${DEVNET}&view=raw`, 'http://localhost/tx/abc?cluster=devnet&view=raw'],
+            [`/tx/abc?customUrl=${DEVNET}&cluster=custom`, 'http://localhost/tx/abc?cluster=devnet'],
+            [`/tx/abc?cluster=custom&customUrl=${MAINNET_BETA}&view=raw`, 'http://localhost/tx/abc?view=raw'],
+        ])('should redirect %s to %s with 308', async (path, location) => {
+            const response = await proxy(createRequest(path));
+
+            expect(response.status).toBe(308);
+            expect(response.headers.get('Location')).toBe(location);
+        });
+
+        it.each([
+            `/tx/abc?cluster=devnet&customUrl=${DEVNET}`,
+            `/tx/abc?cluster=custom&customUrl=${encodeURIComponent('http://localhost:8899')}`,
+        ])('should pass %s through untouched', async path => {
+            const response = await proxy(createRequest(path));
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('Location')).toBeNull();
+            expect(botIdMiddleware).not.toHaveBeenCalled();
+        });
+    });
+
     describe('sitemap gating', () => {
         afterEach(() => {
             vi.unstubAllEnvs();

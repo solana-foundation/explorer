@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
     Cluster,
+    clusterForPublicEndpoint,
     type ClusterSelection,
     clusterSelection,
     clusterUrl,
@@ -83,6 +84,27 @@ describe('clusterSelection', () => {
         // A literal that cannot parse describes a state the app can never reach, so it fails loudly
         // rather than resolving to something plausible.
         expect(() => clusterSelection(Cluster.Custom, 'localhost:8899')).toThrow();
+    });
+});
+
+describe('clusterForPublicEndpoint', () => {
+    it.each([
+        ['https://api.devnet.solana.com', Cluster.Devnet],
+        ['https://api.testnet.solana.com', Cluster.Testnet],
+        ['https://api.mainnet.solana.com', Cluster.Mainnet],
+        ['https://api.mainnet-beta.solana.com', Cluster.Mainnet],
+        ['https://api.devnet.solana.com/some/path', Cluster.Devnet],
+    ])('should map %s to its cluster', (url, cluster) => {
+        expect(clusterForPublicEndpoint(url)).toBe(cluster);
+    });
+
+    it.each([
+        'http://api.devnet.solana.com',
+        'https://rpc.example.com',
+        'https://explorer-api.devnet.solana.com',
+        'not a url',
+    ])('should not map %s to a cluster', url => {
+        expect(clusterForPublicEndpoint(url)).toBeUndefined();
     });
 });
 
