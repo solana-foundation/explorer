@@ -13,7 +13,7 @@ import { type ProgramIdlPair } from './types';
  * IDL names it.
  *
  * Undefined covers three cases: a non-anchor program, a program with no IDL, and a
- * program whose IDLs carry neither a metadata name nor a usable discriminator table.
+ * program whose IDLs give neither a program name nor a usable discriminator table.
  * @param url - The RPC URL to resolve against
  * @param programId - The program whose IDLs to read
  * @param backoffOptions - Retry configuration for handling RPC failures
@@ -35,5 +35,5 @@ export async function resolveProgramIdlNames(
         shouldRetry: backoffOptions.shouldRetry ?? isRetryableError,
     })) as ProgramIdlPair;
 
-    return buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl]);
+    return buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl], programId);
 }

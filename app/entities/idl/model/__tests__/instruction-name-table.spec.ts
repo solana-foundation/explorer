@@ -1,4 +1,6 @@
 import { type SupportedIdl } from '../../lib/types';
+import ammV3Legacy from '../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import ammV3Modern from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import codamaPmp from '../../mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import {
     buildInstructionNameResolver,
@@ -9,9 +11,11 @@ import {
     matchInstructionName,
 } from '../instruction-name-table';
 
+const VOTING_ADDRESS = 'AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye';
+
 // A resolved Anchor IDL (snake_case names + 8-byte discriminators), shaped like the on-chain Voting DApp.
 const anchorIdl = {
-    address: 'AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye',
+    address: VOTING_ADDRESS,
     instructions: [
         { accounts: [], args: [], discriminator: [193, 22, 99, 197, 18, 33, 115, 117], name: 'initialize_poll' },
         { accounts: [], args: [], discriminator: [227, 110, 155, 23, 136, 126, 172, 25], name: 'vote' },
@@ -138,7 +142,7 @@ describe('instruction-name-table', () => {
 
     describe('buildProgramIdlNames', () => {
         it('should bundle the program name with the instruction-name resolver', () => {
-            const names = buildProgramIdlNames([anchorIdl]);
+            const names = buildProgramIdlNames([anchorIdl], VOTING_ADDRESS);
             expect(names?.programName).toBe('Voting');
             expect(names?.resolveInstructionName?.(Uint8Array.from([227, 110, 155, 23, 136, 126, 172, 25]))).toBe(
                 'Vote',
@@ -150,14 +154,50 @@ describe('instruction-name-table', () => {
                 instructions: [],
                 metadata: { name: 'voting', spec: '0.1.0' },
             } as unknown as SupportedIdl;
-            const names = buildProgramIdlNames([nameOnly]);
+            const names = buildProgramIdlNames([nameOnly], VOTING_ADDRESS);
             expect(names?.programName).toBe('Voting');
             expect(names?.resolveInstructionName).toBeUndefined();
         });
 
         it('should return undefined when no IDL yields a name or a table', () => {
-            expect(buildProgramIdlNames([undefined, undefined])).toBeUndefined();
-            expect(buildProgramIdlNames([])).toBeUndefined();
+            expect(buildProgramIdlNames([undefined, undefined], VOTING_ADDRESS)).toBeUndefined();
+            expect(buildProgramIdlNames([], VOTING_ADDRESS)).toBeUndefined();
+        });
+
+        it('should name an instruction of a legacy Anchor IDL by the discriminator its modern IDL lists', () => {
+            const legacyIdl = { ...ammV3Legacy, metadata: null } as unknown as SupportedIdl;
+            const swapV2 = ammV3Modern.instructions.find(ix => ix.name === 'swap_v2');
+            const names = buildProgramIdlNames([undefined, legacyIdl], ammV3Modern.address);
+            expect(names?.programName).toBe('Amm V3');
+            expect(names?.resolveInstructionName?.(Uint8Array.from(swapV2?.discriminator ?? []))).toBe('Swap V2');
+        });
+
+        it('should keep the discriminators and the name of an IDL that has no metadata.spec', () => {
+            // The converter does not compute these bytes, so a converted IDL fails the lookup.
+            const listedDiscriminator = [1, 2, 3, 4, 5, 6, 7, 8];
+            const idlWithoutSpec = {
+                instructions: [{ accounts: [], args: [], discriminator: listedDiscriminator, name: 'vote' }],
+                metadata: { name: 'voting' },
+            } as unknown as SupportedIdl;
+            const names = buildProgramIdlNames([idlWithoutSpec], VOTING_ADDRESS);
+            expect(names?.programName).toBe('Voting');
+            expect(names?.resolveInstructionName?.(Uint8Array.from(listedDiscriminator))).toBe('Vote');
+        });
+
+        it('should keep the legacy form of an Anchor IDL that the converter rejects', () => {
+            const rejectedIdl = {
+                ...ammV3Legacy,
+                types: [
+                    {
+                        name: 'Pair',
+                        type: { fields: [{ name: 'pair', type: { tuple: ['u8', 'string'] } }], kind: 'struct' },
+                    },
+                ],
+            } as unknown as SupportedIdl;
+            expect(buildProgramIdlNames([rejectedIdl], ammV3Modern.address)).toEqual({
+                programName: 'Amm V3',
+                resolveInstructionName: undefined,
+            });
         });
     });
 });
