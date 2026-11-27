@@ -1,4 +1,4 @@
-import { nextjsParameters, withClipboardMock, withCluster } from '@storybook-config/decorators';
+import { withClipboardMock, withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { IdlCard } from '../IdlCard';
@@ -9,7 +9,6 @@ import { IdlCard } from '../IdlCard';
 const meta = {
     component: IdlCard,
     decorators: [withCluster, withClipboardMock],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/IdlCard',
 } satisfies Meta<typeof IdlCard>;

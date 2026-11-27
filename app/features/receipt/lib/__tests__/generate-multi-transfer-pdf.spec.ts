@@ -1,8 +1,3 @@
-import { vi } from 'vitest';
-
-import type { FormattedReceipt } from '../../types';
-import { generateMultiTransferPdf } from '../generate-multi-transfer-pdf';
-import { loadPdfDeps } from '../generate-receipt-pdf';
 import {
     buildMultiSolReceipt,
     collectTextFromMock as collectText,
@@ -19,11 +14,16 @@ import {
     SOL_RECEIPT as RECEIPT,
     stubSvgRasterizationUnsupported,
     SVG_RASTERIZATION_ERROR,
-} from './__fixtures__/pdf-mocks';
+} from '@features/receipt/__fixtures__/pdf-mocks';
+import { vi } from 'vitest';
+
+import type { FormattedReceipt } from '../../types';
+import { generateMultiTransferPdf } from '../generate-multi-transfer-pdf';
+import { loadPdfDeps } from '../generate-receipt-pdf';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
 vi.mock('qrcode', () => qrcodeModule);
-vi.mock('../pdf-fonts', async () => (await import('./__fixtures__/pdf-mocks')).pdfFontsModule);
+vi.mock('../pdf-fonts', async () => (await import('@features/receipt/__fixtures__/pdf-mocks')).pdfFontsModule);
 
 describe('generateMultiTransferPdf', () => {
     const mockOnError = vi.fn();

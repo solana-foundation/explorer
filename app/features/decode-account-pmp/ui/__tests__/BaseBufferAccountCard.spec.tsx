@@ -17,9 +17,7 @@ import { BaseBufferAccountCard } from '../BaseBufferAccountCard';
 
 // Both render address-shaped links that reach for the active cluster, which has no provider here. The rows under
 // test are the config enums, so stubbing them keeps this spec to the precedence question.
-vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: { toBase58(): string } }) => <div data-testid="address">{pubkey.toBase58()}</div>,
-}));
+vi.mock('@components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@components/common/Signature', () => ({
     Signature: ({ signature }: { signature: string }) => <span data-testid="signature">{signature}</span>,

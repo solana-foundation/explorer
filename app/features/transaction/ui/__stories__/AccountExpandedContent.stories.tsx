@@ -1,14 +1,13 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
-import React from 'react';
+import { withAccountsState, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
 import { FetchStatus } from '@/app/providers/cache';
-import { ClusterProvider } from '@/app/providers/cluster';
+import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
 import { AccountExpandedContent } from '../AccountExpandedContent';
 
@@ -22,10 +21,7 @@ const meta: Meta<typeof AccountExpandedContent> = {
         enabled: true,
     },
     component: AccountExpandedContent,
-    decorators: [withClusterAccountsAndTokenInfo],
-    parameters: {
-        ...nextjsParameters,
-    },
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/AccountExpandedContent',
 };
@@ -90,27 +86,15 @@ export const WithAccountSize: Story = {
         enabled: true,
     },
     decorators: [
-        Story => (
-            <ClusterProvider>
-                <MockAccountsProvider
-                    accounts={{
-                        [SIZED_ADDRESS]: {
-                            data: {
-                                data: {},
-                                executable: false,
-                                lamports: 1_000_000_000,
-                                owner: SystemProgram.programId,
-                                pubkey: new PublicKey(SIZED_ADDRESS),
-                                space: 1024,
-                            },
-                            status: FetchStatus.Fetched,
-                        },
-                    }}
-                >
-                    <Story />
-                </MockAccountsProvider>
-            </ClusterProvider>
-        ),
+        withAccountsState({
+            entries: {
+                [SIZED_ADDRESS]: {
+                    data: makeAccount({ pubkey: new PublicKey(SIZED_ADDRESS), space: 1024 }),
+                    status: FetchStatus.Fetched,
+                },
+            },
+            url: MAINNET_BETA_URL,
+        }),
     ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -125,27 +109,15 @@ export const EmptyAccount: Story = {
         enabled: true,
     },
     decorators: [
-        Story => (
-            <ClusterProvider>
-                <MockAccountsProvider
-                    accounts={{
-                        [SIZED_ADDRESS]: {
-                            data: {
-                                data: {},
-                                executable: false,
-                                lamports: 1_000_000_000,
-                                owner: SystemProgram.programId,
-                                pubkey: new PublicKey(SIZED_ADDRESS),
-                                space: 0,
-                            },
-                            status: FetchStatus.Fetched,
-                        },
-                    }}
-                >
-                    <Story />
-                </MockAccountsProvider>
-            </ClusterProvider>
-        ),
+        withAccountsState({
+            entries: {
+                [SIZED_ADDRESS]: {
+                    data: makeAccount({ pubkey: new PublicKey(SIZED_ADDRESS), space: 0 }),
+                    status: FetchStatus.Fetched,
+                },
+            },
+            url: MAINNET_BETA_URL,
+        }),
     ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

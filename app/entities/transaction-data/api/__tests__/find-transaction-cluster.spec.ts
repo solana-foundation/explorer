@@ -9,13 +9,7 @@ import { findTransactionCluster } from '../find-transaction-cluster';
 const mockSend = vi.fn();
 const mockGetSignatureStatuses = vi.fn(() => ({ send: mockSend }));
 
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return {
-        ...actual,
-        createSolanaRpc: vi.fn(() => ({ getSignatureStatuses: mockGetSignatureStatuses })),
-    };
-});
+vi.mocked(createSolanaRpc).mockImplementation(() => ({ getSignatureStatuses: mockGetSignatureStatuses }) as never);
 
 const SIGNATURE = gen.signature(1);
 

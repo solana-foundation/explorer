@@ -1,6 +1,5 @@
 import { gen } from '@__fixtures__/gen';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
-import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import {
     inspectorSurface,
     InstructionSurfaceProvider,
@@ -17,34 +16,24 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { readCell } from '@/app/__tests__/card-harness';
-import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
+import {
+    ammV3Instruction,
+    ammV3Program as program,
+    UPDATE_REWARD_INFOS_DISCRIMINATOR,
+} from '../../__fixtures__/anchor-programs';
 import { decodeAnchorInstruction } from '../../lib/decode-anchor-instruction';
 import { AnchorDetailsCard } from '../AnchorDetailsCard';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('@providers/transactions', async importOriginal => {
     const actual = await importOriginal<typeof import('@providers/transactions')>();
     return { ...actual, useTransactionDetails: vi.fn(actual.useTransactionDetails) };
 });
 
-const program = new Program(
-    anchor030Devi as Idl,
-    {
-        connection: { commitment: 'confirmed', rpcEndpoint: 'https://api.devnet.solana.com' },
-        opts: {},
-        wallet: { publicKey: PublicKey.default },
-    } as unknown as AnchorProvider,
-);
-
-const UPDATE_REWARD_INFOS_DISCRIMINATOR = [163, 172, 224, 52, 11, 154, 106, 223];
 const CONFIG_CHANGE_EVENT_DISCRIMINATOR = [247, 189, 7, 119, 106, 112, 95, 151];
 const CONFIG_CHANGE_EVENT = Buffer.from([...CONFIG_CHANGE_EVENT_DISCRIMINATOR, ...new Array(80).fill(0)]).toString(
     'base64',
@@ -61,7 +50,7 @@ describe('AnchorDetailsCard', () => {
         ['tx page', 0],
         ['inspector', 1],
     ] as const)('should draw the frame of the %s', (surface, collapseButtons) => {
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface });
 
         expect(screen.getByText('Amm V3: Update Reward Infos')).toBeInTheDocument();
         expect(screen.queryAllByRole('button', { name: 'Collapse' })).toHaveLength(collapseButtons);
@@ -70,7 +59,7 @@ describe('AnchorDetailsCard', () => {
     it.each(['tx page', 'inspector'] as const)(
         'should draw one Program row on the %s when the instruction decodes',
         surface => {
-            renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface });
+            renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface });
 
             expect(screen.getByText('Account Name')).toBeInTheDocument();
             expect(screen.getAllByText('Program')).toHaveLength(1);
@@ -81,7 +70,7 @@ describe('AnchorDetailsCard', () => {
     it.each(['tx page', 'inspector'] as const)(
         'should draw one Program row on the %s when the instruction does not decode',
         surface => {
-            renderCard(makeIx([0, 0, 0, 0, 0, 0, 0, 0]), { surface });
+            renderCard(ammV3Instruction([0, 0, 0, 0, 0, 0, 0, 0]), { surface });
 
             expect(readCell('Error')).toBe('Failed to decode account data according to the public Anchor interface');
             expect(screen.getAllByText('Program')).toHaveLength(1);
@@ -90,7 +79,7 @@ describe('AnchorDetailsCard', () => {
     );
 
     it.each(['tx page', 'inspector'] as const)('should pass the child index to the frame of the %s', surface => {
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 2, surface });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 2, surface });
 
         expect(screen.getByText('#1.3')).toBeInTheDocument();
     });
@@ -108,7 +97,7 @@ describe('AnchorDetailsCard', () => {
             [other, program.programId],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { index: 1, surface: 'tx page' });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { index: 1, surface: 'tx page' });
 
         expect(screen.getByText('Events')).toBeInTheDocument();
         expect(screen.getByText('Unknown Event')).toBeInTheDocument();
@@ -129,7 +118,7 @@ describe('AnchorDetailsCard', () => {
             [parent],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
 
         expect(screen.getByText('Config Change Event')).toBeInTheDocument();
         expect(screen.queryByText('Unknown Event')).not.toBeInTheDocument();
@@ -147,7 +136,7 @@ describe('AnchorDetailsCard', () => {
             ],
             [parent],
         );
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
         expect(screen.getByText('Field Name')).toBeInTheDocument();
 
         await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
@@ -170,7 +159,7 @@ describe('AnchorDetailsCard', () => {
             [parent],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
 
         expect(screen.getByText('#1.1 · event 1')).toBeInTheDocument();
     });
@@ -188,7 +177,7 @@ describe('AnchorDetailsCard', () => {
             [program.programId],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface: 'tx page' });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface: 'tx page' });
 
         expect(screen.getByText('Amm V3: Update Reward Infos')).toBeInTheDocument();
         expect(screen.queryByText('Events')).not.toBeInTheDocument();
@@ -204,7 +193,7 @@ describe('AnchorDetailsCard', () => {
             [program.programId],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface: 'tx page' });
+        renderCard(ammV3Instruction(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface: 'tx page' });
 
         expect(screen.getByText('Amm V3: Update Reward Infos')).toBeInTheDocument();
         expect(screen.queryByText('Events')).not.toBeInTheDocument();
@@ -216,14 +205,6 @@ function expectProgramLink() {
         'href',
         `/address/${program.programId.toBase58()}`,
     );
-}
-
-function makeIx(data: number[]) {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: [{ isSigner: false, isWritable: true, pubkey: gen.publicKey(1) }],
-        programId: program.programId,
-    });
 }
 
 function mockTransactionLogs(logMessages: string[], programIds: PublicKey[]) {

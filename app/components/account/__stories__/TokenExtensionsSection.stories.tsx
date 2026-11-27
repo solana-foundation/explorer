@@ -1,4 +1,4 @@
-import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { TokenExtension } from '@/app/validators/accounts/token-extension';
@@ -44,7 +44,6 @@ const sampleExtensions: TokenExtension[] = [
 const meta = {
     component: TokenExtensionsSection,
     decorators: [withClusterAndAccounts],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenExtensionsSection',
 } satisfies Meta<typeof TokenExtensionsSection>;

@@ -1,4 +1,4 @@
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
 
@@ -13,7 +13,6 @@ const MIGRATED: AlpenglowUpgrade = {
 const meta = {
     component: BaseAlpenglowCard,
     decorators: [withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Alpenglow/AlpenglowCard',
 } satisfies Meta<typeof BaseAlpenglowCard>;

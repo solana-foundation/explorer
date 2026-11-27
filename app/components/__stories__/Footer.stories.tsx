@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withCluster } from '../../../.storybook/decorators';
+import { withCluster } from '../../../.storybook/decorators';
 import { Footer } from '../Footer';
 
 const meta = {
     component: Footer,
     decorators: [withCluster],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Layout/Footer',
 } satisfies Meta<typeof Footer>;

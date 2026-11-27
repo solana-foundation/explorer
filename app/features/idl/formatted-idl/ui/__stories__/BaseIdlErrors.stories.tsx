@@ -4,13 +4,6 @@ import { BaseIdlErrors } from '../BaseIdlErrors';
 
 const meta = {
     component: BaseIdlErrors,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlErrors',
 } satisfies Meta<typeof BaseIdlErrors>;

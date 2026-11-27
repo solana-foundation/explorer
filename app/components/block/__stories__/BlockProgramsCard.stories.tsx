@@ -1,6 +1,6 @@
-import type { BlockData, BlockTransaction } from '@entities/block-data';
-import { address, blockhash, lamports } from '@solana/kit';
-import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import { makeBlock, makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
+import { address, lamports } from '@solana/kit';
+import { withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockProgramsCard } from '../BlockProgramsCard';
@@ -8,7 +8,6 @@ import { BlockProgramsCard } from '../BlockProgramsCard';
 const meta: Meta<typeof BlockProgramsCard> = {
     component: BlockProgramsCard,
     decorators: [withCluster, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockProgramsCard',
 };
@@ -29,52 +28,43 @@ const PROGRAM_IDS = [
 // appears in every (j+1)-th transaction, giving a descending usage distribution; every 5th tx is
 // marked failed (`err`) so Success Rate lands below 100%. All txs carry `meta`, so the Success Rate
 // column shows.
-function makeBlock(txCount: number): BlockData {
+function blockWithTransactions(txCount: number) {
     const keys = PROGRAM_IDS.map(address);
-    const transactions: BlockTransaction[] = Array.from({ length: txCount }, (_, k) => {
-        const instructions = PROGRAM_IDS.map((_, j) => j)
-            .filter(j => k % (j + 1) === 0)
-            .map(j => ({ programAddressIndex: j }));
-        return {
-            index: k,
-            message: {
-                header: {
-                    numReadonlyNonSignerAccounts: keys.length,
-                    numReadonlySignerAccounts: 0,
-                    numSignerAccounts: 0,
+    return makeBlock(
+        Array.from({ length: txCount }, (_, k) => {
+            const instructions = PROGRAM_IDS.map((_, j) => j)
+                .filter(j => k % (j + 1) === 0)
+                .map(j => ({ programAddressIndex: j }));
+            return makeBlockTransaction({
+                index: k,
+                message: {
+                    header: {
+                        numReadonlyNonSignerAccounts: keys.length,
+                        numReadonlySignerAccounts: 0,
+                        numSignerAccounts: 0,
+                    },
+                    instructions,
+                    staticAccounts: keys,
+                    version: 'legacy',
                 },
-                instructions,
-                lifetimeToken: blockhash('11111111111111111111111111111111'),
-                staticAccounts: keys,
-                version: 'legacy',
-            },
-            meta: {
-                err: k % 5 === 0 ? { InstructionError: [0, { Custom: 1 }] } : null,
-                fee: lamports(5_000n),
-                innerInstructions: [],
-                logMessages: [],
-            },
-            signatures: [],
-        };
-    });
-    return {
-        blockTime: null,
-        blockhash: blockhash('11111111111111111111111111111111'),
-        parentSlot: 0n,
-        previousBlockhash: blockhash('11111111111111111111111111111111'),
-        rewards: [],
-        transactions,
-    };
+                meta: {
+                    err: k % 5 === 0 ? { InstructionError: [0, { Custom: 1 }] } : null,
+                    fee: lamports(5_000n),
+                    innerInstructions: [],
+                },
+            });
+        }),
+    );
 }
 
 export const WithData: Story = {
     args: {
-        block: makeBlock(12),
+        block: blockWithTransactions(12),
     },
 };
 
 export const EmptyBlock: Story = {
     args: {
-        block: makeBlock(0),
+        block: blockWithTransactions(0),
     },
 };

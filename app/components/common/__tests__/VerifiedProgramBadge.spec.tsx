@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { makeProgramDataInfo } from '@entities/account/__fixtures__/account';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -21,11 +22,7 @@ vi.mock('@/app/utils/verified-builds', async importOriginal => ({
 import { useCluster } from '@/app/providers/cluster';
 import { useIsProgramVerified } from '@/app/utils/verified-builds';
 
-const mockProgramData = {
-    authority: new PublicKey('11111111111111111111111111111111'),
-    data: ['deadbeef', 'base64'] as [string, 'base64'],
-    slot: 123,
-};
+const mockProgramData = makeProgramDataInfo();
 const mockPubkey = new PublicKey('cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK');
 
 describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {

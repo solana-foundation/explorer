@@ -1,11 +1,9 @@
-import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
+import type { State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
-import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withAccountsState, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import React from 'react';
 
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
@@ -15,28 +13,10 @@ const LOOKUP_TABLE_KEY = new PublicKey('AddressLookupTab1e1111111111111111111111
 const RESOLVED_A = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const RESOLVED_B = new PublicKey('So11111111111111111111111111111111111111112');
 
-const noop = () => undefined;
-
 const createAccountsState = (entries: State['entries']): State => ({
     entries,
     url: MAINNET_BETA_URL,
 });
-
-function MockProvider({ children, state }: { children: React.ReactNode; state: State }) {
-    return (
-        <ClusterProvider>
-            <StateContext.Provider value={state}>
-                <DispatchContext.Provider value={noop}>
-                    <FetchersContext.Provider
-                        value={{ parsed: { fetch: noop }, raw: { fetch: noop }, skip: { fetch: noop } } as any}
-                    >
-                        {children}
-                    </FetchersContext.Provider>
-                </DispatchContext.Provider>
-            </StateContext.Provider>
-        </ClusterProvider>
-    );
-}
 
 const messageWithLookups = mockVersionedMessage({
     addressTableLookups: [
@@ -86,7 +66,6 @@ const resolvedState = createAccountsState({
 const meta = {
     component: AddressTableLookupsCard,
     decorators: [withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AddressTableLookupsCard',
 } satisfies Meta<typeof AddressTableLookupsCard>;
@@ -96,13 +75,7 @@ type Story = StoryObj<typeof meta>;
 
 export const WithResolvedAddresses: Story = {
     args: { message: messageWithLookups },
-    decorators: [
-        Story => (
-            <MockProvider state={resolvedState}>
-                <Story />
-            </MockProvider>
-        ),
-    ],
+    decorators: [withAccountsState(resolvedState)],
 };
 
 const messageNoLookups = mockVersionedMessage({
@@ -112,11 +85,5 @@ const messageNoLookups = mockVersionedMessage({
 
 export const Empty: Story = {
     args: { message: messageNoLookups },
-    decorators: [
-        Story => (
-            <MockProvider state={createAccountsState({})}>
-                <Story />
-            </MockProvider>
-        ),
-    ],
+    decorators: [withAccountsState(createAccountsState({}))],
 };

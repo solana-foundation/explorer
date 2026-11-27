@@ -1,22 +1,13 @@
-import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SimulatorCard } from '../SimulationCard';
+import * as Base from './SimulationCard.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const idleMessage = mockVersionedMessage({
-    serialize: () => new Uint8Array(),
-});
-
 const meta = {
     component: SimulatorCard,
-    decorators: [withViewportFromGlobal, withCluster],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
+    decorators: [withViewportFromGlobal, ...Base.default.decorators],
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SimulationCard@Media',
 } satisfies Meta<typeof SimulatorCard>;
@@ -24,10 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    message: idleMessage,
-    showTokenBalanceChanges: false,
-};
+const args = Base.Idle.args;
 
 export const Mobile: Story = {
     args,

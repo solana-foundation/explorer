@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
+import { makeAccount } from '@entities/account/__fixtures__/account';
 import { Account, FetchersContext, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -14,16 +14,6 @@ import { useAccountExpandedInfo } from '../use-account-expanded-info';
 import { useAccountQuery } from '../use-account-query';
 
 const TEST_ADDRESS = NATIVE_MINT_ADDRESS;
-
-function makeAccount(pubkey: string): Account {
-    return {
-        data: {},
-        executable: false,
-        lamports: 0,
-        owner: SystemProgram.programId,
-        pubkey: new PublicKey(pubkey),
-    };
-}
 
 function createWrapper(entries: Record<string, { status: FetchStatus; data?: Account }> = {}, fetchSpy = vi.fn()) {
     const state = { entries, url: MAINNET_BETA_URL };
@@ -65,7 +55,7 @@ describe('useAccountQuery', () => {
 
     it('should not trigger fetch when cache entry exists', () => {
         const { wrapper, fetchSpy } = createWrapper({
-            [TEST_ADDRESS]: { data: makeAccount(TEST_ADDRESS), status: FetchStatus.Fetched },
+            [TEST_ADDRESS]: { data: makeAccount(), status: FetchStatus.Fetched },
         });
         renderHook(() => useAccountQuery([TEST_ADDRESS], { select: selectLamports }), { wrapper });
 
@@ -73,8 +63,7 @@ describe('useAccountQuery', () => {
     });
 
     it('should return selected data when cache entry is fetched', () => {
-        const account = makeAccount(TEST_ADDRESS);
-        account.lamports = 42;
+        const account = makeAccount({ lamports: 42 });
         const { wrapper } = createWrapper({
             [TEST_ADDRESS]: { data: account, status: FetchStatus.Fetched },
         });
@@ -113,7 +102,7 @@ describe('useAccountQuery', () => {
     });
 
     it('should return undefined from select when data does not match', () => {
-        const account = makeAccount(TEST_ADDRESS);
+        const account = makeAccount();
         const { wrapper } = createWrapper({
             [TEST_ADDRESS]: { data: account, status: FetchStatus.Fetched },
         });
@@ -144,7 +133,7 @@ describe('useAccountExpandedInfo', () => {
     });
 
     it('should return the cached account itself', () => {
-        const account = makeAccount(TEST_ADDRESS);
+        const account = makeAccount();
         const { wrapper } = createWrapper({ [TEST_ADDRESS]: { data: account, status: FetchStatus.Fetched } });
         const { result } = renderHook(() => useAccountExpandedInfo(TEST_ADDRESS, true), { wrapper });
 

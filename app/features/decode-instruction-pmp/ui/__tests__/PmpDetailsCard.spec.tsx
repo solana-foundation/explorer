@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { InstructionNodeCard } from '@components/instruction/InstructionNodeCard';
 import {
     inspectorSurface,
@@ -35,11 +36,7 @@ vi.mock('../../lib/decode-pmp-instruction', async importOriginal => {
     return { decodePmpContentInstruction: vi.fn(actual.decodePmpContentInstruction) };
 });
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
-        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@/app/components/common/Copyable', () => ({
     Copyable: ({ children }: { children: React.ReactNode }) => <div data-testid="copyable">{children}</div>,
@@ -51,13 +48,7 @@ const FOREIGN_BUFFER = gen.publicKey(1);
 const METADATA_PDA = gen.publicKey(2);
 const DOC = '{"name":"company","version":"1.0.0"}';
 
-function makeIx(data: Uint8Array, accounts: PublicKey[]): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: accounts.map(pubkey => ({ isSigner: false, isWritable: true, pubkey })),
-        programId: PMP,
-    });
-}
+const makeIx = (data: Uint8Array, keys: PublicKey[]) => makeInstruction({ data, keys, programId: PMP, writable: true });
 
 const SURFACE: InstructionSurface = {
     ...inspectorSurface({ Card: InstructionNodeCard, instructionData: () => undefined }),

@@ -17,8 +17,7 @@ const getBlocks = vi.fn();
 const getBlockTime = vi.fn();
 const getRpc = vi.fn((_url: string) => rpcStub({ getBlockTime, getBlocks }));
 
-vi.mock('@entities/cluster', async importOriginal => ({
-    ...((await importOriginal()) as Record<string, unknown>),
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({
     getRpc: (...args: [string]) => getRpc(...args),
 }));
 

@@ -3,8 +3,6 @@ import { AccountRole, type Address, address } from '@solana/kit';
 import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
-
 import { Logger } from '@/app/shared/lib/logger';
 
 import { bpfLoaderInstructionParser } from '../bpf-loader-client';

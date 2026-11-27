@@ -1,14 +1,10 @@
-import { ClusterProvider } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { BigNumber } from 'bignumber.js';
-import React from 'react';
 
 import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS, RECIPIENT, TOKEN_MINT } from '../__fixtures__/transaction';
-import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
+import { withTransaction } from '../__fixtures__/withTransactionProviders';
 import { TokenBalancesCard, TokenBalancesCardInner } from '../TokenBalancesCard';
 
 const metaConnected: Meta<typeof TokenBalancesCard> = {
@@ -16,9 +12,6 @@ const metaConnected: Meta<typeof TokenBalancesCard> = {
         signature: DEFAULT_SIGNATURE,
     },
     component: TokenBalancesCard,
-    parameters: {
-        ...nextjsParameters,
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/TokenBalancesCard',
 };
@@ -27,32 +20,11 @@ export default metaConnected;
 type Story = StoryObj<typeof metaConnected>;
 
 export const WithTokenBalances: Story = {
-    decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-                { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-            );
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
-    ],
+    decorators: [withTransaction({ [DEFAULT_SIGNATURE]: MOCK_PARSED_TX }, { [DEFAULT_SIGNATURE]: MOCK_STATUS })],
 };
 
 export const NoBalanceChanges: Story = {
-    decorators: [
-        Story => {
-            const Wrapper = withTransactionProviders({}, {});
-            return (
-                <Wrapper>
-                    <Story />
-                </Wrapper>
-            );
-        },
-    ],
+    decorators: [withTransaction({}, {})],
 };
 
 const SAMPLE_ROWS = [
@@ -78,43 +50,22 @@ export const Inner_MultipleRows: StoryObj<typeof TokenBalancesCardInner> = {
     args: {
         rows: SAMPLE_ROWS,
     },
-    render: args => (
-        <ClusterProvider>
-            <MockTokenInfoBatchProvider>
-                <MockAccountsProvider>
-                    <TokenBalancesCardInner {...args} />
-                </MockAccountsProvider>
-            </MockTokenInfoBatchProvider>
-        </ClusterProvider>
-    ),
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    render: args => <TokenBalancesCardInner {...args} />,
 };
 
 export const Inner_PositiveDelta: StoryObj<typeof TokenBalancesCardInner> = {
     args: {
         rows: [SAMPLE_ROWS[0]],
     },
-    render: args => (
-        <ClusterProvider>
-            <MockTokenInfoBatchProvider>
-                <MockAccountsProvider>
-                    <TokenBalancesCardInner {...args} />
-                </MockAccountsProvider>
-            </MockTokenInfoBatchProvider>
-        </ClusterProvider>
-    ),
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    render: args => <TokenBalancesCardInner {...args} />,
 };
 
 export const Inner_NegativeDelta: StoryObj<typeof TokenBalancesCardInner> = {
     args: {
         rows: [SAMPLE_ROWS[1]],
     },
-    render: args => (
-        <ClusterProvider>
-            <MockTokenInfoBatchProvider>
-                <MockAccountsProvider>
-                    <TokenBalancesCardInner {...args} />
-                </MockAccountsProvider>
-            </MockTokenInfoBatchProvider>
-        </ClusterProvider>
-    ),
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    render: args => <TokenBalancesCardInner {...args} />,
 };

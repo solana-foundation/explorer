@@ -1,5 +1,5 @@
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withCluster } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { Navbar } from '../Navbar';
@@ -9,9 +9,7 @@ const meta = {
     component: Navbar,
     decorators: [withCluster, withViewportFromGlobal],
     parameters: {
-        ...nextjsParameters,
         docs: { story: { height: '120px' } },
-        viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
     title: 'Components/Navbar@Media',

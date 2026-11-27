@@ -1,6 +1,5 @@
 import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
-    nextjsParameters,
     withCluster,
     withClusterAndAccounts,
     withScrollAnchor,
@@ -20,7 +19,6 @@ const meta = {
     args: { collapsible: false, rawSource: { kind: 'none' }, result: { err: null }, validateProgram: false },
     component: BaseInstructionCard,
     decorators: [withCluster, withScrollAnchor, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Entities/Instruction Card/BaseInstructionCard',
 } satisfies Meta<typeof BaseInstructionCard>;

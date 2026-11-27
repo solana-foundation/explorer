@@ -1,15 +1,12 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlErrors } from '../BaseIdlErrors';
+import * as Base from './BaseIdlErrors.stories';
 
 const meta: Meta<typeof BaseIdlErrors> = {
     component: BaseIdlErrors,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        nextjs: { appDirectory: true },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlErrors@Media',
 };
@@ -17,20 +14,7 @@ const meta: Meta<typeof BaseIdlErrors> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    data: [
-        {
-            code: '100',
-            message: 'The provided owner is not valid for this operation',
-            name: 'InvalidOwner',
-        },
-        {
-            code: '101',
-            message: 'The account has insufficient funds for this operation',
-            name: 'InsufficientFunds',
-        },
-    ],
-};
+const args = Base.BasicErrors.args;
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

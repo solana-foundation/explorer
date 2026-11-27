@@ -1,7 +1,3 @@
-import type { Meta, StoryObj } from '@storybook-config/types';
-import { expect, fn, userEvent, within } from 'storybook/test';
-
-import { ReceiptView } from '../ReceiptView';
 import {
     defaultReceipt,
     forBaseReceipt,
@@ -11,7 +7,11 @@ import {
     receiptTokenTransfer,
     receiptWithDomains,
     receiptWithMemo,
-} from './receipt-fixtures';
+} from '@features/receipt/__fixtures__/receipts';
+import type { Meta, StoryObj } from '@storybook-config/types';
+import { expect, fn, userEvent, within } from 'storybook/test';
+
+import { ReceiptView } from '../ReceiptView';
 
 const meta: Meta<typeof ReceiptView> = {
     args: {

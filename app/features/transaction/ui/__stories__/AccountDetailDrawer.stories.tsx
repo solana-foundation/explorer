@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { ParsedMessage, ParsedMessageAccount, PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { expect, fn, within } from 'storybook/test';
 
 import { AccountDetailDrawer } from '../AccountDetailDrawer';
@@ -31,9 +31,8 @@ const meta: Meta<typeof AccountDetailDrawer> = {
         open: true,
     },
     component: AccountDetailDrawer,
-    decorators: [withClusterAccountsAndTokenInfo],
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: {
-        ...nextjsParameters,
         // Render at mobile viewport to match intended use case
         viewport: { defaultViewport: 'mobile1' },
     },

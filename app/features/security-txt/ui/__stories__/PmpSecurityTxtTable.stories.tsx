@@ -5,13 +5,6 @@ import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';
 
 const meta = {
     component: PmpSecurityTxtTable,
-    decorators: [
-        Story => (
-            <div>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         backgrounds: {
             default: 'Card',
@@ -20,9 +13,6 @@ const meta = {
             description: {
                 story: 'Render security.txt from Program Metadata',
             },
-        },
-        nextjs: {
-            appDirectory: true,
         },
     },
     tags: ['autodocs', 'test'],

@@ -6,15 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const FILTER_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(() => '/address/x/tokens'),
-    // Selected filter = FILTER_MINT so the toggle button renders that mint's label (the exact regression surface).
-    useSearchParams: vi.fn(() => ({
-        get: vi.fn((k: string) => (k === 'filter' ? FILTER_MINT : null)),
-        has: vi.fn(),
-        toString: () => `filter=${FILTER_MINT}`,
-    })),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const { useClusterMock } = vi.hoisted(() => ({ useClusterMock: vi.fn() }));
 vi.mock('@providers/cluster', async importOriginal => {

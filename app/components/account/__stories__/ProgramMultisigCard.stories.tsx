@@ -1,9 +1,9 @@
+import { makeProgramAccountData, makeProgramDataInfo } from '@entities/account/__fixtures__/account';
 import { PublicKey } from '@solana/web3.js';
 import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { SWRConfig, unstable_serialize } from 'swr';
 
-import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
@@ -37,17 +37,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        data: {
-            parsed: {
-                info: { programData: PublicKey.default },
-                type: 'program',
-            },
-            program: 'bpf-upgradeable-loader',
-            programData: {
-                authority: PublicKey.default,
-                data: ['', 'base64'],
-                slot: 312_000_000,
-            },
-        } satisfies UpgradeableLoaderAccountData,
+        data: makeProgramAccountData(makeProgramDataInfo()),
     },
 };

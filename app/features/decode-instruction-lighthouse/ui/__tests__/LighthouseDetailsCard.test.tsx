@@ -17,11 +17,7 @@ import { LIGHTHOUSE_ADDRESS } from '../../lib/constants';
 import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
-vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey, fallbackText }: { pubkey: PublicKey; fallbackText?: string }) => (
-        <div data-testid="address">{fallbackText ?? pubkey.toBase58()}</div>
-    ),
-}));
+vi.mock('@/app/components/common/Address', () => import('@/app/__tests__/address-stub'));
 
 vi.mock('@/app/components/common/Copyable', () => ({
     Copyable: ({ text, children }: { text: string; children: React.ReactNode }) => (

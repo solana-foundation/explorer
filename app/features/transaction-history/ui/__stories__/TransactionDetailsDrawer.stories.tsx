@@ -1,5 +1,4 @@
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
@@ -40,7 +39,6 @@ const meta = {
     component: TransactionDetailsDrawer,
     decorators: [withCluster],
     parameters: {
-        ...nextjsParameters,
         viewport: { defaultViewport: 'mobile1' },
     },
     tags: ['autodocs', 'test'],

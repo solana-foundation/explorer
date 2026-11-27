@@ -19,9 +19,6 @@ const meta = {
             },
         },
         layout: 'fullscreen', // NicknameEditor renders as a position:fixed overlay; fullscreen removes the canvas padding so it anchors to the iframe viewport.
-        nextjs: {
-            appDirectory: true,
-        },
     },
     tags: ['autodocs', 'test'],
     title: 'Features/Nicknames/NicknameEditor',

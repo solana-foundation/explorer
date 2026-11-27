@@ -1,14 +1,16 @@
 // @vitest-environment jsdom
 
-import { buildFormattedReceipt } from '@entities/token-receipt/__fixtures__/formatted-receipt';
+import { DEFAULT_SIGNATURE as SIGNATURE } from '@__fixtures__/gen';
+import {
+    buildFormattedReceipt,
+    buildFormattedTokenReceipt,
+} from '@entities/token-receipt/__fixtures__/formatted-receipt';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FormattedReceipt } from '../../types';
 import { buildReceiptCsvRows, generateReceiptCsv } from '../generate-receipt-csv';
 
 const RECEIPT = buildFormattedReceipt();
-
-const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
 
 describe('buildReceiptCsvRows', () => {
     it('should include all expected fields in correct column order', () => {
@@ -34,14 +36,7 @@ describe('buildReceiptCsvRows', () => {
     });
 
     it('should include mint address for token receipts', () => {
-        const tokenReceipt: FormattedReceipt = {
-            ...RECEIPT,
-            kind: 'token',
-            mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-            symbol: 'USDC',
-            total: { formatted: '143.25', raw: 143.25, unit: 'USDC' },
-        };
-        const [row] = buildReceiptCsvRows(tokenReceipt, SIGNATURE);
+        const [row] = buildReceiptCsvRows(buildFormattedTokenReceipt(), SIGNATURE);
         expect(row[6]).toBe('USDC');
         expect(row[7]).toBe('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
     });
@@ -59,13 +54,10 @@ describe('buildReceiptCsvRows', () => {
     });
 
     it('should sanitize token symbol with formula-injection prefix', () => {
-        const receipt: FormattedReceipt = {
-            ...RECEIPT,
-            kind: 'token',
-            mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+        const receipt = buildFormattedTokenReceipt({
             symbol: '=EVIL',
             total: { formatted: '100', raw: 100, unit: '=EVIL' },
-        };
+        });
         const [row] = buildReceiptCsvRows(receipt, SIGNATURE);
         expect(row[6]).toBe("'=EVIL");
     });

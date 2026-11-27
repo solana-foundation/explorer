@@ -1,16 +1,9 @@
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-    nextjsParameters,
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { invariant } from '@/app/shared/lib/invariant';
@@ -25,15 +18,8 @@ const NEW_ORDER_V3_DATA =
 const dispatcher = createInstructionParserDispatcher(serumInstructionParsers);
 
 function storyArgs(data: Buffer, keyCount: number) {
-    const raw = new TransactionInstruction({
-        data,
-        keys: Array.from({ length: keyCount }, (_, i) => ({
-            isSigner: false,
-            isWritable: false,
-            pubkey: gen.publicKey(i),
-        })),
-        programId: new PublicKey(OPEN_BOOK_PROGRAM_IDS.mainnet),
-    });
+    const keys = Array.from({ length: keyCount }, (_, i) => gen.publicKey(i));
+    const raw = makeInstruction({ data, keys, programId: OPEN_BOOK_PROGRAM_IDS.mainnet });
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     invariant(dispatched, 'the OpenBook program id is registered');
     return {
@@ -42,13 +28,12 @@ function storyArgs(data: Buffer, keyCount: number) {
     };
 }
 
-const meta: Meta<typeof SerumDetailsCard> = {
+const meta = {
     component: SerumDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionProgramSerum/SerumDetailsCard',
-};
+} satisfies Meta<typeof SerumDetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

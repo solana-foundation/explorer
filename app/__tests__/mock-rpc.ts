@@ -72,6 +72,16 @@ export function rpcStub(methods: Record<string, Mock>) {
     );
 }
 
+/** Like `rpcStub`, but each `send()` resolves to `{ value }`, the envelope of kit's account reads. */
+export function rpcValueStub(methods: Record<string, Mock>) {
+    return Object.fromEntries(
+        Object.entries(methods).map(([name, method]) => [
+            name,
+            (...args: unknown[]) => ({ send: async () => ({ value: await method(...args) }) }),
+        ]),
+    );
+}
+
 /** Returns the update a mocked cache dispatch received last. */
 export function lastDispatch<T>(dispatch: Mock<Dispatch<T>>): Update<T> {
     const action = dispatch.mock.lastCall?.[0];

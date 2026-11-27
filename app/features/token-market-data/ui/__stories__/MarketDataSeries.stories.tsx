@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { MarketData } from '../MarketData';
+import * as Base from './MarketData.stories';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
@@ -16,28 +17,7 @@ type Story = StoryObj<typeof meta>;
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
-        data: [
-            {
-                label: 'Market Cap',
-                lastUpdatedAt: new Date(),
-                value: {
-                    volume: 58_800_000_000,
-                },
-            },
-            {
-                label: '24 Hour Volume',
-                value: { volume: 3_600_000_000 },
-            },
-            {
-                label: 'Price',
-                rank: 1,
-                value: {
-                    precision: 6,
-                    price: 0.999887,
-                    trend: 0.1,
-                },
-            },
-        ],
+        data: [Base.MarketCap.args, Base.Volume.args, Base.PriceUpTrend.args],
     },
     async play({ canvasElement }) {
         const canvas = within(canvasElement);

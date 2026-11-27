@@ -1,25 +1,13 @@
-import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
-import { nextjsParameters, withHistory } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withHistory } from '@storybook-config/decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenTransfersCard } from '../TokenTransfersCard';
-
-const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+import * as Base from './TokenTransfersCard.stories';
 
 const meta: Meta<typeof TokenTransfersCard> = {
     component: TokenTransfersCard,
     decorators: [withHistory, withViewportFromGlobal],
-    parameters: {
-        ...nextjsParameters,
-        history: {
-            [ADDRESS]: mockAccountHistory({
-                fetched: [mockConfirmedSignatureInfo({ blockTime: null, slot: 312_456_789 })],
-                foundOldest: true,
-            }),
-        },
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Account/History/TokenTransfersCard@Media',
 };
@@ -27,8 +15,8 @@ const meta: Meta<typeof TokenTransfersCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { address: ADDRESS };
+const { args, parameters } = Base.WithSignatures;
 
-export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
-export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };
-export const TabletLandscape: Story = { args, globals: { viewport: { isRotated: true, value: 'ipad' } } };
+export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } }, parameters };
+export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } }, parameters };
+export const TabletLandscape: Story = { args, globals: { viewport: { isRotated: true, value: 'ipad' } }, parameters };

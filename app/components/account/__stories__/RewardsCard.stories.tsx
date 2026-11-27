@@ -1,7 +1,7 @@
 import { DispatchContext as RewardsDispatch, StateContext as RewardsStateCtx } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import { withClusterAndAccounts } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
@@ -55,7 +55,6 @@ const withRewards: Decorator = Story => (
 const meta = {
     component: RewardsCard,
     decorators: [withClusterAndAccounts],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/RewardsCard',
 } satisfies Meta<typeof RewardsCard>;

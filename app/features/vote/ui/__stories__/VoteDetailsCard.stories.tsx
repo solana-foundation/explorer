@@ -1,11 +1,5 @@
 import { toInstructionNode } from '@entities/instruction-card';
-import {
-    nextjsParameters,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
@@ -24,8 +18,7 @@ import {
 
 const meta = {
     component: VoteDetailsCard,
-    decorators: [withTxInstructionSurface, withMockTransactions, withScrollAnchor, withTokenInfoBatch],
-    parameters: nextjsParameters,
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard',
 } satisfies Meta<typeof VoteDetailsCard>;

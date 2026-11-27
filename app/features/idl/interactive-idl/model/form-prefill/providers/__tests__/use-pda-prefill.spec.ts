@@ -4,8 +4,7 @@ import type { SupportedIdl } from '@entities/idl';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import votingIdl030 from '../../../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
-import votingIdl030Variations from '../../../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
+import votingIdl030 from '../../../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import { findInstruction } from '../../../__tests__/utils';
 import type { PdaGenerationResult } from '../../../pda-generator/types';
 import { usePdaPrefill } from '../use-pda-prefill';
@@ -99,7 +98,7 @@ describe('usePdaPrefill', () => {
     });
 
     it('should handle nested PDA accounts', () => {
-        const { createForm, mockInstruction } = setup(votingIdl030Variations, 'instruction_with_nested');
+        const { createForm, mockInstruction } = setup(votingIdl030, 'instruction_with_nested');
         const { form, fieldNames } = createForm();
 
         renderHook(() =>
@@ -118,7 +117,7 @@ describe('usePdaPrefill', () => {
     });
 
     it('should not fill non-PDA accounts', () => {
-        const { createForm, mockInstruction } = setup(votingIdl030Variations, 'instruction_with_non_pda');
+        const { createForm, mockInstruction } = setup(votingIdl030, 'instruction_with_non_pda');
         const { form, fieldNames } = createForm();
 
         const setValueSpy = vi.spyOn(form, 'setValue');

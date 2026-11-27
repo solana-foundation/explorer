@@ -1,4 +1,4 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { LoadingCard } from '../LoadingCard';
@@ -7,9 +7,6 @@ import { LoadingCard } from '../LoadingCard';
 const meta: Meta<typeof LoadingCard> = {
     component: LoadingCard,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Components/Common/LoadingCard@Media',
 };

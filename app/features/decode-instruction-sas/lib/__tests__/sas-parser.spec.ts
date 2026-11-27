@@ -1,6 +1,7 @@
+import { makeInstruction } from '@__fixtures__/instruction';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { AccountRole, type Address, address } from '@solana/kit';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { solanaAttestationInstructionParser } from '../sas-client';
@@ -74,9 +75,6 @@ describe('solanaAttestationInstructionParser', () => {
 });
 
 function transactionInstruction(data: Uint8Array, accounts: Address[]) {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: accounts.map(account => ({ isSigner: false, isWritable: false, pubkey: new PublicKey(account) })),
-        programId: new PublicKey(SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS),
-    });
+    const keys = accounts.map(account => new PublicKey(account));
+    return makeInstruction({ data, keys, programId: SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS });
 }

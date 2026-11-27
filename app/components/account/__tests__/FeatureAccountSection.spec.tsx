@@ -14,9 +14,7 @@ import { FEATURE_PROGRAM_ID } from '@/app/utils/parseFeatureAccount';
 
 const { refreshAccount } = vi.hoisted(() => ({ refreshAccount: vi.fn() }));
 
-vi.mock('next/navigation', () => ({
-    useSearchParams: vi.fn(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('@/app/providers/cluster', () => ({
     EPOCH_INFO_REFRESH_MS: 30_000,

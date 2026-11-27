@@ -1,18 +1,13 @@
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
-import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VoteAccountSection } from '../VoteAccountSection';
-import { accountFixture, BASE_SLOT, voteAccountV4Fixture } from './fixtures';
+import * as Base from './VoteAccountSection.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta = {
     component: VoteAccountSection,
-    decorators: [withMockRpc, withViewportFromGlobal, withClusterAndAccounts, withTokenInfoBatch],
-    parameters: {
-        ...nextjsParameters,
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
+    decorators: [withViewportFromGlobal, ...Base.default.decorators],
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteAccountSection@Media',
 } satisfies Meta<typeof VoteAccountSection>;
@@ -20,10 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    account: accountFixture(),
-    voteAccount: voteAccountV4Fixture([{ confirmationCount: 31, slot: BASE_SLOT }]),
-};
+const args = Base.V4.args;
 
 export const Mobile: Story = {
     args,

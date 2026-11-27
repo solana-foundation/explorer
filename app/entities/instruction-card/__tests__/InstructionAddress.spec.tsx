@@ -9,11 +9,7 @@ import { address as addressField } from '../model/fields';
 import { InstructionAddress } from '../ui/InstructionAddress';
 import { InstructionFieldRows } from '../ui/InstructionFields';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(() => '/'),
-    useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('@entities/token-info', () => ({
     useTokenInfo: (fetch: boolean | undefined) => (fetch ? { name: 'USD Coin', symbol: 'USDC' } : undefined),

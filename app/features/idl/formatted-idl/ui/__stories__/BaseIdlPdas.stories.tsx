@@ -4,11 +4,6 @@ import { BaseIdlPdas } from '../BaseIdlPdas';
 
 const meta = {
     component: BaseIdlPdas,
-    parameters: {
-        nextjs: {
-            appDirectory: true,
-        },
-    },
     tags: ['autodocs', 'test'],
     title: 'Features/IDL/Formatted IDL/BaseIdlPdas',
 } satisfies Meta<typeof BaseIdlPdas>;

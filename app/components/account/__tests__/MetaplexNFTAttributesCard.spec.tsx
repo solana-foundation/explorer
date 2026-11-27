@@ -6,7 +6,7 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MetaplexNFTAttributesCard } from '@/app/components/account/MetaplexNFTAttributesCard';
-import { makeMetadata } from '@/app/entities/nft/lib/__tests__/make-nft-data';
+import { makeMetadata } from '@/app/entities/nft/__fixtures__/make-nft-data';
 import type { Account, TokenProgramData } from '@/app/providers/accounts';
 
 vi.mock('@/app/providers/cluster', () => ({

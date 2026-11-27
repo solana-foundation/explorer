@@ -1,5 +1,4 @@
 import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
 
@@ -10,7 +9,6 @@ const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
 
 const meta: Meta<typeof BaseSimulatorCUProfilingCard> = {
     component: BaseSimulatorCUProfilingCard,
-    parameters: { ...nextjsParameters },
     tags: ['autodocs', 'test'],
     // TODO(dashkit): rename to match BaseSimulatorCUProfilingCard once the Dashkit migration lands. Kept
     // as-is so the Storybook tree does not churn mid-migration.

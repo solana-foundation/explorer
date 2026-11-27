@@ -1,3 +1,4 @@
+import { makeAccount, makeProgramAccountData } from '@entities/account/__fixtures__/account';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -7,7 +8,7 @@ import { AccountHeader } from '@/app/components/account/AccountHeader';
 import { accountBytes, MAINNET_NFTS, nftokenAccount } from '@/app/features/nftoken/__tests__/fixtures';
 import { useSecurityTxt } from '@/app/features/security-txt';
 import { createNeodymeSecurityTxt, createPmpSecurityTxt } from '@/app/features/security-txt/ui/__tests__/helpers';
-import type { Account, UpgradeableLoaderAccountData } from '@/app/providers/accounts';
+import type { Account, AccountData } from '@/app/providers/accounts';
 import { Cluster } from '@/app/utils/cluster';
 import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 
@@ -131,14 +132,11 @@ describe('AccountHeader', () => {
 
         it('should render the "Stake Account" title instead of the generic "Account" fallback', () => {
             const stakeAddress = '5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo';
-            const account = {
-                data: { parsed: { parsed: { type: 'delegated' }, program: 'stake' } },
-                executable: false,
-                lamports: 100,
-                owner: PublicKey.default,
+            const account = makeAccount({
+                data: { parsed: { parsed: { type: 'delegated' }, program: 'stake' } } as unknown as AccountData,
                 pubkey: new PublicKey(stakeAddress),
                 space: 200,
-            } as unknown as Account;
+            });
 
             render(<AccountHeader address={stakeAddress} account={account} tokenInfo={undefined} isTokenInfoLoading />);
 
@@ -181,24 +179,10 @@ function renderHeader(address: string) {
 }
 
 function programAccount(address: string): Account {
-    const parsedData: UpgradeableLoaderAccountData = {
-        parsed: {
-            info: {
-                programData: PublicKey.default,
-            },
-            type: 'program',
-        },
-        program: 'bpf-upgradeable-loader',
-    };
-
-    return {
-        data: {
-            parsed: parsedData,
-        },
+    return makeAccount({
+        data: { parsed: makeProgramAccountData() },
         executable: true,
-        lamports: 0,
-        owner: PublicKey.default,
         pubkey: new PublicKey(address),
         space: 0,
-    };
+    });
 }

@@ -11,9 +11,6 @@ const meta = {
         // preview block collapses. Render each story in its own sized iframe so the
         // card is contained and visible in full per block.
         docs: { story: { height: '220px', inline: false } },
-        nextjs: {
-            appDirectory: true,
-        },
     },
     tags: ['autodocs', 'test'],
     title: 'Features/Cookie/CookieConsent',

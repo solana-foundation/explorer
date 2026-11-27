@@ -1,8 +1,10 @@
-import { PublicKey, SystemProgram } from '@solana/web3.js';
+import {
+    mockSingleTransferTransaction,
+    mockUsdcJitoTransferTransaction,
+} from '@features/receipt/__fixtures__/transactions';
+import { type ParsedInstruction, PublicKey, SystemProgram } from '@solana/web3.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
-import { mockUsdcJitoTransferTransaction } from '../../mocks/usdc-jito-transfer';
 import { isJitoTransfer } from '../jito';
 
 const JITO_TIP_ACCOUNT_IN_MOCK = '96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5';
@@ -75,7 +77,7 @@ describe('isJitoTransfer', () => {
             const customAccount = 'CustomJitoTipAccount1111111111111111111111111';
             vi.stubEnv('NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS', customAccount);
             const instructions = mockUsdcJitoTransferTransaction.transaction.message.instructions;
-            const jitoTipInstruction = instructions[1];
+            const jitoTipInstruction = instructions[1] as ParsedInstruction;
             expect(isJitoTransfer(jitoTipInstruction)).toBe(false);
             const customInstruction = {
                 ...jitoTipInstruction,

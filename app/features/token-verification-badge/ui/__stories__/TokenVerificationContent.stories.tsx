@@ -1,35 +1,19 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { EVerificationSource, type VerificationSource } from '../../lib/types';
 import { ERiskLevel } from '../../model/use-rugcheck';
 import { TokenVerificationContent } from '../TokenVerificationContent';
+import { mockCoinGeckoSource, mockJupiterSource, mockRugCheckSource } from './mock-verification-data';
 
-const jupiterVerified: VerificationSource = {
-    name: EVerificationSource.Jupiter,
-    url: 'https://jup.ag',
-    verified: true,
-};
-
-const rugcheckGood: VerificationSource = {
-    level: ERiskLevel.Good,
-    name: EVerificationSource.RugCheck,
-    score: 88,
-    url: 'https://rugcheck.xyz',
-    verified: true,
-};
-
-const rugcheckRateLimited: VerificationSource = {
+const jupiterVerified = mockJupiterSource();
+const rugcheckGood = mockRugCheckSource({ level: ERiskLevel.Good, score: 88 });
+const rugcheckRateLimited = mockRugCheckSource({
     isRateLimited: true,
-    name: EVerificationSource.RugCheck,
-    url: 'https://rugcheck.xyz',
+    isVerificationFound: false,
+    level: undefined,
+    score: undefined,
     verified: false,
-};
-
-const coingeckoApply: VerificationSource = {
-    applyUrl: 'https://www.coingecko.com',
-    name: EVerificationSource.CoinGecko,
-    verified: false,
-};
+});
+const coingeckoApply = mockCoinGeckoSource({ isVerificationFound: false, verified: false });
 
 const meta: Meta<typeof TokenVerificationContent> = {
     component: TokenVerificationContent,

@@ -1,12 +1,14 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
+import { compileV0Message } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import { MANGO_PROGRAM_IDS } from '@explorer/decoder-mango';
 import { OPEN_BOOK_PROGRAM_IDS, SERUM_DEX_V3_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { TOKEN_SWAP_PROGRAM_IDS } from '@explorer/decoder-token-swap';
 import { WORMHOLE_PROGRAM_IDS } from '@explorer/decoder-wormhole';
 import { getBase58Decoder } from '@solana/kit';
 import type { CompiledInnerInstruction } from '@solana/web3.js';
-import { MessageV0, PublicKey, SystemProgram, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
+import { MessageV0, PublicKey, SystemProgram } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -21,27 +23,9 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 
 import { InstructionsSection } from '../InstructionsSection';
 
-// `useAnchorProgram` reads its IDL through SWR. The mock returns no data, so the instructions
-// render through the dispatcher.
-vi.mock('swr', () => ({
-    __esModule: true,
-    default: vi.fn(() => ({
-        data: undefined,
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })),
-}));
+vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
-// The Token Swap and Wormhole parsers report a tag outside their name table through `Logger.error`.
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
-
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(() => '/'),
-    useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 vi.mock('next/link', () => ({
     __esModule: true,
@@ -74,7 +58,7 @@ describe('Inspector InstructionsSection with vendored decoder instructions', () 
     ])(
         'should render decoded fields for the OpenBook instruction $title',
         async ({ data, fields, keyCount, title }) => {
-            renderSection(buildMessage(makeInstruction(OPEN_BOOK_PROGRAM_IDS.mainnet, hexBytes(data), keyCount)));
+            renderSection(buildMessage(OPEN_BOOK_PROGRAM_IDS.mainnet, hexBytes(data), keyCount));
 
             expect(await screen.findByText(title)).toBeInTheDocument();
             for (const field of fields) {
@@ -85,7 +69,7 @@ describe('Inspector InstructionsSection with vendored decoder instructions', () 
     );
 
     test('should show the raw accounts and hex of a decoded OpenBook instruction on request', async () => {
-        renderSection(buildMessage(makeInstruction(OPEN_BOOK_PROGRAM_IDS.mainnet, hexBytes(CONSUME_EVENTS_DATA), 6)));
+        renderSection(buildMessage(OPEN_BOOK_PROGRAM_IDS.mainnet, hexBytes(CONSUME_EVENTS_DATA), 6));
 
         expect(await screen.findByText('OpenBook Dex Program: Consume Events')).toBeInTheDocument();
         expect(screen.queryByText(/Instruction Data/)).not.toBeInTheDocument();
@@ -98,9 +82,7 @@ describe('Inspector InstructionsSection with vendored decoder instructions', () 
     });
 
     test('should render a deprecated Serum deployment name-only under its program name', async () => {
-        renderSection(
-            buildMessage(makeInstruction(SERUM_DEX_V3_PROGRAM_IDS.mainnet, hexBytes(CONSUME_EVENTS_DATA), 6)),
-        );
+        renderSection(buildMessage(SERUM_DEX_V3_PROGRAM_IDS.mainnet, hexBytes(CONSUME_EVENTS_DATA), 6));
 
         expect(await screen.findByText('Serum Dex v3 (deprecated): Consume Events')).toBeInTheDocument();
         expect(screen.queryByText('Event Queue')).not.toBeInTheDocument();
@@ -114,7 +96,7 @@ describe('Inspector InstructionsSection with vendored decoder instructions', () 
         { data: [1], programId: TOKEN_SWAP_PROGRAM_IDS[0], title: 'Token Swap: Swap' },
         { data: [2], programId: WORMHOLE_PROGRAM_IDS[0], title: 'Wormhole: Post VAA' },
     ])('should title the $title instruction by name', async ({ data, programId, title }) => {
-        renderSection(buildMessage(makeInstruction(programId, data, 1)));
+        renderSection(buildMessage(programId, data, 1));
 
         expect(await screen.findByText(title)).toBeInTheDocument();
         expectNoGenericUnknownCard();
@@ -144,7 +126,7 @@ describe('Inspector InstructionsSection with vendored decoder instructions', () 
     ])(
         'should title an unrecognized $name instruction "Unknown" and open its raw view',
         async ({ data, programId, title }) => {
-            renderSection(buildMessage(makeInstruction(programId, data, 1)));
+            renderSection(buildMessage(programId, data, 1));
 
             expect(await screen.findByText(title)).toBeInTheDocument();
             // The raw view is the card's whole content, so it opens without a click.
@@ -231,24 +213,9 @@ function expectNoGenericUnknownCard() {
     expect(screen.queryByText('Instruction')).not.toBeInTheDocument();
 }
 
-function makeInstruction(programId: string, data: ArrayLike<number>, keyCount: number): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: Array.from({ length: keyCount }, (_, i) => ({
-            isSigner: false,
-            isWritable: false,
-            pubkey: gen.publicKey(i),
-        })),
-        programId: new PublicKey(programId),
-    });
-}
-
-function buildMessage(ix: TransactionInstruction): MessageV0 {
-    return new TransactionMessage({
-        instructions: [ix],
-        payerKey: PAYER,
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
+function buildMessage(programId: string, data: Uint8Array | number[], keyCount: number): MessageV0 {
+    const keys = Array.from({ length: keyCount }, (_, i) => gen.publicKey(i));
+    return compileV0Message(PAYER, makeInstruction({ data, keys, programId }));
 }
 
 // A single System Transfer, so every vendored card in the inspector is an inner instruction.

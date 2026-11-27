@@ -9,7 +9,7 @@ import {
     getIsMutablePill,
     MetaplexNFTHeader,
 } from '@/app/components/account/MetaplexNFTHeader';
-import { makeNftData } from '@/app/entities/nft/lib/__tests__/make-nft-data';
+import { makeNftData } from '@/app/entities/nft/__fixtures__/make-nft-data';
 
 vi.mock('@providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: 'mainnet-beta', url: 'https://api.mainnet-beta.solana.com' })),

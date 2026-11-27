@@ -1,11 +1,15 @@
+import {
+    mockJitoOnlyTransferTransaction,
+    mockMultipleTransfersTransaction,
+    mockNoTransferTransaction,
+    mockSingleTransferTransaction,
+    mockZeroTransferTransaction,
+    RECEIVER,
+    RECEIVER_2,
+    SENDER,
+} from '@features/receipt/__fixtures__/transactions';
 import { describe, expect, it } from 'vitest';
 
-import { RECEIVER, RECEIVER_2, SENDER } from '../../mocks/addresses';
-import { mockJitoOnlyTransferTransaction } from '../../mocks/jito-only-transfer';
-import { mockMultipleTransfersTransaction } from '../../mocks/multiple-transfers';
-import { mockNoTransferTransaction } from '../../mocks/no-transfers';
-import { mockSingleTransferTransaction } from '../../mocks/single-transfer';
-import { mockZeroTransferTransaction } from '../../mocks/zero-transfer';
 import { createSolTransferReceipt } from '../sol-transfer';
 
 describe('createSolTransferReceipt', () => {
@@ -15,8 +19,8 @@ describe('createSolTransferReceipt', () => {
 
             expect(result).toMatchObject({
                 fee: 5000,
-                receiver: RECEIVER.publicKey.toBase58(),
-                sender: SENDER.publicKey.toBase58(),
+                receiver: RECEIVER.toBase58(),
+                sender: SENDER.toBase58(),
                 total: 300000000,
                 type: 'sol',
             });
@@ -54,18 +58,18 @@ describe('createSolTransferReceipt', () => {
 
             expect(result?.transfers).toEqual([
                 {
-                    receiver: RECEIVER.publicKey.toBase58(),
-                    sender: SENDER.publicKey.toBase58(),
+                    receiver: RECEIVER.toBase58(),
+                    sender: SENDER.toBase58(),
                     total: 80000000,
                 },
                 {
-                    receiver: RECEIVER_2.publicKey.toBase58(),
-                    sender: SENDER.publicKey.toBase58(),
+                    receiver: RECEIVER_2.toBase58(),
+                    sender: SENDER.toBase58(),
                     total: 50000000,
                 },
                 {
-                    receiver: RECEIVER.publicKey.toBase58(),
-                    sender: SENDER.publicKey.toBase58(),
+                    receiver: RECEIVER.toBase58(),
+                    sender: SENDER.toBase58(),
                     total: 10000000,
                 },
             ]);
@@ -74,8 +78,8 @@ describe('createSolTransferReceipt', () => {
         it('should use the first instruction sender and receiver on the receipt root', () => {
             const result = createSolTransferReceipt(mockMultipleTransfersTransaction);
 
-            expect(result?.sender).toBe(SENDER.publicKey.toBase58());
-            expect(result?.receiver).toBe(RECEIVER.publicKey.toBase58());
+            expect(result?.sender).toBe(SENDER.toBase58());
+            expect(result?.receiver).toBe(RECEIVER.toBase58());
         });
     });
 

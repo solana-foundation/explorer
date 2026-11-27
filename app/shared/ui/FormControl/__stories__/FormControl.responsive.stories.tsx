@@ -1,15 +1,13 @@
-import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import { withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FormControl } from '../FormControl';
+import * as Base from './FormControl.stories';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
 const meta: Meta<typeof FormControl> = {
     component: FormControl,
     decorators: [withViewportFromGlobal],
-    parameters: {
-        viewport: { options: INITIAL_VIEWPORTS },
-    },
     tags: ['autodocs', 'test'],
     title: 'Shared/FormControl@Media',
 };
@@ -17,10 +15,7 @@ const meta: Meta<typeof FormControl> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = {
-    children: <textarea rows={3} className="font-mono" placeholder="Paste a base64 transaction message..." />,
-    variant: 'flush-auto' as const,
-};
+const args = Base.WithChildClassName.args;
 
 export const Mobile: Story = {
     args,

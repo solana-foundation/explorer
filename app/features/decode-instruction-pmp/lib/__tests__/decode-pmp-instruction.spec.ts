@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { makeInstruction } from '@__fixtures__/instruction';
+import { PublicKey } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -21,13 +22,7 @@ const FOREIGN_BUFFER = gen.publicKey(1);
 const METADATA_PDA = gen.publicKey(2);
 const DOC_BYTES = new TextEncoder().encode('{"name":"company"}');
 
-function makeIx(data: Uint8Array, accounts: PublicKey[] = []): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(data),
-        keys: accounts.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId: PMP,
-    });
-}
+const makeIx = (data: Uint8Array, keys?: PublicKey[]) => makeInstruction({ data, keys, programId: PMP });
 
 describe('isProgramMetadataInstruction', () => {
     it('should accept an instruction targeting the PMP program', () => {
@@ -35,11 +30,7 @@ describe('isProgramMetadataInstruction', () => {
     });
 
     it('should reject an instruction targeting another program', () => {
-        const ix = new TransactionInstruction({
-            data: Buffer.from([0]),
-            keys: [],
-            programId: PublicKey.default,
-        });
+        const ix = makeInstruction({ data: [0], programId: PublicKey.default });
 
         expect(isProgramMetadataInstruction(ix)).toBe(false);
     });

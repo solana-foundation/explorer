@@ -13,16 +13,7 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 import { PermalinkView } from '../InspectorPage';
 import { buildMessage, INNER_INSTRUCTIONS } from './__fixtures__/create-idempotent-tx';
 
-vi.mock('swr', () => ({
-    __esModule: true,
-    default: vi.fn(() => ({
-        data: undefined,
-        error: undefined,
-        isLoading: false,
-        isValidating: false,
-        mutate: vi.fn(),
-    })),
-}));
+vi.mock('swr', async () => (await import('@/app/__tests__/swr-idle')).idleSwrModule);
 
 vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@features/decode-instruction-with-idl')>()),

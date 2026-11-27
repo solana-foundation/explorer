@@ -1,6 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { vi } from 'vitest';
 
+import { stubFetch } from '@/app/__tests__/rpc-fetch';
 import { Logger } from '@/app/shared/lib/logger';
 
 // The route reads JUPITER_API_KEY into a module-level const, so the env must
@@ -14,8 +15,7 @@ import { GET } from '../[mintAddress]/route';
 
 const VALID_MINT = gen.address(1);
 
-const fetchMock = vi.fn();
-vi.stubGlobal('fetch', fetchMock);
+const { fetchMock, respondWith } = stubFetch();
 
 describe('Jupiter API Route', () => {
     afterEach(() => {
@@ -29,7 +29,7 @@ describe('Jupiter API Route', () => {
     });
 
     it('should call the Jupiter search endpoint with the API key header and return verified: true', async () => {
-        mockFetchResponse(200, [{ id: VALID_MINT, isVerified: true }]);
+        respondWith(200, [{ id: VALID_MINT, isVerified: true }]);
         const response = await callRoute(VALID_MINT);
 
         const [url, options] = fetchMock.mock.calls[0];
@@ -47,14 +47,14 @@ describe('Jupiter API Route', () => {
             [{ id: 'OtherMint11111111111111111111111111111111111', isVerified: true }],
         ],
     ])('should return verified: false when %s', async (_reason, body) => {
-        mockFetchResponse(200, body);
+        respondWith(200, body);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: false });
     });
 
     it('should return 502 with short cache when the response shape is unexpected', async () => {
-        mockFetchResponse(200, { unexpected: 'shape' });
+        respondWith(200, { unexpected: 'shape' });
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(502);
         expect(await response.json()).toEqual({ error: 'Upstream schema mismatch' });
@@ -65,7 +65,7 @@ describe('Jupiter API Route', () => {
     });
 
     it('should return 404 silently when Jupiter responds with 404', async () => {
-        mockFetchResponse(404);
+        respondWith(404, []);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(404);
         expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
@@ -74,7 +74,7 @@ describe('Jupiter API Route', () => {
     });
 
     it('should return 429 and log to sentry when rate limited', async () => {
-        mockFetchResponse(429);
+        respondWith(429, []);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(429);
         expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
@@ -82,7 +82,7 @@ describe('Jupiter API Route', () => {
     });
 
     it.each([408, 500, 502, 503])('should pass through %i and report it to sentry as a warning', async status => {
-        mockFetchResponse(status);
+        respondWith(status, []);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(status);
         expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
@@ -94,7 +94,7 @@ describe('Jupiter API Route', () => {
     });
 
     it('should return upstream status and log panic for other error codes', async () => {
-        mockFetchResponse(403);
+        respondWith(403, []);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(403);
         expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
@@ -123,16 +123,6 @@ describe('Jupiter API Route', () => {
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 });
-
-function mockFetchResponse(status: number, body: unknown = []) {
-    const ok = status >= 200 && status < 300;
-    // Cast: tests only stub the surface of Response that the route touches.
-    fetchMock.mockResolvedValueOnce({
-        json: async () => body,
-        ok,
-        status,
-    } as Response);
-}
 
 function callRoute(mintAddress: string) {
     const request = new Request(`http://localhost:3000/api/verification/jupiter/${mintAddress}`);

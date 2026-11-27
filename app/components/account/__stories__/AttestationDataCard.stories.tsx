@@ -1,10 +1,8 @@
-import { Account, DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
+import { Account, type State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
-import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-import React from 'react';
+import { withAccountsState } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
@@ -32,8 +30,6 @@ function buildAccount(fixture: FixtureAccount): Account {
 const schemaAccount = buildAccount(schemaFixture as unknown as FixtureAccount);
 const attestationAccount = buildAccount(attestationFixture as unknown as FixtureAccount);
 
-const noop = () => undefined;
-
 // AttestationCard reads the schema from useAccountInfo to deserialize attestation `data`.
 const stateWithSchema: State = {
     entries: {
@@ -42,29 +38,12 @@ const stateWithSchema: State = {
     url: MAINNET_BETA_URL,
 };
 
-function MockAccountsState({ children, state }: { children: React.ReactNode; state: State }) {
-    return (
-        <ClusterProvider>
-            <StateContext.Provider value={state}>
-                <DispatchContext.Provider value={noop}>
-                    <FetchersContext.Provider
-                        value={{ parsed: { fetch: noop }, raw: { fetch: noop }, skip: { fetch: noop } } as any}
-                    >
-                        {children}
-                    </FetchersContext.Provider>
-                </DispatchContext.Provider>
-            </StateContext.Provider>
-        </ClusterProvider>
-    );
-}
-
 function onNotFound(): never {
     throw new Error('Fixture failed to decode — check the captured account bytes.');
 }
 
 const meta = {
     component: AttestationDataCard,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/AttestationDataCard',
 } satisfies Meta<typeof AttestationDataCard>;
@@ -72,17 +51,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const withEmptyAccounts: Decorator = Story => (
-    <MockAccountsState state={{ entries: {}, url: MAINNET_BETA_URL }}>
-        <Story />
-    </MockAccountsState>
-);
+const withEmptyAccounts = withAccountsState({ entries: {}, url: MAINNET_BETA_URL });
 
-const withSchemaInCache: Decorator = Story => (
-    <MockAccountsState state={stateWithSchema}>
-        <Story />
-    </MockAccountsState>
-);
+const withSchemaInCache = withAccountsState(stateWithSchema);
 
 // Schema account (decodes as SAS Schema → renders SchemaCard with the Borsh layout).
 export const Schema: Story = {

@@ -2,6 +2,10 @@ import { gen } from '@__fixtures__/gen';
 import { GENESIS_HASHES } from '@entities/chain-id/lib/const';
 import { tokenInfo } from '@entities/token-info/__fixtures__/token-info';
 import type { TransactionWithMeta } from '@entities/transaction-data';
+import {
+    buildParsedTransaction,
+    buildTokenTransferCheckedIx,
+} from '@entities/transaction-data/__fixtures__/parsed-transactions';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { renderHook } from '@testing-library/react';
 import { Cluster, ClusterStatus } from '@utils/cluster';
@@ -9,7 +13,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ClusterContext, clusterContext, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
-import { buildParsedTransaction, buildTokenTransferCheckedIx } from '../__fixtures__/builders';
 import { useReceiptResult } from '../use-receipt-result';
 
 const mocks = vi.hoisted(() => ({

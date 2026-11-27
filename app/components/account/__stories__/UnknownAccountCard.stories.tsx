@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { makeAccount } from '@entities/account/__fixtures__/account';
+import { withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
@@ -8,7 +8,6 @@ import { UnknownAccountCard } from '../UnknownAccountCard';
 const meta = {
     component: UnknownAccountCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/UnknownAccountCard',
 } satisfies Meta<typeof UnknownAccountCard>;
@@ -16,14 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const baseAccount = {
-    data: {},
-    executable: false,
-    lamports: 1_000_000_000,
-    owner: PublicKey.default,
-    pubkey: gen.publicKey(1),
-    space: 165,
-};
+const baseAccount = makeAccount({ pubkey: gen.publicKey(1), space: 165 });
 
 export const WithBalance: Story = {
     args: {

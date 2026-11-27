@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@entities/idl/server', () => ({ resolveProgramIdls: mocks.resolveProgramIdls }));
 vi.mock('@solana/security-txt', () => ({ fetchSecurityTxt: mocks.fetchSecurityTxt }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
 import { getProgramProvenance, verifiedBuildState, type VerifiedLookup } from '../get-program-provenance';
 

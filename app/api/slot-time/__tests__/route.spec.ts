@@ -3,26 +3,22 @@ import {
     createSolanaRpc,
     SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
     SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND,
-    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
     SolanaError,
 } from '@solana/kit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { connectionFailure, httpError, reported } from '@/app/__tests__/rpc-errors';
 import { Logger } from '@/app/shared/lib/logger';
 import { ROUTE_TIMEOUT_MS, UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 import { Cluster } from '@/app/utils/cluster';
 
 import { GET, maxDuration } from '../route';
 
-const mocks = vi.hoisted(() => ({ getRecentPerformanceSamples: vi.fn(), send: vi.fn() }));
+const mocks = { getRecentPerformanceSamples: vi.fn(), send: vi.fn() };
 
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return {
-        ...actual,
-        createSolanaRpc: vi.fn(() => ({ getRecentPerformanceSamples: mocks.getRecentPerformanceSamples })),
-    };
-});
+vi.mocked(createSolanaRpc).mockImplementation(
+    () => ({ getRecentPerformanceSamples: mocks.getRecentPerformanceSamples }) as never,
+);
 
 // Stubbed, so a local `.env` cannot decide what the route resolves to — an empty one would fail these
 // tests for a reason that has nothing to do with the route.
@@ -256,28 +252,4 @@ describe('GET /api/slot-time', () => {
 
 function createRequest(cluster: Cluster) {
     return new Request(`http://localhost:3000/api/slot-time?cluster=${cluster}`);
-}
-
-/** A node answering over HTTP rather than in JSON-RPC: a gateway, a key check, a wrong path. */
-function httpError(statusCode: number) {
-    return new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
-        headers: new Headers(),
-        message: `HTTP ${statusCode}`,
-        statusCode,
-    });
-}
-
-/** Shaped the way undici reports one: the code sits on an `Error` nested as `cause`. */
-function connectionFailure(code: string) {
-    const cause = Object.assign(new Error(`${code} on connect`), { code });
-    return Object.assign(new TypeError('fetch failed'), { cause });
-}
-
-/**
- * What has to be on a log call for the failure to reach Sentry at all: the flag, and the reason under
- * `sentryExtras`, which is the only part of a context Sentry receives. A bare `toHaveBeenCalled` passes
- * with both dropped, and the tier then fails silently for everyone.
- */
-function reported(extras: Record<string, unknown>) {
-    return expect.objectContaining({ sentry: true, sentryExtras: expect.objectContaining(extras) });
 }

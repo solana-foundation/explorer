@@ -12,7 +12,7 @@ import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
 import { LEGACY_BLOCK_RESPONSE, V1_BLOCK_RESPONSE } from '../../__fixtures__/block-responses';
 import { fetchBlock } from '../fetch-block';
 
-vi.mock('@solana/kit', async importOriginal => await importOriginal());
+vi.unmock('@solana/kit');
 
 const URL = 'https://mock.rpc';
 const SLOT = 440_572_822;

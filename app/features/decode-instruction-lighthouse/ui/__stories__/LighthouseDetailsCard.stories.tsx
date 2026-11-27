@@ -1,13 +1,6 @@
 import { toRawInstructionNode } from '@entities/instruction-card';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
-import {
-    nextjsParameters,
-    withCluster,
-    withMockTransactions,
-    withScrollAnchor,
-    withTokenInfoBatch,
-    withTxInstructionSurface,
-} from '@storybook-config/decorators';
+import { instructionCardDecorators } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
@@ -48,13 +41,12 @@ const assertAccountInfoIx = {
     programId: new PublicKey(LIGHTHOUSE_ADDRESS),
 } as unknown as TransactionInstruction;
 
-const meta: Meta<typeof LighthouseDetailsCard> = {
+const meta = {
     component: LighthouseDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface, withMockTransactions],
-    parameters: nextjsParameters,
+    decorators: instructionCardDecorators,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',
-};
+} satisfies Meta<typeof LighthouseDetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

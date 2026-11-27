@@ -1,9 +1,10 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
+import { makeInstruction } from '@__fixtures__/instruction';
 import { toInstructionNode } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { OPEN_BOOK_PROGRAM_IDS, SERUM_DEX_V3_PROGRAM_IDS } from '@explorer/decoder-serum';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
@@ -24,7 +25,7 @@ const dispatcher = createInstructionParserDispatcher(serumInstructionParsers);
 describe('@features/instruction-program-serum', () => {
     describe('SerumDetailsCard', () => {
         test('should render decoded fields for a New Order v3 instruction', async () => {
-            renderCard(makeInstruction(NEW_ORDER_V3_DATA, 12));
+            renderCard(makeIx(NEW_ORDER_V3_DATA, 12));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -45,7 +46,7 @@ describe('@features/instruction-program-serum', () => {
 
         test('should stack every open-orders account into one row for a Consume Events instruction', async () => {
             // 6 keys: openOrders = keys[0..1], market = keys[2], eventQueue = keys[3]
-            renderCard(makeInstruction(CONSUME_EVENTS_DATA, 6));
+            renderCard(makeIx(CONSUME_EVENTS_DATA, 6));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -60,7 +61,7 @@ describe('@features/instruction-program-serum', () => {
         });
 
         test('should omit the Open Orders row for a Consume Events instruction with no open-orders account', async () => {
-            renderCard(makeInstruction(CONSUME_EVENTS_DATA, 4));
+            renderCard(makeIx(CONSUME_EVENTS_DATA, 4));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -70,7 +71,7 @@ describe('@features/instruction-program-serum', () => {
         });
 
         test('should fall back to the raw card with an "Unknown" title for undecodable data', async () => {
-            renderCard(makeInstruction('00ff000000', 0));
+            renderCard(makeIx('00ff000000', 0));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -80,7 +81,7 @@ describe('@features/instruction-program-serum', () => {
         });
 
         test('should render a deprecated Serum deployment name-only under its program name', async () => {
-            renderCard(makeInstruction(CONSUME_EVENTS_DATA, 6, SERUM_DEX_V3_PROGRAM_IDS.mainnet));
+            renderCard(makeIx(CONSUME_EVENTS_DATA, 6, SERUM_DEX_V3_PROGRAM_IDS.mainnet));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -90,7 +91,7 @@ describe('@features/instruction-program-serum', () => {
         });
 
         test('should title an instruction on a deprecated deployment "Unknown" when its code is unrecognized', async () => {
-            renderCard(makeInstruction('00ff000000', 0, SERUM_DEX_V3_PROGRAM_IDS.mainnet));
+            renderCard(makeIx('00ff000000', 0, SERUM_DEX_V3_PROGRAM_IDS.mainnet));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -99,7 +100,7 @@ describe('@features/instruction-program-serum', () => {
         });
 
         test('should title a named code with no vendored layout from the name table', async () => {
-            renderCard(makeInstruction('0007000000', 0));
+            renderCard(makeIx('0007000000', 0));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -109,7 +110,7 @@ describe('@features/instruction-program-serum', () => {
         });
 
         test('should title a recognized code with a truncated payload by name', async () => {
-            renderCard(makeInstruction('000a00000001', 0));
+            renderCard(makeIx('000a00000001', 0));
 
             // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
             await waitFor(() => {
@@ -119,20 +120,9 @@ describe('@features/instruction-program-serum', () => {
     });
 });
 
-function makeInstruction(
-    dataHex: string,
-    keyCount: number,
-    programId: string = OPEN_BOOK_PROGRAM_IDS.mainnet,
-): TransactionInstruction {
-    return new TransactionInstruction({
-        data: Buffer.from(dataHex, 'hex'),
-        keys: Array.from({ length: keyCount }, (_, i) => ({
-            isSigner: false,
-            isWritable: false,
-            pubkey: gen.publicKey(i),
-        })),
-        programId: new PublicKey(programId),
-    });
+function makeIx(dataHex: string, keyCount: number, programId: string = OPEN_BOOK_PROGRAM_IDS.mainnet) {
+    const keys = Array.from({ length: keyCount }, (_, i) => gen.publicKey(i));
+    return makeInstruction({ data: Buffer.from(dataHex, 'hex'), keys, programId });
 }
 
 function renderCard(raw: TransactionInstruction) {

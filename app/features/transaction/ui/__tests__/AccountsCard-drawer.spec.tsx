@@ -4,9 +4,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('next/navigation');
 
-import { DEFAULT_SIGNATURE, FEE_PAYER, MOCK_PARSED_TX, MOCK_STATUS } from '../__fixtures__/transaction';
-import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
-import { AccountsCard } from '../AccountsCard';
+import { FEE_PAYER } from '../__fixtures__/transaction';
+import { accountsCardWithProviders } from '../__fixtures__/withTransactionProviders';
 
 const LG_WIDTH = 992;
 const MOBILE_WIDTH = 375;
@@ -20,7 +19,7 @@ describe('transaction::AccountsCard drawer', () => {
     afterEach(() => vi.restoreAllMocks());
 
     test('should open the tapped account', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
 
         await tapFeePayer();
 
@@ -30,7 +29,7 @@ describe('transaction::AccountsCard drawer', () => {
     });
 
     test('should close on Close', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
         await tapFeePayer();
         await screen.findByRole('dialog');
 
@@ -40,7 +39,7 @@ describe('transaction::AccountsCard drawer', () => {
     });
 
     test('should open again after a close', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
         await tapFeePayer();
         await userEvent.click(await screen.findByRole('button', { name: 'Close' }));
         await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -51,7 +50,7 @@ describe('transaction::AccountsCard drawer', () => {
     });
 
     test('should stay closed after the viewport widens and narrows again', async () => {
-        renderCard();
+        render(accountsCardWithProviders());
         await tapFeePayer();
         await screen.findByRole('dialog');
 
@@ -63,18 +62,6 @@ describe('transaction::AccountsCard drawer', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 });
-
-function renderCard() {
-    const Wrapper = withTransactionProviders(
-        { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-        { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-    );
-    return render(
-        <Wrapper>
-            <AccountsCard signature={DEFAULT_SIGNATURE} />
-        </Wrapper>,
-    );
-}
 
 async function tapFeePayer() {
     await userEvent.click(screen.getAllByText(FEE_PAYER.toBase58())[0]);

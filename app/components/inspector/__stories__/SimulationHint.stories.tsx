@@ -1,4 +1,3 @@
-import { nextjsParameters } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
@@ -7,7 +6,6 @@ import { SimulationHint } from '../SimulationHint';
 
 const meta: Meta<typeof SimulationHint> = {
     component: SimulationHint,
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Inspector/SimulationHint',
 };

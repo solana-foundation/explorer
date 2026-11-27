@@ -1,8 +1,8 @@
-import type * as SolanaKit from '@solana/kit';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@solana/kit', async () => await vi.importActual<typeof SolanaKit>('@solana/kit'));
+vi.unmock('@solana/kit');
 
+import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
 import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
 import { Logger } from '@/app/shared/lib/logger';
 import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
@@ -14,14 +14,9 @@ const URL = toConnectableUrl('https://mock.rpc');
 const NFTOKEN_PROGRAM = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
 const NFT_DISCRIMINATOR_BASE58 = '6dycNg3Aybe';
 
-const fetchMock = vi.fn();
-
-beforeEach(() => {
-    vi.stubGlobal('fetch', fetchMock);
-});
+const { fetchMock, requestBody, respondWithError } = stubRpcFetch();
 
 afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
     vi.clearAllMocks();
 });
@@ -32,7 +27,7 @@ describe('fetchCollectionNfts', () => {
 
         await fetchCollectionNfts(URL, COLLECTION);
 
-        expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+        expect(requestBody()).toMatchObject({
             method: 'getProgramAccounts',
             params: [
                 NFTOKEN_PROGRAM,
@@ -104,25 +99,25 @@ describe('fetchCollectionNfts', () => {
     });
 
     it('should return unsupported for the method-not-found code with any node message', async () => {
-        respondWithRpcError({ code: -32601, message: 'getProgramAccounts is disabled' });
+        respondWithError({ code: -32601, message: 'getProgramAccounts is disabled' });
 
         await expect(fetchCollectionNfts(URL, COLLECTION)).resolves.toEqual({ kind: 'unsupported' });
     });
 
     it('should throw on any other JSON-RPC error code so the caller retries', async () => {
-        respondWithRpcError({ code: -32005, message: 'Node is behind by 42 slots' });
+        respondWithError({ code: -32005, message: 'Node is behind by 42 slots' });
 
         await expect(fetchCollectionNfts(URL, COLLECTION)).rejects.toThrow();
     });
 
     it('should return unsupported for an internal error whose message names a missing method', async () => {
-        respondWithRpcError({ code: -32603, message: 'Method not found' });
+        respondWithError({ code: -32603, message: 'Method not found' });
 
         await expect(fetchCollectionNfts(URL, COLLECTION)).resolves.toEqual({ kind: 'unsupported' });
     });
 
     it('should throw on an internal error with any other message so the caller retries', async () => {
-        respondWithRpcError({ code: -32603, message: 'Internal error' });
+        respondWithError({ code: -32603, message: 'Internal error' });
 
         await expect(fetchCollectionNfts(URL, COLLECTION)).rejects.toThrow();
     });
@@ -169,8 +164,4 @@ function respondWithAccounts(accounts: readonly { base64: string; pubkey: string
             `{"account":{"data":["${base64}","base64"],"executable":false,"lamports":2199360,"owner":"${NFTOKEN_PROGRAM}","rentEpoch":18446744073709551615,"space":188},"pubkey":"${pubkey}"}`,
     );
     fetchMock.mockResolvedValueOnce(new Response(`{"id":"0","jsonrpc":"2.0","result":[${result.join(',')}]}`));
-}
-
-function respondWithRpcError(error: { code: number; message: string }) {
-    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ error, id: '0', jsonrpc: '2.0' })));
 }

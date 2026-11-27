@@ -14,7 +14,7 @@ import { ConfirmedSignatureInfo, PublicKey } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
-import { createNextjsParameters, nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import { createNextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { expect, userEvent, within } from 'storybook/test';
@@ -117,7 +117,6 @@ async function loadHistory(canvasElement: HTMLElement) {
 const meta = {
     component: TokenHistoryCard,
     decorators: [withCard, withTokenInfoBatch],
-    parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenHistoryCard',
 } satisfies Meta<typeof TokenHistoryCard>;

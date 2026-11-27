@@ -25,10 +25,7 @@ vi.mock('../../cluster', async importOriginal => {
     return { ...actual, useCluster: useClusterMock };
 });
 
-vi.mock('@entities/cluster', async importOriginal => {
-    const actual = await importOriginal<typeof import('@entities/cluster')>();
-    return { ...actual, getRpc };
-});
+vi.mock('@/app/entities/cluster/api/get-rpc', () => ({ getRpc }));
 
 vi.mock('@entities/nft', async importOriginal => {
     const actual = await importOriginal<typeof import('@entities/nft')>();

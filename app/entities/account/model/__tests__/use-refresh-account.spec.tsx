@@ -2,10 +2,10 @@ import { PublicKey } from '@solana/web3.js';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { getFullTokenInfoSwrKey } from '@utils/token-info';
-import { SWRConfig } from 'swr';
 import useSWRImmutable from 'swr/immutable';
 import { describe, expect, it, vi } from 'vitest';
 
+import { settleRetries, swrWrapper } from '@/app/__tests__/swr-hook';
 import { accountRefreshKey } from '@/app/shared/lib/account-refresh-key';
 
 import { rawAccountDataKey } from '../use-raw-account-data';
@@ -38,7 +38,7 @@ describe('useRefreshAccount', () => {
         ],
     ])('should not refetch %s', async (_, key) => {
         const fetcher = await refreshWith(key);
-        await act(() => new Promise(resolve => setTimeout(resolve, 50)));
+        await act(() => settleRetries());
 
         expect(fetcher).toHaveBeenCalledTimes(1);
     });
@@ -51,7 +51,7 @@ async function refreshWith(key: readonly unknown[]) {
             useSWRImmutable(key, fetcher);
             return useRefreshAccount();
         },
-        { wrapper },
+        { wrapper: swrWrapper() },
     );
     await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
 
@@ -61,7 +61,3 @@ async function refreshWith(key: readonly unknown[]) {
 
 const MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 const OTHER = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
-
-function wrapper({ children }: { children: React.ReactNode }) {
-    return <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>;
-}
