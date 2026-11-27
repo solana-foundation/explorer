@@ -73,7 +73,7 @@ export async function GET(request: Request, props: Params) {
 
 function errorResponse(error: unknown, address: Address): NextResponse {
     if (isTimeoutError(error)) {
-        Logger.warn('[api:stake-rewards] Upstream request timed out', { address, sentry: true });
+        Logger.warn('[api:stake-rewards] Upstream request timed out', { sentry: true, sentryExtras: { address } });
         return NextResponse.json(
             { error: 'Upstream request timed out' },
             { headers: ERROR_CACHE_HEADERS, status: 504 },
@@ -84,7 +84,7 @@ function errorResponse(error: unknown, address: Address): NextResponse {
         // Pass 429 through rather than masking it as 502: the client must not retry a rate limit,
         // and the shorter error cache lets the next visitor try once the window resets.
         if (error.status === 429) {
-            Logger.warn('[api:stake-rewards] Rate limit exceeded', { address, sentry: true });
+            Logger.warn('[api:stake-rewards] Rate limit exceeded', { sentry: true, sentryExtras: { address } });
             return NextResponse.json({ error: 'Rate limit exceeded' }, { headers: ERROR_CACHE_HEADERS, status: 429 });
         }
         // Every other upstream status becomes 502, including 401 — that is our key being rejected,
@@ -94,10 +94,12 @@ function errorResponse(error: unknown, address: Address): NextResponse {
         // key is set but has no plan or has expired, so it fails for every account and keeps failing
         // until someone rotates it. A 5xx from Solscan is transient and needs nobody.
         Logger.error(error, {
-            address,
-            reason: isKeyRejected(error.status) ? 'solscan-key-rejected' : 'solscan-request-failed',
             sentry: true,
-            status: error.status,
+            sentryExtras: {
+                address,
+                reason: isKeyRejected(error.status) ? 'solscan-key-rejected' : 'solscan-request-failed',
+                status: error.status,
+            },
         });
         return NextResponse.json(
             { error: 'Failed to fetch stake rewards' },
@@ -109,9 +111,8 @@ function errorResponse(error: unknown, address: Address): NextResponse {
     // Still 502: we have no total to serve either way.
     if (error instanceof SolscanResponseError) {
         Logger.warn('[api:stake-rewards] Solscan returned an unusable response', {
-            address,
-            reason: error.message,
             sentry: true,
+            sentryExtras: { address, reason: error.message },
         });
         return NextResponse.json(
             { error: 'Failed to fetch stake rewards' },

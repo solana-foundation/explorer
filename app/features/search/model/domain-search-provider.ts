@@ -59,7 +59,10 @@ export const domainSearchProvider: SearchProvider = {
                 // },
             ];
         } catch (error) {
-            Logger.error(new Error('Domain search request failed', { cause: error }), { query, sentry: true });
+            Logger.error(new Error('Domain search request failed', { cause: error }), {
+                sentry: true,
+                sentryExtras: { query },
+            });
             return [];
         } finally {
             clearTimeout(timeoutId);

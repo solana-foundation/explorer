@@ -134,9 +134,9 @@ describe('Logger', () => {
         it('should not leak sentryExtras into console output', () => {
             const err = new Error('fatal');
 
-            Logger.panic(err, { route: '/api', sentryExtras: { module: 'rpc' } });
+            Logger.panic(err, { sentryExtras: { module: 'rpc' } });
 
-            expect(consoleSpy.error).toHaveBeenCalledWith(err, { route: '/api' });
+            expect(consoleSpy.error).toHaveBeenCalledWith(err);
         });
 
         it('should call captureException even when logging is suppressed', () => {
@@ -191,9 +191,9 @@ describe('Logger', () => {
         });
 
         it('should not leak sentryExtras into console output', () => {
-            log({ route: '/api', sentry: true, sentryExtras: { internal: true } });
+            log({ sentry: true, sentryExtras: { internal: true } });
 
-            expect(consoleSpy[method]).toHaveBeenCalledWith(logged, { route: '/api' });
+            expect(consoleSpy[method]).toHaveBeenCalledWith(logged);
         });
 
         it('should not capture by default', () => {
@@ -203,9 +203,14 @@ describe('Logger', () => {
         });
 
         it('should not leak sentry flag into console output', () => {
-            log({ route: '/api', sentry: true });
+            log({ sentry: true });
 
-            expect(consoleSpy[method]).toHaveBeenCalledWith(logged, { route: '/api' });
+            expect(consoleSpy[method]).toHaveBeenCalledWith(logged);
+        });
+
+        it('should reject a plain field in a context that reports to Sentry', () => {
+            // @ts-expect-error -- Sentry receives only `sentryExtras`
+            log({ route: '/api', sentry: true });
         });
     });
 

@@ -127,8 +127,8 @@ async function pushToLoki(streams: LokiStream[]) {
         const detail = await response.text().catch(() => '');
         // Sentry is the only channel left when the drain itself is broken: every log-based alert is blind.
         Logger.error(new Error(`[log-drain] Loki push failed: ${response.status}`), {
-            detail: detail.slice(0, 300),
             sentry: true,
+            sentryExtras: { detail: detail.slice(0, 300) },
         });
         return false;
     }

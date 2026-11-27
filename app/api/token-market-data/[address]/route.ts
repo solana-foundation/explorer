@@ -57,7 +57,10 @@ export async function GET(_request: Request, props: Params) {
         try {
             data = await response.json();
         } catch {
-            Logger.warn('[api:token-market-data] Failed to parse upstream JSON', { address, sentry: true });
+            Logger.warn('[api:token-market-data] Failed to parse upstream JSON', {
+                sentry: true,
+                sentryExtras: { address },
+            });
             return NextResponse.json(
                 { error: 'Invalid response from market data provider' },
                 { headers: ERROR_CACHE_HEADERS, status: 502 },
@@ -70,7 +73,7 @@ export async function GET(_request: Request, props: Params) {
         }
 
         if (!is(data, CoinGeckoMarketDataSchema)) {
-            Logger.warn('[api:token-market-data] Invalid response schema', { address, sentry: true });
+            Logger.warn('[api:token-market-data] Invalid response schema', { sentry: true, sentryExtras: { address } });
             return NextResponse.json(
                 { error: 'Invalid response from market data provider' },
                 { headers: ERROR_CACHE_HEADERS, status: 502 },
@@ -90,7 +93,10 @@ export async function GET(_request: Request, props: Params) {
         );
     } catch (error) {
         if (isTimeoutError(error)) {
-            Logger.warn('[api:token-market-data] Upstream request timed out', { address, sentry: true });
+            Logger.warn('[api:token-market-data] Upstream request timed out', {
+                sentry: true,
+                sentryExtras: { address },
+            });
             return NextResponse.json(
                 { error: 'Upstream request timed out' },
                 { headers: ERROR_CACHE_HEADERS, status: 504 },

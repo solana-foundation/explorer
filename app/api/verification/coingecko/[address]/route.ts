@@ -35,7 +35,10 @@ export async function GET(_request: Request, props: Params) {
             } else if (response.status === 404) {
                 Logger.warn('[api:coingecko] No data found', { address });
             } else if (isTransientStatus(response.status)) {
-                Logger.warn(`[api:coingecko] Upstream returned ${response.status}`, { address, sentry: true });
+                Logger.warn(`[api:coingecko] Upstream returned ${response.status}`, {
+                    sentry: true,
+                    sentryExtras: { address },
+                });
             } else {
                 Logger.panic(new Error(`CoinGecko onchain info API error: ${response.status}`));
             }
@@ -49,7 +52,7 @@ export async function GET(_request: Request, props: Params) {
         try {
             data = await response.json();
         } catch {
-            Logger.warn('[api:coingecko] Failed to parse upstream JSON', { address, sentry: true });
+            Logger.warn('[api:coingecko] Failed to parse upstream JSON', { sentry: true, sentryExtras: { address } });
             return NextResponse.json(
                 { error: 'Invalid response from coingecko API' },
                 { headers: ERROR_CACHE_HEADERS, status: 502 },
@@ -57,7 +60,7 @@ export async function GET(_request: Request, props: Params) {
         }
 
         if (!is(data, CoinGeckoVerificationSchema)) {
-            Logger.warn('[api:coingecko] Invalid response schema', { address, sentry: true });
+            Logger.warn('[api:coingecko] Invalid response schema', { sentry: true, sentryExtras: { address } });
             return NextResponse.json(
                 { error: 'Invalid response from coingecko API' },
                 { headers: ERROR_CACHE_HEADERS, status: 502 },
@@ -73,7 +76,7 @@ export async function GET(_request: Request, props: Params) {
         );
     } catch (error) {
         if (isTimeoutError(error)) {
-            Logger.warn('[api:coingecko] Upstream request timed out', { address, sentry: true });
+            Logger.warn('[api:coingecko] Upstream request timed out', { sentry: true, sentryExtras: { address } });
             return NextResponse.json(
                 { error: 'Upstream request timed out' },
                 { headers: ERROR_CACHE_HEADERS, status: 504 },

@@ -34,7 +34,7 @@ export function useWallet() {
         try {
             return new PublicKey(walletAddress);
         } catch (error) {
-            Logger.error(error, { sentry: true, walletAddress });
+            Logger.error(error, { sentry: true, sentryExtras: { walletAddress } });
             return undefined;
         }
     }, [walletAddress]);

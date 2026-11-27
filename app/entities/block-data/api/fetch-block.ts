@@ -66,7 +66,7 @@ function adaptTransactionEntry({
         const validated = create(transactionToValidate, BlockTransactionResponseSchema);
         return adaptTransaction({ costUnits: validated.meta?.costUnits, index, rpcTransaction });
     } catch (error) {
-        Logger.error(error, { index, sentry: true, slot });
+        Logger.error(error, { sentry: true, sentryExtras: { index, slot } });
         return { index, unavailable: true };
     }
 }

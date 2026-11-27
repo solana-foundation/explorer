@@ -46,8 +46,8 @@ export async function fetchCoinGeckoVerification([, address]: CoinGeckoSwrKey): 
         const data = await response.json();
         if (!is(data, CoinGeckoResultSchema)) {
             Logger.error(new Error('[coingecko-verification] CoinGecko schema validation failed'), {
-                address,
                 sentry: true,
+                sentryExtras: { address },
             });
             return { status: CoingeckoStatus.FetchFailed, verified: false };
         }

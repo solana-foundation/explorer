@@ -60,7 +60,7 @@ describe('Jupiter API Route', () => {
         expect(await response.json()).toEqual({ error: 'Upstream schema mismatch' });
         expect(Logger.error).toHaveBeenCalledWith(
             expect.any(Error),
-            expect.objectContaining({ mintAddress: VALID_MINT, sentry: true }),
+            expect.objectContaining({ sentry: true, sentryExtras: { mintAddress: VALID_MINT } }),
         );
     });
 
@@ -87,8 +87,8 @@ describe('Jupiter API Route', () => {
         expect(response.status).toBe(status);
         expect(await response.json()).toEqual({ error: 'Failed to fetch jupiter data' });
         expect(Logger.warn).toHaveBeenCalledWith(`[api:jupiter] Upstream returned ${status}`, {
-            mintAddress: VALID_MINT,
             sentry: true,
+            sentryExtras: { mintAddress: VALID_MINT },
         });
         expect(Logger.panic).not.toHaveBeenCalled();
     });
@@ -117,8 +117,8 @@ describe('Jupiter API Route', () => {
         expect(await response.json()).toEqual({ error: 'Upstream request timed out' });
         expect(response.headers.get('Cache-Control')).toBe('public, max-age=30, s-maxage=30');
         expect(Logger.warn).toHaveBeenCalledWith('[api:jupiter] Upstream request timed out', {
-            mintAddress: VALID_MINT,
             sentry: true,
+            sentryExtras: { mintAddress: VALID_MINT },
         });
         expect(Logger.panic).not.toHaveBeenCalled();
     });

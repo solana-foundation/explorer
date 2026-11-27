@@ -64,7 +64,10 @@ export async function GET(request: NextRequest, props: Props) {
             data ? RESOLVED_CACHE_DURATION : FALLBACK_CACHE_DURATION,
         );
     } catch (e) {
-        Logger.error(new Error('[og:tx] Failed to generate image', { cause: e }), { sentry: true, signature });
+        Logger.error(new Error('[og:tx] Failed to generate image', { cause: e }), {
+            sentry: true,
+            sentryExtras: { signature },
+        });
         return new NextResponse('Failed to process request', { status: 500 });
     }
 }

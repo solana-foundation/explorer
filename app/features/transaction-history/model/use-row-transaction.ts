@@ -61,11 +61,8 @@ export function useRowTransaction(signature: string, enabled = true): RowTransac
                 if (error instanceof TaskSkippedError) return;
                 if (opts.retryCount > RETRY_COUNT) {
                     Logger.warn('[transaction-history] row fetch failed after its retries', {
-                        error,
                         sentry: 'always',
                         sentryExtras: { error: String(error), signature },
-                        signature,
-                        url,
                     });
                     setFailedKey(errorKey);
                     return;

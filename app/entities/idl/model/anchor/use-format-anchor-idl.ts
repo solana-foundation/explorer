@@ -303,8 +303,8 @@ export function formatAnchorIdl(idl: Idl): FormattedIdl {
 
     if (formattingErrors.length) {
         Logger.warn(`[idl] Formatting errors in ${idl.metadata.name} (${idl.address})`, {
-            accounts: formattingErrors.map(([, acc]) => acc),
             sentry: true,
+            sentryExtras: { accounts: formattingErrors.map(([, acc]) => acc) },
         });
     }
 
