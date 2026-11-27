@@ -35,5 +35,5 @@ export async function resolveProgramIdlNames(
         shouldRetry: backoffOptions.shouldRetry ?? isRetryableError,
     })) as ProgramIdlPair;
 
-    return buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl]);
+    return buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl], programId);
 }

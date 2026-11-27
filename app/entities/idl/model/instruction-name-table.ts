@@ -13,7 +13,8 @@ import { arrayOrEmpty } from '@/app/shared/lib/array';
 import { startsWith } from '@/app/shared/lib/bytes';
 
 import { type AnchorIdl, type CodamaIdl, type SupportedIdl } from '../lib/types';
-import { getIdlStandard } from './idl-version';
+import { formatSerdeIdl } from './formatters/format-serde-idl';
+import { getIdlStandard, getIdlVersion } from './idl-version';
 
 export type InstructionNameEntry = {
     discriminator: Uint8Array;
@@ -42,11 +43,25 @@ export type ProgramIdlNames = {
  * Build a program's IDL-derived names — display name and instruction-name resolver — from its IDLs in
  * preference order (program-metadata beats Anchor). Returns undefined when no IDL yields either.
  */
-export function buildProgramIdlNames(idls: readonly (SupportedIdl | undefined)[]): ProgramIdlNames | undefined {
-    const programName = buildProgramName(idls);
-    const resolveInstructionName = buildInstructionNameResolver(idls);
+export function buildProgramIdlNames(
+    idls: readonly (SupportedIdl | undefined)[],
+    programAddress: string,
+): ProgramIdlNames | undefined {
+    const convertedIdls = idls.map(idl => idl && convertIfLegacy(idl, programAddress));
+    const programName = buildProgramName(convertedIdls);
+    const resolveInstructionName = buildInstructionNameResolver(convertedIdls);
     if (programName === undefined && resolveInstructionName === undefined) return undefined;
     return { programName, resolveInstructionName };
+}
+
+function convertIfLegacy(idl: SupportedIdl, programAddress: string): SupportedIdl {
+    if (getIdlVersion(idl) !== 'Legacy') return idl;
+    if (arrayOrEmpty((idl as AnchorIdl).instructions).some(ix => ix.discriminator)) return idl;
+    try {
+        return formatSerdeIdl(idl, programAddress);
+    } catch {
+        return idl;
+    }
 }
 
 /**

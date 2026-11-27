@@ -70,7 +70,7 @@ export function useProgramIdlNames(programIds: string[], cluster: Cluster, url: 
         const resolvers = new Map<string, ProgramIdlNames>();
         for (const [id, idls] of data ?? []) {
             // Program-metadata IDL is preferred; Anchor only names what program-metadata can't.
-            const names = buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl]);
+            const names = buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl], id);
             if (names) resolvers.set(id, names);
         }
         return resolvers;
