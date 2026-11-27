@@ -4,10 +4,11 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { cn } from '@components/shared/utils';
+import { type RawTokenBalance } from '@entities/token-amount';
 import { fetchTokenInfosFromApi, getChainId, toScaledUiAmount } from '@entities/token-info';
 import { useTransactionDetails } from '@providers/transactions';
 import { invariant } from '@shared/lib/invariant';
-import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
+import { ParsedMessageAccount, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import useSWRImmutable from 'swr/immutable';
@@ -164,12 +165,12 @@ function TokenBalanceRow({
 }
 
 export function generateTokenBalanceRows(
-    preTokenBalances: TokenBalance[],
-    postTokenBalances: TokenBalance[],
+    preTokenBalances: RawTokenBalance[],
+    postTokenBalances: RawTokenBalance[],
     accounts: ParsedMessageAccount[],
 ): TokenBalanceRow[] {
-    const preBalanceMap = new Map<number, TokenBalance>();
-    const postBalanceMap = new Map<number, TokenBalance>();
+    const preBalanceMap = new Map<number, RawTokenBalance>();
+    const postBalanceMap = new Map<number, RawTokenBalance>();
 
     preTokenBalances.forEach(balance => preBalanceMap.set(balance.accountIndex, balance));
     postTokenBalances.forEach(balance => postBalanceMap.set(balance.accountIndex, balance));
@@ -182,12 +183,7 @@ export function generateTokenBalanceRows(
             postBalanceMap.set(index, {
                 accountIndex: index,
                 mint: preBalance.mint,
-                uiTokenAmount: {
-                    amount: '0',
-                    decimals: preBalance.uiTokenAmount.decimals,
-                    uiAmount: null,
-                    uiAmountString: '0',
-                },
+                uiTokenAmount: { amount: '0', decimals: preBalance.uiTokenAmount.decimals },
             });
         }
     }
