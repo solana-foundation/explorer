@@ -94,10 +94,10 @@ export function slotsToHumanString(slots: number, slotTime: number): string {
 }
 
 export function wrap(input: string, length: number): string {
+    const characters = Array.from(input);
     const result = [];
-    while (input.length) {
-        result.push(input.substr(0, length));
-        input = input.substr(length);
+    for (let offset = 0; offset < characters.length; offset += length) {
+        result.push(characters.slice(offset, offset + length).join(''));
     }
     return result.join('\n');
 }
