@@ -402,12 +402,6 @@
     "verifiedAt": "2026-10-27T20:53:09"
   },
   {
-    "address": "4z2KpxUcdNFXFpzxKtcmTv6aDMqE4CMLCdbYExLYeDE2",
-    "name": "Deep-Liquidity/contracts",
-    "repoUrl": "https://github.com/Deep-Liquidity/contracts/tree/cfa931ba0ea8b1dbf1507ee8bf6b79657e058596",
-    "verifiedAt": "2026-10-14T20:46:56"
-  },
-  {
     "address": "51DFYj5Evdk3TnbipTmscxwt4HvJiYq5d3cfdriEEvqm",
     "name": "nft_prediction_stake_v1",
     "repoUrl": "https://github.com/md5sha1/CosmicGATE-SOL/tree/ecb85856ee1d8f060402d7e51e6ccd9f3f4401e2",
@@ -430,6 +424,12 @@
     "name": "ElTrueque/mini-launch-solana",
     "repoUrl": "https://github.com/ElTrueque/mini-launch-solana/tree/5413304c6580cce236b8bc7706cb14e72e2e8f62",
     "verifiedAt": "2026-09-22T02:39:56"
+  },
+  {
+    "address": "5bNbw7Rcx58ybEa6cAZ9W1xa21jXztHhERrqpqM3nXHf",
+    "name": "SOLIDNESS/DusterTool",
+    "repoUrl": "https://github.com/SOLIDNESS/DusterTool/tree/cd62c7ddb769a952e97d9e999a2bccdc236c1a0c",
+    "verifiedAt": "2026-11-27T00:27:39"
   },
   {
     "address": "5cojoUStG7WFhHJiSncCUEwTqDuhDLKu4a9BqTbF8jzG",
@@ -460,6 +460,12 @@
     "name": "LayerZero-Labs/LayerZero-v2",
     "repoUrl": "https://github.com/LayerZero-Labs/LayerZero-v2/tree/88428755be6caa71cb1d2926141d73c8989296b5",
     "verifiedAt": "2025-05-26T14:42:39"
+  },
+  {
+    "address": "5o9DeQkYHXM3DQkzo16mAt6doaYrfhq3Q5aabWMfMy2n",
+    "name": "ghost_markets",
+    "repoUrl": "https://github.com/ghostrings/zolana/tree/034f6accbeec03c7b3026f1c0b80c527f2c9f721",
+    "verifiedAt": "2026-11-27T11:24:40"
   },
   {
     "address": "5PrHPCCbKpW4SvBZfXmt23RKMaShSM4XGTJdBh8qpw3q",
@@ -688,12 +694,6 @@
     "name": "hub",
     "repoUrl": "https://github.com/OTCHUB/hubconnect/tree/1309113",
     "verifiedAt": "2026-09-17T13:07:52"
-  },
-  {
-    "address": "7czURwVLkQpcF1HVhhZU5GGzvPA8YniogZY1BhZHCDtA",
-    "name": "Deep-Liquidity/contracts",
-    "repoUrl": "https://github.com/Deep-Liquidity/contracts/tree/cfa931ba0ea8b1dbf1507ee8bf6b79657e058596",
-    "verifiedAt": "2026-10-14T20:42:20"
   },
   {
     "address": "7db6vHi6uoKvFA5zP7YkadBQmnThhYJYJ2ova2S16JpJ",
@@ -1146,6 +1146,12 @@
     "verifiedAt": "2025-03-13T06:17:35"
   },
   {
+    "address": "AnFkUo9tGqmCLe1e2nwZmGm9mA2m59TnaPhm7cEM8s4G",
+    "name": "MalumMor/ottie-rewards",
+    "repoUrl": "https://github.com/MalumMor/ottie-rewards/tree/e3ccc7d089f7ff3c66d7a42c195055b4d2fc2878",
+    "verifiedAt": "2026-11-27T20:30:22"
+  },
+  {
     "address": "AnseMvrDzsJs3hGUEMPZku5jn76grMj8eZFM7rKMrPJQ",
     "name": "AnsemBot/ansem-buyback",
     "repoUrl": "https://github.com/AnsemBot/ansem-buyback/tree/49ddd6b59ecffece607e578cb8407006e559045b",
@@ -1190,8 +1196,8 @@
   {
     "address": "AUDRBK6kVkQoEGm3EB7swd34SUPqrHZeNEkB5vZWVSv3",
     "name": "audren-xyz/audren",
-    "repoUrl": "https://github.com/audren-xyz/audren/tree/842ada95af872735a6daf187223a310bb9629954",
-    "verifiedAt": "2026-11-24T20:23:43"
+    "repoUrl": "https://github.com/audren-xyz/audren/tree/385d032129d90483e4394d7a1f2d5cae012b9d4a",
+    "verifiedAt": "2026-11-26T13:53:57"
   },
   {
     "address": "AutHysEUfKrWDETzrDA7S7MwL1eSSc2BjySR2W8EuSEr",
@@ -1382,8 +1388,8 @@
   {
     "address": "CART9hmcuf38a58NCYhRJmtGXJjh16eXmLr9hmhAqPZo",
     "name": "Bread-Heads-Studios/bgl-gamebient-engine",
-    "repoUrl": "https://github.com/Bread-Heads-Studios/bgl-gamebient-engine/tree/7691d2c24960a59914005a95b7da9051440b6896",
-    "verifiedAt": "2026-11-22T02:41:23"
+    "repoUrl": "https://github.com/Bread-Heads-Studios/bgl-gamebient-engine/tree/3673a14a6bf62ae84c6c38e51025688787cf357d",
+    "verifiedAt": "2026-11-27T19:02:45"
   },
   {
     "address": "CaWcaw5YfBYQZ1jraTPqiLx2CJc5CwBL8J4Z1DN5neVs",
@@ -1430,8 +1436,8 @@
   {
     "address": "CDPwGWGWbAE8FL5f2oVdzfkTutrnsKJcAcgqWktC3dwZ",
     "name": "pepper_curve",
-    "repoUrl": "https://github.com/Pepperoni-team/custom-program/tree/770c33aa9bc1e992a68e59e2d2883042cbf98e33",
-    "verifiedAt": "2026-11-09T13:31:43"
+    "repoUrl": "https://github.com/Pepperoni-team/custom-program/tree/d8c52db3068d36c99f145801e7b07a28bacd6c51",
+    "verifiedAt": "2026-11-27T17:19:49"
   },
   {
     "address": "CdvSq48QUukYuMczgZAVNZrwcHNshBdtqrjW26sQiGPs",
@@ -2076,6 +2082,24 @@
     "verifiedAt": "2026-10-05T13:41:17"
   },
   {
+    "address": "EscapeCu75SSPg24kyh7R6NvwgMUT8QEpCLY6kKHYCeD",
+    "name": "escape_curve",
+    "repoUrl": "https://github.com/escapehub-ai/escapehub-solana-programs/tree/dbf97d83550504a9e702c5406dacc7d8e20633e0",
+    "verifiedAt": "2026-11-28T04:15:56"
+  },
+  {
+    "address": "EscapeFezQneK4bXRhcaBW19qQNj2xLJpaJX9pouM6C1",
+    "name": "escape_fee",
+    "repoUrl": "https://github.com/escapehub-ai/escapehub-solana-programs/tree/2a41cf47fb48a9cb9e8d072aaf457f6262d3d2aa",
+    "verifiedAt": "2026-11-27T02:12:47"
+  },
+  {
+    "address": "EscapeSwCMQocQoabyGaXDyN1BmhCR6orUV7kmxFRmY",
+    "name": "escape_swap",
+    "repoUrl": "https://github.com/escapehub-ai/escapehub-solana-programs/tree/2a41cf47fb48a9cb9e8d072aaf457f6262d3d2aa",
+    "verifiedAt": "2026-11-27T02:14:36"
+  },
+  {
     "address": "EtZMZM22ViKMo4r5y4Anovs3wKQ2owUmDpjygnMMcdEX",
     "name": "wormhole-foundation/wormhole",
     "repoUrl": "https://github.com/wormhole-foundation/wormhole/tree/28e2d012982e4a1b0b42fe116248383193b5f6ed",
@@ -2400,6 +2424,12 @@
     "verifiedAt": "2026-02-08T02:23:42"
   },
   {
+    "address": "GQR9H7uTXKjj2piht43Koz74SsWNVZpNqQ7h7AZ5HjUu",
+    "name": "adaptor_escrow",
+    "repoUrl": "https://gitlab.com/scpcorp/scp-swap-driver/tree/ef22acc60aafb7f45eb1986216e3a077ce3b286f",
+    "verifiedAt": "2026-11-26T16:26:36"
+  },
+  {
     "address": "gr8tqq2ripsM6N46gLWpSDXtdrH6J9jaXoyya1ELC9t",
     "name": "token_migrator",
     "repoUrl": "https://github.com/metaDAOproject/token-migrator/tree/6b736cf65eb2296faf1f0af9bce0976715a6ba58",
@@ -2548,12 +2578,6 @@
     "name": "game",
     "repoUrl": "https://github.com/ErenVance/DoomsdayArk/tree/b62f1f4863376dbee4aa3c2baf28ac8cb49a483b",
     "verifiedAt": "2025-01-16T07:12:29"
-  },
-  {
-    "address": "HCrCy6bzHhZ1b6bXwQAucEFkKXyzYMh3hgAR8UPrYSEP",
-    "name": "Deep-Liquidity/contracts",
-    "repoUrl": "https://github.com/Deep-Liquidity/contracts/tree/cfa931ba0ea8b1dbf1507ee8bf6b79657e058596",
-    "verifiedAt": "2026-10-14T20:44:46"
   },
   {
     "address": "HDTbJM8xLj9LbWGxG7BqZqtACoKmwVmXvFLpCQBgLztU",
@@ -2820,6 +2844,12 @@
     "verifiedAt": "2026-07-27T11:35:17"
   },
   {
+    "address": "Lomb8TTCwJKEhZrJ1J8UbsCRjNSf7NNQUEr4qo3dkSk",
+    "name": "lombard-finance/sol-svm-contracts",
+    "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/19b9c8a7f5952c1dbbae1f2a962cea881710831e",
+    "verifiedAt": "2026-11-26T18:24:47"
+  },
+  {
     "address": "LomeavGUocL4Rn5TboDYFQEwUp3wBKodUTRKE8KqbE6",
     "name": "lombard-finance/sol-svm-contracts",
     "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/21d81cff91da2632c83f91ce7a21c87facdceb7f",
@@ -2842,6 +2872,12 @@
     "name": "lombard-finance/sol-svm-contracts",
     "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/21d81cff91da2632c83f91ce7a21c87facdceb7f",
     "verifiedAt": "2026-05-26T10:22:04"
+  },
+  {
+    "address": "Lomva5kTftuXE8992qRufkaeq3XrXV47qv3C1W9xW6Z",
+    "name": "lombard-finance/sol-svm-contracts",
+    "repoUrl": "https://github.com/lombard-finance/sol-svm-contracts/tree/8de1053ef7dc4ebb74355ccdfd4ea9b8eb657cb6",
+    "verifiedAt": "2026-11-26T18:20:34"
   },
   {
     "address": "LomyRmBeQiuqiwcPmr23RRA1SMLAuDEgj5tHHe7rsDn",
@@ -2954,8 +2990,8 @@
   {
     "address": "mineWsRs2Rmw2jPMkVbgAbDjV1E23yQ8TEodaX3iza4",
     "name": "zenx-labs/godl-program",
-    "repoUrl": "https://github.com/zenx-labs/godl-program/tree/8cbbc86341445d11e3779dfd5be9363474d75683",
-    "verifiedAt": "2026-10-15T22:43:09"
+    "repoUrl": "https://github.com/zenx-labs/godl-program/tree/b0eb72d952458d3cdcc8d336988224d8455b41a0",
+    "verifiedAt": "2026-11-27T06:41:09"
   },
   {
     "address": "mintwGiwfvL3uVNi9aKxKu1Y5LQbDuwdvpfis4fyE7X",
@@ -3354,6 +3390,12 @@
     "verifiedAt": "2025-01-16T17:01:07"
   },
   {
+    "address": "SMRTzfY6DfH5ik3TKiyLFfXexV8uSG3d2UksSCYdunG",
+    "name": "squads_smart_account_program",
+    "repoUrl": "https://github.com/Squads-Protocol/smart-account-program/tree/0e510821e00bf2a02716e3933b8659fa36ab2bee",
+    "verifiedAt": "2026-11-27T20:06:57"
+  },
+  {
     "address": "SNyKyiZYU4R54SF9sYLmjCaCUsa1sC6QouNAj3x3Zzf",
     "name": "nightcode112/pangea-solana-programs",
     "repoUrl": "https://github.com/nightcode112/pangea-solana-programs/tree/3d75fabc8e5a2f126d7d5f3e075deab63e053f03",
@@ -3394,6 +3436,12 @@
     "name": "igneous-labs/S",
     "repoUrl": "https://github.com/igneous-labs/S/tree/658f728dd476ca5f99ba11810e8ad8621caca70b",
     "verifiedAt": "2024-04-10T12:10:50"
+  },
+  {
+    "address": "sstowRTr15wR623yz3cUTRXJf8YhjgPBJ2TKBvNyZA3",
+    "name": "RetailTradingRealities/shortstake-program",
+    "repoUrl": "https://github.com/RetailTradingRealities/shortstake-program/tree/920de12b63c27dc9c208d3bb34871803513d52d6",
+    "verifiedAt": "2026-11-26T17:51:21"
   },
   {
     "address": "stakecNP3FpiExZPCgZfqRgumVzi6dNqnfrjwXyTgeH",
@@ -3500,8 +3548,8 @@
   {
     "address": "TGLDv9L2xHKHRi2yQJSKt5QCKpH6fZrAz4kJ4wydPhR",
     "name": "toggld",
-    "repoUrl": "https://github.com/plungarini/toggld-program/tree/cfd9212c28f7cf02f7a77267f95def9f3ce9770e",
-    "verifiedAt": "2026-09-25T21:23:14"
+    "repoUrl": "https://github.com/plungarini/toggld-program/tree/4c9d43b52f95415a10d8d446a82e743d09183282",
+    "verifiedAt": "2026-11-27T14:53:35"
   },
   {
     "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
